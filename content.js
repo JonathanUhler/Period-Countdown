@@ -180,8 +180,16 @@ function checkTime(h, m, s, sH, sM, sS, eH, eM, eS) {
         return true;
     }
     else {
+        printNotPeriod();
         return false;
     }
+}
+
+function printNotPeriod() {
+    context.fillStyle = 'black';
+    context.font = "35px Arial"; // This is not a great fix :/
+    context.fillText("No School  |  Free", textPos.x, textPos.y)
+    timeLeft(hour, minute, second, P1.startH, P1.startM, P1.startS);
 }
 
 function printPeriod(periodName, periodNum) {
@@ -200,7 +208,7 @@ function printPeriod(periodName, periodNum) {
 
 
 function timeLeft(h, m, s, eH, eM, eS, type) {
-    var sumH, sumM, sumS;
+    var sumH, sumM, sumS, sumOverflow;
     sumH = eH - h;
     sumM = eM - m;
     sumS = eS - s;
@@ -221,6 +229,12 @@ function timeLeft(h, m, s, eH, eM, eS, type) {
     if (sumS >= 60) {
         sumM++;
         sumS -= 60;
+    }
+
+    if (sumM < 0) { // This is not the best fix for issues like this. A better way of doing this would be to subtract the two times and not each element.
+        sumOverflow = sumM;
+        sumH--;
+        sumM = (60 + sumOverflow) - 1
     }
 
     context.fillStyle = 'black';
