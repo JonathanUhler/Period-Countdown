@@ -1,7 +1,6 @@
 var canvas = document.getElementById('Periods');
 var context = canvas.getContext('2d');
 
-// Define what a period is
 function periodDescr(name, periodNum, startH, startM, startS, endH, endM, endS) {
     this.name = name;
     this.periodNum = periodNum;
@@ -13,7 +12,6 @@ function periodDescr(name, periodNum, startH, startM, startS, endH, endM, endS) 
     this.endS = endS;
 }
 
-// Define all 7 periods
 var P1 = new periodDescr (
     "Biology",
     1,
@@ -128,52 +126,55 @@ var tutorialDay = [
 var freeDay = [
     PFree
 ]
-// Get the current date
-var currentDate = new Date();
-var day = currentDate.getDay();
-var hour = currentDate.getHours();
-var minute = currentDate.getMinutes();
-var second = currentDate.getSeconds();
+var dayMap = [
+    freeDay,
+    oddDay,
+    evenDay,
+    tutorialDay,
+    oddDay,
+    evenDay,
+    freeDay
+]
+
+var currentDate, today, tomorrow, hour, minute, second;
 var textPos = {
     x: 10,
     y: 35,
-    xOffset: 10,
+    xOffset: 0,
     yOffset: 70
 }
 
-// Get the current day
-switch (day) {
-    case 1: // Monday
-    case 4: // Thursday
-        printDay(oddDay);
-        break;
-
-    case 2: // Tuesday
-    case 5: // Friday
-        printDay(evenDay);
-        break;
-
-    case 3: // Wednesday
-        printDay(tutorialDay);
-        break;
-
-    default: // Saturday, Sunday
-        printDay(freeDay);
-        break;
+enableTimer();
+function enableTimer () {
+    setInterval(function () {
+        gatherDayInfo();
+    }, 1)
 }
 
-function printDay(dayObj) {
-    dayObj.forEach(element => checkTimeAndPrint(element.name, element.periodNum, hour, minute, second, element.startH, element.startM, element.startS, element.endH, element.endM, element.endS)); 
+function gatherDayInfo() {
+    context.clearRect(0, 0, canvas.width, canvas.height);
+    currentDate = new Date();
+    today = currentDate.getDay();
+    tomorrow = (today + 1) % 7;
+    hour = currentDate.getHours();
+    minute = currentDate.getMinutes();
+    second = currentDate.getSeconds();
+    var todayObj = dayMap[today];
+    var tomorrowObj = dayMap[tomorrow];
+    printDay(todayObj, tomorrowObj);
 }
 
-function checkTimeAndPrint (n, p, h, m, s, sH, sM, sS, eH, eM, eS) {
+function printDay(todayObj, tomorrowObj) {
+    todayObj.forEach(element => checkTimeAndPrint(element.name, element.periodNum, hour, minute, second, element.startH, element.startM, element.startS, element.endH, element.endM, element.endS, today)); 
+}
+
+function checkTimeAndPrint (n, p, h, m, s, sH, sM, sS, eH, eM, eS, type) {
     if (checkTime(h, m, s, sH, sM, sS, eH, eM, eS)) {
         printPeriod(n, p);
-        timeLeft(h, m, s, eH, eM, eS);
+        timeLeft(h, m, s, eH, eM, eS, type);
     }
 }  
 
-// Check if the current time is in the range of a class
 function checkTime(h, m, s, sH, sM, sS, eH, eM, eS) {
     if ((h > sH && h < eH) || (h === sH && m >= sM) || (h === eH && m <= eM) || (m === sM && s >= sS) || (m === eM && s <= eS)) {
         return true;
@@ -183,7 +184,6 @@ function checkTime(h, m, s, sH, sM, sS, eH, eM, eS) {
     }
 }
 
-// Called to print the current period on the screen
 function printPeriod(periodName, periodNum) {
     context.fillStyle = 'black';
     context.font = "35px Arial";
@@ -199,11 +199,20 @@ function printPeriod(periodName, periodNum) {
 }
 
 
-function timeLeft(h, m, s, eH, eM, eS) {
+function timeLeft(h, m, s, eH, eM, eS, type) {
     var sumH, sumM, sumS;
     sumH = eH - h;
     sumM = eM - m;
     sumS = eS - s;
+
+    if (type === 0) {
+        sumH += P1.startH;
+        sumM += P1.startM;
+    }
+    else if (type === 6) {
+        sumH += P1.startH + 24;
+        sumM += P1.startM;
+    }
 
     context.fillStyle = 'black';
     context.font = "59px Arial";
