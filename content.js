@@ -214,6 +214,15 @@ function timeLeft(h, m, s, eH, eM, eS, type) {
         sumM += P1.startM;
     }
 
+    if (sumM >= 60) {
+        sumH++;
+        sumM -= 60;
+    }
+    if (sumS >= 60) {
+        sumM++;
+        sumS -= 60;
+    }
+
     context.fillStyle = 'black';
     context.font = "59px Arial";
     if (sumM <= 9 && sumS <= 9) {
