@@ -6,10 +6,10 @@ function periodDescr(name, periodNum, startH, startM, startS, endH, endM, endS) 
     this.periodNum = periodNum;
     this.startH = startH;
     this.startM = startM;
-    this.startS = startS;
+    this.startS = startS; // Remove this
     this.endH = endH;
     this.endM = endM;
-    this.endS = endS;
+    this.endS = endS; // This too
 }
 
 var P1 = new periodDescr (
@@ -37,7 +37,7 @@ var P2T = new periodDescr (
     10, 39, 59
 )
 var P3 = new periodDescr (
-    "World Studies",
+    "History",
     3,
     11, 0, 0,
     12, 14, 59
@@ -148,23 +148,21 @@ enableTimer();
 function enableTimer () {
     setInterval(function () {
         gatherDayInfo();
-    }, 1)
+    }, 10)
 }
 
 function gatherDayInfo() {
     context.clearRect(0, 0, canvas.width, canvas.height);
     currentDate = new Date();
     today = currentDate.getDay();
-    tomorrow = (today + 1) % 7;
     hour = currentDate.getHours();
     minute = currentDate.getMinutes();
     second = currentDate.getSeconds();
     var todayObj = dayMap[today];
-    var tomorrowObj = dayMap[tomorrow];
-    printDay(todayObj, tomorrowObj);
+    printDay(todayObj);
 }
 
-function printDay(todayObj, tomorrowObj) {
+function printDay(todayObj) {
     todayObj.forEach(element => checkTimeAndPrint(element.name, element.periodNum, hour, minute, second, element.startH, element.startM, element.startS, element.endH, element.endM, element.endS, today)); 
 }
 
@@ -173,14 +171,20 @@ function checkTimeAndPrint (n, p, h, m, s, sH, sM, sS, eH, eM, eS, type) {
         printPeriod(n, p);
         timeLeft(h, m, s, eH, eM, eS, type);
     }
+    else {
+        printNotPeriod();
+    }
 }  
 
 function checkTime(h, m, s, sH, sM, sS, eH, eM, eS) {
     if ((h > sH && h < eH) || (h === sH && m >= sM) || (h === eH && m <= eM) || (m === sM && s >= sS) || (m === eM && s <= eS)) {
+        console.debug("in a period");
+        console.debug(hour + ", " + minute + ", " + second);
+        console.debug(sH + ", " + sM + ", " + sS);
         return true;
     }
     else {
-        printNotPeriod();
+        console.debug("not in a period");
         return false;
     }
 }
@@ -210,7 +214,7 @@ function printPeriod(periodName, periodNum) {
 function timeLeft(h, m, s, eH, eM, eS, type) {
     var sumH, sumM, sumS, sumOverflow;
     sumH = eH - h;
-    sumM = eM - m;
+    sumM = eM - (m + 1);
     sumS = eS - s;
 
     if (type === 0) {
@@ -234,7 +238,7 @@ function timeLeft(h, m, s, eH, eM, eS, type) {
     if (sumM < 0) { // This is not the best fix for issues like this. A better way of doing this would be to subtract the two times and not each element.
         sumOverflow = sumM;
         sumH--;
-        sumM = (60 + sumOverflow) - 1
+        sumM = (60 + sumOverflow)
     }
 
     context.fillStyle = 'black';
