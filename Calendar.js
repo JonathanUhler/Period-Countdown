@@ -5,6 +5,7 @@
  */
 "use strict";
 const enableDebug = false;
+const enableTestCode = false;
 const mvhsFirstDay = "2020-08-17";
 const mvhsLastDay  = "2021-06-09";
 const mvhs_Default_Week = [
@@ -224,62 +225,33 @@ export default class Calendar {
 
 
 
+// Test code for local testing of the class
 
 
+if (enableTestCode) {
 
+    var calendar = new Calendar(mvhsFirstDay, mvhsLastDay);
 
-var calendar = new Calendar(mvhsFirstDay, mvhsLastDay);
+    console.log("Start date is " + calendar.getStartEDate());
+    console.log("End date is " + calendar.getEndEDate());
+    let tagList = calendar.getTagList();
+    console.log("Tag list for calendar is: [" + tagList + "]");
+    let dateTag = calendar.createDateTag(new Date());
+    console.log("Date tag for now is " + dateTag);
 
-console.log("Start date is " + calendar.getStartEDate());
-console.log("End date is " + calendar.getEndEDate());
-let tagList = calendar.getTagList();
-console.log("Tag list for calendar is: [" + tagList + "]");
-let dateTag = calendar.createDateTag(new Date());
-console.log("Date tag for now is " + dateTag);
-
-for (const weekTag of tagList) {
-  console.log ("Processing header for week " + weekTag)
-  let header = calendar.getHeaderForWeek (weekTag);
-  if (header === undefined) {
-    console.log ("ERROR: Undefined header for week " + weekTag)
-  } else {
-    console.log ("Header.weekTag = " + header.weekTag);
-    console.log ("Header.eDate = " + header.eDate);
-    console.log ("Weekly schedule:");
-    let ws = header.weekSched;
-    for (const day of ws) {
-      console.log ("Sched: " + day)
+    for (const weekTag of tagList) {
+	console.log ("Processing header for week " + weekTag)
+	let header = calendar.getHeaderForWeek (weekTag);
+	if (header === undefined) {
+	    console.log ("ERROR: Undefined header for week " + weekTag)
+	} else {
+	    console.log ("Header.weekTag = " + header.weekTag);
+	    console.log ("Header.eDate = " + header.eDate);
+	    console.log ("Weekly schedule:");
+	    let ws = header.weekSched;
+	    for (const day of ws) {
+		console.log ("Sched: " + day)
+	    }
+	}
     }
-  }
 }
-
-/*
- * constructor
- *
- * At invocation, create the calendar for the school year.
- *
- * The variable calendar is the object, indexed by the date tag for each
- * Sunday in the school year.
- *
- */
-
-// function constructor () {
-
-//  calendar = new Object();
-
-  // Force the start and end dates to noon. This handles oddities around daylight
-  // savings time.
-  // let startDate = new Date(mvhsFirstDay + "T12:00:00");
-  // let endDate   = new Date(mvhsLastDay + "T12:00:00");
-
-   // Generate the list of tags for each week in the school year
-  // var tagList = generateSchoolYearDateTags(startDate, endDate);
-
-   // Build the calendar object for each week
-  // for (const element of tagList) {
-  //   if (enableDebug) {
-  //     console.log("calendar.prototype: Building week for " + element)
-  //   }
-  //   calendar[element] = "Date: " + element;
-//   }
-//}
