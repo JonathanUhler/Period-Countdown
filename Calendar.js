@@ -1,35 +1,640 @@
 
- // Calendar.js
- //
- // Calendar-related functions for the MVHS schedule app
-
+// Calendar.js
+//
+// Calendar-related functions for the MVHS schedule app
 "use strict";
 
+
+// =+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
+// Copyright 2020 Mike Uhler and Jonathan Uhler
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in
+// all copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+// FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
+// IN THE SOFTWARE.
+// =+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
+
+
+// =+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
+// Conventions, used throughout
+//
+// Terms
+//   A "day tag" is a string representing the date of a particular day, in
+//   the form "yyyy-mm-dd"
+//
+//   The "day tag array" is an array containing all day tags, in date order, for
+//   the entire school year.
+//
+//   The "day object hash" is an associative array whose index is the day tag
+//   and whose value is the CalendarDayObject object for that day. There is one
+//   day object hash entry for each element in the day tag array
+//
+//   The "day index" is the offset in the day tag array of a particular day tag
+//
+//   A "week tag" is a day tag string representing the Sunday of the start of
+//   a week.
+//
+//   The "week tag array" is an array containing all week tags, in date order,
+//   for the entire school year.
+//
+//   The "week object hash" is an associative array whose index is the week tag
+//   and whose value is the CalendarWeekObject object for that week. There is one
+//   week object hash entry for each element in the week tag array
+//
+//   The "week index" is the offset in the week tag array of a particular week
+//   tag
+//
+// Variable/Constant Naming Conventions
+//
+//   Global variables/constants (and some function variables/contants) have
+//   a suffix that identifies their type. These are convention, not enforced
+//   by type checking. Such variables/constants end with "_" followed by a
+//   single lowercase character, as follows:
+//
+//       _a    Array object
+//       _c    Class object
+//       _h    Hash (associative array) object
+//       _k    Constant (the c was taken by class)
+//       _s    String
+//
+// Class Variable and Method Naming Convention
+//
+//   Class variables that start with "_" are intended to be private variables,
+//   although Javascript has no way of defining a private class variable. If
+//   you see a class variable like this, you aren't intended to reach into the
+//   class instance to access that variable. There are public methods to do so.
+//
+//   Class variables that don't start with "_" are intended to be public, so
+//   you are free to access them directly from a class instance. BUT, IT'S
+//   PROBABLY NOT A GOOD IDEA TO CHANGE THESE - CONSIDER THEM READ-ONLY.
+//
+//   The same convention applies to methods of a class. If they start with "_",
+//   they are for the use of code in this file, not for a consumer of the
+//   Calendar class.
+//
+// Other Thoughts
+//
+//   Consumers of the Calendar are really intended to interact only with the
+//   main Calendar class. One instantiates a new Calendar instance with a
+//   call to the constructure, e.g., new Calendar (args), which gives you back
+//   a populated instance of the class. One can now interact with it using
+//   the public methods of the class.
+//
+//   There are other classes defined in this file for weeks, days, periods, and
+//   (school) classes. Instances of these classes are not intended to be
+//   created by the consumer of the Calendar class - this is done by the
+//   Calendar class constructure. However, these lower-level classes do have
+//   methods and public variables that can be accessed when one receives a
+//   reference to an instance of one of these classes.
+// =+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
+
+
+// =+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
+// MOUNTAIN VIEW HIGH SCHOOL (MVHS) WEEK, DAY, PERIOD AND CLASS DEFINITIONS
+
+const MVHSFirstDay_k = "2020-08-12";
+const MVHSLastDay_k  = "2021-06-09";
+const MVHSStudent_k = "Jonathan Uhler";
+
+// Define the types of a day
 const CalendarDayTypeSchoolDay_k = "School Day";
 const CalendarDayTypeWeekend_k = "Weekend";
 const CalendarDayTypeHoliday_k = "Holiday"
 
+// Define first and last period
+const CalendarPeriodFirst_k = 0;
+const CalendarPeriodLast_k = 7;
+
+// =============================================================================
+// SCHOOL CLASS DESCRIPTIONS
+//
+// IMPORTANT IMPORTANT IMPORTANT IMPORTANT IMPORTANT IMPORTANT IMPORTANT IMPORTANT
+//
+// CalendarClassObject.constructor arguments
+//
+// Each of the following hash definitions provides the information about a
+// (school) class for a single period 0..7. The information in each hash
+// corresponds to the arguments to the CalendarClassObject constructor.
+//
+// The keys to the hash identify what information is specified, as follows:
+//
+//        p = The period number, 0..7
+//        c = The name of the (school) class
+//        r = The room in which the class is held
+//        t = The name of the teacher for the class /
+//
+const _CCD_KPer = "p";
+const _CCD_KCls = "c";
+const _CCD_KRmn = "r";
+const _CCD_KTch = "t";
+//
+/*
+//                      Period     class               Room        Teacher
+const _MVHS_P0_CLASS_h = {p: 0,   c:  null,              r: "",     t:  null         };
+const _MVHS_P1_CLASS_h = {p: 1,   c: "Biology",          r: "113",  t: "Kim Rogers"  };
+const _MVHS_P2_CLASS_h = {p: 2,   c: "PE",               r: "Gym",  t: "Williams"    };
+const _MVHS_P3_CLASS_h = {p: 3,   c: "World Studies",    r: "602",  t: "Cardenas"    };
+const _MVHS_P4_CLASS_h = {p: 4,   c: "Survey Comp/Lit",  r: "215",  t: "Engel-Hall"  };
+const _MVHS_P5_CLASS_h = {p: 5,   c: "Geometry",         r: "412",  t: "Smith"       };
+const _MVHS_P6_CLASS_h = {p: 6,   c:  null,              r: "",     t: ""};
+const _MVHS_P7_CLASS_h = {p: 7,   c: "IntroCompSci",     r: "514",  t: "Dilloughery" };
+*/
+
+const _CalendarClassInfoArray_a = [
+//         period                class                          Room                 Teacher
+  {[_CCD_KPer]: 0, [_CCD_KCls]:  null,             [_CCD_KRmn]: "",    [_CCD_KTch]: ""            },
+  {[_CCD_KPer]: 1, [_CCD_KCls]: "Biology",         [_CCD_KRmn]: "113", [_CCD_KTch]: "Kim Rogers"  },
+  {[_CCD_KPer]: 2, [_CCD_KCls]: "PE",              [_CCD_KRmn]: "Gym", [_CCD_KTch]: "Williams"    },
+  {[_CCD_KPer]: 3, [_CCD_KCls]: "World Studies",   [_CCD_KRmn]: "602", [_CCD_KTch]: "Cardenas"    },
+  {[_CCD_KPer]: 4, [_CCD_KCls]: "Survey Comp/Lit", [_CCD_KRmn]: "215", [_CCD_KTch]: "Engel-Hall"  },
+  {[_CCD_KPer]: 5, [_CCD_KCls]: "Geometry",        [_CCD_KRmn]: "412", [_CCD_KTch]: "Smith"       },
+  {[_CCD_KPer]: 6, [_CCD_KCls]:  null,             [_CCD_KRmn]: "",    [_CCD_KTch]: ""            },
+  {[_CCD_KPer]: 7, [_CCD_KCls]: "IntroCompSci",    [_CCD_KRmn]: "514", [_CCD_KTch]: "Dilloughery" }
+];
+
+// END SCHOOL CLASS DESCRIPTIONS
+// =============================================================================
+
+// =============================================================================
+// PERIOD DESCRIPTIONS
+//
+// Instantiate period hashes for periods 1..7 **** FIX FOR PERIOD 0 ****
+//
+// The following constants define the periods for each day. If the Class Info
+// element of the array is null, there is no class for this period. A period
+// number of -1 is used to denote a pseudo period for periods that are
+// before or after school, passing periods, and lunch.
+//
+// IMPORTANT IMPORTANT IMPORTANT IMPORTANT IMPORTANT IMPORTANT IMPORTANT IMPORTANT
+// The order of values in each array exactly match the arguments to the
+// CalendarPeriodObject constructor, which is called during the calendar creation
+// process. If the argument order or definition of that constructor changes, so
+// must these array definitions.
+//
+// CalendarPeriodObject.constructor arguments
+/*
+//
+// Periods for A Day
+//                     period    name           startTime  endTime   Class Info               Comment                     Adjustment
+const  _MVHS_BSA_a =     [-1,   "Before School",  "00:00",  "09:30", null,                "Before school on A day"];
+const  _MVHS_P1A_a =     [ 1,   "P1",             "09:30",  "10:45", _MVHS_P1_CLASS_a,     "Period 1 on A day"];
+const  _MVHS_P13A_a =    [-1,   "P1->P3",         "10:45",  "11:00", null,                "Passing Period 1->3 on A day"];
+const  _MVHS_P3A_a =     [ 3,   "P3",             "11:00",  "12:15", _MVHS_P3_CLASS_a,     "Period 3 on A day"];
+const  _MVHS_LunchA_a =  [-1,   "Lunch",          "12:15",  "13:05", null,                "Lunch on A day"];
+const  _MVHS_P5A_a =     [ 5,   "P5",             "13:05",  "14:20", _MVHS_P5_CLASS_a,     "Period 5 on A day"];
+const  _MVHS_P57A_a =    [-1,   "P5->P7",         "14:20",  "14:30", null,                "Passing Period 5->7 on A day"];
+const  _MVHS_P7A_a =     [ 7,   "P7",             "14:30",  "15:45", _MVHS_P7_CLASS_a,     "Period 7 on A day"];
+const  _MVHS_ASA_a =     [-1,   "After School",   "15:45",  "23:59", null,                "After school on A day",         60*1000-1];
+//                                                                                                                           ^
+//                                                                                                                    This adjustment
+//                                                                                                                    makes the end time
+//                                                                                                                    1ms before midnight
+// Periods for B Day
+//                     period    name           startTime  endTime   Class Info               Comment                     Adjustment
+const  _MVHS_BSB_a =     [-1,   "Before School",  "00:00",  "09:30", null,                "Before school on B day"];
+const  _MVHS_P2B_a =     [ 2,   "P2",             "09:30",  "10:45", _MVHS_P2_CLASS_a,     "Period 2 on B day"];
+const  _MVHS_P24B_a =    [-1,   "P2->P4",         "10:45",  "11:00", null,                "Passing Period 2->4 on B day"];
+const  _MVHS_P4B_a =     [ 4,   "P4",             "11:00",  "12:15", _MVHS_P4_CLASS_a,     "Period 4 on B day"];
+const  _MVHS_LunchB_a =  [-1,   "Lunch",          "12:15",  "13:05", null,                "Lunch on B day"];
+const  _MVHS_P6B_a =     [ 6,   "P6",             "13:05",  "14:20", _MVHS_P6_CLASS_a,     "Period 6 on B day"];
+const  _MVHS_ASB_a =     [-1,   "After School",   "14:20",  "23:59", null,                "After school on B day",         60*1000-1];
+//                                                                                                                           ^
+//                                                                                                                    This adjustment
+//                                                                                                                    makes the end time
+//                                                                                                                    1ms before midnight
+// Periods for C Day
+//                     period    name           startTime  endTime   Class Info               Comment                     Adjustment
+const  _MVHS_BSC_a =     [-1,   "Before School",  "00:00",  "09:30", null,                "Before school on C day"];
+const  _MVHS_P1C_a =     [ 1,   "P1",             "09:30",  "10:00", _MVHS_P1_CLASS_a,     "Period 1 on C day"];
+const  _MVHS_P12C_a =    [-1,  "P1->P2",          "10:00",  "10:10", null,                "Passing Period 1->2 on C day"];
+const  _MVHS_P2C_a =     [ 2,   "P2",             "10:10",  "10:40", _MVHS_P2_CLASS_a,     "Period 2 on C day"];
+const  _MVHS_P23C_a =    [-1,  "P2->P3",          "10:40",  "10:50", null,                "Passing Period 2->3 on C day"];
+const  _MVHS_P3C_a =     [ 3,   "P3",             "10:50",  "11:20", _MVHS_P3_CLASS_a,     "Period 3 on C day"];
+const  _MVHS_P34C_a =    [-1,  "P3->P4",          "11:20",  "11:30", null,                "Passing Period 3->4 on C day"];
+const  _MVHS_P4C_a =     [ 4,   "P4",             "11:30",  "12:00", _MVHS_P4_CLASS_a,     "Period 4 on C day"];
+const  _MVHS_LunchC_a =  [-1,  "Lunch",           "12:00",  "13:00", null,                "Lunch on C day"];
+const  _MVHS_P5C_a =     [ 5,   "P5",             "13:00",  "13:30", _MVHS_P5_CLASS_a,     "Period 5 on C day"];
+const  _MVHS_P56C_a =    [-1,  "P5->P6",          "13:30",  "13:40", null,                "Passing Period 5->6 on C day"];
+const  _MVHS_P6C_a =     [ 6,   "P6",             "13:40",  "14:10", _MVHS_P6_CLASS_a,     "Period 6 on C day"];
+const  _MVHS_P67C_a =    [-1,  "P6->P7",          "14:10",  "14:20", null,                "Passing Period 6->7 on C day"];
+const  _MVHS_P7C_a =     [ 7,   "P7",             "14:20",  "14:50", _MVHS_P7_CLASS_a,     "Period 7 on C day"];
+const  _MVHS_ASC_a =     [-1,   "After School",   "14:50",  "23:59", null,                "After school on C day",         60*1000-1];
+//                                                                                                                           ^
+//                                                                                                                    This adjustment
+//                                                                                                                    makes the end time
+//                                                                                                                    1ms before midnight
+*/
+
+const _CalendarPeriodsForDayType1_k = "PeriodsForADay";
+const _CalendarPeriodsForDayType2_k = "PeriodsForBDay";
+const _CalendarPeriodsForDayType3_k = "PeriodsForCDay";
+
+const _CPD_KPer ="p";
+const _CPD_KNam = "n";
+const _CPD_KStT = "st";
+const _CPD_KEnT = "et";
+const _CPD_KCmt = "c";
+const _CPD_KAdj = "a"
+
+const _CalendarPeriodDayTypeHash_h = {
+  [_CalendarPeriodsForDayType1_k] : [
+    // Periods for A Day
+    //        period                name                        startTime             endTime                Comment                            Adjustment
+    {[_CPD_KPer]: -1, [_CPD_KNam]: "Before School", [_CPD_KStT]: "00:00", [_CPD_KEnT]: "09:30", [_CPD_KCmt]: "Before school on A day"},
+    {[_CPD_KPer]:  1, [_CPD_KNam]: "P1",            [_CPD_KStT]: "09:30", [_CPD_KEnT]: "10:45", [_CPD_KCmt]: "Period 1 on A day"},
+    {[_CPD_KPer]: -1, [_CPD_KNam]: "P1->P3",        [_CPD_KStT]: "10:45", [_CPD_KEnT]: "11:00", [_CPD_KCmt]: "Passing Period 1->3 on A day"},
+    {[_CPD_KPer]:  3, [_CPD_KNam]: "P3",            [_CPD_KStT]: "11:00", [_CPD_KEnT]: "12:15", [_CPD_KCmt]: "Period 3 on A day"},
+    {[_CPD_KPer]: -1, [_CPD_KNam]: "Lunch",         [_CPD_KStT]: "12:15", [_CPD_KEnT]: "13:05", [_CPD_KCmt]: "Lunch on A day"},
+    {[_CPD_KPer]:  5, [_CPD_KNam]: "P5",            [_CPD_KStT]: "13:05", [_CPD_KEnT]: "14:20", [_CPD_KCmt]: "Period 5 on A day"},
+    {[_CPD_KPer]: -1, [_CPD_KNam]: "P5->P7",        [_CPD_KStT]: "14:20", [_CPD_KEnT]: "14:30", [_CPD_KCmt]: "Passing Period 5->7 on A day"},
+    {[_CPD_KPer]:  7, [_CPD_KNam]: "P7",            [_CPD_KStT]: "14:30", [_CPD_KEnT]: "15:45", [_CPD_KCmt]: "Period 7 on A day"},
+    {[_CPD_KPer]: -1, [_CPD_KNam]: "After School",  [_CPD_KStT]: "15:45", [_CPD_KEnT]: "23:59", [_CPD_KCmt]: "After school on A day",          [_CPD_KAdj]: 60*1000-1}
+    //                                                                                                                                                        ^
+    //                                                                                                                                                  This adjustment
+    //                                                                                                                                                makes the end time
+    //                                                                                                                                                1ms before midnight
+  ], // [_MVHS_PeriodsForADay_k]
+
+  [_CalendarPeriodsForDayType2_k] : [
+    // Periods for B Day
+    //        period                name                        startTime             endTime                Comment                            Adjustment
+    {[_CPD_KPer]: -1, [_CPD_KNam]: "Before School", [_CPD_KStT]: "00:00", [_CPD_KEnT]: "09:30", [_CPD_KCmt]: "Before school on B day"},
+    {[_CPD_KPer]:  2, [_CPD_KNam]: "P2",            [_CPD_KStT]: "09:30", [_CPD_KEnT]: "10:45", [_CPD_KCmt]: "Period 2 on B day"},
+    {[_CPD_KPer]: -1, [_CPD_KNam]: "P2->P4",        [_CPD_KStT]: "10:45", [_CPD_KEnT]: "11:00", [_CPD_KCmt]: "Passing Period 2->4 on B day"},
+    {[_CPD_KPer]:  4, [_CPD_KNam]: "P4",            [_CPD_KStT]: "11:00", [_CPD_KEnT]: "12:15", [_CPD_KCmt]: "Period 4 on B day"},
+    {[_CPD_KPer]: -1, [_CPD_KNam]: "Lunch",         [_CPD_KStT]: "12:15", [_CPD_KEnT]: "13:05", [_CPD_KCmt]: "Lunch on B day"},
+    {[_CPD_KPer]:  6, [_CPD_KNam]: "P6",            [_CPD_KStT]: "13:05", [_CPD_KEnT]: "14:20", [_CPD_KCmt]: "Period 6 on B day"},
+    {[_CPD_KPer]: -1, [_CPD_KNam]: "After School",  [_CPD_KStT]: "14:20", [_CPD_KEnT]: "23:59", [_CPD_KCmt]: "After school on B day",          [_CPD_KAdj]: 60*1000-1}
+    //                                                                                                                                                        ^
+    //                                                                                                                                                  This adjustment
+    //                                                                                                                                                makes the end time
+    //                                                                                                                                                1ms before midnight
+  ], // [_MVHS_PeriodsForBDay_k]
+
+  // Periods for C Day
+  //        period                name                        startTime             endTime                Comment                            Adjustment
+  [_CalendarPeriodsForDayType3_k] : [
+    {[_CPD_KPer]: -1, [_CPD_KNam]: "Before School", [_CPD_KStT]: "00:00", [_CPD_KEnT]: "09:30", [_CPD_KCmt]: "Before school on C day"},
+    {[_CPD_KPer]:  1, [_CPD_KNam]: "P1",            [_CPD_KStT]: "09:30", [_CPD_KEnT]: "10:00", [_CPD_KCmt]: "Period 1 on C day"},
+    {[_CPD_KPer]: -1, [_CPD_KNam]: "P1->P2",        [_CPD_KStT]: "10:00", [_CPD_KEnT]: "10:10", [_CPD_KCmt]: "Passing Period 1->2 on C day"},
+    {[_CPD_KPer]:  2, [_CPD_KNam]: "P2",            [_CPD_KStT]: "10:10", [_CPD_KEnT]: "10:40", [_CPD_KCmt]: "Period 2 on C day"},
+    {[_CPD_KPer]: -1, [_CPD_KNam]: "P2->P3",        [_CPD_KStT]: "10:40", [_CPD_KEnT]: "10:50", [_CPD_KCmt]: "Passing Period 2->3 on C day"},
+    {[_CPD_KPer]:  3, [_CPD_KNam]: "P3",            [_CPD_KStT]: "10:50", [_CPD_KEnT]: "11:20", [_CPD_KCmt]: "Period 3 on C day"},
+    {[_CPD_KPer]: -1, [_CPD_KNam]: "P3->P4",        [_CPD_KStT]: "11:20", [_CPD_KEnT]: "11:30", [_CPD_KCmt]: "Passing Period 3->4 on C day"},
+    {[_CPD_KPer]:  4, [_CPD_KNam]: "P4",            [_CPD_KStT]: "11:30", [_CPD_KEnT]: "12:00", [_CPD_KCmt]: "Period 4 on C day"},
+    {[_CPD_KPer]: -1, [_CPD_KNam]: "Lunch",         [_CPD_KStT]: "12:00", [_CPD_KEnT]: "13:00", [_CPD_KCmt]: "Lunch on C day"},
+    {[_CPD_KPer]:  5, [_CPD_KNam]: "P5",            [_CPD_KStT]: "13:00", [_CPD_KEnT]: "13:30", [_CPD_KCmt]: "Period 5 on C day"},
+    {[_CPD_KPer]: -1, [_CPD_KNam]: "P5->P6",        [_CPD_KStT]: "13:30", [_CPD_KEnT]: "13:40", [_CPD_KCmt]: "Passing Period 5->6 on C day"},
+    {[_CPD_KPer]:  6, [_CPD_KNam]: "P6",            [_CPD_KStT]: "13:40", [_CPD_KEnT]: "14:10", [_CPD_KCmt]: "Period 6 on C day"},
+    {[_CPD_KPer]: -1, [_CPD_KNam]: "P6->P7",        [_CPD_KStT]: "14:10", [_CPD_KEnT]: "14:20", [_CPD_KCmt]: "Passing Period 6->7 on C day"},
+    {[_CPD_KPer]:  7, [_CPD_KNam]: "P7",            [_CPD_KStT]: "14:20", [_CPD_KEnT]: "14:50", [_CPD_KCmt]: "Period 7 on C day"},
+    {[_CPD_KPer]: -1, [_CPD_KNam]: "After School",  [_CPD_KStT]: "14:50", [_CPD_KEnT]: "23:59", [_CPD_KCmt]: "After school on C day",          [_CPD_KAdj]: 60*1000-1}
+    //                                                                                                                                                        ^
+    //                                                                                                                                                  This adjustment
+    //                                                                                                                                                makes the end time
+    //                                                                                                                                                1ms before midnight
+  ] // [_MVHS_PeriodsForCDay_k]
+
+}; // _MVHS_Periods_By_Day_Type_h
+
+// END PERIOD DESCRIPTIONS
+// =============================================================================
+
+// =============================================================================
+// DAY PATTERN DESCRIPTIONS
+//
+// Type A day, usually Monday and Thursday
+/*
+const _MVHS_A_Day_a = [
+  _MVHS_BSA_a,
+  _MVHS_P1A_a,
+  _MVHS_P13A_a,
+  _MVHS_P3A_a,
+  _MVHS_LunchA_a,
+  _MVHS_P5A_a,
+  _MVHS_P57A_a,
+  _MVHS_P7A_a,
+  _MVHS_ASA_a
+];
+
+// Type B day, usually Tuesday and Friday
+const _MVHS_B_Day_a = [
+  _MVHS_BSB_a,
+  _MVHS_P2B_a,
+  _MVHS_P24B_a,
+  _MVHS_P4B_a,
+  _MVHS_LunchB_a,
+  _MVHS_P6B_a,
+  _MVHS_ASB_a
+];
+
+// Type C day, usually Wednesday
+const _MVHS_C_Day_a = [
+  _MVHS_BSC_a,
+  _MVHS_P1C_a,
+  _MVHS_P12C_a,
+  _MVHS_P2C_a,
+  _MVHS_P23C_a,
+  _MVHS_P3C_a,
+  _MVHS_P34C_a,
+  _MVHS_P4C_a,
+  _MVHS_LunchC_a,
+  _MVHS_P5C_a,
+  _MVHS_P56C_a,
+  _MVHS_P6C_a,
+  _MVHS_P67C_a,
+  _MVHS_P7C_a,
+  _MVHS_ASC_a
+];
+*/
+
+// END DAY PATTERN DESCRIPTIONS
+// =============================================================================
+
+// =============================================================================
+// WEEK DESCRIPTIONS
+//
+// IMPORTANT IMPORTANT IMPORTANT IMPORTANT IMPORTANT IMPORTANT IMPORTANT IMPORTANT
+//
+// Calendar.constructor Day Descriptions
+//
+// The following array definiitions are each 7 elements long, corresponding to
+// the 7 days of the week. Each week of the school year falls into one of these
+// patterns. _MVHS_Default_Week_a is the pattern for each week, unless overridden
+// by a week that has some form of holiday. For those weeks, the name of the
+// week denotes what type of week it is based on the second pattern of letters,
+// each of which can be "A", "B", "C" or "H", with the following meanings
+//
+//        A = A School Day
+//        B = B School Day
+//        C = C School Day
+//        H = Some form of holiday
+//
+// So the _MVHS_ABHAB_Week_a name means that the week has an A day on Monday
+// and Thursday, a B Day on Tuesday and Friday, and a holiday on Wednesday.
+// Nothing enforces this naming convention, so it's there only to aid understanding
+// of the definitions.
+//
+// Each element of the array describes the day in that position in the week.
+// So element 0 of the array represents Sunday, element 1 represents Monday, and so
+// on to element 6, which represents Saturday.
+//
+// Each element is a hash that gives information about that day. The keys
+// of the hash are:
+//
+//        dt = Day type; one of CalendarDayType*
+//        pa = Period array; an array of periods in that day. See Day Pattern
+//             Descriptions, above. If the value for a pa key is [], it means
+//             that there are no periods in that day.
+//
+const _CWD_KDaT = "dt";
+const _CWD_KPeA = "pa"
+//
+// This is the default week, which is used for any week that is not in the
+// _MVHS_Week_Exceptions_h hash below.
+const _MVHS_Default_Week_a = [
+    {[_CWD_KDaT]: CalendarDayTypeWeekend_k,      [_CWD_KPeA]:      null       },
+    {[_CWD_KDaT]: CalendarDayTypeSchoolDay_k,    [_CWD_KPeA]: _CalendarPeriodsForDayType1_k  },
+    {[_CWD_KDaT]: CalendarDayTypeSchoolDay_k,    [_CWD_KPeA]: _CalendarPeriodsForDayType2_k  },
+    {[_CWD_KDaT]: CalendarDayTypeSchoolDay_k,    [_CWD_KPeA]: _CalendarPeriodsForDayType3_k  },
+    {[_CWD_KDaT]: CalendarDayTypeSchoolDay_k,    [_CWD_KPeA]: _CalendarPeriodsForDayType1_k  },
+    {[_CWD_KDaT]: CalendarDayTypeSchoolDay_k,    [_CWD_KPeA]: _CalendarPeriodsForDayType2_k  },
+    {[_CWD_KDaT]: CalendarDayTypeWeekend_k,      [_CWD_KPeA]:      null       }
+];
+
+// This is the beginning-of-year week
+const _MVHS_HHCAB_Week_a = [
+  {[_CWD_KDaT]: CalendarDayTypeWeekend_k,        [_CWD_KPeA]:      null       },
+  {[_CWD_KDaT]: CalendarDayTypeHoliday_k,        [_CWD_KPeA]:      null       },
+  {[_CWD_KDaT]: CalendarDayTypeHoliday_k,        [_CWD_KPeA]:      null       },
+  {[_CWD_KDaT]: CalendarDayTypeSchoolDay_k,      [_CWD_KPeA]: _CalendarPeriodsForDayType3_k  },
+  {[_CWD_KDaT]: CalendarDayTypeSchoolDay_k,      [_CWD_KPeA]: _CalendarPeriodsForDayType1_k  },
+  {[_CWD_KDaT]: CalendarDayTypeSchoolDay_k,      [_CWD_KPeA]: _CalendarPeriodsForDayType2_k  },
+  {[_CWD_KDaT]: CalendarDayTypeWeekend_k,        [_CWD_KPeA]:      null       }
+];
+
+// This is a Monday holiday week
+const _MVHS_HABAB_Week_a = [
+  {[_CWD_KDaT]: CalendarDayTypeWeekend_k,        [_CWD_KPeA]:      null       },
+  {[_CWD_KDaT]: CalendarDayTypeHoliday_k,        [_CWD_KPeA]:      null       },
+  {[_CWD_KDaT]: CalendarDayTypeSchoolDay_k,      [_CWD_KPeA]: _CalendarPeriodsForDayType1_k  },
+  {[_CWD_KDaT]: CalendarDayTypeSchoolDay_k,      [_CWD_KPeA]: _CalendarPeriodsForDayType2_k  },
+  {[_CWD_KDaT]: CalendarDayTypeSchoolDay_k,      [_CWD_KPeA]: _CalendarPeriodsForDayType1_k  },
+  {[_CWD_KDaT]: CalendarDayTypeSchoolDay_k,      [_CWD_KPeA]: _CalendarPeriodsForDayType2_k  },
+  {[_CWD_KDaT]: CalendarDayTypeWeekend_k,        [_CWD_KPeA]:      null       }
+];
+
+// This is a Monday Staff Dev week
+const _MVHS_HBCAB_Week_a = [
+  {[_CWD_KDaT]: CalendarDayTypeWeekend_k,        [_CWD_KPeA]:      null       },
+  {[_CWD_KDaT]: CalendarDayTypeHoliday_k,        [_CWD_KPeA]:      null       },
+  {[_CWD_KDaT]: CalendarDayTypeSchoolDay_k,      [_CWD_KPeA]: _CalendarPeriodsForDayType2_k  },
+  {[_CWD_KDaT]: CalendarDayTypeSchoolDay_k,      [_CWD_KPeA]: _CalendarPeriodsForDayType3_k  },
+  {[_CWD_KDaT]: CalendarDayTypeSchoolDay_k,      [_CWD_KPeA]: _CalendarPeriodsForDayType1_k  },
+  {[_CWD_KDaT]: CalendarDayTypeSchoolDay_k,      [_CWD_KPeA]: _CalendarPeriodsForDayType2_k  },
+  {[_CWD_KDaT]: CalendarDayTypeWeekend_k,        [_CWD_KPeA]:      null       }
+];
+
+// This is a Wednesday holiday week
+const _MVHS_ABHAB_Week_a = [
+  {[_CWD_KDaT]: CalendarDayTypeWeekend_k,        [_CWD_KPeA]:      null       },
+  {[_CWD_KDaT]: CalendarDayTypeSchoolDay_k,      [_CWD_KPeA]: _CalendarPeriodsForDayType1_k  },
+  {[_CWD_KDaT]: CalendarDayTypeSchoolDay_k,      [_CWD_KPeA]: _CalendarPeriodsForDayType2_k  },
+  {[_CWD_KDaT]: CalendarDayTypeHoliday_k,        [_CWD_KPeA]:      null       },
+  {[_CWD_KDaT]: CalendarDayTypeSchoolDay_k,      [_CWD_KPeA]: _CalendarPeriodsForDayType1_k  },
+  {[_CWD_KDaT]: CalendarDayTypeSchoolDay_k,      [_CWD_KPeA]: _CalendarPeriodsForDayType2_k  },
+  {[_CWD_KDaT]: CalendarDayTypeWeekend_k,        [_CWD_KPeA]:      null       }
+];
+
+// This is the end-of-year week
+const _MVHS_ABCHH_Week_a = [
+  {[_CWD_KDaT]: CalendarDayTypeWeekend_k,        [_CWD_KPeA]:      null       },
+  {[_CWD_KDaT]: CalendarDayTypeSchoolDay_k,      [_CWD_KPeA]: _CalendarPeriodsForDayType1_k  },
+  {[_CWD_KDaT]: CalendarDayTypeSchoolDay_k,      [_CWD_KPeA]: _CalendarPeriodsForDayType2_k  },
+  {[_CWD_KDaT]: CalendarDayTypeSchoolDay_k,      [_CWD_KPeA]: _CalendarPeriodsForDayType3_k  },
+  {[_CWD_KDaT]: CalendarDayTypeHoliday_k,        [_CWD_KPeA]:      null       },
+  {[_CWD_KDaT]: CalendarDayTypeHoliday_k,        [_CWD_KPeA]:      null       },
+  {[_CWD_KDaT]: CalendarDayTypeWeekend_k,        [_CWD_KPeA]:      null       }
+];
+
+// This is a week-long holiday week
+const _MVHS_HHHHH_Week_a = [
+  {[_CWD_KDaT]: CalendarDayTypeWeekend_k,        [_CWD_KPeA]:      null      },
+  {[_CWD_KDaT]: CalendarDayTypeHoliday_k,        [_CWD_KPeA]:      null      },
+  {[_CWD_KDaT]: CalendarDayTypeHoliday_k,        [_CWD_KPeA]:      null      },
+  {[_CWD_KDaT]: CalendarDayTypeHoliday_k,        [_CWD_KPeA]:      null      },
+  {[_CWD_KDaT]: CalendarDayTypeHoliday_k,        [_CWD_KPeA]:      null      },
+  {[_CWD_KDaT]: CalendarDayTypeHoliday_k,        [_CWD_KPeA]:      null      },
+  {[_CWD_KDaT]: CalendarDayTypeWeekend_k,        [_CWD_KPeA]:      null      }
+];
+
+// This is the list of weeks that are different from the default week. The key
+// is the week tag of the exceptional week and the value is the week object
+// for that week
+const _MVHS_Week_Exceptions_h = {
+  "2020-08-09": _MVHS_HHCAB_Week_a,          // Beginning of the school year
+  "2020-09-06": _MVHS_HABAB_Week_a,          // Labor Day
+  "2020-10-11": _MVHS_HHCAB_Week_a,          // Columbus Day
+  "2020-11-08": _MVHS_ABHAB_Week_a,          // Veterans Day
+  "2020-11-22": _MVHS_HHHHH_Week_a,          // Thanksgiving Break
+  "2020-12-20": _MVHS_HHHHH_Week_a,          // Holiday Break
+  "2020-12-27": _MVHS_HHHHH_Week_a,          // Holiday Break
+  "2021-01-03": _MVHS_HBCAB_Week_a,          // Staff Dev Day
+  "2021-01-17": _MVHS_HBCAB_Week_a,          // Martin Luther King day
+  "2021-02-14": _MVHS_HHHHH_Week_a,          // Winter Break
+  "2021-03-14": _MVHS_HBCAB_Week_a,          // MVHS Recess
+  "2021-04-11": _MVHS_HHHHH_Week_a,          // Spring Recess
+  "2021-05-31": _MVHS_HBCAB_Week_a,          // Memorial Day
+  "2021-06-06": _MVHS_ABCHH_Week_a,          // End of the school year
+};
+
+// END WEEK DESCRIPTIONS
+// =============================================================================
+
+// END MVHS WEEK, DAY, PERIOD AND CLASS DEFINITIONS
+// =+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
 
 // =+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
-// class CalendarClassDescr
+// GLOBAL FUNCTIONS
 //
-// This class defines the structure of the descriptor for each (school) class,
+// CalendarAssert
+//
+// Function to test and assertion and an exception, with traceback
+// if the assertion failed
+//
+// Arguments:
+//  assertion         Boolean expression
+//
+//  msg               Message explaining the assertion
+//
+//  args              Optional list of arguments to output
+//
+// Returns:
+//  If assertion is true, just return with no value. If false, emit an error
+//  message, including msg and the args list, and throw an exception
+
+function CalendarAssert (assertion, msg, ...args) {
+  if (!assertion) {
+    let message = "***ERROR: CalendarAssert Assertion Failed: " + msg + ": " +args.join(", ")
+    console.log (message)
+    throw Error ("Assertion Failed");
+  }
+} // function CalendarAssert (assertion, msg, ...args)
+
+// CalendarMessage
+//
+// Function to emit a message, with optional arguments, which are separated
+// by ", "
+//
+// Arguments:
+//  msg               Message
+//
+//  args              Optional list of arguments to output
+//
+// Returns:
+//  None
+
+function CalendarMessage (msg, ...args) {
+
+  let message = "Calendar Message: " + msg + ": " +args.join(", ")
+  console.log (message)
+
+} // function CalendarMessage (msg, ...args)
+
+// DateAtMidnight
+//
+// Function to return a Date() value corresponding to midnight on the date
+// specified.
+//
+// Arguments:
+//  sDate         (String) Date in the format yyyy-mm-yy
+//
+// Returns:
+//  New Date() object corresponding to midnight, local time, of the date
+// specified
+
+function DateAtMidnight (sDate) {
+
+  // Verify the existence and type of the argument
+  CalendarAssert (
+    (sDate !== undefined) &&
+    (typeof sDate == "string"),
+    "DateAtMidnight called with invalid argument",
+    sDate, typeof sDate
+  );
+
+  let mysDate = sDate + "T00:00:00"; // Force parser to set local time
+  return new Date(mysDate);
+
+}
+
+function _leftPad (value, width, character) {
+  return value.toString().padStart(width, character)
+}
+// END GLOBAL FUNCTIONS DEFINITIONS
+// =+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
+
+// =+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
+// GLOBAL CONSTANTS AND VARIABLES
+//
+// Define the school year first and last days, the default week pattern,
+// and the week exception pattern. You'll need these to call the Calendar
+// class constructor to get an instance of the Calendar object.
+//
+const SchoolFirstDay_k        = MVHSFirstDay_k;
+const SchoolLastDay_k         = MVHSLastDay_k;
+const SchoolDefaultWeek_a     = _MVHS_Default_Week_a;
+const SchoolWeekExceptions_h  = _MVHS_Week_Exceptions_h;
+
+// Maximum print depth for calls to class toString methods
+const CalendarMaxToStringDepth_k = 10;
+
+
+// END GLOBAL CONSTANTS AND VARIABLES
+// =+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
+
+
+// =+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
+// class CalendarClassObject
+//
+// This class defines the structure of the object for each (school) class,
 // which looks like this:
+//
+//  Public Class Variables
 //
 //    period:       (Positive Integer) Period number
 //
-//    className:    (String) Name of the class
+//    className:    (String) Name of the class.
 //
 //    room:         (String) Room in which the class is held
 //
 //    teacher:      (String) Name of the teacher for the class
+//
+//  Methods
+//
+//    returnString = toString ([linePrefix] [, maxDepth])
+//                  Return a string with printable information about the class
 
-class CalendarClassDescr {
+const _CalendarClassObjectDebug_k = false;
+class CalendarClassObject {
 
   // ===========================================================================
   // constructor
   //
-  // Initialize the CalendarClassDescr object
+  // Initialize the CalendarClassObject object
   //
   // Arguments:
   //
@@ -40,15 +645,23 @@ class CalendarClassDescr {
   //  room:       (REQUIRED String) Room in which the class is held
   //
   //  teacher:    (REQUIRED String) Name of the teacher for the class
+  //
+  // IMPORTANT IMPORTANT IMPORTANT IMPORTANT IMPORTANT IMPORTANT IMPORTANT IMPORTANT
+  // Do not change the order, type, or definition of these arguments without
+  // updating the (school) class definition arrays above. Search for the string
+  // "CalendarClassObject.constructor arguments"
 
   constructor (period, className, room, teacher) {
-
     // Make sure the caller provided the required arguments
-    if ((period === undefined) || (className === undefined) ||
-        (room === undefined) || (teacher === undefined)) {
-      throw Error ("ERROR: CalendarClassDescr.constructor called with invalid arguments: " +
-                   period + ", " + className + ", " + room + ", " + teacher)
-    }
+    CalendarAssert(
+      (period     !== undefined) &&
+      (className  !== undefined) &&
+      (room       !== undefined) &&
+      (teacher    !== undefined),
+      "CalendarClassObject.constructor called with invalid arguments",
+      className, room, teacher
+    );
+
 
     // This information is really just for reporting purposes
     this.period = period;
@@ -56,7 +669,12 @@ class CalendarClassDescr {
     this.room = room;
     this.teacher = teacher;
 
-  } // CalendarClassDescr.constructor
+    if (_CalendarClassObjectDebug_k) {
+      CalendarMessage ("DEBUG: Created new CalendarClassObject instance for period", period);
+      CalendarMessage ("DEBUG: ", this.toString("  ", 1));
+    }
+
+  } // CalendarClassObject.constructor
 
   // ===========================================================================
   // toString
@@ -65,48 +683,54 @@ class CalendarClassDescr {
   // class
   //
   // Arguments:
-  //  linePrefix  (OPTIONAL String) The prefix to use for each line
+  //  linePrefix  (OPTIONAL String) The prefix to use for each line. If not
+  //              specified, defaults to "";
+  //
+  //  maxDepth    (OPTIONAL Positive Number) Max depth of class toString calls.
+  //              If not specified, defaults to CalendarMaxToStringDepth_k.
+  //              maxDepth must be > 0 to return a non-"" string and is
+  //              decremented before calling the next level down.
   //
   // Returns:
   //  Multi-line string giving all information about this period
 
-  toString (linePrefix) {
+  toString (linePrefix, maxDepth) {
 
     let myLinePrefix = linePrefix || "";
+    let myMaxDepth = maxDepth || CalendarMaxToStringDepth_k;
+    if (myMaxDepth-- <= 0) return "";
 
     // A null in the className field indicates that there is no class in that
-    // periods
+    // period
     if (this.className === null) {
       return myLinePrefix + "There is no class in period " + this.period + "\n"
     }
 
     // Otherwise, dump the information
     var returnString =
-    myLinePrefix + "Class in period " + this.period + " is " + this.className + "\n" +
-    myLinePrefix + "taught by " + this.teacher + " in room " + this.room + "\n";
+    myLinePrefix + "Class in period " + this.period + " is " + this.className +
+                   " taught by " + this.teacher + " in room " + this.room + "\n";
 
     return returnString;
 
-  } // CalendarClassDescr.toString
+  } // CalendarClassObject.toString
 
-} // class CalendarClassDescr
+} // class CalendarClassObject
 
 
 // =+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
-// class CalendarPeriodDescr
+// class CalendarPeriodObject
 //
-// This class defines the structure of the descriptor for each period of the day,
+// This class defines the structure of the object for each period of the day,
 // which looks like this:
+//
+//  Public Class Variables
 //
 //    period:       (Number) Period number 0..7. If this is -1, it is a pseudo
 //                  period, used for before and after school, passing periods
 //                  and lunch
 //
 //    name:         (String) Name of the period
-//
-//    eDate:        (Date() object) Date at midnight of the day containing this
-//                  period. NOTE: The setEndDate method must be called after
-//                  the constructor in order to get this value set.
 //
 //    startSTime:   (String) Start time of the period: "hh:mm" using a 24-hour
 //                  clock
@@ -124,15 +748,25 @@ class CalendarClassDescr {
 //
 //    comment:      (String) Comment describing the period. May be ""
 //
-//    classInfo:    (CalendarClassDescr) Class information for this period. If
+//    classInfoObject:
+//                  (CalendarClassObject) Class information for this period. If
 //                  there is no class this period, this value is null
+//
+//  Methods
+//
+//    setEDate (sDate)
+//                  Set the eDate for the period from an sDate
+//
+//    returnString = toString ([linePrefix] [, maxDepth])
+//                  Return a string with printable information about the period
 
-class CalendarPeriodDescr {
+const _CalendarPeriodObjectDebug_k = false;
+class CalendarPeriodObject {
 
   // ===========================================================================
   // constructor
   //
-  // Initialize the CalendarPeriodDescr object
+  // Initialize the CalendarPeriodObject object
   //
   // Arguments:
   //
@@ -148,8 +782,10 @@ class CalendarPeriodDescr {
   //  endTime     (REQUIRED String) End time of the period in "hh:mm" (24 hour
   //              clock)
   //
-  //  classArray  (REQURIED Array of CalendarClassDescr) Array, indexed by period
-  //              containing the class information for each period.
+  //  classInfoObject
+  //             (REQURIED CalendarClassObject instance) The class information
+  //             object corresponding to this period, or null if there is no
+  //             class during this period.
   //
   //  comment     (OPTIONAL String) Comment describing the period
   //
@@ -159,18 +795,23 @@ class CalendarPeriodDescr {
   //              pseudo period, whose end time is 23:59, to pad the time
   //              up to the end of the hour (midnight minus 1 ms)
   //
-  // NOTE: The setEDate method must be called after the constructor to set
-  // the eDate class variable
+  // IMPORTANT IMPORTANT IMPORTANT IMPORTANT IMPORTANT IMPORTANT IMPORTANT IMPORTANT
+  // Do not change the order, type, or definition of these arguments without
+  // updating the period definition arrays above. Search for the string
+  // "CalendarPeriodObject.constructor arguments"
 
-  constructor (period, name, startTime, endTime, classArray, comment, adjTime) {
+  constructor (period, name, startTime, endTime, comment, adjTime, classInfoObject) {
 
     // Make sure the caller provided the required arguments
-    if ((period === undefined) || (name === undefined) ||
-    (startTime === undefined) || (endTime === undefined) ||
-    (classArray == undefined)) {
-      throw Error ("ERROR: CalendarPeriodDescr.constructor called with invalid arguments: " +
-      period + ", " + name + ", " + startTime + ", " + endTime + ", " + classArray);
-    }
+    CalendarAssert (
+      (period           !== undefined) &&
+      (name             !== undefined) &&
+      (startTime        !== undefined) &&
+      (endTime          !== undefined) &&
+      (classInfoObject  !== undefined),
+      "CalendarPeriodObject.constructor called with invalid arguments",
+      period, name, startTime, endTime, classInfoObject
+    );
 
     // Make the default end time adjustment -1 ms. If the adjTime argument
     // is specified, use that
@@ -181,190 +822,82 @@ class CalendarPeriodDescr {
     // Save both the string version of start and end times, but also convert
     // them to milliseconds from midnight to make time comparisons easier for
     // users of the data
-
+    let errorString = period + ":" + name + ":" + startTime + ":" + endTime + ":" + comment;
     this.startSTime = startTime;
-    this.startMSTime = _helperSTimeToMSTime(startTime, 0,
-      period + ":" + name + ":" + startTime + ":" +
-      endTime + ":" + comment);
+    this.startMSTime = _helperSTimeToMSTime(startTime, 0, errorString);
+
     this.endSTime = endTime;
-    this.endMSTime = _helperSTimeToMSTime(endTime, msAdjust,
-      period + ":" + name + ":" + endTime + ":" +
-      endTime + ":" + comment);
+    this.endMSTime = _helperSTimeToMSTime(endTime, msAdjust, errorString);
 
     // If the period number isn't in the range of the class array, then
-    // make classInfo null, otherwise extract the class information for this
+    // make classInfoObject null, otherwise extract the class information for this
     // period
-    if (period < 0 || period >= classArray.length) {
-      this.classInfo = null;
+    if (classInfoObject === null) {
+      this.classInfoObject = null;
     } else {
-      this.classInfo = classArray[period]
+      this.classInfoObject = classInfoObject;
     }
 
-        // If a comment was not included in the constructor call, make it empty
-        this.comment = comment || "";
+    // If a comment was not included in the constructor call, make it empty
+    this.comment = comment || "";
 
-        // Helper function to convert a string in the format "[h]h:[m]m" to
-        // the number of milliseconds after midnight, so (h*60+m)*60*1000. Also
-        // performs error checking and throws an error if the number is incorrectly
-        // formatted
-        //
-        // Arguments:
-        //  sTime       String to convert, in [h]h:[m]m format
-        //
-        //  adjTime     Number of ms to add to the converted value (typically
-        //              provided as a negative number to back the end time up
-        //              so that there is no overlap. For example, if -1 is used
-        //              then the end time will be 1ms less than the sTime string)
-        //
-        //  errorString Context string to print if an error is found
-        //
-        // Returns:
-        //  ms after midnight corresponding to the input string
-
-        function _helperSTimeToMSTime (sTime, adjTime, errorString) {
-          // Define some useful constants
-          const HoursPerDay_k = 24;
-          const MinutesPerHour_k = 60;
-          const msPerMinute_k = 60*1000;
-
-          // Pattern match the time format. H is returned in [1]; M in [2]
-          let timeSplit = sTime.match(/^\s*(\d+)\:(\d+)\s*$/);
-          let hours = parseInt(timeSplit[1],10);
-          let minutes = parseInt(timeSplit[2],10);
-
-          // Throw an error if the parse failed. This is a bug in the caller of
-          // the constructor, so it's OK to give up if an error is found.
-          if (isNaN(hours) || isNaN(minutes) ||
-          (hours < 0) || (hours >= HoursPerDay_k) ||
-          (minutes < 0) || (minutes >= MinutesPerHour_k)) {
-            throw Error ("ERROR: CalendarPeriodDecr.constructor found an incorrect formatted time: " +
-            sTime + ", in entry " + errorString);
-          }
-
-          return (((hours * MinutesPerHour_k + minutes) * msPerMinute_k) + adjTime);
-        } // CalendarPeriodDescr.constructor._helperSTimeToMSTime
-
-      } // CalendarPeriodDescr.constructor
-
-      // ===========================================================================
-      // setEDate
-      //
-      // Set the eDate value in the class period descriptor
-      //
-      // Arguments:
-      //  sDate      (REQUIRED String) The date to use to set the variables
-      //
-      // Returns:
-      //  None
-
-      setEDate (sDate) {
-
-        // Create a new Date() object, forcing the time to midnight of the day
-        this.eDate = new Date(sDate + "T00:00:00");
-
-      } // CalendarPeriodDescr.setEDate
-
-      // ===========================================================================
-      // toString
-      //
-      // Returns a multi-line string with the printable information about the
-      // period
-      //
-      // Arguments:
-      //  linePrefix  (OPTIONAL String) The prefix to use for each line
-      //
-      // Returns:
-      //  Multi-line string giving all information about this period
-
-      toString (linePrefix) {
-
-        let myLinePrefix = linePrefix || "";
-
-        var returnString =
-        myLinePrefix + "Period " + this.name;
-        if (this.period > 0)  {
-          returnString += " (" + this.period + ")";
-        }
-        myLinePrefix += "  ";
-        returnString +=
-          myLinePrefix + "on " + this.eDate + "\n" +
-          myLinePrefix + "starts at " + this.startSTime + " (" + this.startMSTime + ")\n" +
-          myLinePrefix + "ends at " + this.endSTime + " (" + this.endMSTime + ")\n";
-
-        if (this.comment !== null) {
-          returnString +=
-          myLinePrefix + "comment: " + this.comment + "\n";
-        }
-
-        if (this.classInfo !== null) {
-          returnString += this.classInfo.toString(myLinePrefix);
-        }
-
-        return returnString;
-
-      } // CalendarPeriodDescr.toString
-
-    } // class CalendarPeriodDescr
-
-
-// =+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
-// class CalendarDayDescr
-//
-// This class defines the structure of the descriptor for each day of the week,
-// which looks like this:
-//
-//    dayName:      (String) Name of the day, e.g., "Sunday"
-//
-//    printDate:    (String) Date in printable format, e.g., "9/30/2020"
-//
-//    dayType:      (String) Type of day: CalendarDayTypeSchoolDay_k,
-//                  CalendarDayTypeWeekend_k, CalendarDayTypeHoliday_k
-//
-//    eDate:        (Date() object) Date for this day
-//
-//    periodList:   (Array of CalendarPeriodDescr) Array containing the
-//                  descriptors for each period of the day. If the length
-//                  of this array is 0, there are no periods in the day
-
-class CalendarDayDescr {
-
-  // ===========================================================================
-  // constructor
-  //
-  // Initialize the CalendarDayDescr object
-  //
-  // Arguments:
-  //  dayType     (REQUIRED String) Type of day: one of CalendarDayType*
-  //
-  //  periodList  (REQUIRED Array of CalendarPeriodDescr) List of periods
-  //              for this day, or [] if there are no periods
-  //
-  // NOTE: THE setEDate METHOD MUST BE CALLED TO FINISH INITIALIZING THE
-  // DATA STRUCTURE AFTER THE CONSTRUCTOR IS CALLED.
-
-  constructor (dayType, periodList) {
-
-    // Make sure the caller provided the required arguments
-    if (
-      (periodList === undefined) ||
-      (dayType === undefined)
-    ) {
-      throw Error ("ERROR: CalendarDayDescr.constructor called with invalid arguments: " +
-                   periodList + ", " + dayType);
+    if (_CalendarPeriodObjectDebug_k) {
+      CalendarMessage ("DEBUG: Created new CalendarPeriodObject instance");
+      CalendarMessage ("DEBUG: ", this.toString("  ", 2));
     }
 
-    // the day type
-    this.dayType = dayType;
+    // Helper function to convert a string in the format "[h]h:[m]m" to
+    // the number of milliseconds after midnight, so (h*60+m)*60*1000. Also
+    // performs error checking and throws an error if the number is incorrectly
+    // formatted
+    //
+    // Arguments:
+    //  sTime       String to convert, in [h]h:[m]m format
+    //
+    //  adjTime     Number of ms to add to the converted value (typically
+    //              provided as a negative number to back the end time up
+    //              so that there is no overlap. For example, if -1 is used
+    //              then the end time will be 1ms less than the sTime string)
+    //
+    //  errorString Context string to print if an error is found
+    //
+    // Returns:
+    //  ms after midnight corresponding to the input string
 
-    // and the period list
-    this.periodList = [...periodList];
+    function _helperSTimeToMSTime (sTime, adjTime, errorString) {
+      // Define some useful constants
+      const HoursPerDay_k = 24;
+      const MinutesPerHour_k = 60;
+      const msPerMinute_k = 60*1000;
 
-  } // CalendarDayDescr.constructor
+      // Pattern match the time format. H is returned in [1]; M in [2]
+      let timeSplit = sTime.match(/^\s*(\d+)\:(\d+)\s*$/);
+      let hours = parseInt(timeSplit[1],10);
+      let minutes = parseInt(timeSplit[2],10);
 
+      // Throw an error if the parse failed. This is a bug in the caller of
+      // the constructor, so it's OK to give up if an error is found.
+      CalendarAssert (
+        !isNaN(hours)           &&
+        !isNaN(minutes)         &&
+        (hours >= 0)            &&
+        (hours < HoursPerDay_k) &&
+        (minutes >= 0)          &&
+        (minutes < MinutesPerHour_k),
+        "CalendarPeriodDecr.constructor found an incorrect formatted time",
+        sTime, errorString
+      );
+
+      return (((hours * MinutesPerHour_k + minutes) * msPerMinute_k) + adjTime);
+    } // CalendarPeriodObject.constructor._helperSTimeToMSTime
+
+  } // CalendarPeriodObject.constructor
+
+/*
   // ===========================================================================
   // setEDate
   //
-  // Set the eDate, printDate, and dayName value in the class period descriptor
+  // Set the eDate value in the class period object
   //
   // Arguments:
   //  sDate      (REQUIRED String) The date to use to set the variables
@@ -374,12 +907,140 @@ class CalendarDayDescr {
 
   setEDate (sDate) {
 
-    const dayIndexToName_a = [
-          "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"
-        ];
-
     // Create a new Date() object, forcing the time to midnight of the day
-    this.eDate = new Date(sDate + "T00:00:00");
+    this.eDate = DateAtMidnight(sDate);
+
+  } // CalendarPeriodObject.setEDate
+  */
+
+  // ===========================================================================
+  // toString
+  //
+  // Returns a multi-line string with the printable information about the
+  // period
+  //
+  //  linePrefix  (OPTIONAL String) The prefix to use for each line. If not
+  //              specified, defaults to "";
+  //
+  //  maxDepth    (OPTIONAL Positive Number) Max depth of class toString calls.
+  //              If not specified, defaults to CalendarMaxToStringDepth_k.
+  //              maxDepth must be > 0 to return a non-"" string and is
+  //              decremented before calling the next level down.
+  //
+  // Returns:
+  //  Multi-line string giving all information about this period
+
+  toString (linePrefix, maxDepth) {
+
+    let myLinePrefix = linePrefix || "";
+    let myMaxDepth = maxDepth || CalendarMaxToStringDepth_k;
+    if (myMaxDepth-- <= 0) return "";
+
+    var returnString =
+    myLinePrefix + "Period " + this.name;
+    if (this.period > 0)  {
+      returnString += " (" + this.period + ")";
+    }
+    myLinePrefix += "  ";
+    returnString +=
+    myLinePrefix + "starts at " + this.startSTime + " (" + this.startMSTime + ")\n" +
+    myLinePrefix + "ends at " + this.endSTime + " (" + this.endMSTime + ")\n";
+
+    if (this.comment !== null) {
+      returnString +=
+      myLinePrefix + "comment: " + this.comment + "\n";
+    }
+
+    if ((this.classInfoObject !== null) && (myMaxDepth > 0)) {
+      returnString += this.classInfoObject.toString(myLinePrefix, myMaxDepth);
+    }
+
+    return returnString;
+
+  } // CalendarPeriodObject.toString
+
+} // class CalendarPeriodObject
+
+
+// =+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
+// class CalendarDayObject
+//
+// This class defines the structure of the object for each day of the week,
+// which looks like this:
+//
+//    dayName:      (String) Name of the day, e.g., "Sunday"
+//
+//    printDate:    (String) Date in printable format, e.g., "9/30/2020"
+//
+//    dayType:      (String) Type of day: CalendarDayTypeSchoolDay_k,
+//                  CalendarDayTypeWeekend_k, CalendarDayTypeHoliday_k
+//
+//    dayTag        (String) Day tag for this day
+//
+//    dayIdx        (Positive number) day index for this day
+//
+//    weekTag       (String) Week tag for the week containing this day
+//
+//    eDate:        (Date() object) Date for this day
+//
+//    periodObjectArray
+//                  (Array of CalendarPeriodObject) Array containing the
+//                  objects for each period of the day. If the length
+//                  of this array is 0, there are no periods in the day
+
+class CalendarDayObject {
+
+  // ===========================================================================
+  // constructor
+  //
+  // Initialize the CalendarDayObject object
+  //
+  // Arguments:
+  //  dayTag      (REQUIRED String) The day tag for this day
+  //
+  //  dayIdx      (REQUIRED positive number) The day index for this day
+  //
+  //  dayType     (REQUIRED String) Type of day: one of CalendarDayType*
+  //
+  //  weekTag     (REQUIRED String) The week tag for the week in which this
+  //              day is found
+  //
+  //  periodObjectArray
+  //              (REQUIRED Array of CalendarPeriodObject) Array of the
+  //              CalendarPeriodObject instances for each period of the day, or
+  //              [] if there are no periods.
+  //
+  // IMPORTANT IMPORTANT IMPORTANT IMPORTANT IMPORTANT IMPORTANT IMPORTANT IMPORTANT
+  // Do not change the order, type, or definition of these arguments without
+  // updating the day definition arrays above. Search for the string
+  // "CalendarDayObject.constructor arguments"
+
+
+  constructor (dayTag, dayIdx, weekTag, dayType, periodObjectArray) {
+
+    // Make sure the caller provided the required arguments
+    CalendarAssert (
+      (dayTag                 !== undefined) &&
+      (dayIdx                 !== undefined) &&
+      (dayIdx                 >= 0)          &&
+      (weekTag                !== undefined) &&
+      (dayType                !== undefined) &&
+      (periodObjectArray      !== undefined),
+      "CalendarDayObject.constructor called with invalid arguments",
+      periodObjectArray, dayType
+    );
+
+    this.dayTag = dayTag;
+    this.dayIdx = dayIdx;
+    this.weekTag = weekTag;
+    this.dayType = dayType;
+
+    const dayIndexToName_a = [
+      "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"
+    ];
+
+    // Set the eDate class variable
+    this.eDate = DateAtMidnight(dayTag);
 
     // Generate a printable date
     let month = this.eDate.getMonth() + 1;
@@ -391,8 +1052,46 @@ class CalendarDayDescr {
     // Create the printable day name
     this.dayName = dayIndexToName_a[this.eDate.getDay()];
 
-  } // CalendarDayDescr.setEDate
+    // Build the periodObjectArray
+    this.periodObjectArray = [];
+    for (let p = 0; p < periodObjectArray.length; p++) {
+      this.periodObjectArray.push(periodObjectArray[p]);
+    }
 
+  } // CalendarDayObject.constructor
+
+  // ===========================================================================
+  // setEDate
+  //
+  // Set the eDate, printDate, and dayName value in the class period object
+  //
+  // Arguments:
+  //  sDate      (REQUIRED String) The date to use to set the variables
+  //
+  // Returns:
+  //  None
+/*
+  setEDate (sDate) {
+
+    const dayIndexToName_a = [
+          "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"
+        ];
+
+    // Create a new Date() object, forcing the time to midnight of the day
+    this.eDate = DateAtMidnight(sDate);
+
+    // Generate a printable date
+    let month = this.eDate.getMonth() + 1;
+    this.printDate =
+    month.toString() + "/" +
+    this.eDate.getDate().toString() + "/" +
+    this.eDate.getFullYear().toString();
+
+    // Create the printable day name
+    this.dayName = dayIndexToName_a[this.eDate.getDay()];
+
+  } // CalendarDayObject.setEDate
+*/
   // ===========================================================================
   // toString
   //
@@ -400,98 +1099,125 @@ class CalendarDayDescr {
   // day
   //
   // Arguments:
-  //  linePrefix  (OPTIONAL String) The prefix to use for each line
+  //  linePrefix  (OPTIONAL String) The prefix to use for each line. If not
+  //              specified, defaults to "";
+  //
+  //  maxDepth    (OPTIONAL Positive Number) Max depth of class toString calls.
+  //              If not specified, defaults to CalendarMaxToStringDepth_k.
+  //              maxDepth must be > 0 to return a non-"" string and is
+  //              decremented before calling the next level down.
   //
   // Returns:
   //  Multi-line string giving all information about this day
 
-  toString (linePrefix) {
+  toString (linePrefix, maxDepth) {
     let myLinePrefix = linePrefix || "";
+    let myMaxDepth = maxDepth || CalendarMaxToStringDepth_k;
+    if (myMaxDepth-- <= 0) return "";
 
+    let dayNum = this.dayIdx+1;
     var returnString =
-    myLinePrefix + this.dayName + ", " + this.printDate + " (" + this.eDate + ") " +
-    "is a " + this.dayType + " and has the following periods:\n";
+    myLinePrefix +
+    "Day " + dayNum + ", " +
+    this.dayName + ", " +
+    this.printDate + " (" + this.eDate + ") " +
+    "is a " + this.dayType +
+    ", has week tag " + this.weekTag +
+    " and day tag " + this.dayTag +
+    ", and has "
 
-    myLinePrefix += "  ";
-    if (this.periodList.length == 0) {
-      returnString += myLinePrefix + "There are no periods on this day\n";
+    if (this.periodObjectArray.length === 0) {
+      returnString += "no periods\n";
+    } else if (myMaxDepth <= 0) {
+      returnString += "periods suppressed by maxDepth limitations\n";
     } else {
-      for (const period of this.periodList) {
-        returnString += period.toString(myLinePrefix);
+      returnString += "the following periods:\n";
+      for (const period of this.periodObjectArray) {
+        returnString += period.toString(myLinePrefix, myMaxDepth);
       }
     }
 
     return returnString;
 
-  } // CalendarDayDescr.toString
+  } // CalendarDayObject.toString
 
-} // class CalendarDayDescr
+} // class CalendarDayObject
 
 
 // =+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
-// class CalendarWeekDescr
+// class CalendarWeekObject
 //
-// This class defines the structure of the descriptor for a week of classes,
+// This class defines the structure of the object for a week of classes,
 // which looks like this:
 //    weekTag:    (String) Date for the Sunday of this week in the format
-//                "yyyy-[m]m-[d]d".
+//                "yyyy-mm-dd".
 //
-//    weekNum:    (Positive Integer) Number of week, starting at zero. Can
-//                be used to index weekList in the calendar
+//    weekIdx:    (Positive Integer) Index of week, starting at zero. Can
+//                be used to index _weekTagArray in the calendar
 //
 //    eDate       (Date() object) Date corresponding to weekTag
 //
-//    weekList    (Array) Array 0..6, indexed by day of the week (Sunday=0,
-//                Saturday=6) containing the descriptor for each day of that
-//                week.
+//    dayObjectArray
+//                (Array) Array 0..6, indexed by day of the week (Sunday=0,
+//                Saturday=6) containing the CalendarDayObject object for each
+//                day of that week.
 //
-class CalendarWeekDescr {
+class CalendarWeekObject {
 
+  // ===========================================================================
   // constructor
   //
-  // Initialize a new calendar week descriptor
+  // Initialize a new calendar week object
   //
   // Arguments:
-  //  weekTag     (REQUIRED String) Week tag for the week for this descriptor
+  //  weekTag     (REQUIRED String) Week tag for the week for this object
   //
-  //  weekNum     (Required Number) Week number for this week
+  //  weekIdx     (REQUIRED Number) Week index for this week
   //
-  //  weekList    (REQUIRED Array[0..6]) Array of CalendarDayDescr objects for
-  //              each day of the week. This may also be null if there are no
-  //              school days in the list
-  //
-  // ===========================================================================
-  constructor (weekTag, weekNum, weekList) {
+  // NOTE: The setDayObjectArray must be called after the constructor to set
+  // the dayObjectArray class variable.
 
-    const daysPerWeek_k = 7;
+  constructor (weekTag, weekIdx) {
 
-    if ((weekTag === undefined) || (weekList === undefined) ||
-        (weekNum === undefined) ||
-        ((weekList !== null) && (weekList.length != daysPerWeek_k))) {
-          throw Error ("ERROR: CalendarWeekDescr.constructor called with invalid arguments: " +
-                       weekTag + ", " + weekList + ", " + weekNum);
-        }
+    CalendarAssert (
+      (weekTag    !== undefined) &&
+      (weekIdx    !== undefined),
+      "CalendarWeekObject.constructor called with invalid arguments",
+      weekTag, weekIdx
+    );
 
     // Initialize the variables
     this.weekTag = weekTag;
-    this.weekNum = weekNum;
-    this.eDate = new Date(weekTag + "T00:00:00");
-    this.weekList = [...weekList];
-  }
+    this.weekIdx = weekIdx;
+    this.eDate = DateAtMidnight(weekTag);
 
-// setWeekList
-//
-// Overwrite the week list array from the constructer call
-//
-// Arguments:
-//
-//  weekList    (REQUIRED) Array of day lists for each day of the weeks
+    this.dayObjectArray = []
 
-  setWeekList (weekList) {
+  } // CalendarWeekObject.constructor
 
-    this.weekList = weekList;
+  // ===========================================================================
+  // setDayObjectArray
+  //
+  // Supply the dayObjectArray for this week
+  //
+  // Arguments:
+  //  dayObjectArray
+  //              (REQUIRED Array[0..6]) Array of CalendarDayObject arguments for
+  //              each day of the week. This may also be null if there are no
+  //              school days in the list
 
-  } // CalendarWeekDescr.setWeekList
+  setDayObjectArray (dayObjectArray) {
+    const daysPerWeek_k = 7;
+
+    CalendarAssert (
+      (dayObjectArray != undefined) &&
+      (dayObjectArray.length === daysPerWeek_k),
+      "CalendarWeekObject.setDayObjectArray called with invalid arguments",
+      dayObjectArray
+    )
+    this.dayObjectArray = [...dayObjectArray];
+
+  } // CalendarWeekObject.setDayObjectArray
 
   // ===========================================================================
   // toString
@@ -500,25 +1226,42 @@ class CalendarWeekDescr {
   // day
   //
   // Arguments:
-  //  linePrefix  (OPTIONAL String) The prefix to use for each line
+  //  linePrefix  (OPTIONAL String) The prefix to use for each line. If not
+  //              specified, defaults to "";
+  //
+  //  maxDepth    (OPTIONAL Positive Number) Max depth of class toString calls.
+  //              If not specified, defaults to CalendarMaxToStringDepth_k.
+  //              maxDepth must be > 0 to return a non-"" string and is
+  //              decremented before calling the next level down.
   //
   // Returns:
   //  Multi-line string giving all information about this day
 
-  toString (linePrefix) {
+  toString (linePrefix, maxDepth) {
     let myLinePrefix = linePrefix || "";
+    let myMaxDepth = maxDepth || CalendarMaxToStringDepth_k;
+    if (myMaxDepth-- <= 0) return "";
 
+    let weekNum = this.weekIdx+1;
     var returnString =
-    myLinePrefix + "Week " + this.weekNum + " starts on " + this.weekTag +
+    myLinePrefix +
+    "Week " + weekNum +
+    ", with week tag " + this.weekTag +
+    ", starts on " + this.weekTag +
     " (" + this.eDate + "), and has the following days:\n";
     myLinePrefix += "  ";
-    for (const day of this.weekList) {
-      returnString += day.toString(myLinePrefix);
-    }
+    if (myMaxDepth <= 0) {
+      returnString += myLinePrefix + "maxPrint suppressed the printing of days\n";
+    } else {}
+      for (const day of this.dayObjectArray) {
+        returnString += day.toString(myLinePrefix, myMaxDepth);
+      }
+
     return returnString;
 
-  } // CalendarWeekDescr.toString
-} // class CalendarWeekDescr
+  } // CalendarWeekObject.toString
+
+} // class CalendarWeekObject
 
 
 
@@ -540,31 +1283,46 @@ class CalendarWeekDescr {
 //                  school (essentially, _endEDate moved forward to the next
 //                  Saturday)
 //
-//    _dayHash      (Hash of CalendarDayDescr) A hash structure, indexed by the
-//                  day tag of each day, with the value being the CalendarDayDescr
-//                  descriptor for the day.
+//    _dayObjectHash
+//                  (Hash of CalendarDayObject) A hash structure, indexed by the
+//                  day tag of each day, with the value being the CalendarDayObject
+//                  object for the day.
 //
-//    _dayList      (Array of String) An array containing the day tags of each
+//    _dayTagArray  (Array of String) An array containing the day tags of each
 //                  day of the school year, whether an actual school day, a
 //                  weekend day, or a holiday. By indexing into this array by
-//                  day number, one can extract the day tag (to be used to)
-//                  index into _dayHash) for any other day.
+//                  day index, one can extract the day tag (to be used to)
+//                  index into _dayObjectHash) for any other day.
 //
-//    _weekHash     (Hash of CalendarWeekDescr) The calendar data structure,
+//    _weekObjectHash
+//                  (Hash of CalendarWeekObject) The calendar data structure,
 //                  indexed by week tag of the Sunday of the week, with the
-//                  value being the CalendarWeekDescr descriptor for that week
+//                  value being the CalendarWeekObject object for that week
 //
-//    _weekList     (Array of String) An array containing the week tags of
+//    _weekTagArray (Array of String) An array containing the week tags of
 //                  each week of the school year, in order of week. By indexing
 //                  into this array by the week number, one can extract the
-//                  week tag (to be used to index into _weekHash) for any other
+//                  week tag (to be used to index into _weekObjectHash) for any other
 //                  week.
+//
+//    _classInfoObjectArray
+//                  (Readonly array of CalendarClassObject) An array, indexed by
+//                  period, containing the CalendarClassObject instance for each
+//                  period
+//
+//    _periodObjectHash
+//                  (Readonly hash of CalendarPeriodObject) A hash, indexed by
+//                  The type of school day (see _MVHS_Periodsfor*Day_k) and whose
+//                  value is and array of CalendarPeriodObject instances for
+//                  each period of that day type. The class information for
+//                  real periods will have already been inserted into these
+//                  objects
 
 
 
 // =+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
 
-export default class Calendar {
+class Calendar {
 
   // ===========================================================================
   // Constructor
@@ -572,157 +1330,230 @@ export default class Calendar {
   // Initialize a new Calendar Object
   //
   // Arguments:
-  //  startSDate      (REQUIRED String) Starting date for the new school year
-  //                  in the form "yyyy-[m]m-[d]d"
+  //  startSDate      (OPTIONAL String) Starting date for the new school year
+  //                  in the form "yyyy-mm-dd". Defaults to SchoolFirstDay_k
+  //                  if not supplied.
   //
-  //  endSDate        (REQUIRED String) Ending date for the new school year
-  //                  in the form "yyyy-[m]m-[d]d";
+  //  endSDate        (OPTIONAL String) Ending date for the new school year
+  //                  in the form "yyyy-mm-dd". Defaults to SchoolLastDay_k
+  //                  if not supplied.
   //
-  //  defaultWeek     (REQUIRED Array, length 7, of CalendarDayDescr objects)
-  //                  The default week list, to be used for any week in which
-  //                  there is not an exception
+  //  defaultWeek     (OPTIONAL Array, length 7, of hashes). The default week
+  //                  array, to be used for any week in which there is not an
+  //                  exception. Defaults to SchoolDefaultWeek_a if not supplied.
+  //                  The length of this array must equal 7, representing the 7
+  //                  days in a week. Search for the string
   //
-  //  weekExceptions  (REQUIRED hash with the key being the week tag and the
-  //                  value being an array, length 7, of CalendarDayDescr objects)
-  //                  The exception list for weeks that don't map to the
-  //                  default week pattern.
+  //                      Calendar.constructor Day Descriptions
+  //
+  //                  for an explanation of the format of this argument.
+  //
+  //  weekExceptions  (OPTIONAL hash) A hash that identifies those weeks that
+  //                  don't map to the default week, described above. The key
+  //                  of the hash is the week tag for the exceptional week and
+  //                  the value of the hash is an array in the same format as
+  //                  that described for the defaultWeek argument, immediately
+  //                  above. Defaults to SchoolWeekExceptions_h if not supplied.
   //
   // Returns:
   //  this
 
-  constructor (startSDate, endSDate, defaultWeek, weekExceptions) {
+  constructor (c_startSDate, c_endSDate, c_defaultWeek, c_weekExceptions) {
     const daysPerWeek_k = 7;
-    // Make sure the caller provided the required arguments
-    if (
-          (startSDate === undefined)
-      ||  (endSDate === undefined)
-      ||  (defaultWeek === undefined)
-      ||  (weekExceptions === undefined)
-      ||  (typeof(startSDate) != "string")
-      ||  (typeof(endSDate) != "string")
-    ) {
-      throw Error ("ERROR: Calendar.constructor called with invalid arguments: " +
-                   startSDate + ", " + endSDate + ", " + defaultWeek);
-    }
+    const maxDayIdx_k = 365
+    const maxWeekIdx_k = 52;
 
-    // Force the start and end dates to midnight local time.
-    this._startEDate = new Date(startSDate + "T00:00:00");
-    this._endEDate = new Date(endSDate + "T00:00:00");
+    // Default arguments that are not supplied
+    let startSDate = c_startSDate || SchoolFirstDay_k;
+    let endSDate = c_endSDate || SchoolLastDay_k;
+    let defaultWeek = c_defaultWeek || SchoolDefaultWeek_a;
+    let weekExceptions = c_weekExceptions || SchoolWeekExceptions_h;
+
+    // After defaults are applied, make sure the arguments are correct
+    CalendarAssert (
+      (startSDate     !== undefined)    &&
+      (endSDate       !== undefined)    &&
+      (defaultWeek    !== undefined)    &&
+      (weekExceptions !== undefined)    &&
+      (typeof(startSDate) === "string") &&
+      (typeof(endSDate)   === "string"),
+      "Calendar.constructor called with invalid arguments",
+      startSDate, endSDate, defaultWeek
+    );
+
+    // Create objects for class information about each period.
+    this._classInfoObjectArray = _helperInstantiateClassInfoObjects();
+    // Setup for and build period objects for each day type (see _CalendarPeriodsForDayType*_k)
+    // Get all of the day types from the hash
+    let periodDayTypes = Object.getOwnPropertyNames(_CalendarPeriodDayTypeHash_h);
+    this._periodObjectHash = _helperInstantiatePeriodObjects(
+      _CalendarPeriodDayTypeHash_h,
+      periodDayTypes,
+      this._classInfoObjectArray
+    );
+
+    // Force the start and end dates to midnight local time and store
+    this._startEDate = this.convertSDateToEDate(startSDate);
+    this._endEDate = this.convertSDateToEDate(endSDate);
+    // Calculate the Sunday before the first day of school and the
+    // Saturday after the last day of school. These define the bounds for
+    // all of the weeks of the school year and are the limits of the
+    // _dayTagArray array.
     this._startWEDate = this.getFirstDayOfWeek(this._startEDate);
     this._endWEDate = this.getLastDayOfWeek(this._endEDate);
 
-    // Generate the day and week tag lists for the school year
-    [this._dayList, this._weekList] = _helperGenerateWeekList (this, this._startWEDate, this._endWEDate);
+    // Build the remainder of the calendar data structure and setup the
+    // class variables _weekTagArray, _weekObjectHash, _dayTagArray and _dayObjectHash, starting
+    // with empty values for each
+    this._weekTagArray = [];
+    this._weekObjectHash = new Object();
+    let weekIdx = 0;
+    this._dayTagArray = [];
+    this._dayObjectHash = new Object();
+    let dayIdx = 0;
 
-    // Now generate the week hash for each of the week tags
-    this._weekHash = new Object();
-    let weekNum = 0;
-    let weekObject;
+    //  Start at the Sunday before the start of school. The loop actully runs by the
+    //  day to fill in both the week and day class variable, and to call the
+    //  CalendarWeekObject and CalendarDayObject constructors for each week and day
+    //  in the school year. eDate moves as days are processed.
+    let eDate = new Date(this._startWEDate.getTime());
+    while (eDate.getTime() <= this._endWEDate.getTime()) {
 
-    // Loop through all weeks in the school year and build the _weekHash
-    // data structure, whose index is the week tag and whose values are the
-    // CalendarWeekDescr object for that week
-    for (let weekNum = 0; weekNum < this._weekList.length; weekNum++) {
-      let weekTag = this._weekList[weekNum];
+      // Push week tag onto the week tag array
+      let weekTag = this.getDayTag(eDate);
+      this._weekTagArray.push (weekTag);
 
-      // See if the default week or an exception defines the week pattern
+      // Create a new week object and store it in the _weekObjectHash object
+      let weekObject = new CalendarWeekObject(weekTag, weekIdx);
+      this._weekObjectHash[weekTag] = weekObject;
+
+      // Determine whether this week should use the default week array, or
+      // one from the exceptions hash. The key for the exceptions hash is the
+      // week tag, and the value has the same format as the default week array.
+
+      let dayArray;
       if (weekExceptions[weekTag] === undefined) {
-        weekObject = new CalendarWeekDescr(weekTag, weekNum, defaultWeek);
+        dayArray = [...defaultWeek];
       } else {
-        weekObject = new CalendarWeekDescr(weekTag, weekNum, weekExceptions[weekTag]);
+        dayArray = [...weekExceptions[weekTag]];
       }
-      this._weekHash[weekTag] = weekObject;
+      // dayArray should now be an array of length 7, with each element of the
+      // array describing a day of the week, Sunday==0..Saturday==6.
+      CalendarAssert (
+        dayArray.length === daysPerWeek_k,
+        "Calendar.constructor found length error in dayArray",
+        dayArray.length, dayArray
+      );
 
-      // Find the offset of the week tag in the day list. If it can't be found,
-      // if the days of the week would wind up outside of the day list array,
-      // or if the size of the weekList for this week isn't 7, then that is
-      // an internal CalendarPeriodDecr
-      let dayOffset = this._dayList.indexOf(weekTag);
-      if (dayOffset < 0 ||
-          dayOffset + daysPerWeek_k > this._dayList.length ||
-          weekObject.weekList.length != daysPerWeek_k) {
-        throw Error ("Calendar.constructor found an inconsisent state in " +
-                     "searching the day list: " +
-                     weekTag + " " +
-                     dayOffset + " " +
-                     this._dayList.length + " " +
-                     this._weekList.length + " " +
-                     weekObject.weekList.length)
-      }
+      // Loop over each day, create a day object and add it to the day
+      // object hash. Also add the day tag to the day tag array
+      let dayObjectArray = [];
+      for (let d = 0; d < dayArray.length; d++) {
+        let dayTag = this.getDayTag(eDate);
 
-      // Walk through the list of days in the week and set each date, going from
-      //  dayOffset..dayOffset+7
-      for (const day of weekObject.weekList) {
-        let daySDate = this._dayList[dayOffset];
-        day.setEDate(daySDate);
+        // Extract the day type and the period array from the day array. These
+        // are used as args in the creation of the new day object
+        let dayType = dayArray[d][ _CWD_KDaT];
+        let periodHashName = dayArray[d][_CWD_KPeA];
+        let periodsForThisDay = (periodHashName === null) ? [] : this._periodObjectHash[periodHashName];
 
-        // Now set the date in all of the periods
-        for (let p = 0; p < day.periodList.length; p++) {
-          day.periodList[p].setEDate(daySDate);
-        }
-        dayOffset++
-      }
+        // Create the new day object and update _dayTagArray, _dayObjectHash
+        let day = new CalendarDayObject (dayTag, dayIdx, weekTag, dayType, periodsForThisDay);
+        dayObjectArray.push (day);
+        this._dayTagArray.push (dayTag);
+        this._dayObjectHash[dayTag] = day;
 
-    } // for (const weekNum = 0; weekNum < this_.weekList.length; weekNum++)
+        dayIdx++;
+        this.advanceToFutureDay (eDate,1);
 
+        CalendarAssert (
+          dayIdx <= maxDayIdx_k,
+          "Calendar.constructor runaway dayIdx - code logic failure",
+          dayIdx
+        );      } // for (let d = 0; d < dayConstructorArgs.length; d++)
+
+      // Put the day object array in the week object
+      weekObject.setDayObjectArray (dayObjectArray);
+
+      weekIdx++;
+      CalendarAssert (
+        weekIdx <= maxWeekIdx_k,
+        "Calendar.constructor runaway weekIdx - code logic failure",
+        weekIdx
+      );
+
+    } // while (eDate.getTime() <= this._endWEDate.getTime())
 
     return this;
 
-
-    // Constructor helper functions
-    //
-    // _helperGenerateWeekList
-    //
-    // Generate the week tags for each week in the school year and return all
-    // tags in an array
-    //
-    // Arguments:
-    //  ctx           "this" isn't available by name in a helper function,
-    //                so it has to be passed in
-    //
-    //  startWEDate   The Date() value of the Sunday before the first day of the
-    //                school year
-    //
-    //  endWEDate     The Date() value of the Saturday after the last day of the
-    //                school year
-    //
-    //
-    // Returns:
-    //  Two arrays, in this order:
-    //    1. An array of the day tags for all days in the school year, including
-    //       weekends, holdidays, and the days in the week before the first day
-    //       of school and in the week after the last day of school
-    //    2. An array of the week tags for all weeks in the school year
-
-    function _helperGenerateWeekList (ctx, startWEDate, endWEDate) {
-      const daysPerWeek_k = 7;
-
-      // weekTags will be the array containing the week tags for each week
-      // in the school year. Similarly, dayTags will be the array containing
-      // the day tags for each day in the school year, including weekens and
-      // holidays. Both are returned from this function.
-      let weekTags = [];
-      let dayTags = [];
-
-      // Loop from the initial value to the point where weekDate is beyond the
-      // ending date, call the tag generator for that date and push it onto the end
-      // of the array to return
-      let weekEDate = new Date(startWEDate.getTime());
-      while (weekEDate.getTime() < endWEDate.getTime()) {
-        weekTags.push (ctx.getDayTag(weekEDate))
-        ctx.advanceToFutureDay(weekEDate, daysPerWeek_k)
+    function _helperInstantiateClassInfoObjects () {
+      // Loop through _CalendarClassInfoArray_a, create a new object for the
+      // class info, and store it in the _classInfoObjectArray based on the
+      // period number
+      let classInfoObjectArray = [];
+      for (const classInfo of _CalendarClassInfoArray_a) {
+        let period = classInfo[_CCD_KPer];
+        CalendarAssert (
+          (period >= CalendarPeriodFirst_k) &&
+          (period <= CalendarPeriodLast_k),
+          "_CalendarClassInfoArray_a contains a period outside of the period bounds",
+          period, CalendarPeriodFirst_k, CalendarPeriodLast_k
+        );
+        let className = classInfo[_CCD_KCls];
+        let room = classInfo[_CCD_KRmn];
+        let teacher = classInfo[_CCD_KTch];
+        let classInfoObject = new CalendarClassObject (period, className, room, teacher);
+        classInfoObjectArray[period] = classInfoObject;
+      }
+      // Now make sure that all entries 0..CalendarPeriodLlast_k either contain
+      // a class info object, or are set to null
+      for (let p = 0; p <= CalendarPeriodLast_k; p++) {
+        if (classInfoObjectArray[p] === undefined) {
+          classInfoObjectArray[p] = null;
+        }
       }
 
-      // Now do it again for the day tags
-      let dayEDate = new Date(startWEDate.getTime());
-      while (dayEDate.getTime() <= endWEDate.getTime()) {
-        dayTags.push (ctx.getDayTag(dayEDate))
-        ctx.advanceToFutureDay(dayEDate,1);
-      }
+      return classInfoObjectArray;
+    } // function _helperInstantiateClassInfoObjects
 
-      // Now return the two arrays of tags
-      return [dayTags, weekTags];
-    } // Calendar.constructor._helperGenerateWeekList
+    function _helperInstantiatePeriodObjects
+    (
+      dayTypeHash,
+      periodDayTypes,
+      classInfoObjectArray
+    ) {
+
+      // Start with an empty hash to return to the caller
+      let periodObjectHash = Object();
+
+      // periodDayTypes is an array of the day types that will become the
+      // keys of the hash
+      for (const thisDayType of periodDayTypes) {
+        // Initialize the key for the hash, and make the value an empty array
+        // into which the CalendarPeriodObject instances will be added
+        periodObjectHash[thisDayType] = [];
+        // Now loop over each of the elements in the
+        for (const singlePeriod of dayTypeHash[thisDayType]) {
+          // Extract the information required for the CalendarPeriodObject
+          // constructor call.
+          let period = singlePeriod[_CPD_KPer];
+          let className = singlePeriod[_CPD_KNam];
+          let startTime = singlePeriod[_CPD_KStT];
+          let endTime = singlePeriod[_CPD_KEnT];
+          let comment = singlePeriod[_CPD_KCmt];
+          let adjTime = singlePeriod[_CPD_KAdj];
+          let classInfoObject = null;
+          if ((period >= CalendarPeriodFirst_k) && (period <= CalendarPeriodLast_k)) {
+            classInfoObject = classInfoObjectArray[period];
+          }
+
+          periodObjectHash[thisDayType].push(new CalendarPeriodObject(
+            period, className, startTime, endTime, comment, adjTime, classInfoObject
+          ))
+        } // for (const singlePeriod of dayTypeHash[thisDayType])
+      } // for (const thisDayType of periodDayTypes)
+      return periodObjectHash;
+    } // function _helperInstantiateClassInfoObjects
 
   } // Calendar.constructor
 
@@ -750,6 +1581,29 @@ export default class Calendar {
 
 
   // ===========================================================================
+  // convertSDateToEDate
+  //
+  // Convert an sDate value to the corresponding eDate value, with the time
+  // forced to midnight, local time, of that day.
+  //
+  // Arguments:
+  //  sDate       (REQUIRED String) sDate of the form yyyy-mm-dd to convert to
+  //              and eDate.
+  //
+  // Returns:
+  //  New Date() object corresponding to the sDate input, with the time forced
+  //  to midnight
+
+  convertSDateToEDate (sDate) {
+
+    let eDate = DateAtMidnight(sDate);
+    return eDate;
+
+  } //Calendar.convertSDateToEDate
+
+
+
+  // ===========================================================================
   // getDayTag
   //
   // convert an Date() value to a day tag in the form yyyy-mm-dd.
@@ -767,8 +1621,8 @@ export default class Calendar {
     // getMonth() returns 0..1 and needs to be adjusted to 1..12
     let month = myEDate.getMonth() + 1;
     return (myEDate.getFullYear() + "-" +
-    month.toString().padStart(2,"0") + "-" +
-    myEDate.getDate().toString().padStart(2,"0"));
+    _leftPad(month, 2,"0") + "-" +
+    _leftPad(myEDate.getDate(), 2, "0"))
 
   } // Calendar.getDayTag
 
@@ -874,321 +1728,279 @@ export default class Calendar {
   } // Calendar.getStartEDate
 
   // ===========================================================================
-  // getWeekByIndex
+  // getDayByIndex
   //
-  // Return the CalendarWeekDescr object for a week based on the week index
+  // Return the CalendarDayObject object for a day based on the day index
   //
   // Arguments:
-  //  weekIndex       Week index for which to return the weekly schedule, in
-  //                  the range 0.._weekList.length-1
+  //  dayIndex        Day index for which to return the daily schedule, in
+  //                  the range 0.._dayTagArray.length-1
   //
   // Returns
-  //  CalendarWeekDescr object for the week, or null if the week doesn't exist.
+  //  CalendarDayObject object for the day, or null if the day doesn't exist.
 
-  getWeekByIndex (weekIndex) {
+  getDayByIndex (dayIndex) {
 
     // Check for bounds of the argument and return null if the argument is
     // invalid.
 
-    if ((weekTag < 0) ||
-    (weekTag >= this._weeklist.length)) {
+    if ((dayIndex < 0) ||
+    (dayIndex >= this._dayTagArray.length)) {
       return null;
     }
 
-    // Otherwise, let getWeekByTag do the work
-    return getWeekByTag (this._weekList[weekIndex]);
-  } // Calendar.getWeekByIndex
+    // Otherwise, let getDayByTag do the work
+    return this.getDayByTag (this._dayTagArray[dayIndex]);
 
-  // ===========================================================================
-  // getWeekByTag
-  //
-  // Return the CalendarWeekDescr object for a week based on the week tag
-  //
-  // Arguments:
-  //  weekTag       Week tag for which to return the weekly schedule
-  //
-  // Returns
-  //  CalendarWeekDescr object for the week, or null if the week doesn't exist.
+  } // Calendar.getDayByIndex
 
-  getWeekByTag (weekTag) {
+    // ===========================================================================
+    // getDayByTag
+    //
+    // Return the CalendarDayObject object for a day based on the day tag
+    //
+    // Arguments:
+    //  dayTag        Day tag for which to return the daily schedule
+    //
+    // Returns
+    //  CalendarDayObject object for the day, or null if the day doesn't exist.
 
-    return this._weekHash[weekTag] || null;
+    getDayByTag (dayTag) {
 
-  } // Calendar.getWeekByTag
+      return this._dayObjectHash[dayTag] || null;
 
-  // ===========================================================================
-  // getDayList
-  //
-  // Return the list of all day tags in the calendar
-  //
-  // Arguments:
-  //  None
-  //
-  // Returns
-  //  List of all day tags in the calendar
+    } // Calendar.geDayByTag
 
-  getDayList () {
-    let dayList = [...this._dayList]; // Return a copy of the list
-    return dayList;
 
-  } // Calendar.getDayList
+    // ===========================================================================
+    // getPeriodByDateAndTime
+    //
+    // Return the CalendarDayObject and CalendarPeriodObject instances for the
+    // Date() object specified in the argument.
+    //
+    // Arguments:
+    //  eDate         The Date() object for the date and time for which the
+    //                day and period information is to be returned.
+    //
+    // Returns
+    //  Object containing the matching CalendarDayObject instance (key "dayObj"),
+    //  the matching CalendarPeriodObject instance (key "pObj"), and the
+    //  matching period index (key "pIndex"). The pindex value is used in
+    //  conjunction with the getNextPeriod method, below.
 
-  // ===========================================================================
-  // getWeekList
-  //
-  // Return the list of all week tags in the calendar
-  //
-  // Arguments:
-  //  None
-  //
-  // Returns
-  //  List of all week tags in the calendar
 
-  getWeekList () {
-    let weekList = [...this._weekList]; // Return a copy of the list
-    return weekList;
-  } // Calendar.getWeekList
+    getPeriodByDateAndTime (eDate) {
+
+      // Make sure the specified date is in the calendar. Return null if not
+      if (
+        (eDate.getTime() < this._startWEDate.getTime()) ||
+        (eDate.getTime() > this._endWEDate.getTime())
+      ) {
+        return null;
+      };
+
+      // Convert the date to a day tag and get the day object for that date
+      let dayTag = this.getDayTag(eDate);
+      let dayObject = this._dayObjectHash[dayTag];
+
+      // If dayObject.periodObjectArray is null, there are no periods that day,
+      // so return [dayObject, null, 0] to the caller
+      if (dayObject.periodObjectArray === null) {
+        return {dObj: dayObject, pObj: null, pindex: 0};
+      }
+
+      // At this point, we know that the day has periods, so we have to look
+      // for a period whose time surrounds that of the one provided in the
+      // argument. To do this, calculate the number of ms since midnight in
+      // the eDate arg. This will allow delta comparison in the period
+      // object.
+      let msSinceMidnight = this.getMsSinceMidnight(eDate);
+      for (let index = 0; index < dayObject.periodObjectArray.length; index++) {
+
+        let periodObject = dayObject.periodObjectArray[index];
+        if (
+          msSinceMidnight >= periodObject.startMSTime &&
+          msSinceMidnight <= periodObject.endMSTime
+        ) {
+          return {dObj: dayObject, pObj: periodObject, pIndex: index};
+        }
+      }
+
+      // If we get here, there was no match, so return null
+      return null;
+
+    } // Calendar.getPeriodByDateAndTime
+
+    getNextPeriod (lastMatch, matchRealPeriod) {
+      if (
+        (lastMatch === undefined) ||
+        (typeof lastMatch !== "object") ||
+        (lastMatch.dObj === undefined) ||
+        (lastMatch.pObj === undefined) ||
+        (lastMatch.pIndex === undefined)
+      ) {
+        CalendarMessage (
+          "***WARNING: Calendar.getNextPeriod called with invalid arguments - returning null",
+          lastMatch, matchRealPeriod
+      );
+        return null;
+      };
+
+      // Default the matchRealPeriod boolean to false if not supplied
+      let matchReal = matchRealPeriod || false;
+
+      // Extract the information from the argument object
+      let dayObject = lastMatch.dObj;
+      let periodObject = lastMatch.pObj;
+      let pIndex = lastMatch.pIndex;
+
+
+    } // getNextPeriod
+
+    getMsSinceMidnight (eDate) {
+      let sDate = this.getDayTag(eDate);
+      let midnight = DateAtMidnight(this.getDayTag(eDate));
+      return eDate.getTime() - midnight.getTime();
+
+    } // Calendar.getMsSinceMidnight
+
+    getTimeRemainingInPeriod (eDate, pObj) {
+
+      const msPerSecond_k = 1000;
+      const msPerMinute_k = msPerSecond_k * 60;
+      const msPerHour_k = msPerMinute_k * 60;
+
+      // Convert eDate to ms since midnight and the same for the end date of the
+      // period
+      let eDate_ms = this.getMsSinceMidnight(eDate);
+      let periodEnd_ms = pObj.endMSTime + 1;
+      let timeLeft = {msTotal: 0, hDelta: 0, mDelta: 0, sDelta:0};
+      let delta_ms = periodEnd_ms - eDate_ms;
+      if (delta_ms >= 0) {
+        timeLeft.msTotal = delta_ms;
+        timeLeft.hDelta = Math.floor(delta_ms / msPerHour_k);
+        delta_ms -= timeLeft.hDelta * msPerHour_k;
+        timeLeft.mDelta = Math.floor(delta_ms / msPerMinute_k);
+        delta_ms -= timeLeft.mDelta * msPerMinute_k
+        timeLeft.sDelta = Math.floor(delta_ms / msPerSecond_k);
+      }
+      return timeLeft
+    }
+
+    // ===========================================================================
+    // getWeekByIndex
+    //
+    // Return the CalendarWeekObject object for a week based on the week index
+    //
+    // Arguments:
+    //  weekIndex       Week index for which to return the weekly schedule, in
+    //                  the range 0.._weekTagArray.length-1
+    //
+    // Returns
+    //  CalendarWeekObject object for the week, or null if the week doesn't exist.
+
+    getWeekByIndex (weekIndex) {
+
+      // Check for bounds of the argument and return null if the argument is
+      // invalid.
+
+      if ((weekIndex < 0) ||
+      (weekIndex >= this._weekTagArray.length)) {
+        return null;
+      }
+
+      // Otherwise, let getWeekByTag do the work
+      return this.getWeekByTag (this._weekTagArray[weekIndex]);
+
+    } // Calendar.getWeekByIndex
+
+    // ===========================================================================
+    // getWeekByTag
+    //
+    // Return the CalendarWeekObject object for a week based on the week tag
+    //
+    // Arguments:
+    //  weekTag       Week tag for which to return the weekly schedule
+    //
+    // Returns
+    //  CalendarWeekObject object for the week, or null if the week doesn't exist.
+
+    getWeekByTag (weekTag) {
+
+      return this._weekObjectHash[weekTag] || null;
+
+    } // Calendar.getWeekByTag
+
+    // ===========================================================================
+    // getDayList
+    //
+    // Return the list of all day tags in the calendar
+    //
+    // Arguments:
+    //  None
+    //
+    // Returns
+    //  List of all day tags in the calendar
+
+    getDayList () {
+      let dayList = [...this._dayTagArray]; // Return a copy of the list
+      return dayList;
+
+    } // Calendar.getDayList
+
+    // ===========================================================================
+    // getWeekList
+    //
+    // Return the list of all week tags in the calendar
+    //
+    // Arguments:
+    //  None
+    //
+    // Returns
+    //  List of all week tags in the calendar
+
+    getWeekList () {
+      let weekList = [...this._weekTagArray]; // Return a copy of the list
+      return weekList;
+    } // Calendar.getWeekList
+
+
+    // ===========================================================================
+    // toString
+    //
+    // Returns a multi-line string with the printable information about the
+    // day
+    //
+    // Arguments:
+    //  linePrefix  (OPTIONAL String) The prefix to use for each line. If not
+    //              specified, defaults to "";
+    //
+    //  maxDepth    (OPTIONAL Positive Number) Max depth of class toString calls.
+    //              If not specified, defaults to CalendarMaxToStringDepth_k.
+    //              maxDepth must be > 0 to return a non-"" string and is
+    //              decremented before calling the next level down.
+    //
+    // Returns:
+    //  Multi-line string giving all information about this day
+
+    toString (linePrefix, maxDepth) {
+      let myLinePrefix = linePrefix || "";
+      let myMaxDepth = maxDepth || CalendarMaxToStringDepth_k;
+      if (myMaxDepth-- <= 0) return "";
+
+      var returnString = "";
+      for (let w = 0; w < this._weekTagArray.length; w++) {
+        let weekTag = this._weekTagArray[w];
+        let weekObject = this._weekObjectHash[weekTag];
+        returnString += weekObject.toString(myLinePrefix, myMaxDepth);
+      }
+
+      return returnString;
+
+    } // CalendarWeekObject.toString
 
 }  // class Calendar
 
-// Define first and last day of the school year
-const MVHSFirstDay_k = "2020-08-12";
-const MVHSLastDay_k  = "2021-06-09";
-
-// =+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
-// SCHOOL CLASS DESCRIPTIONS
-//
-// Instantiate class descriptors for each class and put them in an array
-// that can be passed to the CalendarPeriodDescr constructor
-const MVHS_JRU_Classes_a = [
-//                   Period     class            Room      Teacher
-new CalendarClassDescr(0,   null,               null,   null          ),
-new CalendarClassDescr(1,   "Biology",          "113",  "Kim Rogers"  ),
-new CalendarClassDescr(2,   "PE",               "Gym",  "Williams"    ),
-new CalendarClassDescr(3,   "World Studies",    "602",  "Cardenas"    ),
-new CalendarClassDescr(4,   "Survey Comp/Lit",  "215",  "Engel-Hall"  ),
-new CalendarClassDescr(5,   "Geometry",         "412",  "Smith"       ),
-new CalendarClassDescr(6,   null,               null,   null          ),
-new CalendarClassDescr(7,   "IntroCompSci",     "514",  "Dilloughery" ),
-];
-
-// END CLASS DESCRIPTIONS
-// =+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
-
-
-// =+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
-// PERIOD DESCRIPTIONS
-//
-// Instantiate period descriptors for periods 1..7 **** FIX FOR PERIOD 0 ****
-//
-// Periods for A Day
-//                                            period    name           startTime  endTime       Class Info          Comment
-const  MVHS_BSA_c =     new CalendarPeriodDescr(-1,   "Before School",  "00:00",  "09:30", MVHS_JRU_Classes_a, "Before school on A day");
-const  MVHS_P1A_c =     new CalendarPeriodDescr( 1,   "P1",             "09:30",  "10:45", MVHS_JRU_Classes_a, "Period 1 on A day");
-const  MVHS_P13A_c =    new CalendarPeriodDescr(-1,   "P1->P3",         "10:45",  "11:00", MVHS_JRU_Classes_a, "Passing Period 1->3 on A day");
-const  MVHS_P3A_c =     new CalendarPeriodDescr( 3,   "P3",             "11:00",  "12:15", MVHS_JRU_Classes_a, "Period 3 on A day");
-const  MVHS_LunchA_c =  new CalendarPeriodDescr(-1,   "Lunch",          "12:15",  "13:05", MVHS_JRU_Classes_a, "Lunch on A day");
-const  MVHS_P5A_c =     new CalendarPeriodDescr( 5,   "P5",             "13:05",  "14:20", MVHS_JRU_Classes_a, "Period 5 on A day");
-const  MVHS_P57A_c =    new CalendarPeriodDescr(-1,   "P5->P7",         "14:20",  "14:30", MVHS_JRU_Classes_a, "Passing Period 5->7 on A day");
-const  MVHS_P7A_c =     new CalendarPeriodDescr( 7,   "P7",             "14:30",  "15:45", MVHS_JRU_Classes_a, "Period 7 on A day");
-const  MVHS_ASA_c =     new CalendarPeriodDescr(-1,   "After School",   "15:45",  "23:59", MVHS_JRU_Classes_a, "After school on A day", 60*1000-1);
-//                                                                                                                      ^
-//                                                                                                                This adjustment
-//                                                                                                                makes the end time
-//                                                                                                                1ms before midnight
-// Periods for B Day
-//                                            period    name           startTime  endTime       Class Info          Comment
-const  MVHS_BSB_c =     new CalendarPeriodDescr(-1,   "Before School",  "00:00",  "09:30", MVHS_JRU_Classes_a, "Before school on B day");
-const  MVHS_P2B_c =     new CalendarPeriodDescr( 2,   "P2",             "09:30",  "10:45", MVHS_JRU_Classes_a, "Period 2 on B day");
-const  MVHS_P24B_c =    new CalendarPeriodDescr(-1,   "P2->P4",         "10:45",  "11:00", MVHS_JRU_Classes_a, "Passing Period 2->4 on B day");
-const  MVHS_P4B_c =     new CalendarPeriodDescr( 4,   "P4",             "11:00",  "12:15", MVHS_JRU_Classes_a, "Period 4 on B day");
-const  MVHS_LunchB_c =  new CalendarPeriodDescr(-1,   "Lunch",          "12:15",  "13:05", MVHS_JRU_Classes_a, "Lunch on B day");
-const  MVHS_P6B_c =     new CalendarPeriodDescr( 6,   "P6",             "13:05",  "14:20", MVHS_JRU_Classes_a, "Period 6 on B day");
-const  MVHS_ASB_c =     new CalendarPeriodDescr(-1,   "After School",   "14:20",  "23:59", MVHS_JRU_Classes_a, "After school on B day", 60*1000-1);
-//                                                                                                                      ^
-//                                                                                                                This adjustment
-//                                                                                                                makes the end time
-//                                                                                                                1ms before midnight
-
-// Periods for C Day
-//                                            period    name           startTime  endTime       Class Info          Comment
-const  MVHS_BSC_c =     new CalendarPeriodDescr(-1,   "Before School",  "00:00",  "09:30", MVHS_JRU_Classes_a, "Before school on C day");
-const  MVHS_P1C_c =     new CalendarPeriodDescr( 1,   "P1",             "09:30",  "10:00", MVHS_JRU_Classes_a, "Period 1 on C day");
-const  MVHS_P12C_c =    new CalendarPeriodDescr(-1,  "P1->P2",          "10:00",  "10:10", MVHS_JRU_Classes_a, "Passing Period 1->2 on C day");
-const  MVHS_P2C_c =     new CalendarPeriodDescr( 2,   "P2",             "10:10",  "10:40", MVHS_JRU_Classes_a, "Period 2 on C day");
-const  MVHS_P23C_c =    new CalendarPeriodDescr(-1,  "P2->P3",          "10:40",  "10:50", MVHS_JRU_Classes_a, "Passing Period 2->3 on C day");
-const  MVHS_P3C_c =     new CalendarPeriodDescr( 3,   "P3",             "10:50",  "11:20", MVHS_JRU_Classes_a, "Period 3 on C day");
-const  MVHS_P34C_c =    new CalendarPeriodDescr(-1,  "P3->P4",          "11:20",  "11:30", MVHS_JRU_Classes_a, "Passing Period 3->4 on C day");
-const  MVHS_P4C_c =     new CalendarPeriodDescr( 4,   "P4",             "11:30",  "12:00", MVHS_JRU_Classes_a, "Period 4 on C day");
-const  MVHS_LunchC_c =  new CalendarPeriodDescr(-1,  "Lunch",           "12:00",  "13:00", MVHS_JRU_Classes_a, "Lunch on C day");
-const  MVHS_P5C_c =     new CalendarPeriodDescr( 5,   "P5",             "13:00",  "13:30", MVHS_JRU_Classes_a, "Period 5 on C day");
-const  MVHS_P56C_c =    new CalendarPeriodDescr(-1,  "P5->P6",          "13:30",  "13:40", MVHS_JRU_Classes_a, "Passing Period 5->6 on C day");
-const  MVHS_P6C_c =     new CalendarPeriodDescr( 6,   "P6",             "13:40",  "14:10", MVHS_JRU_Classes_a, "Period 6 on C day");
-const  MVHS_P67C_c =    new CalendarPeriodDescr(-1,  "P6->P7",          "14:10",  "14:20", MVHS_JRU_Classes_a, "Passing Period 6->7 on C day");
-const  MVHS_P7C_c =     new CalendarPeriodDescr( 7,   "P7",             "14:20",  "14:50", MVHS_JRU_Classes_a, "Period 7 on C day");
-const  MVHS_ASC_c =     new CalendarPeriodDescr(-1,   "After School",   "14:50",  "23:59", MVHS_JRU_Classes_a, "After school on C day", 60*1000-1);
-//                                                                                                                      ^
-//                                                                                                                This adjustment
-//                                                                                                                makes the end time
-//                                                                                                                1ms before midnight
-// END PERIOD DESCRIPTIONS
-// =+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
-
-
-// =+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
-// DAY PATTERN DESCRIPTIONS
-//
-// Type A day, usually Monday and Thursday
-const MVHS_A_Day_a = [
-  MVHS_BSA_c,
-  MVHS_P1A_c,
-  MVHS_P13A_c,
-  MVHS_P3A_c,
-  MVHS_LunchA_c,
-  MVHS_P5A_c,
-  MVHS_P57A_c,
-  MVHS_P7A_c,
-  MVHS_ASA_c
-];
-
-// Type B day, usually Tuesday and Friday
-const MVHS_B_Day_a = [
-  MVHS_BSB_c,
-  MVHS_P2B_c,
-  MVHS_P24B_c,
-  MVHS_P4B_c,
-  MVHS_LunchB_c,
-  MVHS_P6B_c,
-  MVHS_ASB_c
-];
-
-// Type C day, usually Wednesday
-const MVHS_C_Day_a = [
-  MVHS_BSB_c,
-  MVHS_P1C_c,
-  MVHS_P12C_c,
-  MVHS_P2C_c,
-  MVHS_P23C_c,
-  MVHS_P3C_c,
-  MVHS_P34C_c,
-  MVHS_P4C_c,
-  MVHS_LunchC_c,
-  MVHS_P5C_c,
-  MVHS_P56C_c,
-  MVHS_P6C_c,
-  MVHS_P67C_c,
-  MVHS_P7C_c,
-  MVHS_ASC_c
-];
-
-// END DAY PATTERN DESCRIPTIONS
-// =+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
-
-
-// =+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
-// WEEK DESCRIPTIONS
-//
-// This is the default week, which is used for any week that is not in the
-// MVHS_Week_Exceptions_h hash below. If a day pattern is [], it means that
-// there are no periods on that day
-const MVHS_Default_Week_a = [
-    new CalendarDayDescr(CalendarDayTypeWeekend_k,   []),
-    new CalendarDayDescr(CalendarDayTypeSchoolDay_k, MVHS_A_Day_a),
-    new CalendarDayDescr(CalendarDayTypeSchoolDay_k, MVHS_B_Day_a),
-    new CalendarDayDescr(CalendarDayTypeSchoolDay_k, MVHS_C_Day_a),
-    new CalendarDayDescr(CalendarDayTypeSchoolDay_k, MVHS_A_Day_a),
-    new CalendarDayDescr(CalendarDayTypeSchoolDay_k, MVHS_B_Day_a),
-    new CalendarDayDescr(CalendarDayTypeWeekend_k,   [])
-];
-
-// This is the beginning-of-year week
-const MVHS_HHCAB_Week_a = [
-  new CalendarDayDescr(CalendarDayTypeWeekend_k,    []),
-  new CalendarDayDescr(CalendarDayTypeHoliday_k,    []),
-  new CalendarDayDescr(CalendarDayTypeHoliday_k,    []),
-  new CalendarDayDescr(CalendarDayTypeSchoolDay_k,  MVHS_C_Day_a),
-  new CalendarDayDescr(CalendarDayTypeSchoolDay_k,  MVHS_A_Day_a),
-  new CalendarDayDescr(CalendarDayTypeSchoolDay_k,  MVHS_B_Day_a),
-  new CalendarDayDescr(CalendarDayTypeWeekend_k,    [])
-];
-
-// This is a Monday holiday week
-const MVHS_HABAB_Week_a = [
-  new CalendarDayDescr(CalendarDayTypeWeekend_k,    []),
-  new CalendarDayDescr(CalendarDayTypeHoliday_k,    []),
-  new CalendarDayDescr(CalendarDayTypeSchoolDay_k,  MVHS_A_Day_a),
-  new CalendarDayDescr(CalendarDayTypeSchoolDay_k,  MVHS_B_Day_a),
-  new CalendarDayDescr(CalendarDayTypeSchoolDay_k,  MVHS_A_Day_a),
-  new CalendarDayDescr(CalendarDayTypeSchoolDay_k,  MVHS_B_Day_a),
-  new CalendarDayDescr(CalendarDayTypeWeekend_k,    [])
-];
-
-// This is a Monday Staff Dev week
-const MVHS_HBCAB_Week_a = [
-  new CalendarDayDescr(CalendarDayTypeWeekend_k,   []),
-  new CalendarDayDescr(CalendarDayTypeHoliday_k,   []),
-  new CalendarDayDescr(CalendarDayTypeSchoolDay_k, MVHS_B_Day_a),
-  new CalendarDayDescr(CalendarDayTypeSchoolDay_k, MVHS_C_Day_a),
-  new CalendarDayDescr(CalendarDayTypeSchoolDay_k, MVHS_A_Day_a),
-  new CalendarDayDescr(CalendarDayTypeSchoolDay_k, MVHS_B_Day_a),
-  new CalendarDayDescr(CalendarDayTypeWeekend_k,   [])
-];
-
-// This is a Wednesday holiday week
-const MVHS_ABHAB_Week_a = [
-  new CalendarDayDescr(CalendarDayTypeWeekend_k,   []),
-  new CalendarDayDescr(CalendarDayTypeSchoolDay_k, MVHS_A_Day_a),
-  new CalendarDayDescr(CalendarDayTypeSchoolDay_k, MVHS_B_Day_a),
-  new CalendarDayDescr(CalendarDayTypeHoliday_k,   []),
-  new CalendarDayDescr(CalendarDayTypeSchoolDay_k, MVHS_A_Day_a),
-  new CalendarDayDescr(CalendarDayTypeSchoolDay_k, MVHS_B_Day_a),
-  new CalendarDayDescr(CalendarDayTypeWeekend_k,   [])
-];
-
-// This is the end-of-year week
-const MVHS_ABCHH_Week_a = [
-  new CalendarDayDescr(CalendarDayTypeWeekend_k,   []),
-  new CalendarDayDescr(CalendarDayTypeSchoolDay_k, MVHS_A_Day_a),
-  new CalendarDayDescr(CalendarDayTypeSchoolDay_k, MVHS_B_Day_a),
-  new CalendarDayDescr(CalendarDayTypeSchoolDay_k, MVHS_C_Day_a),
-  new CalendarDayDescr(CalendarDayTypeHoliday_k,   []),
-  new CalendarDayDescr(CalendarDayTypeHoliday_k,   []),
-  new CalendarDayDescr(CalendarDayTypeWeekend_k,   [])
-];
-
-// This is a week-long holiday week
-const MVHS_HHHHH_Week_a = [
-  new CalendarDayDescr(CalendarDayTypeWeekend_k,    []),
-  new CalendarDayDescr(CalendarDayTypeHoliday_k,    []),
-  new CalendarDayDescr(CalendarDayTypeHoliday_k,    []),
-  new CalendarDayDescr(CalendarDayTypeHoliday_k,    []),
-  new CalendarDayDescr(CalendarDayTypeHoliday_k,    []),
-  new CalendarDayDescr(CalendarDayTypeHoliday_k,    []),
-  new CalendarDayDescr(CalendarDayTypeWeekend_k,    [])
-];
-
-// This is the list of weeks that are different from the default week. The key
-// is the week tag of the exceptional week and the value is the week descriptor
-// for that week
-const MVHS_Week_Exceptions_h = {
-  "2020-08-09": MVHS_HHCAB_Week_a,          // Beginning of the school year
-  "2020-09-06": MVHS_HABAB_Week_a,          // Labor Day
-  "2020-10-11": MVHS_HHCAB_Week_a,          // Columbus Day
-  "2020-11-08": MVHS_ABHAB_Week_a,          // Veterans Day
-  "2020-11-22": MVHS_HHHHH_Week_a,          // Thanksgiving Break
-  "2020-12-20": MVHS_HHHHH_Week_a,          // Holiday Break
-  "2020-12-27": MVHS_HHHHH_Week_a,          // Holiday Break
-  "2021-01-03": MVHS_HBCAB_Week_a,          // Staff Dev Day
-  "2021-01-17": MVHS_HBCAB_Week_a,          // Martin Luther King day
-  "2021-02-14": MVHS_HHHHH_Week_a,          // Winter Break
-  "2021-03-14": MVHS_HBCAB_Week_a,          // MVHS Recess
-  "2021-04-11": MVHS_HHHHH_Week_a,          // Spring Recess
-  "2021-05-31": MVHS_HBCAB_Week_a,          // Memorial Day
-  "2021-06-06": MVHS_ABCHH_Week_a,          // End of the school year
-};
-
-// END WEEK DESCRIPTIONS
-// =+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
 
 
 
@@ -1199,27 +2011,27 @@ const _enableTestCode = false;
 
 if (_enableTestCode) {
   // Emit error message for a test failure
-function emitError (testNum, message, ...args) {
-  let errorString = "** ERROR in test " + testNum + " " + message;
-  for (let i = 0; i < args.length; i++) {
-    if (i === 0)  errorString += ": " + args[i];
-    else          errorString += ", " + args[i];
+  function emitError (testNum, message, ...args) {
+    let errorString = "** ERROR in test " + testNum + " " + message;
+    for (let i = 0; i < args.length; i++) {
+      if (i === 0)  errorString += ": " + args[i];
+      else          errorString += ", " + args[i];
+    }
+    throw Error(errorString);
   }
-  console.log (errorString);
-}
 
-  // Test 1: Validate that the different paths into _weeklist result in the same
+  // Test 1: Validate that the different paths into _weekTagArray result in the same
   // values, and that the array contents match
   function test1(calendar) {
-    console.log ("Test 1: Validate _weekList");
+    CalendarMessage ("Test 1: Validate _weekTagArray");
     let weekList = calendar.getWeekList();
-    if (weekList.length !== calendar._weekList.length) {
-      emitError (1.1, "weekList length test failed", weekList.length, calendar._weekList.length)
+    if (weekList.length !== calendar._weekTagArray.length) {
+      emitError (1.1, "weekList length test failed", weekList.length, calendar._weekTagArray.length)
       return false;
     }
     for (let i = 0; i < weekList.length; i++) {
-      if (weekList[i] !== calendar._weekList[i]) {
-        emitError (1.2, "weekList mismatch", i, weekList[i], calendar._weekList[i])
+      if (weekList[i] !== calendar._weekTagArray[i]) {
+        emitError (1.2, "weekList mismatch", i, weekList[i], calendar._weekTagArray[i])
         return false;
       }
     }
@@ -1229,89 +2041,189 @@ function emitError (testNum, message, ...args) {
   // Test 2: Validate that the first and last tags in the week list correspond
   // to the start and end days of the school year.
   function test2(calendar) {
-    console.log ("Test 2: Validate _dayList school year range");
+    CalendarMessage ("Test 2: Validate _dayTagArray school year range");
     let firstWeek = calendar.getDayTag(calendar.getFirstDayOfWeek(new Date(MVHSFirstDay_k)));
-    if (firstWeek !== calendar._weekList[0]) {
-      emitError (2.1, "Error in first _weekList entry", firstWeek, calendar._weekList[0]);
+    if (firstWeek !== calendar._weekTagArray[0]) {
+      emitError (2.1, "Error in first _weekTagArray entry", firstWeek, calendar._weekTagArray[0]);
       return false;
     }
     let lastWeek = calendar.getDayTag(calendar.getFirstDayOfWeek(new Date(MVHSLastDay_k)));
-    if (lastWeek !== calendar._weekList[calendar._weekList.length - 1]) {
-      emitError (2.2, "Error in last _weekList entry", lastWeek, calendar._weekList[calendar._weekList.length-1]);
+    if (lastWeek !== calendar._weekTagArray[calendar._weekTagArray.length - 1]) {
+      emitError (2.2, "Error in last _weekTagArray entry", lastWeek, calendar._weekTagArray[calendar._weekTagArray.length-1]);
       return false;
     }
-    return true;
-  }
-
-  // Test 3: Validate that the different paths into _daylist result in the same
-  // values, and that the array contents match
-  function test3(calendar) {
-    console.log ("Test 3: Validate _dayList");
-    let dayList = calendar.getDayList();
-    if (dayList.length !== calendar._dayList.length) {
-      emitError (3.1, "Daylist length test failed", dayList.length, calendar._dayList.length)
-      return false;
+    let expectedEDate = calendar.convertSDateToEDate(calendar._weekTagArray[0]);
+    for (let i = 0; i < calendar._weekTagArray.length; i++) {
+      let actualEDate = calendar.convertSDateToEDate(calendar._weekTagArray[i]);
+      if (actualEDate.getTime() !== expectedEDate.getTime()) {
+        emitError (2.3, "weekList date not expected", i, actualEDate, expectedEDate);
+        return false;
+      }
+      calendar.advanceToFutureDay(expectedEDate,7);
     }
-    for (let i = 0; i < dayList.length; i++) {
-      if (dayList[i] !== calendar._dayList[i]) {
-        emitError (3.2, "dayList mismatch", i, dayList[i], calendar._dayList[i]);
+    for (let i = 0; i < calendar._weekTagArray.length; i++) {
+      let listEDate = calendar.convertSDateToEDate(calendar._weekTagArray[i]);
+      let weekObject = calendar.getWeekByTag(calendar._weekTagArray[i]);
+      if (listEDate.getTime() != weekObject.eDate.getTime()) {
+        emitError (2.4, "week object date does not match expected", i, actualEDate, weekObject.eDate);
         return false;
       }
     }
     return true;
   }
 
-  // Test 4: Validate that the first and last tags in the week list correspond
-  // to the start and end days of the school year.
-  function test4(calendar) {
-    console.log ("Test 4: Validate _dayList school year range");
-    let firstDay = calendar.getDayTag(calendar.getFirstDayOfWeek(new Date(MVHSFirstDay_k)));
-    if (firstDay !== calendar._dayList[0]) {
-      emitError (4.1, "Error in first _dayList entry", firstDay, calendar._dayList[0]);
+  // Test 3: Validate that the different paths into _dayTagArray result in the same
+  // values, and that the array contents match
+  function test3(calendar) {
+    CalendarMessage ("Test 3: Validate _dayTagArray");
+    let dayList = calendar.getDayList();
+    if (dayList.length !== calendar._dayTagArray.length) {
+      emitError (3.1, "Daylist length test failed", dayList.length, calendar._dayTagArray.length)
       return false;
     }
-    let lastDay = calendar.getDayTag(calendar.getLastDayOfWeek(new Date(MVHSLastDay_k)));
-    if (lastDay !== calendar._dayList[calendar._dayList.length - 1]) {
-      emitError (4.2, "Error in last _dayList entry", lastDay, calendar._dayList[calendar._dayList.length-1]);
+    for (let i = 0; i < dayList.length; i++) {
+      if (dayList[i] !== calendar._dayTagArray[i]) {
+        emitError (3.2, "dayList mismatch", i, dayList[i], calendar._dayTagArray[i]);
+        return false;
+      }
+    }
+    return true;
+  }
+
+  // Test 4: Validate that the first and last tags in the day list correspond
+  // to the start and end days of the school year.
+  function test4(calendar) {
+    CalendarMessage ("Test 4: Validate _dayTagArray school year range");
+    let firstDay = calendar.getDayTag(calendar.getFirstDayOfWeek(new Date(MVHSFirstDay_k)));
+    if (firstDay !== calendar._dayTagArray[0]) {
+      emitError (4.1, "Error in first _dayTagArray entry", firstDay, calendar._dayTagArray[0]);
       return false;
+    }
+
+    let lastDay = calendar.getDayTag(calendar.getLastDayOfWeek(new Date(MVHSLastDay_k)));
+    if (lastDay !== calendar._dayTagArray[calendar._dayTagArray.length - 1]) {
+      emitError (4.2, "Error in last _dayTagArray entry", lastDay, calendar._dayTagArray[calendar._dayTagArray.length-1]);
+      return false;
+    }
+
+    let expectedEDate = calendar.convertSDateToEDate(calendar._dayTagArray[0]);
+    for (let i = 0; i < calendar._dayTagArray.length; i++) {
+      let actualEDate = calendar.convertSDateToEDate(calendar._dayTagArray[i]);
+      if (actualEDate.getTime() !== expectedEDate.getTime()) {
+        emitError (4.3, "dayList date not expected", i, actualEDate, expectedEDate)
+      }
+      calendar.advanceToFutureDay(expectedEDate,1);
+    }
+    for (let i = 0; i < calendar._dayTagArray.length; i++) {
+      let listEDate = calendar.convertSDateToEDate(calendar._dayTagArray[i]);
+      let dayObject = calendar.getDayByTag(calendar._dayTagArray[i]);
+      if (listEDate.getTime() != dayObject.eDate.getTime()) {
+        emitError (4.4, "day object date does not match expected", i, calendar._dayTagArray[i], listEDate, dayObject.eDate);
+        return false;
+      }
     }
     return true;
   }
 
 
-    // Test 5: Validate that the lengths of _dayList and _weekList are
-    //  consistent.
-    function test5(calendar) {
-      console.log ("Test 5: Validate length consistency of _dayList and _weekList");
-      let dayList = calendar.getDayList();
-      let weekList = calendar.getWeekList();
-      if (dayList.length !== weekList.length * 7) {
-        emitError(5.1, "Length mismatch between _dayList and _weekList", dayList.length, weekList.length)
-      }
-      return true;
+  // Test 5: Validate that the lengths of _dayTagArray and _weekTagArray are
+  //  consistent.
+  function test5(calendar) {
+    CalendarMessage ("Test 5: Validate length consistency of _dayTagArray and _weekTagArray");
+    let dayList = calendar.getDayList();
+    let weekList = calendar.getWeekList();
+    if (dayList.length !== weekList.length * 7) {
+      emitError(5.1, "Length mismatch between _dayTagArray and _weekTagArray", dayList.length, weekList.length)
     }
-  // Create new calendar and initialize the weeks, days and periods
-  var calendar = new Calendar(
-    MVHSFirstDay_k,
-    MVHSLastDay_k,
-    MVHS_Default_Week_a,
-    MVHS_Week_Exceptions_h
-  );
+    return true;
+  }
 
-  if (test1(calendar)) console.log ("  Test passed");
-  if (test2(calendar)) console.log ("  Test passed");
-  if (test3(calendar)) console.log ("  Test passed");
-  if (test4(calendar)) console.log ("  Test passed");
-  if (test5(calendar)) console.log ("  Test passed");
+  // Test6: Validate that the eDate in the week object matches the week tag
+  function test6(calendar) {
+    CalendarMessage ("Test 6: Validate dates in weeks and days");
+    for (const weekTag of calendar.getWeekList()) {
+      let weekObject = calendar.getWeekByTag(weekTag);
+      let expectedEDate = calendar.convertSDateToEDate(weekTag);
+
+      for (let i = 0; i < weekObject.dayObjectArray.length; i++) {
+        let dayObject = weekObject.dayObjectArray[i];
+        if (dayObject.eDate.getTime() !== expectedEDate.getTime()) {
+          emitError (6.1, "Date mismatch between week and day",
+          i, dayObject.eDate, expectedEDate);
+          return false;
+        }
+        calendar.advanceToFutureDay(expectedEDate, 1);
+      }
+    }
+    return true;
+  }
+  // Create new calendar using argument defaults and initialize the weeks, days
+  // and periods
+  let calendar = new Calendar();
+
+  // Run tests and report results
+
+  if (test1(calendar)) CalendarMessage ("  Test passed");
+  if (test2(calendar)) CalendarMessage ("  Test passed");
+  if (test3(calendar)) CalendarMessage ("  Test passed");
+  if (test4(calendar)) CalendarMessage ("  Test passed");
+  if (test5(calendar)) CalendarMessage ("  Test passed");
+  if (test6(calendar)) CalendarMessage ("  Test passed");
 
 
   if (true) {
-    for (let i = 0; i < calendar._weekList.length; i++) {
-      let weekTag = calendar._weekList[i];
-      console.log ("Processing week " + weekTag)
-      let weekHeader = calendar._weekHash[weekTag]
-      let message = weekHeader.toString()
-      console.log(message)
+    let eDate = new Date("2020-09-28T11:45:00");
+
+    console.log("Processing " + eDate)
+//    let day = calendar.getDayByTag("2020-09-28")
+//    console.log(day.toString())
+    let match = calendar.getPeriodByDateAndTime(eDate);
+    console.log ("Return value is " + match)
+    if (match === null) {
+      console.log("No match on " + eDate)
+    } else if (match.pObj === null) {
+      console.log (match.dayObj.toString("", 1))
+    } else {
+      console.log(
+        match.dObj.dayName + " " +
+        match.dObj.printDate + " " +
+        match.dObj.dayType + " " +
+        match.dObj.dayTag + " " +
+        match.dObj.weekTag + " "
+
+      )
+      console.log(match.pObj.toString("",2))
+      console.log("Found at index " + match.pIndex)
+      let timeLeft = calendar.getTimeRemainingInPeriod(eDate, match.pObj);
+      console.log ("Time remaining is " + timeLeft.hDelta + ":" + _leftPad(timeLeft.mDelta,2,"0") + ":" + _leftPad(timeLeft.sDelta,2,"0"));
+    }
+
+  }
+
+  if (false) {
+    let weekTag = calendar._weekTagArray[0];
+    CalendarMessage ("Processing week " + weekTag)
+    let weekObject = calendar._weekObjectHash[weekTag]
+    let message = weekObject.toString()
+    CalendarMessage(message)
+  }
+
+
+  if (false) {
+    let weekTag = calendar._weekTagArray[0];
+    CalendarMessage ("Processing week " + weekTag)
+    let weekObject = calendar._weekObjectHash[weekTag]
+    let message = weekObject.toString()
+    CalendarMessage(message)
+
+  }
+  if (false) {
+    for (let i = 0; i < calendar._weekTagArray.length; i++) {
+      let weekTag = calendar._weekTagArray[i];
+      CalendarMessage ("Processing week " + weekTag)
+      let weekObject = calendar._weekObjectHash[weekTag]
+      let message = weekObject.toString()
+      CalendarMessage (message)
     }
   }
 
