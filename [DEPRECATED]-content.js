@@ -1,3 +1,14 @@
+// =====================================================================================
+// ********WARNING: THIS FILE IS DEPRECATED
+//
+// None of this code is in use anywhere. This file is not referenced in popup.html or manifest.json after 09/29/2020
+// This file is ignored during pulls and pushes and any attempts to update it will be unsuccessful.
+//
+// ******** The file that replaces this is called "display.js"
+//
+// ******** The ONLY 2 APPLICABLE JAVASCRIPT FILES as of 09/29/2020 are "display.js" and "Calendar.js"
+// =====================================================================================
+
 var canvas = document.getElementById('Periods');
 var context = canvas.getContext('2d');
 
