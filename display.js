@@ -50,7 +50,7 @@ context.fillStyle = 'black';
 
 // The following variable lets us force a date and time to see the result.
 // If it is set to null, the current date/time is used
-// let lookupDateTime = "2020-10-03T09:50:00";
+// let lookupDateTime = "2020-10-02T10:50:00";
 let lookupDateTime = null;
 
 let eDate;
@@ -77,22 +77,28 @@ if (match === null) {
     context.fillText("Summer | Free", textPos.x, textPos.y) // There is only 1 year worth of data as of now, so this CANNOT display a "time left in period" number
 
 } 
-else if (match.pObj === null) {
 
-    // if match.pObj is null, then there was a day match, but there are no
-    // periods for that day, as would be the case on a weekend or a holiday
-    let dObj = match.dObj;
-    console.log (
-        dObj.dayName + ", " +
-        dObj.printDate + " is a " +
-        dObj.dayType + " and has no periods"
-    );
 
-    // Display "during school year but not a day that has school" --> weekends and holidays
-    context.font = textPos.nameSize;
-    context.fillText(dObj.dayType + " | Free", textPos.x, textPos.y)
+// =============================================================================
+// WARNING: The following "else if" conditional can never be true and is never called
+// =============================================================================
+//
+// else if (match.pObj === null) {
 
-} 
+//     // if match.pObj is null, then there was a day match, but there are no
+//     // periods for that day, as would be the case on a weekend or a holiday
+//     let dObj = match.dObj;
+//     console.log (
+//         dObj.dayName + ", " +
+//         dObj.printDate + " is a " +
+//         dObj.dayType + " and has no periods"
+//     );
+
+//     // Display "during school year but not a day that has school" --> weekends and holidays
+//     context.font = textPos.nameSize;
+//     context.fillText(dObj.dayType + " | Free", textPos.x, textPos.y)
+
+// } 
 else {
 
     // Found a match on both day and period.
@@ -134,8 +140,27 @@ else {
     else {
         console.log ("There is no class during this period");
 
+        // Display "in the school year but not a school day" --> weekends and holidays
+        context.font = textPos.nameSize;
+        context.fillText(dObj.dayType + " | Free", textPos.x, textPos.y)
+
     } // if (pOjb.period >= 0) ... else
 
+    refreshRemainingTime(eDate);
+}
+
+// =============================================================================
+// refreshRemainingTime();
+//
+// Get the time remaining information for the given period and print the time
+// remaining onto the Chrome extension canvas.
+//
+// Arguments--
+//
+// eDate:       The epic date, set to the JavaScript built-in "new Date();"
+// =============================================================================
+
+function refreshRemainingTime(eDate) {
     // Print time left in period
     let timeLeft = calendar.getTimeRemainingInPeriod(eDate, match.pObj);
     console.log (
@@ -148,6 +173,33 @@ else {
     context.fillText(CalendarHHMMSSAsString(timeLeft.hDelta, timeLeft.mDelta, timeLeft.sDelta), textPos.x - textPos.xOffset, textPos.y + textPos.yOffset)
 }
 
-  // if (match === null) ... else if ... else
- // if (_enableExampleCode)
+
+// =============================================================================
+// enableTimer();
+//
+// Update the information being displayed on the Chrome extension every second
+// (1000 milliseconds) using setInterval(). Clears the canvas and redraws the
+// time remaining in the current period using an updated instance of eDate and
+// a call of refreshRemainingTime();
+//
+// Arguments--
+//
+// enableTimer takes no arguments.
+// =============================================================================
+
+enableTimer(); // Call the function every pass through the file
+
+function enableTimer () {
+    setInterval(function () {
+
+        // Clear the canvas to prevent text overlap
+        context.clearRect(0, 50, canvas.width, canvas.height)
+
+        // Update the eDate value to the current date and time
+        eDate = new Date();
+        refreshRemainingTime(eDate);
+
+    }, 1000) // Update every 1 second
+}
+
  
