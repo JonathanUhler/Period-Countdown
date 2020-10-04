@@ -30,10 +30,8 @@
 var canvas = document.getElementById('Periods');
 var context = canvas.getContext('2d');
 
-
 // Create a new instance of the Calendar class (with all information for current classes)
 calendar = new Calendar();
-
 
 // Text information variables
 var textPos = {
@@ -47,13 +45,21 @@ var textPos = {
 // Set common color for all text
 context.fillStyle = 'black';
 
-
 // The following variable lets us force a date and time to see the result.
 // If it is set to null, the current date/time is used
 // let lookupDateTime = "2020-10-02T10:50:00";
 let lookupDateTime = null;
 
 let eDate;
+
+let match;
+
+let timeLeft = {
+    msTotal: 0,
+    hDelta: 0,
+    mDelta: 0,
+    sDelta: 0,
+}
 
 if (lookupDateTime === null) {
 eDate = new Date(); // If null, assume the user is referencing the current date (right now)
@@ -63,91 +69,105 @@ eDate = new Date(lookupDateTime); // If not null, set the epic date to the times
 
 console.log ("Looking for the day/period for " + eDate);
 
-
-let match = calendar.getPeriodByDateAndTime(eDate);
-
-if (match === null) {
-
-    // if match is null, then there is no match against the current date/time,
-    // which likely means that the date/time is outside the current school year
-    console.log ("No match on " + eDate)
-
-    // Display "not in school" information on extension
-    context.font = textPos.nameSize;
-    context.fillText("Summer | Free", textPos.x, textPos.y) // There is only 1 year worth of data as of now, so this CANNOT display a "time left in period" number
-
-} 
+refreshPeriod(eDate);
+timeLeft = refreshRemainingTime(eDate);
+enableTimer();
 
 
 // =============================================================================
-// WARNING: The following "else if" conditional can never be true and is never called
-// =============================================================================
+// refreshPeriod();
 //
-// else if (match.pObj === null) {
+// ...
+//
+// Arguments--
+//
+// eDate:       The epic date, set to the JavaScript built-in "new Date();"
+// =============================================================================
 
-//     // if match.pObj is null, then there was a day match, but there are no
-//     // periods for that day, as would be the case on a weekend or a holiday
-//     let dObj = match.dObj;
-//     console.log (
-//         dObj.dayName + ", " +
-//         dObj.printDate + " is a " +
-//         dObj.dayType + " and has no periods"
-//     );
+function refreshPeriod(eDate) {
+    match = calendar.getPeriodByDateAndTime(eDate);
 
-//     // Display "during school year but not a day that has school" --> weekends and holidays
-//     context.font = textPos.nameSize;
-//     context.fillText(dObj.dayType + " | Free", textPos.x, textPos.y)
+    if (match === null) {
 
-// } 
-else {
+        // if match is null, then there is no match against the current date/time,
+        // which likely means that the date/time is outside the current school year
+        console.log ("No match on " + eDate)
 
-    // Found a match on both day and period.
-    let dObj = match.dObj; // day object
-    let pObj = match.pObj; // period object
-
-    // Print day information
-    console.log (
-        dObj.dayName + ", " +
-        dObj.printDate + " is a " +
-        dObj.dayType
-    );
-
-    // Print period information
-    console.log (
-        "Period " + pObj.name +
-        " starts at " + pObj.startSTime +
-        " and ends at " + pObj.endSTime
-    );
-
-    // Print class information
-    if (pObj.period >= 0) {
-
-        let cObj = pObj.classInfoObject;
-        console.log (
-        "The class in this period is " + cObj.className +
-        ", taught by " + cObj.teacher  +
-        ", in room " + cObj.room
-        );
-
-        // Display "during an active period" --> this only includes real periods, NOT passing periods
-        // Test if cObj is null, return special case "No class", else return cObj.className
-        let className = (cObj === null) ? "No class" : cObj.className
-
+        // Display "not in school" information on extension
         context.font = textPos.nameSize;
-        context.fillText(className + " | " + pObj.name, textPos.x, textPos.y)
+        context.fillText("Summer | Free", textPos.x, textPos.y) // There is only 1 year worth of data as of now, so this CANNOT display a "time left in period" number
 
     } 
+
+
+    // =============================================================================
+    // WARNING: The following "else if" conditional can never be true and is never called
+    // =============================================================================
+    //
+    // else if (match.pObj === null) {
+
+    //     // if match.pObj is null, then there was a day match, but there are no
+    //     // periods for that day, as would be the case on a weekend or a holiday
+    //     let dObj = match.dObj;
+    //     console.log (
+    //         dObj.dayName + ", " +
+    //         dObj.printDate + " is a " +
+    //         dObj.dayType + " and has no periods"
+    //     );
+
+    //     // Display "during school year but not a day that has school" --> weekends and holidays
+    //     context.font = textPos.nameSize;
+    //     context.fillText(dObj.dayType + " | Free", textPos.x, textPos.y)
+
+    // } 
     else {
-        console.log ("There is no class during this period");
 
-        // Display "in the school year but not a school day" --> weekends and holidays
-        context.font = textPos.nameSize;
-        context.fillText(dObj.dayType + " | Free", textPos.x, textPos.y)
+        // Found a match on both day and period.
+        let dObj = match.dObj; // day object
+        let pObj = match.pObj; // period object
 
+        // Print day information
+        console.log (
+            dObj.dayName + ", " +
+            dObj.printDate + " is a " +
+            dObj.dayType
+        );
+
+        // Print period information
+        console.log (
+            "Period " + pObj.name +
+            " starts at " + pObj.startSTime +
+            " and ends at " + pObj.endSTime
+        );
+
+        // Print class information
+        if (pObj.period >= 0) {
+
+            let cObj = pObj.classInfoObject;
+            console.log (
+            "The class in this period is " + cObj.className +
+            ", taught by " + cObj.teacher  +
+            ", in room " + cObj.room
+            );
+
+            // Display "during an active period" --> this only includes real periods, NOT passing periods
+            // Test if cObj is null, return special case "No class", else return cObj.className
+            let className = (cObj === null) ? "No class" : cObj.className
+
+            context.font = textPos.nameSize;
+            context.fillText(className + " | " + pObj.name, textPos.x, textPos.y)
+
+        } 
+        else {
+            console.log ("There is no class during this period");
+
+            // Display "in the school year but not a school day" --> weekends and holidays
+            context.font = textPos.nameSize;
+            context.fillText(dObj.dayType + " | Free", textPos.x, textPos.y)
+        }
     } // if (pOjb.period >= 0) ... else
-
-    refreshRemainingTime(eDate);
 }
+
 
 // =============================================================================
 // refreshRemainingTime();
@@ -171,6 +191,8 @@ function refreshRemainingTime(eDate) {
     // Print time remaining for any applicable period
     context.font = textPos.timeSize;
     context.fillText(CalendarHHMMSSAsString(timeLeft.hDelta, timeLeft.mDelta, timeLeft.sDelta), textPos.x - textPos.xOffset, textPos.y + textPos.yOffset)
+
+    return timeLeft;
 }
 
 
@@ -187,19 +209,25 @@ function refreshRemainingTime(eDate) {
 // enableTimer takes no arguments.
 // =============================================================================
 
-enableTimer(); // Call the function every pass through the file
-
 function enableTimer () {
     setInterval(function () {
 
+        // If time left in the period goes to 0, the current period will be refreshed
+        if (timeLeft.msTotal <= 0) {
+            context.clearRect(0, 0, canvas.width, canvas.height);
+            refreshPeriod(eDate);
+        }
+
         // Clear the canvas to prevent text overlap
-        context.clearRect(0, 50, canvas.width, canvas.height)
+        context.clearRect(0, 50, canvas.width, canvas.height);
 
         // Update the eDate value to the current date and time
         eDate = new Date();
         refreshRemainingTime(eDate);
 
-    }, 1000) // Update every 1 second
+        timeLeft = refreshRemainingTime(eDate);
+
+    }, 1000) // Update every 1 second --> this leads to the timer trailing by ~1 second for every 20 hours of run time (if the period remains the same)
 }
 
  
