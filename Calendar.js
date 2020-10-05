@@ -5,13 +5,20 @@
 //
 "use strict";
 
-let CalendarVersion = "1.0.0";
+let CalendarVersion = "1.1.0";
 
 // Revision History
 //
 //  version    date                     Change
 //  ------- ----------  --------------------------------------------------------
 //  1.0.0   10/04/2020  First usable release of Calendar.js
+//
+//  1.1.0   10/05/2020  Changes is this version:
+//                       - Add the "toString" key to the return of Calendar.getTimeRemainingInPeriod
+//                         that is a string of the remaining time in [h]h:mm:ss format.
+//                         This saves a call to the CalendarHHMMSSAsString function
+//                         by the caller.
+//                       - Finish implementing the Calendar.getNextPeriod method
 
 // TODO List
 //
@@ -836,7 +843,7 @@ class CalendarPeriodObject {
     // If the period number isn't in the range of the class array, then
     // make classInfoObject null, otherwise extract the class information for this
     // period
-    if (classInfoObject === null) {
+    if (classInfoObject === null || classInfoObject.className === null) {
       this.classInfoObject = null;
     } else {
       this.classInfoObject = classInfoObject;
@@ -1913,11 +1920,20 @@ class Calendar {
   //                day and period information is to be returned.
   //
   // Returns
-  //  Object containing the matching CalendarDayObject instance (key "dObj"),
-  //  the matching CalendarPeriodObject instance (key "pObj"), and the
-  //  matching period index (key "pIdx"). The pindex value is used in
-  //  conjunction with the getNextPeriod method, below.
-
+  //  Object describing the match. If the return value is null, there is no
+  //  match for this date and time, which can only happen if the eDate argument
+  //  is before the school year starts, or after it ends.
+  //
+  //  If the return value is not null, it is an hash which provides information
+  //  about the day and period that matched. The hash has three keys, as follows:
+  //
+  //    dObj        The CalendarDayObject instance for the day that matched
+  //
+  //    pObj        The CalendarPeriodObject instance for the period that matched
+  //
+  //    pIdx        An index to the match. This is only used in subsequent calls
+  //                to the getNextPeriod method, and should not be otherwise
+  //                interpreted
 
   getPeriodByDateAndTime (eDate) {
 
@@ -1992,20 +2008,36 @@ class Calendar {
   // a chain of periods.
   //
   // Arguments:
-  //  lastMatch     The return value from getPeriodByDateAndTime (or getNextPeriod
-  //                itself)
+  //  lastMatch     (REQUIRED Object) The return value from getPeriodByDateAndTime
+  //                (or getNextPeriod itself)
+  //
   //  matchRealPeriod
-  //                True if the next period to return is a "real" period as
-  //                opposed to a pseudo-period; false to get the next period
-  //                real or not.
+  //                (OPTIONAL Boolean) True if the next period to return is a
+  //                "real" period as opposed to a pseudo-period; false to get
+  //                the next period real or not.
+  //
+  //  matchPeriodsWithClass
+  //                (OPTIONAL Boolean) If matchRealPeriod is true, setting this
+  //                to true restricts the next period to one with a class. This
+  //                can happen if the student has no class for a real period.
   //
   // Returns
-  //  Object containing the matching CalendarDayObject instance (key "dObj"),
-  //  the matching CalendarPeriodObject instance (key "pObj"), and the
-  //  matching period index (key "pIndex"). The pIdx value is used in
-  //  conjunction with the getNextPeriod method, below.
+  //  Object describing the match. If the return value is null, there is no
+  //  match for this date and time, which can only happen if the eDate argument
+  //  is at the end of a school year.
+  //
+  //  If the return value is not null, it is an hash which provides information
+  //  about the day and period that matched. The hash has three keys, as follows:
+  //
+  //    dObj        The CalendarDayObject instance for the day that matched
+  //
+  //    pObj        The CalendarPeriodObject instance for the period that matched
+  //
+  //    pIdx        An index to the match. This is only used in subsequent calls
+  //                to the getNextPeriod method, and should not be otherwise
+  //                interpreted
 
-  getNextPeriod (lastMatch, matchRealPeriod) {
+  getNextPeriod (lastMatch, matchRealPeriod, matchPeriodsWithClass) {
     if (
       (lastMatch === undefined) ||
       (typeof lastMatch !== "object") ||
@@ -2020,14 +2052,83 @@ class Calendar {
       return null;
     };
 
-    // Default the matchRealPeriod boolean to false if not supplied
+    // Default the matchRealPeriod and matchPeriodsWithClass values to false if
+    // not supplied and make a copy of the lastMatch hash to use as we go
     let matchReal = matchRealPeriod || false;
+    let matchClass = matchPeriodsWithClass || false;
+    let findMatch = {dObj: lastMatch.dObj, pObj: lastMatch.pObj, pIdx: lastMatch.pIdx+1};
 
-    // Extract the information from the argument object
-    let dayObject = lastMatch.dObj;
-    let periodObject = lastMatch.pObj;
-    let pIndex = lastMatch.pIdx;
+    // Setup a runaway counter to limit the loop below. If we can't find the
+    // next period by that many passes through the loop, then it's a code logic
+    // bug.
+    let runawayCounter = this._dayTagArray.length * 50;
 
+    for (let i = 0; i < runawayCounter; i++) {
+      // Use the helper function to see if there is a match in the current day.
+      // If so, return that. Note that this is called with lastMatch.pIdx on the
+      // first pass, and then it is reset to 0 if we have to advance to the next
+      // day to find the next period
+      let match = _helperGetNextPeriodThisDay (findMatch, matchReal, matchClass);
+      if (match !== null) { return match; } // Found a match for this day
+
+      // No match in the current day, so we have to advance to the next day. We
+      // do this by getting the dayIdx of the current day, adding 1 to it, and
+      // checking to see if it's off the end of the day tag array. If it is, return
+      // null. If not, that's the new day object, and we can call the helper
+      // function again, but with pIdx === 0;
+      let nextDayIdx = findMatch.dObj.dayIdx + 1;
+      if (nextDayIdx >= this._dayTagArray.length) { return null; }
+      let dObj = this.getDayByIndex(nextDayIdx);
+      console.log ("Advancing to " + dObj.dayTag)
+      findMatch = {dObj: dObj, pObj: null, pIdx: 0};
+    } //for (let i = 0; i < runawayCounter; i++)
+    CalendarAssert (
+      false,
+      "getNextPeriod had a runaway loop after not finding a next period"
+    );
+
+    // Helper function to find the next period in this day.
+    //
+    // Arguments:
+    //
+    //  lastMatch, matchRealPeriod
+    //              Same as the arguments to the getNextPeriod method
+    //
+    // Returns:
+    //  Same as the return value from getNextPeriod. However, in this case, a
+    //  return value of null means that the next period couldn't be found in
+    //  this day, and the caller must advance the day before trying again.
+
+    function _helperGetNextPeriodThisDay (
+      lastMatch,
+      matchRealPeriod,
+      matchPeriodWithClass) {
+      let dObj = lastMatch.dObj;
+      let pIdx = lastMatch.pIdx;
+      let match = null;
+
+      // Starting at the index of the last try, walk through the rest of the
+      // period list for this day looking for the next period which, based on the
+      // matchRealPeriod argument, can either be ANY period, or the next REAL
+      // period
+      for (let index = pIdx; index < dObj.periodObjectArray.length; index++) {
+        let pObj = dObj.periodObjectArray[index];
+
+        // Skip this one if it's a pseudo period and matchRealPeriod is true or
+        // if matchPeriodWithClass is true and there is no class this period
+        if (pObj.period < 0) {
+          if (matchRealPeriod) { continue };
+        } else if (pObj.classInfoObject === null){
+          if (matchPeriodWithClass) { continue };
+        }
+
+        // Otherwise, we've found a match, so we can stop the loop
+        match = {dObj: dObj, pObj: pObj, pIdx: index};
+        break;
+      }
+      return match;
+
+    } // _helperGetNextPeriodThisDay
 
   } // getNextPeriod
 
@@ -2076,9 +2177,12 @@ class Calendar {
   //
   //    sDelta    The number of seconds remaining in the period
   //
-  // If msTotal is <= 0, there is no time left in the period. hDelta, mDelta, and
-  // sDelta can be passed to the CalendarHHMMSSAsString function to get a pretty-
-  // printed version of the information as a string in [h]h:mm:ss format.
+  //    toString  The time remaining as a string in the format "[h]h:mm:ss"
+  //
+  // If msTotal is <= 0, there is no time left in the period. toString is just
+  //  hDelta, mDelta and sDelta passed to the  CalendarHHMMSSAsString function
+  //  to get a pretty-printed version of the information as a string in
+  //  [h]h:mm:ss format.
 
   getTimeRemainingInPeriod (eDate, pObj) {
 
@@ -2090,7 +2194,7 @@ class Calendar {
     // period
     let eDate_ms = this.getMsSinceMidnight(eDate);
     let periodEnd_ms = pObj.endMSTime + 1;
-    let timeLeft = {msTotal: 0, hDelta: 0, mDelta: 0, sDelta:0};
+    let timeLeft = {msTotal: 0, hDelta: 0, mDelta: 0, sDelta:0, toString:""};
     let delta_ms = periodEnd_ms - eDate_ms;
     if (delta_ms >= 0) {
       timeLeft.msTotal = delta_ms;
@@ -2100,6 +2204,11 @@ class Calendar {
       delta_ms -= timeLeft.mDelta * msPerMinute_k
       timeLeft.sDelta = Math.floor(delta_ms / msPerSecond_k);
     }
+    timeLeft.toString = CalendarHHMMSSAsString(
+      timeLeft.hDelta,
+      timeLeft.mDelta,
+      timeLeft.sDelta
+    );
     return timeLeft
   }
 
@@ -2537,71 +2646,68 @@ if (_enableExampleCode) {
   } else {
     eDate = new Date(lookupDateTime);
   }
+
   console.log ("Looking for the day/period for " + eDate);
-
   let match = calendar.getPeriodByDateAndTime(eDate);
+  _printDayAndPeriodMatch (match);
+  // Print time left in period
+  let timeLeft = calendar.getTimeRemainingInPeriod(eDate, match.pObj);
+  console.log (
+    "Time remaining in the period is " + timeLeft.toString
+  );
 
-  if (match === null) {
+  console.log("The next eight periods are")
+  for (let i = 0; i < 8; i++) {
+  match = calendar.getNextPeriod(match, true, true);
+    _printDayAndPeriodMatch (match);
+  }
 
-    // if match is null, then there is no match against the current date/time,
-    // which likely means that the date/time is outside the current school year
-    console.log ("No match on " + eDate)
 
-  } else if (match.pObj === null) {
 
-    // if match.pObj is null, then there was a day match, but there are no
-    // periods for that day, as would be the case on a weekend or a holiday
-    let dObj = match.dObj;
-    console.log (
-      dObj.dayName + ", " +
-      dObj.printDate + " is a " +
-      dObj.dayType + " and has no periods"
-    );
+  function _printDayAndPeriodMatch (match) {
+    if (match === null) {
 
-  } else {
-
-    // Found a match on both day and period.
-    let dObj = match.dObj;
-    let pObj = match.pObj;
-
-    // Print day information
-    console.log (
-      dObj.dayName + ", " +
-      dObj.printDate + " is a " +
-      dObj.dayType
-    );
-
-    // Print period information
-    console.log (
-      "Period " + pObj.name +
-      " starts at " + pObj.startSTime +
-      " and ends at " + pObj.endSTime
-    );
-
-    // Print class information
-    if (pObj.period >= 0) {
-
-      let cObj = pObj.classInfoObject;
-      console.log (
-        "The class in this period is " + cObj.className +
-        ", taught by " + cObj.teacher  +
-        ", in room " + cObj.room
-      );
+      // if match is null, then there is no match against the current date/time,
+      // which likely means that the date/time is outside the current school year
+      console.log ("No match on " + eDate)
 
     } else {
 
-      console.log ("There is no class during this period");
+      // Found a match on both day and period.
+      let dObj = match.dObj;
+      let pObj = match.pObj;
 
-    } // if (pOjb.period >= 0) ... else
+      // Print day information
+      console.log (
+        dObj.dayName + ", " +
+        dObj.printDate + " is a " +
+        dObj.dayType
+      );
 
-    // Print time left in period
-    let timeLeft = calendar.getTimeRemainingInPeriod(eDate, match.pObj);
-    console.log (
-      "Time remaining in the period is " +
-      CalendarHHMMSSAsString(timeLeft.hDelta, timeLeft.mDelta, timeLeft.sDelta)
-    );
+      // Print period information
+      console.log (
+        "Period " + pObj.name +
+        " starts at " + pObj.startSTime +
+        " and ends at " + pObj.endSTime
+      );
 
-  }  // if (match === null) ... else if ... else
+      // Print class information
+      let cObj = pObj.classInfoObject;
+      if (pObj.period >= 0 && cObj !== null) {
+
+        console.log (
+          "The class in this period is " + cObj.className +
+          ", taught by " + cObj.teacher  +
+          ", in room " + cObj.room
+        );
+
+      } else {
+
+        console.log ("There is no class during this period");
+
+      } // if (pOjb.period >= 0) ... else
+    }  // if (match === null) ... else ...
+  } // _printDayAndPeriodMatch
 
 } // if (_enableExampleCode)
 
