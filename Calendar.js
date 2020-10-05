@@ -19,17 +19,20 @@ let CalendarVersion = "1.1.0";
 //                         This saves a call to the CalendarHHMMSSAsString function
 //                         by the caller.
 //                       - Finish implementing the Calendar.getNextPeriod method
+//
+//  1.2.0   10/05/2020  Changes in this version:
+//                       - Add the Calendar.getTimeRemainingUntilPeriod method,
+//                         returning the same information as getTimeRemainingInPeriod,
+//                         but to the start of a specified period.
+//                       - As a byproduct of this addition, add the dDelta key to
+//                         the timeLeft object to cover the possibility that the
+//                         time left may be measured not just in hours, but days.
 
 // TODO List
-//
-//  1. Complete the getNextPeriod method. He needs to get both the time remaining
-//     in the current period AND the time remaining until the next (real) period
-//     starts. Need a method in the period object for isReal();
-//
-//  2. Either fix the DST bug hack, or convert over to a date library that
+//  1. Either fix the DST bug hack, or convert over to a date library that
 //     knows about DST
 //
-//  3. Figure out a way to move all of the school year definitions out of this
+//  2. Figure out a way to move all of the school year definitions out of this
 //     file and read it in
 //
 
@@ -599,16 +602,25 @@ function CalendarPadStringRight (value, width, character) {
 //
 //  seconds       (Number in the range 0..59) The number of seconds
 //
+//  days          (Optional positive number) The number of days. Noting is
+//                returned for this unless it is > 0;
+//
 // Returns:
-//  A string in the format [h]h:mm:ss
+//  A string in the format "d [h]h:mm:ss"
 
-function CalendarHHMMSSAsString (hours, minutes, seconds) {
+function CalendarHHMMSSAsString (hours, minutes, seconds, days) {
 
-  let hhmmss =
+  let dayCount = days || 0;
+  let dhhmmss = "";
+  if (dayCount > 0) {
+    dhhmmss = dayCount.toString() + " ";
+  }
+  dhhmmss +=
     (hours.toString() + ":" +
     CalendarPadStringLeft(minutes,2,"0") + ":" +
     CalendarPadStringLeft(seconds,2,"0"));
-  return hhmmss;
+
+  return dhhmmss;
 
 } // function CalendarHHMMSSAsString
 // END GLOBAL FUNCTIONS DEFINITIONS
@@ -1367,9 +1379,19 @@ class CalendarWeekObject {
 //                  Returns the number of milliseconds since midnight of the
 //                  date/time specified by the eDate argument
 //
-//    obj = getTimeRemainingInPeriod (eDate, pObj)
+//    timeLeft = calculateTimeLeft (startTime, endTime)
+//                  Calculate the time in the interval between startTime and
+//                  endTime (both in milliseconds) and return an object that
+//                  describes that time
+//
+//    timeLeft = getTimeRemainingInPeriod (eDate, pObj)
 //                  Returns an object providing the time remaining in a period
-//                  relative to the eDate argument
+//                  described by the pObj argument relative to the eDate argument
+//
+//    timeLeft = getTimeRemainingUntilPeriod (eDate, dObj, pObj)
+//                  Returns an object providing the time between the eDate
+//                  argument and start time of the day and period described by
+//                  the dObj and pObj arguments
 //
 //    version = getVersion ()
 //                  Return the version string
@@ -2156,6 +2178,68 @@ class Calendar {
   } // Calendar.getMsSinceMidnight
 
   // ===========================================================================
+  // calculateTimeLeft
+  //
+  // Return an object specifying the time left between the two arguments
+  //
+  // Arguments:
+  //  startTime   Time in milliseconds of the start of the interval
+  //
+  //  endTime     Time in milliseconds of the end of the interval
+  //
+  // Returns:
+  //  Object that describes the time between the arguments as four keys:
+  //
+  //    msTotal   The number of milliseconds in the interval
+  //
+  //    dDelta    The number of days in the interval
+  //
+  //    hDelta    The number of hours in the interval
+  //
+  //    mDelta    The number of minutes in the interval
+  //
+  //    sDelta    The number of seconds in the interval
+  //
+  //    toString  The time in the interval as a string in the format "[d] [h]h:mm:ss"
+  //
+  //  If msTotal is <= 0, there is no time in the interval. toString is just
+  //  dDelta, hDelta, mDelta and sDelta passed to the  CalendarHHMMSSAsString
+  //  funciton to get a pretty-printed version of the information as a string in
+  //  "d [h]h:mm:ss" format.
+
+  calculateTimeLeft (startTime, endTime) {
+    const msPerSecond_k = 1000;
+    const msPerMinute_k = msPerSecond_k * 60;
+    const msPerHour_k = msPerMinute_k * 60;
+    const msPerDay_k = msPerHour_k * 24;
+
+    let timeLeft = {msTotal: 0, dDelta: 0, hDelta: 0, mDelta: 0, sDelta:0, toString:""};
+    let delta_ms = endTime - startTime;
+
+    // Break this down to the days, hours, minutes and seconds
+    if (delta_ms >= 0) {
+      timeLeft.msTotal = delta_ms;
+      timeLeft.dDelta = Math.floor(delta_ms / msPerDay_k);
+      delta_ms -= timeLeft.dDelta * msPerDay_k;
+      timeLeft.hDelta = Math.floor(delta_ms / msPerHour_k);
+      delta_ms -= timeLeft.hDelta * msPerHour_k;
+      timeLeft.mDelta = Math.floor(delta_ms / msPerMinute_k);
+      delta_ms -= timeLeft.mDelta * msPerMinute_k
+      timeLeft.sDelta = Math.floor(delta_ms / msPerSecond_k);
+    } else {}
+
+    // And pretty-print the results
+    timeLeft.toString = CalendarHHMMSSAsString(
+      timeLeft.hDelta,
+      timeLeft.mDelta,
+      timeLeft.sDelta,
+      timeLeft.dDelta
+    );
+    return timeLeft;
+
+  } // calculateTimeLeft
+
+  // ===========================================================================
   // getTimeRemainingInPeriod
   //
   // Return an object specifying the time remaining in the period the arguments
@@ -2167,50 +2251,50 @@ class Calendar {
   //              can be extracted
   //
   // Returns:
-  //  Object the describes the time left in the period as four keys:
-  //
-  //    msTotal   The number of milliseconds remaining in the period
-  //
-  //    hDelta    The number of hours remaining in the period
-  //
-  //    mDelta    The number of minutes remaining in the period
-  //
-  //    sDelta    The number of seconds remaining in the period
-  //
-  //    toString  The time remaining as a string in the format "[h]h:mm:ss"
-  //
-  // If msTotal is <= 0, there is no time left in the period. toString is just
-  //  hDelta, mDelta and sDelta passed to the  CalendarHHMMSSAsString function
-  //  to get a pretty-printed version of the information as a string in
-  //  [h]h:mm:ss format.
+  //  Object that describes the time left in the period. See calculateTimeLeft
+  //  for a description of the object
 
   getTimeRemainingInPeriod (eDate, pObj) {
 
-    const msPerSecond_k = 1000;
-    const msPerMinute_k = msPerSecond_k * 60;
-    const msPerHour_k = msPerMinute_k * 60;
-
     // Convert eDate to ms since midnight and the same for the end date of the
-    // period
-    let eDate_ms = this.getMsSinceMidnight(eDate);
-    let periodEnd_ms = pObj.endMSTime + 1;
-    let timeLeft = {msTotal: 0, hDelta: 0, mDelta: 0, sDelta:0, toString:""};
-    let delta_ms = periodEnd_ms - eDate_ms;
-    if (delta_ms >= 0) {
-      timeLeft.msTotal = delta_ms;
-      timeLeft.hDelta = Math.floor(delta_ms / msPerHour_k);
-      delta_ms -= timeLeft.hDelta * msPerHour_k;
-      timeLeft.mDelta = Math.floor(delta_ms / msPerMinute_k);
-      delta_ms -= timeLeft.mDelta * msPerMinute_k
-      timeLeft.sDelta = Math.floor(delta_ms / msPerSecond_k);
-    }
-    timeLeft.toString = CalendarHHMMSSAsString(
-      timeLeft.hDelta,
-      timeLeft.mDelta,
-      timeLeft.sDelta
-    );
-    return timeLeft
+    // period and then let calculateTimeLeft do the work. It's possible that
+    // startTime could be later than endTime, but calculateTimeLeft takes care
+    // of that case
+    let startTime = this.getMsSinceMidnight(eDate);
+    let endTime = pObj.endMSTime + 1;
+    return this.calculateTimeLeft (startTime, endTime);
+
   }
+
+    // ===========================================================================
+    // getTimeRemainingUntilPeriod
+    //
+    // Return an object specifying the time remaining until the start time of
+    // the specified period on a day (which may not be today)
+    //
+    // Arguments:
+    //  eDate       Date() object for the date/time to compare to the period
+    //
+    //  dObj        CalendarPeriodObject for the day that contains the period
+    //
+    //  pObj        CalendarPeriodObject for the period from which an start time
+    //              can be extracted
+    //
+    // Returns:
+    //  Object that describes the time left in the period. See calculateTimeLeft
+    //  for a description of the object
+
+    getTimeRemainingUntilPeriod (eDate, dObj, pObj) {
+
+      // The start time is simply the getTime() value for eDate. The end time
+      // is the start time of the period on the day specified.  It's possible that
+      // startTime could be later than endTime, but calculateTimeLeft takes care
+      // of that case
+      let startTime = eDate.getTime();
+      let endTime = dObj.eDate.getTime() + pObj.startMSTime;
+      return this.calculateTimeLeft (startTime, endTime);
+
+    }
 
   // ===========================================================================
   // getVersion
@@ -2650,16 +2734,23 @@ if (_enableExampleCode) {
   console.log ("Looking for the day/period for " + eDate);
   let match = calendar.getPeriodByDateAndTime(eDate);
   _printDayAndPeriodMatch (match);
+
   // Print time left in period
   let timeLeft = calendar.getTimeRemainingInPeriod(eDate, match.pObj);
-  console.log (
-    "Time remaining in the period is " + timeLeft.toString
-  );
+  console.log ("Time remaining in the period is " + timeLeft.toString);
 
-  console.log("The next eight periods are")
-  for (let i = 0; i < 8; i++) {
-  match = calendar.getNextPeriod(match, true, true);
+  let matchRealPeriod = true;
+  let matchPeriodsWithClass = true;
+
+  let countOfNextPeriods = 4;
+  console.log("The next " + countOfNextPeriods + " periods are")
+  for (let i = 0; i < countOfNextPeriods; i++) {
+    match = calendar.getNextPeriod(match, matchRealPeriod, matchPeriodsWithClass);
     _printDayAndPeriodMatch (match);
+    if (match !== null) {
+      let timeLeft = calendar.getTimeRemainingUntilPeriod(eDate, match.dObj, match.pObj);
+      console.log ("Time remaining until the start of that period is " + timeLeft.toString)
+    }
   }
 
 
