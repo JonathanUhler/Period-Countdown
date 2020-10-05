@@ -2,7 +2,29 @@
 // Calendar.js
 //
 // Calendar-related functions for the MVHS schedule app
+//
 "use strict";
+
+let CalendarVersion = "1.0.0";
+
+// Revision History
+//
+//  version    date                     Change
+//  ------- ----------  --------------------------------------------------------
+//  1.0.0   10/04/2020  First usable release of Calendar.js
+
+// TODO List
+//
+//  1. Complete the getNextPeriod method. He needs to get both the time remaining
+//     in the current period AND the time remaining until the next (real) period
+//     starts. Need a method in the period object for isReal();
+//
+//  2. Either fix the DST bug hack, or convert over to a date library that
+//     knows about DST
+//
+//  3. Figure out a way to move all of the school year definitions out of this
+//     file and read it in
+//
 
 // =+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
 // Copyright 2020 Mike Uhler and Jonathan Uhler
@@ -454,7 +476,7 @@ const _MVHS_Week_Exceptions_h = {
 
 function CalendarAssert (assertion, msg, ...args) {
   if (!assertion) {
-    let message = "***ERROR: CalendarAssert Assertion Failed: " + msg + ": " +args.join(", ")
+    let message = "***ERROR: CalendarAssert Assertion Failed: " + msg + ": " +args.join("\n, ")
     console.log (message)
     throw Error ("Assertion Failed");
   }
@@ -476,7 +498,7 @@ function CalendarAssert (assertion, msg, ...args) {
 
 function CalendarMessage (msg, ...args) {
 
-  let message = "Calendar Message: " + msg + ": " +args.join(", ")
+  let message = "Calendar Message: " + msg + ": " +args.join("\n, ")
   console.log (message)
 
 } // function CalendarMessage
@@ -1215,6 +1237,11 @@ class CalendarWeekObject {
 //
 // This class defines the structure of the data structure for the calendar.
 //
+// Public Class Variable:
+//
+//    Version       (String) The version number of the Calendar class (and all
+//                  other sub-classes) as major.minor.patch.
+//
 // Private Class Variables:
 //
 //    _startEDate:  (Date() Object) Midnight of the first day of school
@@ -1337,6 +1364,9 @@ class CalendarWeekObject {
 //                  Returns an object providing the time remaining in a period
 //                  relative to the eDate argument
 //
+//    version = getVersion ()
+//                  Return the version string
+//
 //    returnString = toString ([linePrefix] [, maxDepth])
 //                  Return a string with printable information about the calendar
 
@@ -1401,6 +1431,7 @@ class Calendar {
       "Calendar.constructor called with invalid arguments",
       startSDate, endSDate, defaultWeek
     );
+    this.Version = CalendarVersion;
 
     // Create objects for class information about each period.
     this._classInfoObjectArray = _helperInstantiateClassInfoObjects(_CalendarClassInfoArray_a);
@@ -1914,10 +1945,19 @@ class Calendar {
     );
 
     // If dayObject.periodObjectArray is [], there are no periods that day,
-    // so return [dayObject, null, 0] to the caller
+    // so return [dayObject, null, 0] to the caller. This should never happen
+    // with the current data structure
+
+    CalendarAssert (
+      dayObject.periodObjectArray.length !== 0,
+      "getPeriodByDateAndTime got back a periodObjectArray with length zero",
+      dayTag, dayObject.dayType
+    );
+    /*
     if (dayObject.periodObjectArray.length === 0) {
       return {dObj: dayObject, pObj: null, pIdx: 0};
     }
+    */
 
     // At this point, we know that the day has periods, so we have to look
     // for a period whose time surrounds that of the one provided in the
@@ -2064,6 +2104,23 @@ class Calendar {
   }
 
   // ===========================================================================
+  // getVersion
+  //
+  // Returns the version number of Calendar
+  //
+  // Arguments:
+  //  None
+  //
+  // Returns:
+  //  The version number string
+
+    getVersion () {
+
+      return this.Version;
+
+    } // getVersion
+
+  // ===========================================================================
   // toString
   //
   // Returns a multi-line string with the printable information about the
@@ -2109,6 +2166,7 @@ const _enableTestCode = false;
 const _enableExampleCode = false;
 
 let calendar;
+let version;
 
 // The following block of code, if enabled, does self-test of the data structures.
 // This code should be enabled and run in a stand-alone environment before
@@ -2117,11 +2175,8 @@ let calendar;
 if (_enableTestCode) {
   // Emit error message for a test failure
   function emitError (testNum, message, ...args) {
-    let errorString = "** ERROR in test " + testNum + " " + message;
-    for (let i = 0; i < args.length; i++) {
-      if (i === 0)  errorString += ": " + args[i];
-      else          errorString += ", " + args[i];
-    }
+    let errorString = "** ERROR in test " + testNum + " " + message +
+      ":\n\t" + args.join("\n\t");
     throw Error(errorString);
   }
 
@@ -2153,7 +2208,7 @@ if (_enableTestCode) {
       return false;
     }
     let lastWeek = calendar.getDayTag(calendar.getFirstDayOfWeek(new Date(SchoolLastDay_k)));
-    if (lastWeek !== calendar._weekTagArray[calendar._weekTagArray.length - 1]) {
+    if (lastWeek !== calendar._weekTagArray[calendar._weekTagArray.length -1]) {
       emitError (2.2, "Error in last _weekTagArray entry", lastWeek, calendar._weekTagArray[calendar._weekTagArray.length-1]);
       return false;
     }
@@ -2338,10 +2393,15 @@ if (_enableTestCode) {
       let dayTag = dayTagArray[dayIdx];
       let dayObj = calendar.getDayByTag(dayTag);
       let expectedMSTime = 0;
+      if (dayObj.periodObjectArray.length === 0) {
+        emitError (9.1, "periodObjectArray length is zero",
+        dayTag, dayObj.dayType);
+        return false;
+      }
       for (let pIdx = 0; pIdx < dayObj.periodObjectArray.length; pIdx++) {
         let pObj = dayObj.periodObjectArray[pIdx];
         if (pObj.startMSTime !== expectedMSTime) {
-          emitError (9.1, "Unexpected startMSTime for period",
+          emitError (9.2, "Unexpected startMSTime for period",
           expectedMSTime, dayTag, dayIdx, pIdx, pObj.startMSTime, pObj.endMSTime,
           pObj.period, pObj.name, pObj.comment);
           return false;
@@ -2351,7 +2411,7 @@ if (_enableTestCode) {
       if (expectedMSTime !== msPerDay_k) {
         let pIdx = dayObj.periodObjectArray.length-1;
         let pObj = dayObj.periodObjectArray[pIdx];
-        emitError (9.2, "Final period did not end at 1ms before midnight",
+        emitError (9.3, "Final period did not end at 1ms before midnight",
         expectedMSTime, msPerDay_k, dayTag, dayIdx, pIdx, pObj.startMSTime, pObj.endMSTime,
         pObj.period, pObj.name, pObj.comment);
         return false;
@@ -2413,7 +2473,6 @@ if (_enableTestCode) {
             pObj.toString("",1));
             return false;
           }
-
         } // for (pIdx = 0; pIdx < dayObj.periodObjectArray.length; pIdx++)
       } // for (let dayIdx = 0; dayIdx < dayTagArray.length; dayIdx++)
       return true;
@@ -2427,6 +2486,9 @@ if (_enableTestCode) {
   // Create new calendar using argument defaults and initialize the weeks, days
   // and periods
   calendar = new Calendar();
+  version = calendar.getVersion();
+  console.log ("Calendar v" + version);
+
   // Run tests and report results
 
   if (test1 (calendar)) CalendarMessage ("  Test passed");
@@ -2457,12 +2519,16 @@ if (_enableExampleCode) {
   // to the calendar.
 
   calendar = new Calendar();
+  if (!_enableTestCode) {
+    version = calendar.getVersion();
+    console.log ("Calendar v" + version);
+  }
 
   // The following variable lets us force a date and time to see the result.
   // If it is set to null, the current date/time is used
   // ************************************************
-  let lookupDateTime = "2020-11-01T22:59:59";     //*
-//  let lookupDateTime = null;                      //*
+//  let lookupDateTime = "2020-11-01T22:59:59";     //*
+  let lookupDateTime = null;                      //*
   // ************************************************
 
   let eDate;
