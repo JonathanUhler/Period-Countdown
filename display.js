@@ -30,6 +30,8 @@
 var canvas = document.getElementById('Periods');
 var context = canvas.getContext('2d');
 
+this.Version = "1.0.0";
+
 // Create a new instance of the Calendar class (with all information for current classes)
 calendar = new Calendar();
 
@@ -63,7 +65,8 @@ let timeLeft = {
 
 if (lookupDateTime === null) {
 eDate = new Date(); // If null, assume the user is referencing the current date (right now)
-} else {
+} 
+else {
 eDate = new Date(lookupDateTime); // If not null, set the epic date to the timestamp given
 }
 
