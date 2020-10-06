@@ -10,6 +10,6 @@
     },
     "content_scripts": [{
         "matches": ["<all_urls>"],
-        "js": ["Calendar.js", "display.js"]
+        "js": ["Calendar.js", "display.js", "settings.js"]
     }]
 }
