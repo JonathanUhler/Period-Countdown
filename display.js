@@ -30,7 +30,28 @@
 var canvas = document.getElementById('Periods');
 var context = canvas.getContext('2d');
 
-this.Version = "1.0.0";
+let DisplayVersion = "1.0.0";
+
+// Revision History
+//
+//  version    date                     Change
+//  ------- ----------  --------------------------------------------------------
+//  1.0.0   10/04/2020  First usable release of display.js
+//
+//  1.1.0   10/05/2020  Changes in this version:
+//                          -Add new code from Calendar.js ("toString", removal
+//                          of CalendarHHMMSSAsString)
+//                          -Add "nextMatch" to display the time until the next
+//                          period if the current period is a pseudo-period (end-
+//                          of-day or start-of-day)
+//                              -Change "timeLeft" by one of two values depending
+//                              on the type of period
+//
+
+// Version information
+this.Version = DisplayVersion
+console.log("Display v" + this.Version);
+
 
 // Create a new instance of the Calendar class (with all information for current classes)
 calendar = new Calendar();
@@ -49,15 +70,17 @@ context.fillStyle = 'black';
 
 // The following variable lets us force a date and time to see the result.
 // If it is set to null, the current date/time is used
-// let lookupDateTime = "2020-10-02T10:50:00";
-let lookupDateTime = null;
 
+// let lookupDateTime = "2020-10-07T09:50:00";
+let lookupDateTime = null;
 let eDate;
 
 let match;
+let nextMatch;
 
 let timeLeft = {
     msTotal: 0,
+    dDelta: 0,
     hDelta: 0,
     mDelta: 0,
     sDelta: 0,
@@ -72,6 +95,7 @@ eDate = new Date(lookupDateTime); // If not null, set the epic date to the times
 
 console.log ("Looking for the day/period for " + eDate);
 
+
 refreshPeriod(eDate);
 timeLeft = refreshRemainingTime(eDate);
 enableTimer();
@@ -80,7 +104,7 @@ enableTimer();
 // =============================================================================
 // refreshPeriod();
 //
-// ...
+// Responsible for displaying and updating the current period name
 //
 // Arguments--
 //
@@ -88,7 +112,12 @@ enableTimer();
 // =============================================================================
 
 function refreshPeriod(eDate) {
+
+    const matchRealPeriod = true; // Only give real periods (only includes actual class periods-includes all class periods)
+    const matchPeriodsWithClass = true; // Only includes class periods that are not "null"
+
     match = calendar.getPeriodByDateAndTime(eDate);
+    nextMatch = calendar.getNextPeriod(match, matchRealPeriod, matchPeriodsWithClass);
 
     if (match === null) {
 
@@ -143,10 +172,13 @@ function refreshPeriod(eDate) {
             " and ends at " + pObj.endSTime
         );
 
-        // Print class information
-        if (pObj.period >= 0) {
 
-            let cObj = pObj.classInfoObject;
+        // Init cObj to be used in the next line
+        let cObj = pObj.classInfoObject;
+
+        // Print class information
+        if (pObj.period >= 0 && cObj !== null) { // Only print the class information if there is an avaible class ("null" takes the place of "no class" in the data structure)
+
             console.log (
             "The class in this period is " + cObj.className +
             ", taught by " + cObj.teacher  +
@@ -168,6 +200,11 @@ function refreshPeriod(eDate) {
             context.font = textPos.nameSize;
             context.fillText(dObj.dayType + " | Free", textPos.x, textPos.y)
         }
+//       if (pObj.period < 0) {
+//            if (nextMatch !== null) {
+//                 timeLeft = calendar.getTimeRemainingUntilPeriod(eDate, nextMatch.dObj, nextMatch.pObj);
+//             }
+//         }
     } // if (pOjb.period >= 0) ... else
 }
 
@@ -185,15 +222,17 @@ function refreshPeriod(eDate) {
 
 function refreshRemainingTime(eDate) {
     // Print time left in period
-    let timeLeft = calendar.getTimeRemainingInPeriod(eDate, match.pObj);
-    console.log (
-        "Time remaining in the period is " +
-        CalendarHHMMSSAsString(timeLeft.hDelta, timeLeft.mDelta, timeLeft.sDelta)
-    );
+    if (match.pObj.period >= 0) {
+        timeLeft = calendar.getTimeRemainingInPeriod(eDate, match.pObj);
+        console.log ("Time remaining in the period is " + timeLeft.toString);
+    } else {
+        timeLeft = calendar.getTimeRemainingUntilPeriod(eDate, nextMatch.dObj, nextMatch.pObj)
+        console.log ("Time remaining until the period is " + timeLeft.toString);
+    }
 
     // Print time remaining for any applicable period
     context.font = textPos.timeSize;
-    context.fillText(CalendarHHMMSSAsString(timeLeft.hDelta, timeLeft.mDelta, timeLeft.sDelta), textPos.x - textPos.xOffset, textPos.y + textPos.yOffset)
+    context.fillText(timeLeft.toString, textPos.x - textPos.xOffset, textPos.y + textPos.yOffset)
 
     return timeLeft;
 }
@@ -226,7 +265,6 @@ function enableTimer () {
 
         // Update the eDate value to the current date and time
         eDate = new Date();
-        refreshRemainingTime(eDate);
 
         timeLeft = refreshRemainingTime(eDate);
 
