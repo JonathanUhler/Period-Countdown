@@ -4,13 +4,17 @@
 //
 "use strict";
 
-let MVHSVersion = "1.0.0";
+let MVHSVersion = "1.0.1";
 
 // Revision History
 //
 //  version    date                     Change
 //  ------- ----------  --------------------------------------------------------
 //  1.0.0   10/08/2020  First usable release of MVHS.js
+//
+//  1.0.1   10/08/2020  Add a module exports statement for runs using node.js
+//                      (not needed in the browser because the html file loads
+//                      MVHS.js before Calendar.js)
 
 // =+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
 // Copyright 2020 Mike Uhler and Jonathan Uhler
@@ -607,3 +611,6 @@ class SchoolYearDefinitions {
   } // SchoolYearDefinitions.constructor
 
 } // class SchoolYearDefinitions
+if (typeof process !== "undefined") {
+  module.exports = SchoolYearDefinitions;
+}
