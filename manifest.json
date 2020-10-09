@@ -8,12 +8,12 @@
         "default_icon": "icon.png",
         "default_popup": "popup.html"
     },
-    "content_scripts": {
+    "content_scripts": [{
         "matches": ["<all_urls>"],
         "js": ["Calendar.js", "display.js", "settings.js"]
-    },
+    }],
     "options_ui": {
         "page": "popup.html",
         "open_in_tab": true
-    },
+    }
 }
