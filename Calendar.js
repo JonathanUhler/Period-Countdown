@@ -5,7 +5,7 @@
 //
 "use strict";
 
-let CalendarVersion = "2.0.0";
+const CalendarVersion = "2.0.1";
 
 // Revision History
 //
@@ -42,11 +42,16 @@ let CalendarVersion = "2.0.0";
 //  2.0.0   10/08/2020  Changes is this version:
 //                       - Remove all of the school-related information from this
 //                         file and put it into MVHS.js
+//
+//  2.0.1   10/09/2020  Changes in this verion:
+//                       - Fix up some comments and documentation
 
 // TODO List
 //  1. Either fix the DST bug hack, or convert over to a date library that
 //     knows about DST
 //
+//  2. In the self-test code, find some way to verify getNextPeriod, perhaps by
+//     doing something similar to the test for getPeriodByDateAndTime.
 
 // =+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
 // Copyright 2020 Mike Uhler and Jonathan Uhler
@@ -86,7 +91,8 @@ let CalendarVersion = "2.0.0";
 //   and whose value is the CalendarDayObject object for that day. There is one
 //   day object hash entry for each element in the day tag array
 //
-//   The "day index" is the offset in the day tag array of a particular day tag
+//   The "day index" is the offset in the day tag array of a particular day tag,
+//   starting at 0
 //
 //   A "week tag" is a day tag string representing the Sunday of the start of
 //   a week.
@@ -99,7 +105,7 @@ let CalendarVersion = "2.0.0";
 //   week object hash entry for each element in the week tag array
 //
 //   The "week index" is the offset in the week tag array of a particular week
-//   tag
+//   tag, starting at 0
 //
 // Variable/Constant Naming Conventions
 //
@@ -108,11 +114,7 @@ let CalendarVersion = "2.0.0";
 //   by type checking. Such variables/constants end with "_" followed by a
 //   single lowercase character, as follows:
 //
-//       _a    Array object
-//       _c    Class object
-//       _h    Hash (associative array) object
-//       _k    Constant (the c was taken by class)
-//       _s    String
+//       _k    Constant (historical terminology from c)
 //
 // Class Variable and Method Naming Convention
 //
@@ -127,7 +129,8 @@ let CalendarVersion = "2.0.0";
 //
 //   The same convention applies to methods of a class. If they start with "_",
 //   they are for the use of code in this file, not for a consumer of the
-//   Calendar class.
+//   Calendar class. Just before each class is defined, there is a block of
+//   comments that lists all class variable and methods.
 //
 // Other Thoughts
 //
@@ -143,6 +146,15 @@ let CalendarVersion = "2.0.0";
 //   Calendar class constructor. However, these lower-level classes do have
 //   methods and public variables that can be accessed when one receives a
 //   reference to an instance of one of these classes.
+//
+//   Calendar.js has no knowledge of the school year layout, including periods,
+//   classes, etc. All of this comes from another file, which in the first
+//   example, is MVHS.js whose role is to define the SchoolYearDefinitions
+//   class from which all school-related information is extracted, either
+//   from public class variables, or accessor functions to return information
+//   from which Calendar.js builds its data structures. There are inter-
+//   dependencies between the files in terms of data structure layout assumptions,
+//   but these are documented fairly well in MVHS.js.
 // =+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
 
 
@@ -151,7 +163,7 @@ let CalendarVersion = "2.0.0";
 //
 // CalendarAssert
 //
-// Function to test and assertion and an exception, with traceback
+// Function to test an assertion and thow an exception, with traceback,
 // if the assertion failed
 //
 // Arguments:
@@ -167,7 +179,10 @@ let CalendarVersion = "2.0.0";
 
 function CalendarAssert (assertion, msg, ...args) {
   if (!assertion) {
-    let message = "***ERROR: CalendarAssert Assertion Failed: " + msg + ": " +args.join("\n, ")
+    let message = "***ERROR: CalendarAssert Assertion Failed: " + msg;
+    if (args.length > 0) {
+      message += " " + args.join("\n, ")
+    }
     console.log (message)
     throw Error ("Assertion Failed");
   }
@@ -191,7 +206,7 @@ function CalendarMessage (msg, ...args) {
 
   let message = "Calendar Message: " + msg;
   if (args.length > 0) {
-    message += " " +args.join("\n, ")
+    message += " " + args.join("\n, ")
   }
   console.log (message)
 } // function CalendarMessage
@@ -219,7 +234,10 @@ function CalendarMidnightOfDate (sDate) {
     sDate, typeof sDate
   );
 
-  let mysDate = sDate + "T00:00:00"; // Force parser to set local time
+  // Appending the "T00:00:00" seems to be the only reliable way to get the
+  // Date() code to force a local timezone. Using .setHours doesn't seem to work
+  // in all cases, despite the documentation to the contrary.
+  let mysDate = sDate + "T00:00:00";
   return new Date(mysDate);
 
 } // function CalendarMidnightOfDate
@@ -227,7 +245,7 @@ function CalendarMidnightOfDate (sDate) {
 // ===========================================================================
 // CalendarPadStringLeft
 //
-// Function to return a string, padded to the left to a specified with width
+// Function to return a string, padded to the left to a specified width with
 // a character
 //
 // Arguments:
@@ -275,7 +293,7 @@ function CalendarPadStringRight (value, width, character) {
 // ===========================================================================
 // CalendarHHMMSSAsString
 //
-// Function to return a string in an [h]h:mm:ss format
+// Function to return a string in a [d] [h]h:mm:ss format
 //
 // Arguments:
 //  hours         (Number in the range 0..23) The number of hours
@@ -285,11 +303,11 @@ function CalendarPadStringRight (value, width, character) {
 //
 //  seconds       (Number in the range 0..59) The number of seconds
 //
-//  days          (Optional positive number) The number of days. Noting is
+//  days          (Optional positive number) The number of days. Nothing is
 //                returned for this unless it is > 0;
 //
 // Returns:
-//  A string in the format "d [h]h:mm:ss"
+//  A string in the format "[d] [h]h:mm:ss"
 
 function CalendarHHMMSSAsString (hours, minutes, seconds, days) {
 
@@ -306,6 +324,7 @@ function CalendarHHMMSSAsString (hours, minutes, seconds, days) {
   return dhhmmss;
 
 } // function CalendarHHMMSSAsString
+
 // END GLOBAL FUNCTIONS DEFINITIONS
 // =+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
 
@@ -314,8 +333,8 @@ function CalendarHHMMSSAsString (hours, minutes, seconds, days) {
 // GLOBAL CONSTANTS AND VARIABLES
 //
 
-
-// Maximum print depth for calls to class toString methods
+// Maximum print depth for calls to class toString methods. This is simply to
+// limit runaway nesting, which is a code bug.
 const _CalendarMaxToStringDepth_k = 10;
 
 // Make first period and last period globals so that they are visible to all
@@ -656,8 +675,7 @@ class CalendarPeriodObject {
 //
 //    printDate:    (String) Date in printable format, e.g., "9/30/2020"
 //
-//    dayType:      (String) Type of day: _dayTypeSchoolDay_k,
-//                  _dayTypeWeekend_k, _dayTypeHoliday_k
+//    dayType:      (String) Type of day: See _dayType* in MVHS.js
 //
 //    dayTag        (String) Day tag for this day
 //
@@ -719,7 +737,7 @@ class CalendarDayObject {
     this.weekTag = weekTag;
     this.dayType = dayType;
 
-    const dayIndexToName_a = [
+    const dayIndexToName = [
       "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"
     ];
 
@@ -734,7 +752,7 @@ class CalendarDayObject {
     this.eDate.getFullYear().toString();
 
     // Create the printable day name
-    this.dayName = dayIndexToName_a[this.eDate.getDay()];
+    this.dayName = dayIndexToName[this.eDate.getDay()];
 
     // Build the periodObjectArray
     this.periodObjectArray = [];
@@ -938,8 +956,11 @@ class CalendarWeekObject {
 //
 // Public Class Variable:
 //
-//    Version       (String) The version number of the Calendar class (and all
-//                  other sub-classes) as major.minor.patch.
+//    version       (String) The version number of the Calendar class (and all
+//                  other sub-classes) as {major}.{minor}.{patch}.
+//
+//    schoolVersion (String) The version number of the file containing the
+//                  SchoolYearDefinitions class.
 //
 //    firstPeriod   (Number) The period number of the first period of the day
 //
@@ -1098,7 +1119,7 @@ class Calendar {
     const maxDayIdx_k = 365
     const maxWeekIdx_k = 52;
 
-    this.Version = CalendarVersion;
+    this.version = CalendarVersion;
     let school;
     // If running on a browser, the html file loads MVHS.js before Calendar.js
     // and the SchoolYearDefinitions class is visible. If running on node.js,
@@ -1110,6 +1131,7 @@ class Calendar {
     } else {
       school = new SchoolYearDefinitions ();
     }
+    this.schoolVersion = school.version;
 
     // Get the start and end dates for the school year
     let startSDate = school.firstDate;
@@ -1186,8 +1208,6 @@ class Calendar {
         // are used as args in the creation of the new day object
         let dayType = school.getDayInfo (weekTag, d, "daytype");
         let periodHashName = school.getDayInfo (weekTag, d, "periodidx");
-        // If the periodHashName is null, there are no periods for this day, so
-        // make the periodsForThisDay area be empty
         let periodsForThisDay = this._periodObjectHash[periodHashName];
 
         // Create the new day object and update _dayTagArray, _dayObjectHash
@@ -1583,7 +1603,9 @@ class Calendar {
   //  Date() value of the start of the calendar
 
   getStartEDate () {
+
     return new Date(this._startEDate.getTime());
+
   } // Calendar.getStartEDate
 
 
@@ -1600,7 +1622,9 @@ class Calendar {
   //  Date() value of the end of the calendar
 
   getEndEDate () {
+
     return new Date(this._endEDate.getTime());
+
   } // Calendar.getEndEDate
 
   // ===========================================================================
@@ -1709,11 +1733,6 @@ class Calendar {
       "getPeriodByDateAndTime got back a periodObjectArray with length zero",
       dayTag, dayObject.dayType
     );
-    /*
-    if (dayObject.periodObjectArray.length === 0) {
-      return {dObj: dayObject, pObj: null, pIdx: 0};
-    }
-    */
 
     // At this point, we know that the day has periods, so we have to look
     // for a period whose time surrounds that of the one provided in the
@@ -1819,9 +1838,10 @@ class Calendar {
       let nextDayIdx = findMatch.dObj.dayIdx + 1;
       if (nextDayIdx >= this._dayTagArray.length) { return null; }
       let dObj = this.getDayByIndex(nextDayIdx);
-      console.log ("Advancing to " + dObj.dayTag)
+
       findMatch = {dObj: dObj, pObj: null, pIdx: 0};
     } //for (let i = 0; i < runawayCounter; i++)
+
     CalendarAssert (
       false,
       "getNextPeriod had a runaway loop after not finding a next period"
@@ -1923,7 +1943,7 @@ class Calendar {
   //  If msTotal is <= 0, there is no time in the interval. toString is just
   //  dDelta, hDelta, mDelta and sDelta passed to the  CalendarHHMMSSAsString
   //  funciton to get a pretty-printed version of the information as a string in
-  //  "d [h]h:mm:ss" format.
+  //  "[d] [h]h:mm:ss" format.
 
   calculateTimeLeft (startTime, endTime) {
     const msPerSecond_k = 1000;
@@ -2027,7 +2047,7 @@ class Calendar {
 
     getVersion () {
 
-      return this.Version;
+      return this.version;
 
     } // getVersion
 
@@ -2083,10 +2103,11 @@ let version;
 // pass.
 
 if (typeof process != "undefined" || _enableTestCodeInBrowser) {
+
   // Emit error message for a test failure
   function emitError (testNum, message, ...args) {
     let errorString = "** ERROR in test " + testNum + " " + message +
-      ":\n\t" + args.join("\n\t");
+    ":\n\t" + args.join("\n\t");
     throw Error(errorString);
   }
 
@@ -2330,74 +2351,70 @@ if (typeof process != "undefined" || _enableTestCodeInBrowser) {
     return true;
   } // test9
 
-    // Test10: Validate the getPeriodByDateAndTime method by calling it for the
-    // start time and the end times of every period in the school year
-    function test10(calendar) {
-      CalendarMessage ("Test 10: Validate getPeriodByDateAndTime");
-      let dayTagArray = calendar.getDayTagArray();
-      for (let dayIdx = 0; dayIdx < dayTagArray.length; dayIdx++) {
-        let dayTag = dayTagArray[dayIdx];
-        let dayObj = calendar.getDayByTag(dayTag);
-        let expectedMSTime = 0;
-        for (let pIdx = 0; pIdx < dayObj.periodObjectArray.length; pIdx++) {
-          let pObj = dayObj.periodObjectArray[pIdx];
-          let startMSTime = pObj.startMSTime;
-          let endMSTime = pObj.endMSTime;
-          let date = dayObj.eDate.getTime() + startMSTime;
-          let eDate = new Date(date);
+  // Test10: Validate the getPeriodByDateAndTime method by calling it for the
+  // start time and the end times of every period in the school year
+  function test10(calendar) {
+    CalendarMessage ("Test 10: Validate getPeriodByDateAndTime");
+    let dayTagArray = calendar.getDayTagArray();
+    for (let dayIdx = 0; dayIdx < dayTagArray.length; dayIdx++) {
+      let dayTag = dayTagArray[dayIdx];
+      let dayObj = calendar.getDayByTag(dayTag);
+      let expectedMSTime = 0;
+      for (let pIdx = 0; pIdx < dayObj.periodObjectArray.length; pIdx++) {
+        let pObj = dayObj.periodObjectArray[pIdx];
+        let startMSTime = pObj.startMSTime;
+        let endMSTime = pObj.endMSTime;
+        let date = dayObj.eDate.getTime() + startMSTime;
+        let eDate = new Date(date);
 
-          let match = calendar.getPeriodByDateAndTime(eDate);
-          if (
-            match === null ||
-            match.dObj !== dayObj ||
-            match.pObj !== pObj ||
-            pIdx !== match.pIdx
-            )
-          {
-            emitError (10.1, "getPeriodByDateAndTime returned wrong value on start time test",
-            pIdx, match.pIdx, dayTag,
-            match.dObj.toString("",1),
-            dayObj.toString("",1),
-            match.pObj.toString("",1),
-            pObj.toString("",1));
-            return false;
-          }
+        let match = calendar.getPeriodByDateAndTime(eDate);
+        if (
+          match === null ||
+          match.dObj !== dayObj ||
+          match.pObj !== pObj ||
+          pIdx !== match.pIdx
+        )
+        {
+          emitError (10.1, "getPeriodByDateAndTime returned wrong value on start time test",
+          pIdx, match.pIdx, dayTag,
+          match.dObj.toString("",1),
+          dayObj.toString("",1),
+          match.pObj.toString("",1),
+          pObj.toString("",1));
+          return false;
+        }
 
-          date = dayObj.eDate.getTime() + endMSTime;
-          eDate = new Date(date);
-          if (dayTag === "2021-03-14") continue; //***HACK FOR DST BUG***
+        date = dayObj.eDate.getTime() + endMSTime;
+        eDate = new Date(date);
+        if (dayTag === "2021-03-14") continue; //***HACK FOR DST BUG***
 
-          match = calendar.getPeriodByDateAndTime(eDate);
-          if (
-            match === null ||
-            match.dObj !== dayObj ||
-            match.pObj !== pObj ||
-            pIdx !== match.pIdx
-            )
-          {
-            emitError (10.2, "getPeriodByDateAndTime returned wrong value on end time test",
-            pIdx, match.pIdx, dayTag,
-            match.dObj.toString("",1),
-            dayObj.toString("",1),
-            match.pObj.toString("",1),
-            pObj.toString("",1));
-            return false;
-          }
-        } // for (pIdx = 0; pIdx < dayObj.periodObjectArray.length; pIdx++)
-      } // for (let dayIdx = 0; dayIdx < dayTagArray.length; dayIdx++)
-      return true;
-    } // test9
+        match = calendar.getPeriodByDateAndTime(eDate);
+        if (
+          match === null ||
+          match.dObj !== dayObj ||
+          match.pObj !== pObj ||
+          pIdx !== match.pIdx
+        )
+        {
+          emitError (10.2, "getPeriodByDateAndTime returned wrong value on end time test",
+          pIdx, match.pIdx, dayTag,
+          match.dObj.toString("",1),
+          dayObj.toString("",1),
+          match.pObj.toString("",1),
+          pObj.toString("",1));
+          return false;
+        }
+      } // for (pIdx = 0; pIdx < dayObj.periodObjectArray.length; pIdx++)
+    } // for (let dayIdx = 0; dayIdx < dayTagArray.length; dayIdx++)
+    return true;
+  } // test10
 
-  // TODO: Additional tests to write
-  //
-  //  - Find some way to verify getNextPeriod, perhaps by doing something similar
-  //    to the previous test
 
   // Create new calendar using argument defaults and initialize the weeks, days
   // and periods
   calendar = new Calendar();
   version = calendar.getVersion();
-  console.log ("Calendar v" + version);
+  console.log (`Calendar v${version}, SchoolYearDefinitions v${calendar.schoolVersion}`);
 
   // Run tests and report results
 
@@ -2428,14 +2445,14 @@ if (_enableExampleCode) {
   // Create a new calendar and emit the version number
   calendar = new Calendar();
   version = calendar.getVersion();
-  console.log ("Calendar v" + version);
+  console.log (`Calendar v${version}, SchoolYearDefinitions v${calendar.schoolVersion}`);
 
 
   // The following variable lets us force a date and time to see the result.
   // If it is set to null, the current date/time is used, which is the normal
   // behavior of the browser application
   // ************************************************
-//  let lookupDateTime = "2020-11-01T22:59:59";     //*
+  //  let lookupDateTime = "2020-11-01T22:59:59"; //*
   let lookupDateTime = null;                      //*
   // ************************************************
 
