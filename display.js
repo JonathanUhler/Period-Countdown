@@ -46,7 +46,7 @@ let DisplayVersion = "1.0.0";
 //                          of-day or start-of-day)
 //                              -Change "timeLeft" by one of two values depending
 //                              on the type of period
-//
+// 
 
 // Version information
 this.Version = DisplayVersion

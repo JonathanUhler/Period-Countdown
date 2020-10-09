@@ -27,7 +27,7 @@
 // =+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
 
 // Canvas and context properties
-var canvas = document.getElementById('Settings');
+var canvas = document.getElementById('Periods');
 var context = canvas.getContext('2d');
 
 let SettingsVersion = "0.0.0";
@@ -40,10 +40,30 @@ let SettingsVersion = "0.0.0";
 
 // Version information
 this.Version = SettingsVersion
-console.log("Display v" + this.Version);
+console.log("Settings v" + this.Version);
 
+
+// openSettingsTab();
+
+// function openSettingsTab() {
+//     window.open("/Users/jonathan/Documents/VS\ Code/Period/popup.html", "_blank");
+// }
+
+document.getElementById("goToSettings").addEventListener("click", openSettingsTab);
 
 function openSettingsTab() {
-    console.debug("test");
-    window.open("https://www.geeksforgeeks.org", "_blank");
+    window.open("file:///Users/jonathan/Documents/VS%20Code/Period/popup.html", "_blank")
 }
+
+// function openSettings() {
+//     var n = document.getElementById("settingsClose");
+//     if (n.style.display === "none") {
+//         n.style.display = "block";
+//     } 
+// }
+// function closeSettings() {
+//     var s = document.getElementById("settingsClose");
+//     if (s.style.display === "block") {
+//         s.style.display = "none";
+//     } 
+// }
