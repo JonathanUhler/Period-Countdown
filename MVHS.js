@@ -4,7 +4,7 @@
 //
 "use strict";
 
-let MVHSVersion = "1.0.2";
+const MVHSVersion = "1.0.2";
 
 // Revision History
 //
@@ -96,6 +96,9 @@ class SchoolYearDefinitions {
 
     // =+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
     // MOUNTAIN VIEW HIGH SCHOOL (MVHS) WEEK, DAY, PERIOD AND CLASS DEFINITIONS
+
+    // Export the version number
+    this.version = MVHSVersion;
 
     // Export the day and last day of school
     this.firstDate = "2020-08-12";
