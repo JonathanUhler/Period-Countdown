@@ -4,7 +4,7 @@
 //
 "use strict";
 
-let MVHSVersion = "1.0.1";
+let MVHSVersion = "1.0.2";
 
 // Revision History
 //
@@ -15,6 +15,8 @@ let MVHSVersion = "1.0.1";
 //  1.0.1   10/08/2020  Add a module exports statement for runs using node.js
 //                      (not needed in the browser because the html file loads
 //                      MVHS.js before Calendar.js)
+//
+//  1.0.2   10/09/2020  Fix up some comments and documentation
 
 // =+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
 // Copyright 2020 Mike Uhler and Jonathan Uhler
@@ -124,14 +126,14 @@ class SchoolYearDefinitions {
     //
     // The keys to the hash identify what information is specified, as follows:
     //
-    //        p = The period number, 0..7
-    //        c = The name of the (school) class. If this field is null, there
+    //        p:  The period number, 0..7
+    //        c:  The name of the (school) class. If this field is null, there
     //            is no class during that period.
-    //        r = The room in which the class is held
-    //        t = The name of the teacher for the class /
+    //        r:  The room in which the class is held
+    //        t:  The name of the teacher for the class
     //
-    // This is a private constant within the class, so information is retrieved
-    // via the public accessor function.
+    // _classInfoArray is a private constant within the class, so information
+    // is retrieved via the public accessor function.
 
     // Class information array, indexed by period
     const _classInfoArray = [
@@ -201,16 +203,16 @@ class SchoolYearDefinitions {
     // periods being chonological with no gaps or overlaps. The keys to each
     // period hash identify what information is specified, as follows:
     //
-    //      p  = The period number (-1..7). If this value is -1, it represents a
+    //      p:   The period number (-1..7). If this value is -1, it represents a
     //           pseudo period that is used to denote a block of time that is not
     //           in a real period. The pseudo periods are used for before and after
     //           school, passing periods between real periods, and lunch.
-    //      n  = Name of the period (or pseudo period)
-    //      st = Start time of the period within the day, in the format hh:mm
-    //      et = End time of the period within the day, in the format hh:mm
-    //      c  = A comment about the period. Not used for anything but documentation
+    //      n:   Name of the period (or pseudo period)
+    //      st:  Start time of the period within the day, in the format hh:mm
+    //      et:  End time of the period within the day, in the format hh:mm
+    //      c:   A comment about the period. Not used for anything but documentation
     //           purposes
-    //      a  = End time adjustment. To avoid any overlapping time blocks, the
+    //      a:   End time adjustment. To avoid any overlapping time blocks, the
     //           end time is backed up by 1ms relative to what was specified in the
     //           et key. However, this doesn't work at the end of the day because
     //           the end time is specified as 23:59. This key/value tells the
@@ -218,8 +220,8 @@ class SchoolYearDefinitions {
     //           value for this special case. If the a key/value isn't specified,
     //           it defaults to -1
     //
-    // This is a private constant within the class, so information is retrieved
-    // via the public accessor functions.
+    // _periodDayTypeHash is a private constant within the class, so information
+    // is retrieved via the public accessor functions.
 
     // Create some constants to tie the data structure definitions to the week
     // array usage below.
@@ -231,6 +233,7 @@ class SchoolYearDefinitions {
 
     // Period descriptions for each type of school day
     const _periodDayTypeHash = {
+
       [_PeriodsForADay_k]: [
         // Periods for A Day
         //period      name              startTime    endTime        Comment                         Adjustment
@@ -321,7 +324,7 @@ class SchoolYearDefinitions {
     //  None
     //
     // Returns:
-    //  Array containing all of the day types into _periodDayTypeHash
+    //  Array containing all of the day type keys from _periodDayTypeHash
 
     this.getPeriodDayTypes = function () {
 
@@ -332,7 +335,7 @@ class SchoolYearDefinitions {
     } // this.getPeriodDayTypes = function ()
 
     // -------------------------------------------------------------------------
-    // getPeriodDayTypes
+    // getPeriodCount
     //
     // This is the public accessor function to return the number of periods for
     // a specific day type
@@ -346,7 +349,7 @@ class SchoolYearDefinitions {
     this.getPeriodCount = function (dayType) {
 
       // The dayType argument specifies the day type, which is the top-level
-      // key into the hash. The value of that is the array containing all of
+      // key into the hash. The value of that is the array containing
       // the hashes for each period, so the length of the array is the
       // period count to return
       let periodsForDay = _periodDayTypeHash[dayType];
@@ -435,28 +438,28 @@ class SchoolYearDefinitions {
     // of letters, each of which can be "A", "B", "C" or "H", with the following
     // meanings
     //
-    //        A = A School Day
-    //        B = B School Day
-    //        C = C School Day
-    //        H = Some form of holiday
+    //        A:  A School Day
+    //        B:  B School Day
+    //        C:  C School Day
+    //        H:  Some form of holiday
     //
     // So the _MVHS_ABHAB_Week_a name means that the week has an A day on Monday
     // and Thursday, a B Day on Tuesday and Friday, and a holiday on Wednesday.
-    // Nothing enforces this naming convention, so it's there only to aid understanding
-    // of the definitions.
+    // Nothing enforces this naming convention, so it's there only to aid
+    // understanding of the definitions.
     //
-    // The default week is used unless there is a week tag match in the _MVHS_Week_Exceptions_h
-    // hash (indexed by week tag). The value of that hash is the week array to use
-    // in place of the default week.
+    // The default week is used unless there is a week tag match in the
+    // _MVHS_Week_Exceptions hash (indexed by week tag). The value of that hash
+    // is the week array to use in place of the default week.
     //
     // Each week array is exactly 7 elements long, corresponding to the 7 days of
     // the week, with the 0th element of the array containing the day description
-    // for Sunday, 1 for Monday, and 6 for Saturday. Each array element is hash
+    // for Sunday, 1 for Monday, and 6 for Saturday. Each array element is a hash
     // which provides information about that day of the week. The keys to the hash
     // identify what information is specified, as follows:
     //
-    //        dt = Day type; one of _dayType*_k
-    //        pa = Period array; an array of periods in that day. See Day Pattern
+    //        dt:  Day type; one of _dayType*_k
+    //        pa:  Period array; an array of periods in that day. See Day Pattern
     //             Descriptions, above.
 
     // This is the default week, which is used for any week that is not in the
@@ -538,8 +541,8 @@ class SchoolYearDefinitions {
     ];
 
     // This is the list of weeks that are different from the default week. The key
-    // is the week tag of the exceptional week and the value is the week object
-    // for that week
+    // is the week tag of the exceptional week and the value is the _MVHS_*_Week
+    // array for that week
     const _MVHS_Week_Exceptions = {
       "2020-08-09": _MVHS_HHCAB_Week,          // Beginning of the school year
       "2020-09-06": _MVHS_HABAB_Week,          // Labor Day
@@ -611,6 +614,10 @@ class SchoolYearDefinitions {
   } // SchoolYearDefinitions.constructor
 
 } // class SchoolYearDefinitions
+
+// For running on node.js, export the class definition so that it can be used
+// in Calendar.js via a require statement. Note that this isn't necessary for
+// runs in a browser because the html file loads MVHS.js before Calendar.js
 if (typeof process !== "undefined") {
   module.exports = SchoolYearDefinitions;
 }
