@@ -57,6 +57,18 @@ const DisplayVersion = "1.0.0";
 //                          -Documentation conventions updated to match Calendar.js
 //                          (no functional changes)
 //                          -Additional documentation changes
+//
+// 1.3.0    10/10/2020  Changes in this version:
+//                          -Added function printText to handle displaying text
+//                          -Removed individual print statements (context.fillText();)
+//                          from refreshPeriod and refreshRemainingTime with a call of
+//                          printText
+//                          -Renamed the textPos object to textDef (text definition) for
+//                          clarity
+//                          -Removed the x and y offset variables from textDef in favor of
+//                          a single x-position variable (textDef.textX) and independant
+//                          y-position variables (textDef.nameY for "period name" text and
+//                          textDef.timeY for "time remaining" text)
 
 
 // TO-DO:
@@ -76,14 +88,13 @@ console.log("Display v" + this.Version);
 // Create a new instance of the Calendar class (with all information for current classes)
 calendar = new Calendar();
 
-// Text information variables
-var textPos = {
-    x: 10,
-    y: 35,
-    xOffset: 0,
-    yOffset: 70,
-    timeSize: "59px Arial",
-    nameSize: "35px Arial"
+// Text definition object
+var textDef = {
+    textX: 10,
+    nameY: 35,
+    timeY: 105,
+    nameSize: "35px Arial",
+    timeSize: "59px Arial"
 }
 // Set common color for all text
 context.fillStyle = 'black';
@@ -149,8 +160,7 @@ function refreshPeriod(eDate) {
         console.log ("No match on " + eDate)
 
         // Display "not in school" information on extension
-        context.font = textPos.nameSize;
-        context.fillText("Summer | Free", textPos.x, textPos.y) // There is only 1 year worth of data as of now, so this CANNOT display a "time left in period" number
+        printText("Summer", " | ", "Free", textDef.nameSize, textDef.textX, textDef.nameY);
 
     } 
     else {
@@ -173,7 +183,6 @@ function refreshPeriod(eDate) {
             " and ends at " + pObj.endSTime
         );
 
-
         // Init cObj to be used in the next line
         let cObj = pObj.classInfoObject;
 
@@ -190,16 +199,15 @@ function refreshPeriod(eDate) {
             // Test if cObj is null, return special case "No class", else return cObj.className
             let className = (cObj === null) ? "No class" : cObj.className
 
-            context.font = textPos.nameSize;
-            context.fillText(className + " | " + pObj.name, textPos.x, textPos.y)
+            printText(className, " | ", pObj.name, textDef.nameSize, textDef.textX, textDef.nameY);
 
         } 
         else {
             console.log ("There is no class during this period");
 
             // Display "in the school year but not a school day" --> weekends and holidays
-            context.font = textPos.nameSize;
-            context.fillText(dObj.dayType + " | Free", textPos.x, textPos.y)
+            printText(dObj.dayType, " | ", "Free", textDef.nameSize, textDef.textX, textDef.nameY);
+
         }
     } // end: if (pOjb.period >= 0) ... else
 } // end: function refreshPeriod
@@ -232,11 +240,40 @@ function refreshRemainingTime(eDate) {
     }
 
     // Print time remaining for any applicable period
-    context.font = textPos.timeSize;
-    context.fillText(timeLeft.toString(), textPos.x - textPos.xOffset, textPos.y + textPos.yOffset)
+    printText(timeLeft.toString(), "", "", textDef.timeSize, textDef.textX, textDef.timeY);
 
     return timeLeft;
 } // end: function refreshRemainingTime
+
+
+// =============================================================================
+// printText();
+//
+// Takes and prints information about the time remaining and the name of the
+// current period. Replaces calls to context.fillText with calls to printText
+//
+// Arguments--
+//
+// msg1:        The first of two messages that can be displayed (this is the 
+//              timestamp, "Biology", "Weekend", etc.)
+//
+// divider:     The choice to have a divider like " | " between the two messages
+//
+// msg2:        The second message that is displayed (only used by the name, not
+//              the time remaining; this is like "Free" or "P1")
+//
+// textSize:    The font size of the text to be printed
+//
+// x:           The x position of the text to be printed
+//
+// y:           The y position of the text to be printed
+//
+function printText(msg1, divider, msg2, textSize, x, y) {
+
+    context.font = textSize;
+    context.fillText(msg1 + divider + msg2, x, y);
+
+} // end function printText
 
 
 // =============================================================================
