@@ -69,6 +69,11 @@ const DisplayVersion = "1.0.0";
 //                          a single x-position variable (textDef.textX) and independant
 //                          y-position variables (textDef.nameY for "period name" text and
 //                          textDef.timeY for "time remaining" text)
+//
+// 1.3.1    10/10/2020  Changes in this version:
+//                          -Minor documentation changes
+//                          -Added the "color" argument to printText to allow for changable
+//                          text-color
 
 
 // TO-DO:
@@ -96,8 +101,6 @@ var textDef = {
     nameSize: "35px Arial",
     timeSize: "59px Arial"
 }
-// Set common color for all text
-context.fillStyle = 'black';
 
 // The following variable lets us force a date and time to see the result.
 // If it is set to null, the current date/time is used
@@ -160,7 +163,7 @@ function refreshPeriod(eDate) {
         console.log ("No match on " + eDate)
 
         // Display "not in school" information on extension
-        printText("Summer", " | ", "Free", textDef.nameSize, textDef.textX, textDef.nameY);
+        printText("Summer", " | ", "Free", textDef.nameSize, textDef.textX, textDef.nameY, 'black');
 
     } 
     else {
@@ -199,14 +202,14 @@ function refreshPeriod(eDate) {
             // Test if cObj is null, return special case "No class", else return cObj.className
             let className = (cObj === null) ? "No class" : cObj.className
 
-            printText(className, " | ", pObj.name, textDef.nameSize, textDef.textX, textDef.nameY);
+            printText(className, " | ", pObj.name, textDef.nameSize, textDef.textX, textDef.nameY, 'black');
 
         } 
         else {
             console.log ("There is no class during this period");
 
             // Display "in the school year but not a school day" --> weekends and holidays
-            printText(dObj.dayType, " | ", "Free", textDef.nameSize, textDef.textX, textDef.nameY);
+            printText(dObj.dayType, " | ", "Free", textDef.nameSize, textDef.textX, textDef.nameY, 'black');
 
         }
     } // end: if (pOjb.period >= 0) ... else
@@ -240,7 +243,7 @@ function refreshRemainingTime(eDate) {
     }
 
     // Print time remaining for any applicable period
-    printText(timeLeft.toString(), "", "", textDef.timeSize, textDef.textX, textDef.timeY);
+    printText(timeLeft.toString(), "", "", textDef.timeSize, textDef.textX, textDef.timeY, 'black');
 
     return timeLeft;
 } // end: function refreshRemainingTime
@@ -268,8 +271,15 @@ function refreshRemainingTime(eDate) {
 //
 // y:           The y position of the text to be printed
 //
-function printText(msg1, divider, msg2, textSize, x, y) {
+// color:       The color of the text to be printed
+//
+// Returns--
+//
+// does not return anything to the caller
+//
+function printText(msg1, divider, msg2, textSize, x, y, color) {
 
+    context.fillStyle = color;
     context.font = textSize;
     context.fillText(msg1 + divider + msg2, x, y);
 
