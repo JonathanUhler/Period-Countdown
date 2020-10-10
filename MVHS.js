@@ -4,7 +4,7 @@
 //
 "use strict";
 
-const MVHSVersion = "2.0.0";
+const MVHSVersion = "2.0.1";
 
 // Revision History
 //
@@ -24,6 +24,7 @@ const MVHSVersion = "2.0.0";
 //                      day and let Calendar.js decide what to do with that
 //                      information. This change requires a corresponding change
 //                      to Calendar.js
+//  2.0.1   10/10/2020  Minor documentation change
 
 // =+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
 // Copyright 2020 Mike Uhler and Jonathan Uhler
@@ -56,6 +57,8 @@ const MVHSVersion = "2.0.0";
 // class constructor.
 //
 // Public Class Variables:
+//
+//    version       (String) Version number of the MVHS.js module
 //
 //    firstDate     (String) First date of the school year, in yyyy-mm-dd format
 //
