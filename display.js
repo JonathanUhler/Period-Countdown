@@ -30,7 +30,7 @@
 var canvas = document.getElementById('Periods');
 var context = canvas.getContext('2d');
 
-let DisplayVersion = "1.0.0";
+const DisplayVersion = "1.0.0";
 
 // Revision History
 //
@@ -52,11 +52,26 @@ let DisplayVersion = "1.0.0";
 //                          that calls a function in Calendar.js
 //                          -Days do not display anymore and are converted to hours
 //                          in Calendar.js
+//
+// 1.2.1    10/10/2020  Changes in this version:
+//                          -Documentation conventions updated to match Calendar.js
+//                          (no functional changes)
+//                          -Additional documentation changes
+
+
+// TO-DO:
+//
+// 1) Clean-up documentation
+//
+// 2) Condense context.___ into a function
+//
+// 3) Condese console.log messages into a function
+//
+// 4) Get settings to work with the "next-up" periods feature
 
 // Version information
 this.Version = DisplayVersion
 console.log("Display v" + this.Version);
-
 
 // Create a new instance of the Calendar class (with all information for current classes)
 calendar = new Calendar();
@@ -114,8 +129,11 @@ enableTimer();
 // Arguments--
 //
 // eDate:       The epic date, set to the JavaScript built-in "new Date();"
-// =============================================================================
-
+//
+// Returns--
+// does not return a value to the caller:       Displays the period name and action
+//                                              (like "Free") on the extension
+//
 function refreshPeriod(eDate) {
 
     const matchRealPeriod = true; // Only give real periods (only includes actual class periods-includes all class periods)
@@ -135,28 +153,6 @@ function refreshPeriod(eDate) {
         context.fillText("Summer | Free", textPos.x, textPos.y) // There is only 1 year worth of data as of now, so this CANNOT display a "time left in period" number
 
     } 
-
-
-    // =============================================================================
-    // WARNING: The following "else if" conditional can never be true and is never called
-    // =============================================================================
-    //
-    // else if (match.pObj === null) {
-
-    //     // if match.pObj is null, then there was a day match, but there are no
-    //     // periods for that day, as would be the case on a weekend or a holiday
-    //     let dObj = match.dObj;
-    //     console.log (
-    //         dObj.dayName + ", " +
-    //         dObj.printDate + " is a " +
-    //         dObj.dayType + " and has no periods"
-    //     );
-
-    //     // Display "during school year but not a day that has school" --> weekends and holidays
-    //     context.font = textPos.nameSize;
-    //     context.fillText(dObj.dayType + " | Free", textPos.x, textPos.y)
-
-    // } 
     else {
 
         // Found a match on both day and period.
@@ -205,13 +201,8 @@ function refreshPeriod(eDate) {
             context.font = textPos.nameSize;
             context.fillText(dObj.dayType + " | Free", textPos.x, textPos.y)
         }
-//       if (pObj.period < 0) {
-//            if (nextMatch !== null) {
-//                 timeLeft = calendar.getTimeRemainingUntilPeriod(eDate, nextMatch.dObj, nextMatch.pObj);
-//             }
-//         }
-    } // if (pOjb.period >= 0) ... else
-}
+    } // end: if (pOjb.period >= 0) ... else
+} // end: function refreshPeriod
 
 
 // =============================================================================
@@ -223,8 +214,13 @@ function refreshPeriod(eDate) {
 // Arguments--
 //
 // eDate:       The epic date, set to the JavaScript built-in "new Date();"
-// =============================================================================
-
+//
+// Returns--
+//
+// timeLeft:        The adjusted amount of time remaining in the current period
+//                  (set depending on if the current period is a pseudo-period
+//                  or not)
+//
 function refreshRemainingTime(eDate) {
     // Print time left in period
     if (match.pObj.period >= 0) {
@@ -240,7 +236,7 @@ function refreshRemainingTime(eDate) {
     context.fillText(timeLeft.toString(), textPos.x - textPos.xOffset, textPos.y + textPos.yOffset)
 
     return timeLeft;
-}
+} // end: function refreshRemainingTime
 
 
 // =============================================================================
@@ -254,8 +250,12 @@ function refreshRemainingTime(eDate) {
 // Arguments--
 //
 // enableTimer takes no arguments.
-// =============================================================================
-
+//
+// Returns--
+//
+// does not return a value to the caller:       handles updates (frame by frame)
+//                                              of the extension
+//
 function enableTimer () {
     setInterval(function () {
 
@@ -273,7 +273,9 @@ function enableTimer () {
 
         timeLeft = refreshRemainingTime(eDate);
 
-    }, 1000) // Update every 1 second --> this leads to the timer trailing by ~1 second for every 20 hours of run time (if the period remains the same)
-}
+    // Update every 1 second --> this leads to the timer trailing by ~1 second for 
+    // every 20 hours of run time (if the period remains the same)
+    }, 1000)
+} // end: function enableTimer
 
  
