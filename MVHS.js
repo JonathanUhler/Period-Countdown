@@ -4,7 +4,7 @@
 //
 "use strict";
 
-const MVHSVersion = "1.0.2";
+const MVHSVersion = "2.0.0";
 
 // Revision History
 //
@@ -17,6 +17,13 @@ const MVHSVersion = "1.0.2";
 //                      MVHS.js before Calendar.js)
 //
 //  1.0.2   10/09/2020  Fix up some comments and documentation
+//
+//  2.0.0   10/09/2020  Change the _periodDayTypeHash structure for each day
+//                      type such that the adjustment field becomes a boolean
+//                      that indicates whether a period is the last one of the
+//                      day and let Calendar.js decide what to do with that
+//                      information. This change requires a corresponding change
+//                      to Calendar.js
 
 // =+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
 // Copyright 2020 Mike Uhler and Jonathan Uhler
@@ -215,13 +222,13 @@ class SchoolYearDefinitions {
     //      et:  End time of the period within the day, in the format hh:mm
     //      c:   A comment about the period. Not used for anything but documentation
     //           purposes
-    //      a:   End time adjustment. To avoid any overlapping time blocks, the
+    //      a:   End of day adjustment. To avoid any overlapping time blocks, the
     //           end time is backed up by 1ms relative to what was specified in the
     //           et key. However, this doesn't work at the end of the day because
     //           the end time is specified as 23:59. This key/value tells the
     //           code that adjusts the end time to use a different adjustment
     //           value for this special case. If the a key/value isn't specified,
-    //           it defaults to -1
+    //           it defaults to false
     //
     // _periodDayTypeHash is a private constant within the class, so information
     // is retrieved via the public accessor functions.
@@ -239,7 +246,7 @@ class SchoolYearDefinitions {
 
       [_PeriodsForADay_k]: [
         // Periods for A Day
-        //period      name              startTime    endTime        Comment                         Adjustment
+        //period      name              startTime    endTime        Comment                         eodAdjust
         {p: -1,   n: "Before School", st: "00:00", et: "09:30", c: "Before school on A day"},
         {p:  1,   n: "P1",            st: "09:30", et: "10:45", c: "Period 1 on A day"},
         {p: -1,   n: "P1->P3",        st: "10:45", et: "11:00", c: "Passing Period 1->3 on A day"},
@@ -248,32 +255,24 @@ class SchoolYearDefinitions {
         {p:  5,   n: "P5",            st: "13:05", et: "14:20", c: "Period 5 on A day"},
         {p: -1,   n: "P5->P7",        st: "14:20", et: "14:30", c: "Passing Period 5->7 on A day"},
         {p:  7,   n: "P7",            st: "14:30", et: "15:45", c: "Period 7 on A day"},
-        {p: -1,   n: "After School",  st: "15:45", et: "23:59", c: "After school on A day",         a: 60*1000-1}
-        //                                                                                              ^
-        //                                                                                         This adjustment
-        //                                                                                        makes the end time
-        //                                                                                       1ms before midnight
+        {p: -1,   n: "After School",  st: "15:45", et: "23:59", c: "After school on A day",         a: true}
       ], // [_PeriodsForADay_k]
 
       [_PeriodsForBDay_k]: [
         // Periods for B Day
-        //period      name              startTime    endTime        Comment                         Adjustment
+        //period      name              startTime    endTime        Comment                         eodAdjust
         {p: -1,   n: "Before School", st: "00:00", et: "09:30", c: "Before school on B day"},
         {p:  2,   n: "P2",            st: "09:30", et: "10:45", c: "Period 2 on B day"},
         {p: -1,   n: "P2->P4",        st: "10:45", et: "11:00", c: "Passing Period 2->4 on B day"},
         {p:  4,   n: "P4",            st: "11:00", et: "12:15", c: "Period 4 on B day"},
         {p: -1,   n: "Lunch",         st: "12:15", et: "13:05", c: "Lunch on B day"},
         {p:  6,   n: "P6",            st: "13:05", et: "14:20", c: "Period 6 on B day"},
-        {p: -1,   n: "After School",  st: "14:20", et: "23:59", c: "After school on B day",         a: 60*1000-1}
-        //                                                                                              ^
-        //                                                                                         This adjustment
-        //                                                                                        makes the end time
-        //                                                                                       1ms before midnight
-      ], // [_PeriodsForBDay_k]
+        {p: -1,   n: "After School",  st: "14:20", et: "23:59", c: "After school on B day",         a: true}
+        ], // [_PeriodsForBDay_k]
 
       [_PeriodsForCDay_k]: [
         // Periods for C Day
-        //period      name              startTime    endTime        Comment                         Adjustment
+        //period      name              startTime    endTime        Comment                         eodAdjust
         {p: -1,   n: "Before School", st: "00:00", et: "09:30", c: "Before school on C day"},
         {p:  1,   n: "P1",            st: "09:30", et: "10:00", c: "Period 1 on C day"},
         {p: -1,   n: "P1->P2",        st: "10:00", et: "10:10", c: "Passing Period 1->2 on C day"},
@@ -288,31 +287,19 @@ class SchoolYearDefinitions {
         {p:  6,   n: "P6",            st: "13:40", et: "14:10", c: "Period 6 on C day"},
         {p: -1,   n: "P6->P7",        st: "14:10", et: "14:20", c: "Passing Period 6->7 on C day"},
         {p:  7,   n: "P7",            st: "14:20", et: "14:50", c: "Period 7 on C day"},
-        {p: -1,   n: "After School",  st: "14:50", et: "23:59", c: "After school on C day",         a: 60*1000-1}
-        //                                                                                              ^
-        //                                                                                         This adjustment
-        //                                                                                        makes the end time
-        //                                                                                       1ms before midnight
+        {p: -1,   n: "After School",  st: "14:50", et: "23:59", c: "After school on C day",         a: true}
       ], // [_PeriodsForCDay_k]
 
       [_PeriodsForWeekend_k]: [
         // Periods for Weekend
-        //period      name              startTime    endTime        Comment                         Adjustment
-        {p: -1,   n: "Weekend",       st: "00:00", et: "23:59", c: "Weekend",                       a: 60*1000-1}
-        //                                                                                              ^
-        //                                                                                         This adjustment
-        //                                                                                        makes the end time
-        //                                                                                       1ms before midnight
+        //period      name              startTime    endTime        Comment                         eodAdjust
+        {p: -1,   n: "Weekend",       st: "00:00", et: "23:59", c: "Weekend",                       a: true}
       ], // [_PeriodsForWeekend_k]
 
       [_PeriodsForHoliday_k]: [
         // Periods for Weekend
-        //period      name              startTime    endTime        Comment                         Adjustment
-        {p: -1,   n: "Holiday",       st: "00:00", et: "23:59", c: "Holiday",                       a: 60*1000-1}
-        //                                                                                              ^
-        //                                                                                         This adjustment
-        //                                                                                        makes the end time
-        //                                                                                       1ms before midnight
+        //period      name              startTime    endTime        Comment                         eodAdjust
+        {p: -1,   n: "Holiday",       st: "00:00", et: "23:59", c: "Holiday",                       a: true}
       ] // [_PeriodsForHoliday_k]
 
     }; // _periodDayTypeHash
@@ -393,10 +380,9 @@ class SchoolYearDefinitions {
     //
     //                "comment"   Any comment supplied for the period
     //
-    //                "adjtime"   An optional time adjustment to the end time
-    //                            of the period. This is used to push the end
-    //                            time of the last "after school" period of the
-    //                            day to 1ms before midnight
+    //                "eodadjust" This boolean field specifies whether to special-
+    //                            case the end time for this period because it
+    //                            is the final period in the day.
     //
     // Returns:
     //  The desired field if all arguments are valid for the hash
@@ -413,7 +399,7 @@ class SchoolYearDefinitions {
 
       // Force the field name to lower case to eliminate typing errors by the
       // caller and extract and return the requested field. Note that the
-      // adjTime field is optional, so we need to set it to -1 if it is not
+      // eodadj field is optional, so we need to set it to false if it is not
       // supplied
       let lcfield = field.toLowerCase();
       switch (lcfield) {
@@ -422,7 +408,7 @@ class SchoolYearDefinitions {
         case 'starttime': return periodsForThisDay.st; break;
         case 'endtime':   return periodsForThisDay.et; break;
         case 'comment':   return periodsForThisDay.c;  break;
-        case 'adjtime':   return periodsForThisDay.a || -1;  break;
+        case 'eodadjust': return periodsForThisDay.a || false;  break;
         default:          return undefined;
 
       } // switch (lcfield)
