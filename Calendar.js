@@ -5,7 +5,7 @@
 //
 "use strict";
 
-const CalendarVersion = "2.0.1";
+const CalendarVersion = "3.0.0";
 
 // Revision History
 //
@@ -45,12 +45,33 @@ const CalendarVersion = "2.0.1";
 //
 //  2.0.1   10/09/2020  Changes in this verion:
 //                       - Fix up some comments and documentation
+//
+//  3.0.0   10/09/2020  Changes in this version:
+//                       - Fix up the DST problems by going from a millisecond
+//                         based comparison of periods, to one that uses
+//                         the .setHours call to a real date object, and then
+//                         comparing the .getTime() values for the date object.
+//                         This requires a corresponding change to MVHS.js.
+//                       - Add a field in every class to specify the type of class.
+//                         This helps with checking that an argument to a method
+//                         is of the right type
+//                       - Add improved CalendarAssert calls in methods to
+//                         ensure that method arguments are of the correct type.
+//                         This is the manual method of working around the fact
+//                         that Javascript doesn't do type or argument checking.
+//                       - Convert the .toString property in timeLeft from a
+//                         variable that is only updated by calculateTimeLeft to
+//                         function that will generate the pretty-printed string
+//                         when called. This enables correct values if the
+//                         timeLeft *Delta variables are updated manually
+//                       - Add an optional boolean argument as the last in the
+//                         calls to calculateTimeLeft and getTimeRemainingUntilPeriod
+//                         methods to add (.dDelta*24) to .hDelta and to set
+//                         .dDelta to zero. This converts days to hours for those
+//                         cases where that format is desired.
 
 // TODO List
-//  1. Either fix the DST bug hack, or convert over to a date library that
-//     knows about DST
-//
-//  2. In the self-test code, find some way to verify getNextPeriod, perhaps by
+//  1. In the self-test code, find some way to verify getNextPeriod, perhaps by
 //     doing something similar to the test for getPeriodByDateAndTime.
 
 // =+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
@@ -314,7 +335,7 @@ function CalendarHHMMSSAsString (hours, minutes, seconds, days) {
   let dayCount = days || 0;
   let dhhmmss = "";
   if (dayCount > 0) {
-    dhhmmss = dayCount.toString() + " ";
+    dhhmmss = dayCount.toString() + "d ";
   }
   dhhmmss +=
     (hours.toString() + ":" +
@@ -342,6 +363,15 @@ const _CalendarMaxToStringDepth_k = 10;
 let CalendarFirstPeriod;
 let CalendarLastPeriod;
 
+// Define class type constants, which will be placed as a class variable in
+// every class for error checking purposes
+
+const _classTypeClass_k     = "Type Class";
+const _classTypePeriod_k    = "Type Period";
+const _classTypeDay_k       = "Type Day";
+const _classTypeWeek_k      = "Type Week"
+const _classTypeCalendar_k  = "Type Calendar";
+
 // END GLOBAL CONSTANTS AND VARIABLES
 // =+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
 
@@ -352,6 +382,9 @@ let CalendarLastPeriod;
 // This class defines the structure of the object for each (school) class.
 //
 // Public Class Variables:
+//
+//    classType     (String) Type of class - see _classType*_k. Used for
+//                  argument checking
 //
 //    period:       (Positive Integer) Period number
 //
@@ -397,6 +430,7 @@ class CalendarClassObject {
       "CalendarClassObject.constructor called with invalid arguments",
       period, className, room, teacher
     );
+    this.classType = _classTypeClass_k;
 
     // This information is really just for reporting purposes
     this.period = period;
@@ -460,6 +494,9 @@ class CalendarClassObject {
 //
 // Public Class Variables:
 //
+//    classType     (String) Type of class - see _classType*_k. Used for
+//                  argument checking
+//
 //    period:       (Number) Period number -1..7. If this is -1, it is a pseudo
 //                  period, used for before and after school, passing periods
 //                  and lunch and there is no classInfoObject.
@@ -469,16 +506,16 @@ class CalendarClassObject {
 //    startSTime:   (String) Start time of the period: "hh:mm" using a 24-hour
 //                  clock
 //
-//    startMSTime:  (Number) Milliseconds after midnight for the start time
+//    startDAdj:    (Array) Array containing hours, minutes, seconds and ms to
+//                  be used in a .setHours() call to adjust the eDate value of
+//                  the day to be a full Date() for the start of the period
 //
 //    endSTime:     (String) End time of the period: "hh:mm" using a 24-hour
 //                  clock
 //
-//    endMSTime:    (Number) Milliseconds after midnight for the end time. This
-//                  is actually 1ms less than the end time so that periods don't
-//                  overlap. There is a special case for the after school
-//                  pseudo period in which this is actually 1ms before
-//                  midnight
+//    endDAdj:      (Array) Array containing hours, minutes, seconds and ms to
+//                  be used in a .setHours() call to adjust the eDate value of
+//                  the day to be a full Date() for the start of the period
 //
 //    comment:      (String) Comment describing the period. May be ""
 //
@@ -515,12 +552,15 @@ class CalendarPeriodObject {
   //
   //  comment     (OPTIONAL String) Comment describing the period or null
   //
+  //  eodAdjust   (REQUIRED boolean) True if this period is the last one in the
+  //              day; false for all others
+  //
   //  classInfoObject
   //              (REQURIED CalendarClassObject instance) The class information
   //              object corresponding to this period, or null if there is no
   //              class during this period.
 
-  constructor (period, name, startTime, endTime, comment, adjTime, classInfoObject) {
+  constructor (period, name, startTime, endTime, comment, eodAdjust, classInfoObject) {
 
     // Make sure the caller provided the required arguments and argument types
     CalendarAssert (
@@ -530,26 +570,26 @@ class CalendarPeriodObject {
       (name   !== undefined)            && (typeof name      === "string") &&
       (startTime !== undefined)         && (typeof startTime === "string") &&
       (endTime !== undefined)           && (typeof endTime   === "string") &&
-      (classInfoObject !== undefined)   && (typeof classInfoObject === "object"),
+      (eodAdjust !== undefined)         && (typeof eodAdjust === "boolean") &&
+      ((classInfoObject !== undefined)   &&
+        (classInfoObject === null) || (classInfoObject.classType === _classTypeClass_k)),
       "CalendarPeriodObject.constructor called with invalid arguments",
       period, name, startTime, endTime, classInfoObject, CalendarFirstPeriod, CalendarLastPeriod
     );
+    this.classType = _classTypePeriod_k;
 
-    // Make the default end time adjustment -1 ms. If the adjTime argument
-    // is specified, use that
-    let msAdjust = adjTime || -1;
     this.period = period;
     this.name = name;
 
     // Save both the string version of start and end times, but also convert
-    // them to milliseconds from midnight to make time comparisons easier for
-    // users of the data
+    // them an array that provides the arguments to .setHour() used with the
+    // day's Date() object to get the absolute start and end times of the period
     let errorString = period + ":" + name + ":" + startTime + ":" + endTime + ":" + comment;
     this.startSTime = startTime;
-    this.startMSTime = _helperSTimeToMSTime(startTime, 0, errorString);
+    this.startDAdj = _helperSTimeToSetTimeArgs(startTime, false, false, errorString);
 
     this.endSTime = endTime;
-    this.endMSTime = _helperSTimeToMSTime(endTime, msAdjust, errorString);
+    this.endDAdj = _helperSTimeToSetTimeArgs(endTime, true, eodAdjust, errorString);
 
     // If the period number isn't in the range of the class array, then
     // make classInfoObject null, otherwise extract the class information for this
@@ -568,29 +608,32 @@ class CalendarPeriodObject {
       CalendarMessage ("DEBUG: Instance is\n", this.toString("  ", 2));
     }
 
-    // Helper function to convert a string in the format "[h]h:[m]m" to
-    // the number of milliseconds after midnight, so (h*60+m)*60*1000. Also
-    // performs error checking and throws an error if the number is incorrectly
-    // formatted
+    // Helper function to convert a string in the format "[h]h:[m]m" to an
+    // array that provides the arguments to .setTime() to compute the absolute
+    // start and end times of the period on a particular day.
     //
     // Arguments:
     //  sTime       String to convert, in [h]h:[m]m format
     //
-    //  adjTime     Number of ms to add to the converted value (typically
-    //              provided as a negative number to back the end time up
-    //              so that there is no overlap. For example, if -1 is used
-    //              then the end time will be 1ms less than the sTime string)
+    //  isEndTime   If true, this is the period end time, which needs to be
+    //              adjusted; false otherwise
+    //
+    //  eodAdjust   True if this value is for an end-of-day end time, which
+    //              is special-cased to put the value 1ms before midnight.
+    //              Only used if isEndTime is also true.
     //
     //  errorString Context string to print if an error is found
     //
     // Returns:
-    //  ms after midnight corresponding to the input string
+    //  Array of [hours, minutes, seconds, milliseconds] for the relative time
+    //  for this date. Will be adjusted if isEndTime is true.
 
-    function _helperSTimeToMSTime (sTime, adjTime, errorString) {
+    function _helperSTimeToSetTimeArgs (sTime, isEndTime, eodAdjust, errorString) {
       // Define some useful constants
       const HoursPerDay_k = 24;
       const MinutesPerHour_k = 60;
-      const msPerMinute_k = 60*1000;
+      const SecondsPerMinute_k = 60
+      const MsPerSecond_k = 1000;
 
       // Pattern match the time format. H is returned in [1]; M in [2]
       let timeSplit = sTime.match(/^\s*(\d+)\:(\d+)\s*$/);
@@ -610,8 +653,29 @@ class CalendarPeriodObject {
         sTime, errorString
       );
 
-      return (((hours * MinutesPerHour_k + minutes) * msPerMinute_k) + adjTime);
-    } // CalendarPeriodObject.constructor._helperSTimeToMSTime
+      // Case 1: The start time of the period
+      // If this isn't the end time, simply return hours and minutes and leave
+      // seconds and milliseconds zero
+      if (!isEndTime) { return [hours, minutes, 0, 0] };
+
+      // Case 2: The end time for the last period of the day
+      // Here if this is the end time, which needs some adjustment. If eodAdjust
+      // is true, this is the end time for the period at the end of the day, so
+      // just return [23, 59, 59, 999], which is 1ms before midnight
+      if (eodAdjust) { return [HoursPerDay_k-1, MinutesPerHour_k-1, SecondsPerMinute_k-1, MsPerSecond_k-1] };
+
+      // Case 3: The end time for all but the last period of the day
+      // Here if this is an end time AND not the last period in the day. The
+      // adjustment is to back up the end time by 1 ms. This means that we need
+      // to backup minutes by 1, then add in 59, 999 for the seconds and ms
+      minutes -= 1;           // Backup minutes by 1
+      if (minutes < 0) {      // If it went negative, make it 59 and decrement
+        hours -= 1;           // hours by 1
+        minutes = MinutesPerHour_k - 1;
+      }
+      return [hours, minutes, SecondsPerMinute_k-1, MsPerSecond_k-1];
+
+    } // CalendarPeriodObject.constructor._helperSTimeToSetTimeArgs
 
   } // CalendarPeriodObject.constructor
 
@@ -645,8 +709,8 @@ class CalendarPeriodObject {
     }
     myLinePrefix += "  ";
     returnString +=
-    myLinePrefix + "starts at " + this.startSTime + " (" + this.startMSTime + ")\n" +
-    myLinePrefix + "ends at " + this.endSTime + " (" + this.endMSTime + ")\n";
+    myLinePrefix + "starts at " + this.startSTime + " (" + this.startDAdj + ")\n" +
+    myLinePrefix + "ends at " + this.endSTime + " (" + this.endendDAdj + ")\n";
 
     if (this.comment !== null) {
       returnString +=
@@ -670,6 +734,9 @@ class CalendarPeriodObject {
 // This class defines the structure of the object for each day of the week.
 //
 // Public Class Variables:
+//
+//    classType     (String) Type of class - see _classType*_k. Used for
+//                  argument checking
 //
 //    dayName:      (String) Name of the day, e.g., "Sunday"
 //
@@ -731,6 +798,7 @@ class CalendarDayObject {
       "CalendarDayObject.constructor called with invalid arguments",
       periodObjectArray, dayType
     );
+    this.classType = _classTypeDay_k;
 
     this.dayTag = dayTag;
     this.dayIdx = dayIdx;
@@ -757,6 +825,11 @@ class CalendarDayObject {
     // Build the periodObjectArray
     this.periodObjectArray = [];
     for (let p = 0; p < periodObjectArray.length; p++) {
+      CalendarAssert (
+        periodObjectArray[p].classType === _classTypePeriod_k,
+        "CalendarDayObject constructor called with invalid period object array",
+        p, periodObjectArray[p]
+      );
       this.periodObjectArray.push(periodObjectArray[p]);
     }
 
@@ -825,6 +898,9 @@ class CalendarDayObject {
 // which looks like this
 //
 // Public Class Variables:
+//    classType   (String) Type of class - see _classType*_k. Used for
+//                argument checking
+//
 //    weekTag:    (String) Date for the Sunday of this week in the format
 //                "yyyy-mm-dd".
 //
@@ -869,6 +945,7 @@ class CalendarWeekObject {
       "CalendarWeekObject.constructor called with invalid arguments",
       weekTag, weekIdx
     );
+    this.classType = _classTypeWeek_k;
 
     // Initialize the variables
     this.weekTag = weekTag;
@@ -955,6 +1032,9 @@ class CalendarWeekObject {
 // This class defines the structure of the data structure for the calendar.
 //
 // Public Class Variable:
+//
+//    classType     (String) Type of class - see _classType*_k. Used for
+//                  argument checking
 //
 //    version       (String) The version number of the Calendar class (and all
 //                  other sub-classes) as {major}.{minor}.{patch}.
@@ -1118,6 +1198,7 @@ class Calendar {
     const daysPerWeek_k = 7;
     const maxDayIdx_k = 365
     const maxWeekIdx_k = 52;
+    this.classType = _classTypeCalendar_k;
 
     this.version = CalendarVersion;
     let school;
@@ -1344,7 +1425,7 @@ class Calendar {
             let startTime = getPeriodInfoFunc(thisDayType, p, "startTime");
             let endTime   = getPeriodInfoFunc(thisDayType, p, "endTime");
             let comment   = getPeriodInfoFunc(thisDayType, p, "comment");
-            let adjTime   = getPeriodInfoFunc(thisDayType, p, "adjTime");
+            let eodAdjust = getPeriodInfoFunc(thisDayType, p, "eodAdjust");
 
             // Validate that the values came back correctly
             CalendarAssert (
@@ -1353,9 +1434,9 @@ class Calendar {
               (startTime  !== undefined) &&
               (endTime    !== undefined) &&
               (comment    !== undefined) &&
-              (adjTime    !== undefined),
+              (eodAdjust  !== undefined),
               "school periodDayHashType has incorrect information",
-              period, name, startTime, endTime, comment, adjTime
+              period, name, startTime, endTime, comment, eodAdjust
             );
 
             // If this is a real period, find the class info object for that
@@ -1363,13 +1444,18 @@ class Calendar {
             let classInfoObject = null;
             if ((period >= CalendarFirstPeriod) && (period <= CalendarLastPeriod)) {
               classInfoObject = classInfoObjectArray[period];
+              CalendarAssert (
+                classInfoObject.classType === _classTypeClass_k,
+                "_helperInstantiateClassPeriodObjects got back an object that had the wrong type",
+                classInfoObject
+              );
             }
 
             // Create a new period object and push it onto the array for this
             // day type
             periodObjectHash[thisDayType].push(
               new CalendarPeriodObject(
-                period, name, startTime, endTime, comment, adjTime, classInfoObject
+                period, name, startTime, endTime, comment, eodAdjust, classInfoObject
               )
             );
           } // for (let p = 0; p < periodCount; p++)
@@ -1719,14 +1805,10 @@ class Calendar {
     let dayTag = this.getDayTag(eDate);
     let dayObject = this._dayObjectHash[dayTag];
     CalendarAssert (
-      dayObject !== undefined,
-      "getPeriodByDateAndTime got back an undefined on the _dayObjectHash for tag",
+      (dayObject !== undefined) && (dayObject.classType === _classTypeDay_k),
+      "getPeriodByDateAndTime got back an undefined on the day object for tag",
       dayTag
     );
-
-    // If dayObject.periodObjectArray is [], there are no periods that day,
-    // so return [dayObject, null, 0] to the caller. This should never happen
-    // with the current data structure
 
     CalendarAssert (
       dayObject.periodObjectArray.length !== 0,
@@ -1740,13 +1822,20 @@ class Calendar {
     // the eDate arg. This will allow delta comparison in the period
     // object.
 
-    let msSinceMidnight = this.getMsSinceMidnight(eDate);
     for (let index = 0; index < dayObject.periodObjectArray.length; index++) {
 
       let periodObject = dayObject.periodObjectArray[index];
+      // Calculate the absolute start and end times for the period using the
+      // base eDate for the day, and the setHours() arguments from the period
+      let startTime = new Date(dayObject.eDate.getTime());
+      startTime.setHours(...periodObject.startDAdj);
+      let endTime = new Date(dayObject.eDate.getTime());
+      endTime.setHours(...periodObject.endDAdj);
+
+      // See if the eDate.getTime() value is in the range startTime.getTime()...endTime.getTime()
       if (
-        msSinceMidnight >= periodObject.startMSTime &&
-        msSinceMidnight <= periodObject.endMSTime
+        eDate.getTime() >= startTime.getTime() &&
+        eDate.getTime() <= endTime.getTime()
       ) {
         return {dObj: dayObject, pObj: periodObject, pIdx: index};
       }
@@ -1925,6 +2014,10 @@ class Calendar {
   //
   //  endTime     Time in milliseconds of the end of the interval
   //
+  //  noDays        (Optional boolean) If true, hours are increased by (24*days)
+  //                days are set to zero. If not supplied, this value defaults to
+  //                false
+  //
   // Returns:
   //  Object that describes the time between the arguments as four keys:
   //
@@ -1945,13 +2038,34 @@ class Calendar {
   //  funciton to get a pretty-printed version of the information as a string in
   //  "[d] [h]h:mm:ss" format.
 
-  calculateTimeLeft (startTime, endTime) {
+  calculateTimeLeft (startTime, endTime, noDays) {
     const msPerSecond_k = 1000;
     const msPerMinute_k = msPerSecond_k * 60;
     const msPerHour_k = msPerMinute_k * 60;
     const msPerDay_k = msPerHour_k * 24;
+    const hoursPerDay_k = 24;
 
-    let timeLeft = {msTotal: 0, dDelta: 0, hDelta: 0, mDelta: 0, sDelta:0, toString:""};
+    let suppressDays = noDays || false;
+
+    // Initialize the return value, including the toString function which, when
+    // called, pretty-prints the value of d,h,m,s and returns that as a string
+    let timeLeft = {
+      msTotal: 0,
+      dDelta: 0,
+      hDelta: 0,
+      mDelta: 0,
+      sDelta:0,
+      toString () {
+        let msg = CalendarHHMMSSAsString (
+          this.hDelta,
+          this.mDelta,
+          this.sDelta,
+          this.dDelta
+        );
+        return msg;
+      }
+    };
+
     let delta_ms = endTime - startTime;
 
     // Break this down to the days, hours, minutes and seconds
@@ -1964,15 +2078,12 @@ class Calendar {
       timeLeft.mDelta = Math.floor(delta_ms / msPerMinute_k);
       delta_ms -= timeLeft.mDelta * msPerMinute_k
       timeLeft.sDelta = Math.floor(delta_ms / msPerSecond_k);
+      if (suppressDays) {
+        timeLeft.hDelta += timeLeft.dDelta * hoursPerDay_k;
+        timeLeft.dDelta = 0;
+      }
     } else {}
 
-    // And pretty-print the results
-    timeLeft.toString = CalendarHHMMSSAsString(
-      timeLeft.hDelta,
-      timeLeft.mDelta,
-      timeLeft.sDelta,
-      timeLeft.dDelta
-    );
     return timeLeft;
 
   } // calculateTimeLeft
@@ -1993,14 +2104,21 @@ class Calendar {
   //  for a description of the object
 
   getTimeRemainingInPeriod (eDate, pObj) {
-
+    CalendarAssert (
+      pObj.classType === _classTypePeriod_k,
+      "getTimeRemainingInPeriod called with invalid period object",
+      pObj
+    );
     // Convert eDate to ms since midnight and the same for the end date of the
-    // period and then let calculateTimeLeft do the work. It's possible that
+    // period and then set the hours, minutes, seconds and milliseconds to get
+    // absolute values of the two dates
     // startTime could be later than endTime, but calculateTimeLeft takes care
     // of that case
-    let startTime = this.getMsSinceMidnight(eDate);
-    let endTime = pObj.endMSTime + 1;
-    return this.calculateTimeLeft (startTime, endTime);
+    let startTime = eDate;
+    let endTime = new Date(eDate.getTime());
+    endTime.setHours(...pObj.endDAdj);
+    endTime.setTime(endTime.getTime()+1)
+    return this.calculateTimeLeft (startTime.getTime(), endTime.getTime());
 
   }
 
@@ -2018,19 +2136,38 @@ class Calendar {
     //  pObj        CalendarPeriodObject for the period from which an start time
     //              can be extracted
     //
+    //  noDays        (Optional boolean) If true, hours are increased by (24*days)
+    //                days are set to zero. If not supplied, this value defaults to
+    //                false
+    //
     // Returns:
     //  Object that describes the time left in the period. See calculateTimeLeft
     //  for a description of the object
 
-    getTimeRemainingUntilPeriod (eDate, dObj, pObj) {
+    getTimeRemainingUntilPeriod (eDate, dObj, pObj, noDays) {
+
+      CalendarAssert (
+        dObj.classType === _classTypeDay_k,
+        "getTimeRemainingUntilPeriod called with invalid day object",
+        dObj
+      );
+      CalendarAssert (
+        pObj.classType === _classTypePeriod_k,
+        "getTimeRemainingUntilPeriod called with invalid period object",
+        pObj
+      );
+
+      let suppressDays = noDays || false;
 
       // The start time is simply the getTime() value for eDate. The end time
       // is the start time of the period on the day specified.  It's possible that
       // startTime could be later than endTime, but calculateTimeLeft takes care
       // of that case
-      let startTime = eDate.getTime();
-      let endTime = dObj.eDate.getTime() + pObj.startMSTime;
-      return this.calculateTimeLeft (startTime, endTime);
+      let startTime = eDate;
+      let endTime = new Date(dObj.eDate.getTime());
+      endTime.setHours(...pObj.endDAdj);
+      endTime.setTime(endTime.getTime()+1)
+      return this.calculateTimeLeft (startTime.getTime(), endTime.getTime(), suppressDays);
 
     }
 
@@ -2126,6 +2263,7 @@ if (typeof process != "undefined" || _enableTestCodeInBrowser) {
         return false;
       }
     }
+    CalendarMessage ("  Test passed");
     return true;
   } // test1
 
@@ -2163,6 +2301,7 @@ if (typeof process != "undefined" || _enableTestCodeInBrowser) {
     CalendarMessage ("_weekTagArray is " + calendar._weekTagArray.length +
     " entries: " + calendar._weekTagArray[0] + "..." + calendar._weekTagArray[calendar._weekTagArray.length-1])
 
+    CalendarMessage ("  Test passed");
     return true;
   } // test2
 
@@ -2181,6 +2320,7 @@ if (typeof process != "undefined" || _enableTestCodeInBrowser) {
         return false;
       }
     }
+    CalendarMessage ("  Test passed");
     return true;
   } // test3
 
@@ -2218,6 +2358,7 @@ if (typeof process != "undefined" || _enableTestCodeInBrowser) {
     }
     CalendarMessage ("_dayTagArray is " + calendar._dayTagArray.length +
     " entries: " + calendar._dayTagArray[0] + "..." + calendar._dayTagArray[calendar._dayTagArray.length-1])
+    CalendarMessage ("  Test passed");
     return true;
   } // test4
 
@@ -2231,6 +2372,7 @@ if (typeof process != "undefined" || _enableTestCodeInBrowser) {
     if (dayList.length !== weekList.length * 7) {
       emitError(5.1, "Length mismatch between _dayTagArray and _weekTagArray", dayList.length, weekList.length)
     }
+    CalendarMessage ("  Test passed");
     return true;
   } // test5
 
@@ -2251,6 +2393,7 @@ if (typeof process != "undefined" || _enableTestCodeInBrowser) {
         calendar.advanceToFutureDay(expectedEDate, 1);
       }
     }
+    CalendarMessage ("  Test passed");
     return true;
   } // test6
 
@@ -2285,6 +2428,7 @@ if (typeof process != "undefined" || _enableTestCodeInBrowser) {
         }
       } // for (let di = 0; di < WeekObj.dayObjectArray.length; di++)
     } // for (let weekIdx = 0; weekIdx < weekTagArray.length; weekIdx++)
+    CalendarMessage ("  Test passed");
     return true;
   } // Test7
 
@@ -2311,6 +2455,7 @@ if (typeof process != "undefined" || _enableTestCodeInBrowser) {
         return false;
       }
     } // for (let dayIdx = 0; dayIdx < dayTagArray.length; dayIdx++)
+    CalendarMessage ("  Test passed");
     return true;
   } // Test8
 
@@ -2323,7 +2468,7 @@ if (typeof process != "undefined" || _enableTestCodeInBrowser) {
     for (let dayIdx = 0; dayIdx < dayTagArray.length; dayIdx++) {
       let dayTag = dayTagArray[dayIdx];
       let dayObj = calendar.getDayByTag(dayTag);
-      let expectedMSTime = 0;
+      let expectedTime = new Date(dayObj.eDate.getTime());
       if (dayObj.periodObjectArray.length === 0) {
         emitError (9.1, "periodObjectArray length is zero",
         dayTag, dayObj.dayType);
@@ -2331,23 +2476,29 @@ if (typeof process != "undefined" || _enableTestCodeInBrowser) {
       }
       for (let pIdx = 0; pIdx < dayObj.periodObjectArray.length; pIdx++) {
         let pObj = dayObj.periodObjectArray[pIdx];
-        if (pObj.startMSTime !== expectedMSTime) {
-          emitError (9.2, "Unexpected startMSTime for period",
-          expectedMSTime, dayTag, dayIdx, pIdx, pObj.startMSTime, pObj.endMSTime,
+        let startTime = new Date(dayObj.eDate.getTime())
+        startTime.setHours(...pObj.startDAdj);
+        if (startTime.getTime() !== expectedTime.getTime()) {
+          emitError (9.2, "Unexpected startTime for period",
+          expectedTime, startTime, dayTag, dayIdx, pIdx,
           pObj.period, pObj.name, pObj.comment);
           return false;
         }
-        expectedMSTime = pObj.endMSTime + 1;
+        expectedTime.setHours(...pObj.endDAdj);
+        expectedTime.setTime(expectedTime.getTime()+1)
       } // for (pIdx = 0; pIdx < dayObj.periodObjectArray.length; pIdx++)
-      if (expectedMSTime !== msPerDay_k) {
+      let expectedEODTime = new Date(dayObj.eDate.getTime());
+      calendar.advanceToFutureDay(expectedEODTime, 1)
+      if (expectedTime.getTime() !== expectedEODTime.getTime()) {
         let pIdx = dayObj.periodObjectArray.length-1;
         let pObj = dayObj.periodObjectArray[pIdx];
         emitError (9.3, "Final period did not end at 1ms before midnight",
-        expectedMSTime, msPerDay_k, dayTag, dayIdx, pIdx, pObj.startMSTime, pObj.endMSTime,
+        expectedTime, expectedEODTime, dayTag, dayIdx, pIdx, pObj.startMSTime, pObj.endMSTime,
         pObj.period, pObj.name, pObj.comment);
         return false;
       }
     } // for (let dayIdx = 0; dayIdx < dayTagArray.length; dayIdx++)
+    CalendarMessage ("  Test passed");
     return true;
   } // test9
 
@@ -2362,12 +2513,12 @@ if (typeof process != "undefined" || _enableTestCodeInBrowser) {
       let expectedMSTime = 0;
       for (let pIdx = 0; pIdx < dayObj.periodObjectArray.length; pIdx++) {
         let pObj = dayObj.periodObjectArray[pIdx];
-        let startMSTime = pObj.startMSTime;
-        let endMSTime = pObj.endMSTime;
-        let date = dayObj.eDate.getTime() + startMSTime;
-        let eDate = new Date(date);
+        let startTime = new Date(dayObj.eDate.getTime());
+        startTime.setHours(...pObj.startDAdj);
+        let endTime = new Date(dayObj.eDate.getTime());
+        endTime.setHours(...pObj.endDAdj);
 
-        let match = calendar.getPeriodByDateAndTime(eDate);
+        let match = calendar.getPeriodByDateAndTime(startTime);
         if (
           match === null ||
           match.dObj !== dayObj ||
@@ -2384,11 +2535,7 @@ if (typeof process != "undefined" || _enableTestCodeInBrowser) {
           return false;
         }
 
-        date = dayObj.eDate.getTime() + endMSTime;
-        eDate = new Date(date);
-        if (dayTag === "2021-03-14") continue; //***HACK FOR DST BUG***
-
-        match = calendar.getPeriodByDateAndTime(eDate);
+        match = calendar.getPeriodByDateAndTime(endTime);
         if (
           match === null ||
           match.dObj !== dayObj ||
@@ -2406,6 +2553,7 @@ if (typeof process != "undefined" || _enableTestCodeInBrowser) {
         }
       } // for (pIdx = 0; pIdx < dayObj.periodObjectArray.length; pIdx++)
     } // for (let dayIdx = 0; dayIdx < dayTagArray.length; dayIdx++)
+    CalendarMessage ("  Test passed");
     return true;
   } // test10
 
@@ -2418,16 +2566,16 @@ if (typeof process != "undefined" || _enableTestCodeInBrowser) {
 
   // Run tests and report results
 
-  if (test1 (calendar)) CalendarMessage ("  Test passed");
-  if (test2 (calendar)) CalendarMessage ("  Test passed");
-  if (test3 (calendar)) CalendarMessage ("  Test passed");
-  if (test4 (calendar)) CalendarMessage ("  Test passed");
-  if (test5 (calendar)) CalendarMessage ("  Test passed");
-  if (test6 (calendar)) CalendarMessage ("  Test passed");
-  if (test7 (calendar)) CalendarMessage ("  Test passed");
-  if (test8 (calendar)) CalendarMessage ("  Test passed");
-  if (test9 (calendar)) CalendarMessage ("  Test passed");
-  if (test10(calendar)) CalendarMessage ("  Test passed");
+  test1 (calendar);
+  test2 (calendar);
+  test3 (calendar);
+  test4 (calendar);
+  test5 (calendar);
+  test6 (calendar);
+  test7 (calendar);
+  test8 (calendar);
+  test9 (calendar);
+  test10(calendar);
 
 } // if (typeof process != "undefined" || _enableTestCodeInBrowser)
 
@@ -2452,8 +2600,8 @@ if (_enableExampleCode) {
   // If it is set to null, the current date/time is used, which is the normal
   // behavior of the browser application
   // ************************************************
-  //  let lookupDateTime = "2020-11-01T22:59:59"; //*
-  let lookupDateTime = null;                      //*
+    //let lookupDateTime = "2020-10-19T09:30:00";   //*
+    let lookupDateTime = null;                    //*
   // ************************************************
 
   let eDate;
@@ -2469,7 +2617,7 @@ if (_enableExampleCode) {
 
   // Print time left in period
   let timeLeft = calendar.getTimeRemainingInPeriod(eDate, match.pObj);
-  console.log ("Time remaining in the period is " + timeLeft.toString);
+  console.log ("Time remaining in the period is " + timeLeft.toString());
 
   let matchRealPeriod = true;
   let matchPeriodsWithClass = true;
@@ -2480,8 +2628,8 @@ if (_enableExampleCode) {
     match = calendar.getNextPeriod(match, matchRealPeriod, matchPeriodsWithClass);
     _printDayAndPeriodMatch (match);
     if (match !== null) {
-      let timeLeft = calendar.getTimeRemainingUntilPeriod(eDate, match.dObj, match.pObj);
-      console.log ("Time remaining until the start of that period is " + timeLeft.toString)
+      let timeLeft = calendar.getTimeRemainingUntilPeriod(eDate, match.dObj, match.pObj, true);
+      console.log ("Time remaining until the start of that period is " + timeLeft.toString())
     }
   }
 
