@@ -5,7 +5,7 @@
 //
 "use strict";
 
-const CalendarVersion = "3.0.0";
+const CalendarVersion = "3.0.1";
 
 // Revision History
 //
@@ -69,6 +69,12 @@ const CalendarVersion = "3.0.0";
 //                         methods to add (.dDelta*24) to .hDelta and to set
 //                         .dDelta to zero. This converts days to hours for those
 //                         cases where that format is desired.
+//
+//  3.0.1   10/10/2020   Changes in this version:
+//                        - Remove getMsSinceMidnight method because the v3.3.0
+//                          eliminated the need
+//                        - Minor commentary and typo fixing that doesn't change
+//                          the function
 
 // TODO List
 //  1. In the self-test code, find some way to verify getNextPeriod, perhaps by
@@ -1155,10 +1161,6 @@ class CalendarWeekObject {
 //                  match argument from the last call to getPeriodByDateAndTime,
 //                  or the last call to getNextPeriod)
 //
-//    ms = getMsSinceMidnight (eDate)
-//                  Returns the number of milliseconds since midnight of the
-//                  date/time specified by the eDate argument
-//
 //    timeLeft = calculateTimeLeft (startTime, endTime)
 //                  Calculate the time in the interval between startTime and
 //                  endTime (both in milliseconds) and return an object that
@@ -1982,29 +1984,6 @@ class Calendar {
   } // getNextPeriod
 
   // ===========================================================================
-  // getMSSinceMidnight
-  //
-  // Return the number of milliseconds since midnight of the eDate argument.
-  // This is used to do period comparisons on a specific day.
-  //
-  // Arguments:
-  //  eDate         Date() object for the date/time from which to calculate the
-  //                number of milliseconds since midnight
-  //                itself)
-  //
-  // Returns
-  //  Positive integer corresponding to the number of milliseconds since midnight
-  //  for the eDate argument
-
-  getMsSinceMidnight (eDate) {
-
-    let sDate = this.getDayTag(eDate);
-    let midnight = CalendarMidnightOfDate(this.getDayTag(eDate));
-    return eDate.getTime() - midnight.getTime();
-
-  } // Calendar.getMsSinceMidnight
-
-  // ===========================================================================
   // calculateTimeLeft
   //
   // Return an object specifying the time left between the two arguments
@@ -2082,7 +2061,7 @@ class Calendar {
         timeLeft.hDelta += timeLeft.dDelta * hoursPerDay_k;
         timeLeft.dDelta = 0;
       }
-    } else {}
+    }
 
     return timeLeft;
 
