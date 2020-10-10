@@ -1,6 +1,6 @@
 {
     "name": "MVHS Periods",
-    "version": "1.0.0",
+    "version": "2.0.0",
     "manifest_version": 2,
     "description": "A stand-alone Chrome extension that displays period and schedule information for Mountain View High School",
 

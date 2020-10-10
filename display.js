@@ -47,6 +47,11 @@ let DisplayVersion = "1.0.0";
 //                              -Change "timeLeft" by one of two values depending
 //                              on the type of period
 // 
+// 1.2.0    10/10/2020  Changes in this version:
+//                          -timeLeft.toString replaced with timeLeft.toString();
+//                          that calls a function in Calendar.js
+//                          -Days do not display anymore and are converted to hours
+//                          in Calendar.js
 
 // Version information
 this.Version = DisplayVersion
@@ -224,15 +229,15 @@ function refreshRemainingTime(eDate) {
     // Print time left in period
     if (match.pObj.period >= 0) {
         timeLeft = calendar.getTimeRemainingInPeriod(eDate, match.pObj);
-        console.log ("Time remaining in the period is " + timeLeft.toString);
+        console.log ("Time remaining in the period is " + timeLeft.toString());
     } else {
-        timeLeft = calendar.getTimeRemainingUntilPeriod(eDate, nextMatch.dObj, nextMatch.pObj)
-        console.log ("Time remaining until the period is " + timeLeft.toString);
+        timeLeft = calendar.getTimeRemainingUntilPeriod(eDate, nextMatch.dObj, nextMatch.pObj, true)
+        console.log ("Time remaining until the period is " + timeLeft.toString());
     }
 
     // Print time remaining for any applicable period
     context.font = textPos.timeSize;
-    context.fillText(timeLeft.toString, textPos.x - textPos.xOffset, textPos.y + textPos.yOffset)
+    context.fillText(timeLeft.toString(), textPos.x - textPos.xOffset, textPos.y + textPos.yOffset)
 
     return timeLeft;
 }
