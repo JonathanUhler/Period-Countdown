@@ -11,7 +11,7 @@
 const _enableTestCodeInBrowser = false; // True to enable test code in the browser
 const _enableExampleCode = false;        // True to enable the example code.
 
-const CalendarVersion = "3.0.1";
+const CalendarVersion = "3.0.2";
 
 // Revision History
 //
