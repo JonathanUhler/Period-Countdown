@@ -30,7 +30,7 @@
 var canvas = document.getElementById('Periods');
 var context = canvas.getContext('2d');
 
-const DisplayVersion = "1.0.0";
+const DisplayVersion = "1.4.0";
 
 // Revision History
 //
@@ -74,21 +74,50 @@ const DisplayVersion = "1.0.0";
 //                          -Minor documentation changes
 //                          -Added the "color" argument to printText to allow for changable
 //                          text-color
-
+//
+// 1.4.0    10/11/2020  Changes in this version:
+//                          -Added function "DisplayMessage" to replace console.log commands
+//                          -Removed all console.log calls with calls to DisplayMessage
+//                          -Minor documentation changes and code cleanup
 
 // TO-DO:
 //
-// 1) Clean-up documentation
+// 1) Get settings to work with the "next-up" periods feature
 //
-// 2) Condense context.___ into a function
-//
-// 3) Condese console.log messages into a function
-//
-// 4) Get settings to work with the "next-up" periods feature
+
 
 // Version information
 this.Version = DisplayVersion
-console.log("Display v" + this.Version);
+DisplayMessage("Display v" + this.Version);
+
+
+// ===========================================================================
+// CalendarMessage
+//
+// Function to emit a message, with optional arguments, which are separated
+// by ", "
+//
+// Arguments--
+//
+// msg:        Message
+//
+// args:       Optional list of arguments to output
+//
+// Returns--
+//
+// None
+//
+function DisplayMessage(msg, ...args) {
+
+    let message = "Display Message: " + msg;
+    if (args.length > 0) {
+      message += " " + args.join(", ")
+    }
+
+    console.log(message);
+
+} // end function CalendarMessage
+
 
 // Create a new instance of the Calendar class (with all information for current classes)
 calendar = new Calendar();
@@ -127,8 +156,7 @@ else {
 eDate = new Date(lookupDateTime); // If not null, set the epic date to the timestamp given
 }
 
-console.log ("Looking for the day/period for " + eDate);
-
+DisplayMessage("Looking for the day/period for", eDate);
 
 refreshPeriod(eDate);
 timeLeft = refreshRemainingTime(eDate);
@@ -145,8 +173,7 @@ enableTimer();
 // eDate:       The epic date, set to the JavaScript built-in "new Date();"
 //
 // Returns--
-// does not return a value to the caller:       Displays the period name and action
-//                                              (like "Free") on the extension
+// None
 //
 function refreshPeriod(eDate) {
 
@@ -160,7 +187,7 @@ function refreshPeriod(eDate) {
 
         // if match is null, then there is no match against the current date/time,
         // which likely means that the date/time is outside the current school year
-        console.log ("No match on " + eDate)
+        DisplayMessage("No match on", eDate)
 
         // Display "not in school" information on extension
         printText("Summer", " | ", "Free", textDef.nameSize, textDef.textX, textDef.nameY, 'black');
@@ -173,18 +200,10 @@ function refreshPeriod(eDate) {
         let pObj = match.pObj; // period object
 
         // Print day information
-        console.log (
-            dObj.dayName + ", " +
-            dObj.printDate + " is a " +
-            dObj.dayType
-        );
+        DisplayMessage("DAY INFO:", dObj.dayName, dObj.printDate, "is a", dObj.dayType);
 
         // Print period information
-        console.log (
-            "Period " + pObj.name +
-            " starts at " + pObj.startSTime +
-            " and ends at " + pObj.endSTime
-        );
+        DisplayMessage("Period", pObj.name, "starts at", pObj.startSTime, "and ends at", pObj.endSTime);
 
         // Init cObj to be used in the next line
         let cObj = pObj.classInfoObject;
@@ -192,11 +211,7 @@ function refreshPeriod(eDate) {
         // Print class information
         if (pObj.period >= 0 && cObj !== null) { // Only print the class information if there is an avaible class ("null" takes the place of "no class" in the data structure)
 
-            console.log (
-            "The class in this period is " + cObj.className +
-            ", taught by " + cObj.teacher  +
-            ", in room " + cObj.room
-            );
+            DisplayMessage("The class in this period is", cObj.className, "taught by", cObj.teacher, "in room", cObj.room);
 
             // Display "during an active period" --> this only includes real periods, NOT passing periods
             // Test if cObj is null, return special case "No class", else return cObj.className
@@ -206,7 +221,7 @@ function refreshPeriod(eDate) {
 
         } 
         else {
-            console.log ("There is no class during this period");
+            DisplayMessage("There is no class during this period");
 
             // Display "in the school year but not a school day" --> weekends and holidays
             printText(dObj.dayType, " | ", "Free", textDef.nameSize, textDef.textX, textDef.nameY, 'black');
@@ -236,10 +251,10 @@ function refreshRemainingTime(eDate) {
     // Print time left in period
     if (match.pObj.period >= 0) {
         timeLeft = calendar.getTimeRemainingInPeriod(eDate, match.pObj);
-        console.log ("Time remaining in the period is " + timeLeft.toString());
+        DisplayMessage("Time remaining in the period is", timeLeft.toString());
     } else {
         timeLeft = calendar.getTimeRemainingUntilPeriod(eDate, nextMatch.dObj, nextMatch.pObj, true)
-        console.log ("Time remaining until the period is " + timeLeft.toString());
+        DisplayMessage("Time remaining until the period is", timeLeft.toString());
     }
 
     // Print time remaining for any applicable period
@@ -275,7 +290,7 @@ function refreshRemainingTime(eDate) {
 //
 // Returns--
 //
-// does not return anything to the caller
+// None
 //
 function printText(msg1, divider, msg2, textSize, x, y, color) {
 
@@ -296,12 +311,11 @@ function printText(msg1, divider, msg2, textSize, x, y, color) {
 //
 // Arguments--
 //
-// enableTimer takes no arguments.
+// None
 //
 // Returns--
 //
-// does not return a value to the caller:       handles updates (frame by frame)
-//                                              of the extension
+// None
 //
 function enableTimer () {
     setInterval(function () {
