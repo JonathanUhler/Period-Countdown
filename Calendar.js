@@ -5,6 +5,12 @@
 //
 "use strict";
 
+// Constants that enable test code in the browser (it's always enabled in node.js)
+// and running the example code, which is a pretty good visual test of the operation
+// of the use of the code. These are defined here so that they are easy to find
+const _enableTestCodeInBrowser = false; // True to enable test code in the browser
+const _enableExampleCode = false;        // True to enable the example code.
+
 const CalendarVersion = "3.0.1";
 
 // Revision History
@@ -75,6 +81,10 @@ const CalendarVersion = "3.0.1";
 //                          eliminated the need
 //                        - Minor commentary and typo fixing that doesn't change
 //                          the function
+//
+//  3.0.2   10/11/2020   Bug fix: The getTimeRemainingUntilPeriod method was
+//                       returning the time remaining until the end of the
+//                       identified period, not the start.
 
 // TODO List
 //  1. In the self-test code, find some way to verify getNextPeriod, perhaps by
@@ -2143,10 +2153,9 @@ class Calendar {
       // startTime could be later than endTime, but calculateTimeLeft takes care
       // of that case
       let startTime = eDate;
-      let endTime = new Date(dObj.eDate.getTime());
-      endTime.setHours(...pObj.endDAdj);
-      endTime.setTime(endTime.getTime()+1)
-      return this.calculateTimeLeft (startTime.getTime(), endTime.getTime(), suppressDays);
+      let periodStart = new Date(dObj.eDate.getTime());
+      periodStart.setHours(...pObj.startDAdj);
+      return this.calculateTimeLeft (startTime.getTime(), periodStart.getTime(), suppressDays);
 
     }
 
@@ -2207,8 +2216,6 @@ class Calendar {
 // =+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
 // TEST CODE FOR LOCAL TESTING OF THE CLASSES
 
-const _enableTestCodeInBrowser = false;
-const _enableExampleCode = false;
 
 let calendar;
 let version;
