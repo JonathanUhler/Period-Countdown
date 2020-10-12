@@ -30,7 +30,7 @@
 var canvas = document.getElementById('Periods');
 var context = canvas.getContext('2d');
 
-let DisplayVersion = "1.0.0";
+const DisplayVersion = "1.0.0";
 
 // Revision History
 //
@@ -52,26 +52,55 @@ let DisplayVersion = "1.0.0";
 //                          that calls a function in Calendar.js
 //                          -Days do not display anymore and are converted to hours
 //                          in Calendar.js
+//
+// 1.2.1    10/10/2020  Changes in this version:
+//                          -Documentation conventions updated to match Calendar.js
+//                          (no functional changes)
+//                          -Additional documentation changes
+//
+// 1.3.0    10/10/2020  Changes in this version:
+//                          -Added function printText to handle displaying text
+//                          -Removed individual print statements (context.fillText();)
+//                          from refreshPeriod and refreshRemainingTime with a call of
+//                          printText
+//                          -Renamed the textPos object to textDef (text definition) for
+//                          clarity
+//                          -Removed the x and y offset variables from textDef in favor of
+//                          a single x-position variable (textDef.textX) and independant
+//                          y-position variables (textDef.nameY for "period name" text and
+//                          textDef.timeY for "time remaining" text)
+//
+// 1.3.1    10/10/2020  Changes in this version:
+//                          -Minor documentation changes
+//                          -Added the "color" argument to printText to allow for changable
+//                          text-color
+
+
+// TO-DO:
+//
+// 1) Clean-up documentation
+//
+// 2) Condense context.___ into a function
+//
+// 3) Condese console.log messages into a function
+//
+// 4) Get settings to work with the "next-up" periods feature
 
 // Version information
 this.Version = DisplayVersion
 console.log("Display v" + this.Version);
 
-
 // Create a new instance of the Calendar class (with all information for current classes)
 calendar = new Calendar();
 
-// Text information variables
-var textPos = {
-    x: 10,
-    y: 35,
-    xOffset: 0,
-    yOffset: 70,
-    timeSize: "59px Arial",
-    nameSize: "35px Arial"
+// Text definition object
+var textDef = {
+    textX: 10,
+    nameY: 35,
+    timeY: 105,
+    nameSize: "35px Arial",
+    timeSize: "59px Arial"
 }
-// Set common color for all text
-context.fillStyle = 'black';
 
 // The following variable lets us force a date and time to see the result.
 // If it is set to null, the current date/time is used
@@ -114,8 +143,11 @@ enableTimer();
 // Arguments--
 //
 // eDate:       The epic date, set to the JavaScript built-in "new Date();"
-// =============================================================================
-
+//
+// Returns--
+// does not return a value to the caller:       Displays the period name and action
+//                                              (like "Free") on the extension
+//
 function refreshPeriod(eDate) {
 
     const matchRealPeriod = true; // Only give real periods (only includes actual class periods-includes all class periods)
@@ -131,32 +163,9 @@ function refreshPeriod(eDate) {
         console.log ("No match on " + eDate)
 
         // Display "not in school" information on extension
-        context.font = textPos.nameSize;
-        context.fillText("Summer | Free", textPos.x, textPos.y) // There is only 1 year worth of data as of now, so this CANNOT display a "time left in period" number
+        printText("Summer", " | ", "Free", textDef.nameSize, textDef.textX, textDef.nameY, 'black');
 
     } 
-
-
-    // =============================================================================
-    // WARNING: The following "else if" conditional can never be true and is never called
-    // =============================================================================
-    //
-    // else if (match.pObj === null) {
-
-    //     // if match.pObj is null, then there was a day match, but there are no
-    //     // periods for that day, as would be the case on a weekend or a holiday
-    //     let dObj = match.dObj;
-    //     console.log (
-    //         dObj.dayName + ", " +
-    //         dObj.printDate + " is a " +
-    //         dObj.dayType + " and has no periods"
-    //     );
-
-    //     // Display "during school year but not a day that has school" --> weekends and holidays
-    //     context.font = textPos.nameSize;
-    //     context.fillText(dObj.dayType + " | Free", textPos.x, textPos.y)
-
-    // } 
     else {
 
         // Found a match on both day and period.
@@ -177,7 +186,6 @@ function refreshPeriod(eDate) {
             " and ends at " + pObj.endSTime
         );
 
-
         // Init cObj to be used in the next line
         let cObj = pObj.classInfoObject;
 
@@ -194,24 +202,18 @@ function refreshPeriod(eDate) {
             // Test if cObj is null, return special case "No class", else return cObj.className
             let className = (cObj === null) ? "No class" : cObj.className
 
-            context.font = textPos.nameSize;
-            context.fillText(className + " | " + pObj.name, textPos.x, textPos.y)
+            printText(className, " | ", pObj.name, textDef.nameSize, textDef.textX, textDef.nameY, 'black');
 
         } 
         else {
             console.log ("There is no class during this period");
 
             // Display "in the school year but not a school day" --> weekends and holidays
-            context.font = textPos.nameSize;
-            context.fillText(dObj.dayType + " | Free", textPos.x, textPos.y)
+            printText(dObj.dayType, " | ", "Free", textDef.nameSize, textDef.textX, textDef.nameY, 'black');
+
         }
-//       if (pObj.period < 0) {
-//            if (nextMatch !== null) {
-//                 timeLeft = calendar.getTimeRemainingUntilPeriod(eDate, nextMatch.dObj, nextMatch.pObj);
-//             }
-//         }
-    } // if (pOjb.period >= 0) ... else
-}
+    } // end: if (pOjb.period >= 0) ... else
+} // end: function refreshPeriod
 
 
 // =============================================================================
@@ -223,8 +225,13 @@ function refreshPeriod(eDate) {
 // Arguments--
 //
 // eDate:       The epic date, set to the JavaScript built-in "new Date();"
-// =============================================================================
-
+//
+// Returns--
+//
+// timeLeft:        The adjusted amount of time remaining in the current period
+//                  (set depending on if the current period is a pseudo-period
+//                  or not)
+//
 function refreshRemainingTime(eDate) {
     // Print time left in period
     if (match.pObj.period >= 0) {
@@ -236,11 +243,47 @@ function refreshRemainingTime(eDate) {
     }
 
     // Print time remaining for any applicable period
-    context.font = textPos.timeSize;
-    context.fillText(timeLeft.toString(), textPos.x - textPos.xOffset, textPos.y + textPos.yOffset)
+    printText(timeLeft.toString(), "", "", textDef.timeSize, textDef.textX, textDef.timeY, 'black');
 
     return timeLeft;
-}
+} // end: function refreshRemainingTime
+
+
+// =============================================================================
+// printText();
+//
+// Takes and prints information about the time remaining and the name of the
+// current period. Replaces calls to context.fillText with calls to printText
+//
+// Arguments--
+//
+// msg1:        The first of two messages that can be displayed (this is the 
+//              timestamp, "Biology", "Weekend", etc.)
+//
+// divider:     The choice to have a divider like " | " between the two messages
+//
+// msg2:        The second message that is displayed (only used by the name, not
+//              the time remaining; this is like "Free" or "P1")
+//
+// textSize:    The font size of the text to be printed
+//
+// x:           The x position of the text to be printed
+//
+// y:           The y position of the text to be printed
+//
+// color:       The color of the text to be printed
+//
+// Returns--
+//
+// does not return anything to the caller
+//
+function printText(msg1, divider, msg2, textSize, x, y, color) {
+
+    context.fillStyle = color;
+    context.font = textSize;
+    context.fillText(msg1 + divider + msg2, x, y);
+
+} // end function printText
 
 
 // =============================================================================
@@ -254,8 +297,12 @@ function refreshRemainingTime(eDate) {
 // Arguments--
 //
 // enableTimer takes no arguments.
-// =============================================================================
-
+//
+// Returns--
+//
+// does not return a value to the caller:       handles updates (frame by frame)
+//                                              of the extension
+//
 function enableTimer () {
     setInterval(function () {
 
@@ -273,7 +320,9 @@ function enableTimer () {
 
         timeLeft = refreshRemainingTime(eDate);
 
-    }, 1000) // Update every 1 second --> this leads to the timer trailing by ~1 second for every 20 hours of run time (if the period remains the same)
-}
+    // Update every 1 second --> this leads to the timer trailing by ~1 second for 
+    // every 20 hours of run time (if the period remains the same)
+    }, 1000)
+} // end: function enableTimer
 
  
