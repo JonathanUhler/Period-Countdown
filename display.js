@@ -120,6 +120,7 @@ function DisplayMessage(msg, ...args) {
 
 
 // Create a new instance of the Calendar class (with all information for current classes)
+let calendar;
 calendar = new Calendar();
 
 // Text definition object
