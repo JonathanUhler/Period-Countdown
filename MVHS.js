@@ -595,7 +595,7 @@ class SchoolYearDefinitions {
       "2020-12-13": _MVHS_Finals1_Week,        // Finals 1 week
       "2020-12-20": _MVHS_HHHHH_Week,          // Holiday Break
       "2020-12-27": _MVHS_HHHHH_Week,          // Holiday Break
-      "2021-01-03": _MVHS_HBCAB_Week,          // Staff Dev Day
+      "2021-01-03": _MVHS_HABAB_Week,          // Staff Dev Day
       "2021-01-17": _MVHS_HBCAB_Week,          // Martin Luther King day
       "2021-02-14": _MVHS_HHHHH_Week,          // Winter Break
       "2021-03-14": _MVHS_HBCAB_Week,          // MVHS Recess
