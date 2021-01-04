@@ -4,7 +4,7 @@
 //
 "use strict";
 
-const MVHSVersion = "2.1.0";
+const MVHSVersion = "2.1.1";
 
 // Revision History
 //
@@ -28,6 +28,9 @@ const MVHSVersion = "2.1.0";
 //  2.0.1   10/10/2020  Minor documentation change
 //
 //  2.1.0   12/14/2020  Add the exception for finals week starting 12/13/2020
+//
+//  2.1.1   01/03/2021  Fix the weeks of 1/3/2021 and 1/17/2021. They should both
+//                      be HABAB weeks
 
 // =+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
 // Copyright 2020 Mike Uhler and Jonathan Uhler
@@ -596,7 +599,7 @@ class SchoolYearDefinitions {
       "2020-12-20": _MVHS_HHHHH_Week,          // Holiday Break
       "2020-12-27": _MVHS_HHHHH_Week,          // Holiday Break
       "2021-01-03": _MVHS_HABAB_Week,          // Staff Dev Day
-      "2021-01-17": _MVHS_HBCAB_Week,          // Martin Luther King day
+      "2021-01-17": _MVHS_HABAB_Week,          // Martin Luther King day
       "2021-02-14": _MVHS_HHHHH_Week,          // Winter Break
       "2021-03-14": _MVHS_HBCAB_Week,          // MVHS Recess
       "2021-04-11": _MVHS_HHHHH_Week,          // Spring Recess
