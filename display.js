@@ -79,6 +79,10 @@ const DisplayVersion = "1.4.0";
 //                          -Added function "DisplayMessage" to replace console.log commands
 //                          -Removed all console.log calls with calls to DisplayMessage
 //                          -Minor documentation changes and code cleanup
+//
+// 2.0.0    10/21/2020  Changes in this version:
+//                          -Fixed major compatibility issues with calendarTest.js
+//                          -Added in a declaration for calendar
 
 // TO-DO:
 //
@@ -151,10 +155,10 @@ let timeLeft = {
 }
 
 if (lookupDateTime === null) {
-eDate = new Date(); // If null, assume the user is referencing the current date (right now)
+    eDate = new Date(); // If null, assume the user is referencing the current date (right now)
 } 
 else {
-eDate = new Date(lookupDateTime); // If not null, set the epic date to the timestamp given
+    eDate = new Date(lookupDateTime); // If not null, set the epic date to the timestamp given
 }
 
 DisplayMessage("Looking for the day/period for", eDate);
