@@ -5,7 +5,40 @@
     </head>
     <body>
         <canvas width="350" height="350" id="Periods"></canvas>
-        <img id="goToSettings" src="settings.png" alt="Open Settings" width="50" height="50" style="position: absolute; left: 12px; top: 305px;">
+        <img src="settings.png" alt="Open Settings" width="50" height="50" style="position: absolute; left: 15px; top: 305px;" id="goToSettings">
+
+        <!-- All the text input fields for class names (these are shown and hidden by display.js) -->
+        <div name="P1" id="P1" style="position: absolute; top: 125px;">
+            <label>P1: </label>
+            <input type="text" name="P1" id="P1Text" maxlength="15"/>
+        </div>
+        <div name="P2" id="P2" style="position: absolute; top: 150px;">
+            <label>P2: </label>
+            <input type="text" name="P2" id="P2Text" maxlength="15"/>
+        </div>
+        <div name="P3" id="P3" style="position: absolute; top: 175px;">
+            <label>P3: </label>
+            <input type="text" name="P3" id="P3Text" maxlength="15"/>
+        </div>
+        <div name="P4" id="P4" style="position: absolute; top: 200px;">
+            <label>P4: </label>
+            <input type="text" name="P4" id="P4Text" maxlength="15"/>
+        </div>
+        <div name="P5" id="P5" style="position: absolute; top: 225px;">
+            <label>P5: </label>
+            <input type="text" name="P5" id="P5Text" maxlength="15"/>
+        </div>
+        <div name="P6" id="P6" style="position: absolute; top: 250px;">
+            <label>P6: </label>
+            <input type="text" name="P6" id="P6Text" maxlength="15"/>
+        </div>
+        <div name="P7" id="P7" style="position: absolute; top: 275px;">
+            <label>P7: </label>
+            <input type="text" name="P7" id="P7Text" maxlength="15"/>
+        </div>
+
+        <button id='submitPeriods' type='button' style="position: absolute; left: 80px; top: 315px;">Save Classes</button>
+
         <!-- <a href="https://mvhs.mvla.net/"> // ------ this will be under settings at the bottom along with the gitbuh icon
             <img src="mvhs.png" alt="MVHS Website" width="53" height="53" style="position: absolute; left: 73px; top: 305px;">
         </a>
@@ -14,9 +47,11 @@
         </a> -->
     </body>
 
-    <script src="settings.js"></script>
+    <script type="text/javascript" src="userDefaults.json"></script>
 
     <script src="MVHS.js"></script>
     <script src="Calendar.js"></script>
+    <!-- <script src="calendarTest.js"></script> -->
+    <script src="settings.js"></script>
     <script src="display.js"></script>
 </html>
