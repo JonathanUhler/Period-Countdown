@@ -31,6 +31,9 @@ const MVHSVersion = "2.1.1";
 //
 //  2.1.1   01/03/2021  Fix the weeks of 1/3/2021 and 1/17/2021. They should both
 //                      be HABAB weeks
+//
+//  2.1.2   01/21/2021  Fix the week of 1/17/2021 again. This is an advisory week
+//                      and Thurs/Fri of that week have modified schedules.
 
 // =+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
 // Copyright 2020 Mike Uhler and Jonathan Uhler
@@ -549,6 +552,17 @@ class SchoolYearDefinitions {
       {dt: _dayTypeWeekend_k,      pa: _PeriodsForWeekend_k  }
     ];
 
+    // This is the ACBAB week for Junior PSAT week
+    const _MVHS_ACBAB_Week = [
+      {dt: _dayTypeWeekend_k,      pa: _PeriodsForWeekend_k },
+      {dt: _dayTypeSchoolDay_k,    pa: _PeriodsForADay_k    },
+      {dt: _dayTypeSchoolDay_k,    pa: _PeriodsForCDay_k    },
+      {dt: _dayTypeSchoolDay_k,    pa: _PeriodsForBDay_k    },
+      {dt: _dayTypeSchoolDay_k,    pa: _PeriodsForADay_k    },
+      {dt: _dayTypeSchoolDay_k,    pa: _PeriodsForBDay_k    },
+      {dt: _dayTypeWeekend_k,      pa: _PeriodsForWeekend_k }
+    ];
+
     // This is the beginning-of-year week
     const _MVHS_HHCAB_Week = [
       {dt: _dayTypeWeekend_k,        pa: _PeriodsForWeekend_k },
@@ -639,6 +653,7 @@ class SchoolYearDefinitions {
       "2020-12-27": _MVHS_HHHHH_Week,          // Holiday Break
       "2021-01-03": _MVHS_HABAB_Week,          // Staff Dev Day
       "2021-01-17": _MVHS_AdvisoryHABAB_Week,  // Martin Luther King day
+      "2021-01-24": _MVHS_ACBAB_Week,          // Junior PSAT Week
       "2021-02-14": _MVHS_HHHHH_Week,          // Winter Break
       "2021-03-14": _MVHS_HBCAB_Week,          // MVHS Recess
       "2021-04-11": _MVHS_HHHHH_Week,          // Spring Recess
