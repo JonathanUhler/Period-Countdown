@@ -56,6 +56,14 @@ History of revisions for all files associated with Period-Countdown.
                           -Added in a declaration for calendar
 
 
+# settings.js
+ Revision History
+
+  version    date                     Change
+  ------- ----------  --------------------------------------------------------
+  1.0.0   1/24/2021   -First working version of settings.js
+
+
 # Calendar.js
  Revision History
 
