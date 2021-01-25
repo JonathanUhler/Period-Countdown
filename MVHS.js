@@ -4,7 +4,7 @@
 //
 "use strict";
 
-const MVHSVersion = "2.1.1";
+const MVHSVersion = "2.1.2";
 
 // Revision History
 //
@@ -34,6 +34,9 @@ const MVHSVersion = "2.1.1";
 //
 //  2.1.2   01/21/2021  Fix the week of 1/17/2021 again. This is an advisory week
 //                      and Thurs/Fri of that week have modified schedules.
+//
+//  2.2.0   01/24/2021  Added support for cookies and the ability to change class
+//                      choices
 
 // =+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
 // Copyright 2020 Mike Uhler and Jonathan Uhler
@@ -157,17 +160,28 @@ class SchoolYearDefinitions {
     // _classInfoArray is a private constant within the class, so information
     // is retrieved via the public accessor function.
 
+    // Read in cookie data
+    try {
+      var cookieData = document.cookie
+      var periodsFromCookie = cookieData.split("=")
+      periodsFromCookie = periodsFromCookie[1].split(",")
+    }
+    catch {
+      periodsFromCookie = ["None", "None", "None", "None", "None", "None", "None"]
+    }
+    
+
     // Class information array, indexed by period
     const _classInfoArray = [
       // period     class                Room        Teacher
-      {p: 0,    c:  null,             r: "",    t: ""            },
-      {p: 1,    c: "Biology",         r: "113", t: "Kim Rogers"  },
-      {p: 2,    c: "PE",              r: "Gym", t: "Williams"    },
-      {p: 3,    c: "World Studies",   r: "602", t: "Cardenas"    },
-      {p: 4,    c: "Survey Comp/Lit", r: "215", t: "Engel-Hall"  },
-      {p: 5,    c: "Geometry",        r: "412", t: "Smith"       },
-      {p: 6,    c:  null,             r: "",    t: ""            },
-      {p: 7,    c: "IntroCompSci",    r: "514", t: "Dilloughery" }
+      {p: 0,    c:  null,                r: "",    t: ""            },
+      {p: 1,    c: periodsFromCookie[0], r: "113", t: "Kim Rogers"  },
+      {p: 2,    c: periodsFromCookie[1], r: "Gym", t: "Williams"    },
+      {p: 3,    c: periodsFromCookie[2], r: "602", t: "Cardenas"    },
+      {p: 4,    c: periodsFromCookie[3], r: "215", t: "Engel-Hall"  },
+      {p: 5,    c: periodsFromCookie[4], r: "412", t: "Smith"       },
+      {p: 6,    c: periodsFromCookie[5], r: "",    t: ""            },
+      {p: 7,    c: periodsFromCookie[6], r: "514", t: "Dilloughery" }
     ];
 
     // -------------------------------------------------------------------------
