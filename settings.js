@@ -37,6 +37,12 @@ let SettingsVersion = "1.0.0";
 //  version    date                     Change
 //  ------- ----------  --------------------------------------------------------
 //  1.0.0   1/24/2021   -First working version of settings.js
+//
+//  2.0.0   1/24/2021   Changes in this version:
+//                          -File I/O replaced with cookies
+//                          -Default classes set to be "None" for all 7 periods
+//                          -Issues with cookies fixed
+//                          -Textboxes will now display default values
 
 // Version information
 this.Version = SettingsVersion
@@ -72,10 +78,13 @@ function SettingsMessage(msg, ...args) {
 
 
 var userClassDefaults = []
+// HTML class textbox element IDs
 var classIDs = ["P1", "P2", "P3", "P4", "P5", "P6", "P7", "submitPeriods"]
 var textIDs = ["P1Text", "P2Text", "P3Text", "P4Text", "P5Text", "P6Text", "P7Text"]
+// Settings button icon
 document.getElementById("goToSettings").addEventListener("click", callSettings)
 
+// Make the boxes start hidden until the settings button is pressed
 for (var i = 0; i <= classIDs.length - 1; i++) {
     document.getElementById(classIDs[i]).style.display = 'none'
 }
@@ -84,6 +93,7 @@ function callSettings() {
     openSettingsTab(classIDs)
 }
 
+// Button to save the periods
 var submitButton = document.getElementById('submitPeriods')
 submitButton.addEventListener("click", saveUserDefaults, false)
 
@@ -111,7 +121,12 @@ function saveUserDefaults() {
     for (var i = 0; i <= textIDs.length - 1; i++) {
 
         var classChoice = document.getElementById(textIDs[i]).value
-        userClassDefaults.push(classChoice)
+        if (classChoice.toLowerCase() === "none" || classChoice.toLowerCase() === "n/a") {
+            userClassDefaults.push("Free")
+        }
+        else {
+            userClassDefaults.push(classChoice)
+        }
 
     }
 
@@ -119,9 +134,28 @@ function saveUserDefaults() {
     SettingsMessage(`New Classes:`, userClassDefaults)
 
     // Write the choices to a file to be read by MVHS.js
-
+    removeCookie("periods")
+    createCookie("periods", userClassDefaults)
 
 } // end: function saveUserDefaults
+
+
+function removeCookie(name) {
+
+    var removeStatement = name + "= ; expires = Thu, 01 Jan 1970 00:00:00 GMT"
+    document.cookie = removeStatement
+
+}
+
+
+function createCookie(name, value) {
+
+    var newCookie = name + "=" + value
+    document.cookie = newCookie
+
+    SettingsMessage("New cookie data:", document.cookie)
+
+}
 
 
 // =============================================================================
@@ -142,6 +176,24 @@ function openSettingsTab(IDs) {
     for (var i = 0; i <= IDs.length; i++) {
 
         var period = document.getElementById(IDs[i])
+
+
+        // Read in cookie data
+        try {
+            var cookieData = document.cookie
+            var periodsFromCookie = cookieData.split("=")
+            periodsFromCookie = periodsFromCookie[1].split(",")
+        }
+        catch {
+            periodsFromCookie = ["None", "None", "None", "None", "None", "None", "None"]
+        }
+
+        for (var j = 0; j <= periodsFromCookie.length - 1; j++) {
+            // Set the default values for the classes
+            document.getElementById(textIDs[j]).defaultValue = periodsFromCookie[j];
+        }
+
+        SettingsMessage(period.value)
 
         // Show or hide the 7 textboxes
         if (getComputedStyle(period).display === 'none') {

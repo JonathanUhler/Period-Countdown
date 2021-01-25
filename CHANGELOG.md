@@ -63,6 +63,12 @@ History of revisions for all files associated with Period-Countdown.
   ------- ----------  --------------------------------------------------------
   1.0.0   1/24/2021   -First working version of settings.js
 
+  2.0.0   1/24/2021   Changes in this version:
+                        -File I/O replaced with cookies
+                        -Default classes set to be "None" for all 7 periods
+                        -Issues with cookies fixed
+                        -Textboxes will now display default values
+
 
 # Calendar.js
  Revision History
@@ -171,3 +177,6 @@ History of revisions for all files associated with Period-Countdown.
 
   2.1.2   01/21/2021  Fix the week of 1/17/2021 again. This is an advisory week
                       and Thurs/Fri of that week have modified schedules.
+
+  2.2.0   01/24/2021  Added support for cookies and the ability to change class
+                      choices.
