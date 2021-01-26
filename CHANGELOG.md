@@ -180,3 +180,6 @@ History of revisions for all files associated with Period-Countdown.
 
   2.2.0   01/24/2021  Added support for cookies and the ability to change class
                       choices.
+
+  2.2.1   01/26/2021  Added 'teachersFromCookie' and 'roomsFromCookie' as unused
+                      arrays of data that may be implemented in the future
