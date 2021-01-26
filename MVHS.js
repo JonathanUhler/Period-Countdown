@@ -169,27 +169,27 @@ class SchoolYearDefinitions {
       var cookieData = document.cookie
       var cookieSections = cookieData.split("=")
       var periodsFromCookie = cookieSections[1].split(",")
-      var roomsFromCookie = cookieSections[3].split(",")
-      var teachersFromCookie = cookieSections[5].split(",")
+      // var roomsFromCookie = cookieSections[3].split(",")
+      // var teachersFromCookie = cookieSections[5].split(",")
     }
     catch {
       periodsFromCookie = ["None", "None", "None", "None", "None", "None", "None"]
-      roomsFromCookie = ["None", "None", "None", "None", "None", "None", "None"]
-      teachersFromCookie = ["None", "None", "None", "None", "None", "None", "None"]
+      // roomsFromCookie = ["None", "None", "None", "None", "None", "None", "None"]
+      // teachersFromCookie = ["None", "None", "None", "None", "None", "None", "None"]
     }
     
 
     // Class information array, indexed by period
     const _classInfoArray = [
       // period     class                Room        Teacher
-      {p: 0,    c:  null,                r: "",                 t: ""                    },
-      {p: 1,    c: periodsFromCookie[0], r: roomsFromCookie[0], t: teachersFromCookie[0] },
-      {p: 2,    c: periodsFromCookie[1], r: roomsFromCookie[1], t: teachersFromCookie[1] },
-      {p: 3,    c: periodsFromCookie[2], r: roomsFromCookie[2], t: teachersFromCookie[2] },
-      {p: 4,    c: periodsFromCookie[3], r: roomsFromCookie[3], t: teachersFromCookie[3] },
-      {p: 5,    c: periodsFromCookie[4], r: roomsFromCookie[4], t: teachersFromCookie[4] },
-      {p: 6,    c: periodsFromCookie[5], r: roomsFromCookie[5], t: teachersFromCookie[5] },
-      {p: 7,    c: periodsFromCookie[6], r: roomsFromCookie[6], t: teachersFromCookie[6] }
+      {p: 0,    c:  null,                r: "",                 t: "" },
+      {p: 1,    c: periodsFromCookie[0], r: "",                 t: "" },
+      {p: 2,    c: periodsFromCookie[1], r: "",                 t: "" },
+      {p: 3,    c: periodsFromCookie[2], r: "",                 t: "" },
+      {p: 4,    c: periodsFromCookie[3], r: "",                 t: "" },
+      {p: 5,    c: periodsFromCookie[4], r: "",                 t: "" },
+      {p: 6,    c: periodsFromCookie[5], r: "",                 t: "" },
+      {p: 7,    c: periodsFromCookie[6], r: "",                 t: "" }
     ];
 
     // -------------------------------------------------------------------------

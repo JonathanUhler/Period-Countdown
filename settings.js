@@ -43,6 +43,13 @@ let SettingsVersion = "1.0.0";
 //                          -Default classes set to be "None" for all 7 periods
 //                          -Issues with cookies fixed
 //                          -Textboxes will now display default values
+//
+// 3.0.0    1/26/2021   Changes in this version:
+//                          -Minimized and cleaned up code for settings
+//                          -Rewrote HTML settings elements to minimize code
+//                          -Added in functions for utilities
+//                          -Added support for utilities
+//                          -Condensed utilities and classes into 2 divs
 
 // Version information
 this.Version = SettingsVersion
@@ -77,20 +84,23 @@ function SettingsMessage(msg, ...args) {
 } // end function SettingsMessage
 
 
+// +=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+
+// ---------------------
+// SETTINGS BUTTON
+// ---------------------
+// +=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+
+
+
+var hideElems = ["classes", "submitPeriods", "utils"]
 var userClassDefaults = []
 // HTML class textbox element IDs
-var classIDs = ["P1", "P2", "P3", "P4", "P5", "P6", "P7", "submitPeriods"]
 var textIDs = ["P1Text", "P2Text", "P3Text", "P4Text", "P5Text", "P6Text", "P7Text"]
 // Settings button icon
-document.getElementById("goToSettings").addEventListener("click", callSettings)
+document.getElementById("goToSettings").addEventListener("click", openSettingsTab)
 
 // Make the boxes start hidden until the settings button is pressed
-for (var i = 0; i <= classIDs.length - 1; i++) {
-    document.getElementById(classIDs[i]).style.display = 'none'
-}
-
-function callSettings() {
-    openSettingsTab(classIDs)
+for (var i = 0; i < hideElems.length; i++) {
+    document.getElementById(hideElems[i]).style.display = 'none'
 }
 
 // Button to save the periods
@@ -140,14 +150,43 @@ function saveUserDefaults() {
 } // end: function saveUserDefaults
 
 
+// =============================================================================
+// function removeCookie
+//
+// A function to remove an existing cookie by setting its expiration date to the
+// past
+//
+// Arguments--
+//
+// name:            the name of the cookie to remove
+//
+// Returns--
+//
+// None
+//
 function removeCookie(name) {
 
     var removeStatement = name + "= ; expires = Thu, 01 Jan 1970 00:00:00 GMT"
     document.cookie = removeStatement
 
-}
+} // end: function removeCookie
 
 
+// =============================================================================
+// function createCookie
+//
+// A function to create a new cookie
+//
+// Arguments--
+//
+// name:            the name of the new cookie
+//
+// value:           the value that the cookie should have
+//
+// Returns--
+//
+// None
+//
 function createCookie(name, value) {
 
     var newCookie = name + "=" + value
@@ -155,7 +194,7 @@ function createCookie(name, value) {
 
     SettingsMessage("New cookie data:", document.cookie)
 
-}
+} // end: createCookie
 
 
 // =============================================================================
@@ -171,38 +210,65 @@ function createCookie(name, value) {
 //
 // None
 //
-function openSettingsTab(IDs) {
+function openSettingsTab() {
 
-    for (var i = 0; i <= IDs.length; i++) {
+    var period = document.getElementById("classes")
 
-        var period = document.getElementById(IDs[i])
+    // Read in cookie data
+    try {
+        var cookieData = document.cookie
+        var periodsFromCookie = cookieData.split("=")
+        periodsFromCookie = periodsFromCookie[1].split(",")
+    }
+    catch {
+        periodsFromCookie = ["None", "None", "None", "None", "None", "None", "None"]
+    }
 
+    for (var j = 0; j <= periodsFromCookie.length - 1; j++) {
+        // Set the default values for the classes
+        document.getElementById(textIDs[j]).defaultValue = periodsFromCookie[j];
+    }
 
-        // Read in cookie data
-        try {
-            var cookieData = document.cookie
-            var periodsFromCookie = cookieData.split("=")
-            periodsFromCookie = periodsFromCookie[1].split(",")
-        }
-        catch {
-            periodsFromCookie = ["None", "None", "None", "None", "None", "None", "None"]
-        }
-
-        for (var j = 0; j <= periodsFromCookie.length - 1; j++) {
-            // Set the default values for the classes
-            document.getElementById(textIDs[j]).defaultValue = periodsFromCookie[j];
-        }
-
-        SettingsMessage(period.value)
-
-        // Show or hide the 7 textboxes
-        if (getComputedStyle(period).display === 'none') {
-            document.getElementById(IDs[i]).style.display = ''
-        }
-        else {
-            document.getElementById(IDs[i]).style.display = 'none'
-        }
-
+    // Show or hide the 7 textboxes
+    if (getComputedStyle(period).display === 'none') {
+        document.getElementById("goToUtilities").style.display = 'none'
+        document.getElementById("submitPeriods").style.display = ''
+        document.getElementById("classes").style.display = ''
+    }
+    else {
+        document.getElementById("goToUtilities").style.display = ''
+        document.getElementById("submitPeriods").style.display = 'none'
+        document.getElementById("classes").style.display = 'none'
     }
 
 } // end: function openSettingsTab
+
+
+// +=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+
+// ---------------------
+// UTILITIES BUTTON
+// ---------------------
+// +=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+
+
+
+document.getElementById("goToUtilities").addEventListener("click", openUtilitiesTab)
+
+
+function openUtilitiesTab() {
+
+    var util = document.getElementById("utils")
+
+    // Show or hide the utilities icons
+    if (getComputedStyle(util).display === 'none') {
+        document.getElementById("goToSettings").style.display = 'none'
+        document.getElementById("classes").style.display = 'none'
+        document.getElementById("utils").style.display = ''
+    }
+    else {
+        document.getElementById("goToSettings").style.display = ''
+        document.getElementById("classes").style.display = 'none'
+        document.getElementById("utils").style.display = 'none'
+    }
+
+}
+

@@ -69,6 +69,13 @@ History of revisions for all files associated with Period-Countdown.
                         -Issues with cookies fixed
                         -Textboxes will now display default values
 
+  3.0.0    1/26/2021   Changes in this version:
+                        -Minimized and cleaned up code for settings
+                        -Rewrote HTML settings elements to minimize code
+                        -Added in functions for utilities
+                        -Added support for utilities
+                        -Condensed utilities and classes into 2 divs
+
 
 # Calendar.js
  Revision History

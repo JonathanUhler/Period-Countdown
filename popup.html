@@ -4,50 +4,55 @@
         <title>MVHS Periods</title>
     </head>
     <body>
+        <!-- Canvas -->
         <canvas width="350" height="350" id="Periods"></canvas>
+
+        <!-- Images -->
         <img src="settings.png" alt="Open Settings" width="50" height="50" style="position: absolute; left: 15px; top: 305px;" id="goToSettings">
+        <img src="utilities_menu.png" alt="Open Utilities" width="50" height="50" style="position: absolute; left: 80px; top: 305px;" id="goToUtilities">
 
         <!-- All the text input fields for class names (these are shown and hidden by display.js) -->
-        <div name="P1" id="P1" style="position: absolute; top: 125px;">
-            <label>P1: </label>
-            <input type="text" name="P1" id="P1Text" maxlength="15"/>
+        <!-- PERIOD SAVE BUTTONS -->
+        <div name="classes" id="classes">
+            <label style="position: absolute; top: 127px;">P1: </label>
+            <input type="text" name="P1" id="P1Text" maxlength="15" style="position: absolute; left: 35px; top: 125px;"/>
+            <label style="position: absolute; top: 152px;">P2: </label>
+            <input type="text" name="P2" id="P2Text" maxlength="15" style="position: absolute; left: 35px; top: 150px;"/>
+            <label style="position: absolute; top: 177px;">P3: </label>
+            <input type="text" name="P3" id="P3Text" maxlength="15" style="position: absolute; left: 35px; top: 175px;"/>
+            <label style="position: absolute; top: 202px;">P4: </label>
+            <input type="text" name="P4" id="P4Text" maxlength="15" style="position: absolute; left: 35px; top: 200px;"/>
+            <label style="position: absolute; top: 227px;">P5: </label>
+            <input type="text" name="P5" id="P5Text" maxlength="15" style="position: absolute; left: 35px; top: 225px;"/>
+            <label style="position: absolute; top: 252px;">P6: </label>
+            <input type="text" name="P6" id="P6Text" maxlength="15" style="position: absolute; left: 35px; top: 250px;"/>
+            <label style="position: absolute; top: 277px;">P7: </label>
+            <input type="text" name="P7" id="P7Text" maxlength="15" style="position: absolute; left: 35px; top: 275px;"/>
         </div>
-        <div name="P2" id="P2" style="position: absolute; top: 150px;">
-            <label>P2: </label>
-            <input type="text" name="P2" id="P2Text" maxlength="15"/>
-        </div>
-        <div name="P3" id="P3" style="position: absolute; top: 175px;">
-            <label>P3: </label>
-            <input type="text" name="P3" id="P3Text" maxlength="15"/>
-        </div>
-        <div name="P4" id="P4" style="position: absolute; top: 200px;">
-            <label>P4: </label>
-            <input type="text" name="P4" id="P4Text" maxlength="15"/>
-        </div>
-        <div name="P5" id="P5" style="position: absolute; top: 225px;">
-            <label>P5: </label>
-            <input type="text" name="P5" id="P5Text" maxlength="15"/>
-        </div>
-        <div name="P6" id="P6" style="position: absolute; top: 250px;">
-            <label>P6: </label>
-            <input type="text" name="P6" id="P6Text" maxlength="15"/>
-        </div>
-        <div name="P7" id="P7" style="position: absolute; top: 275px;">
-            <label>P7: </label>
-            <input type="text" name="P7" id="P7Text" maxlength="15"/>
-        </div>
-
+        <!-- end: PERIOD SAVE BUTTONS -->
+        <!-- Save classes button -->
         <button id='submitPeriods' type='button' style="position: absolute; left: 80px; top: 315px;">Save Classes</button>
 
-        <!-- <a href="https://mvhs.mvla.net/"> // ------ this will be under settings at the bottom along with the gitbuh icon
-            <img src="mvhs.png" alt="MVHS Website" width="53" height="53" style="position: absolute; left: 73px; top: 305px;">
-        </a>
-        <a href="https://github.com/JonathanUhler/Period-Countdown/">
-            <img src="github.png" alt="Github Repository" width="50" height="50" style="position: absolute; left: 65px; top: 305px;">
-        </a> -->
+        <!-- All of the utilities that come with the extension -->
+        <!-- UTILITIES -->
+        <div id="utils">
+            <a href="https://github.com/JonathanUhler/Period-Countdown/issues">
+                <img src="github.png" alt="MVHS Website" width="50" height="50" style="position: absolute; left: 40px; top: 135px;">
+            </a>
+            <a href="https://mvhs.mvla.net/">
+                <img src="mvhs.png" alt="Github Repository" width="50" height="50" style="position: absolute; left: 115px; top: 135px;">
+            </a>
+            <a href="https://mvhs.io/map">
+                <img src="map.png" alt="Campus Map" width="50" height="50" style="position: absolute; left: 190px; top: 135px;">
+            </a>
+            <a href="https://mvla.asp.aeries.net/Student/LoginParent.aspx">
+                <img src="aeries.png" alt="Aeries SIS" width="50" height="50" style="position: absolute; left: 265px; top: 135px;">
+            </a>
+        </div>
+        <!-- end: UTILITIES -->
     </body>
 
-    <script src="userDefaults.js"></script>
+    <!-- Scripts -->
     <script src="MVHS.js"></script>
     <script src="Calendar.js"></script>
     <script src="settings.js"></script>
