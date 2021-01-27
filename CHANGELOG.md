@@ -76,6 +76,10 @@ History of revisions for all files associated with Period-Countdown.
                         -Added support for utilities
                         -Condensed utilities and classes into 2 divs
 
+  3.1.0    1/26/2021   Changes in this version:
+                        -A simple fade in/out animation has been added to all
+                         elements to improve user experience
+
 
 # Calendar.js
  Revision History

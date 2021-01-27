@@ -50,6 +50,9 @@ let SettingsVersion = "1.0.0";
 //                          -Added in functions for utilities
 //                          -Added support for utilities
 //                          -Condensed utilities and classes into 2 divs
+// 3.1.0    1/26/2021   Changes in this version:
+//                          -A simple fade in/out animation has been added to all
+//                           elements to improve user experience
 
 // Version information
 this.Version = SettingsVersion
@@ -82,6 +85,66 @@ function SettingsMessage(msg, ...args) {
     console.log(message)
 
 } // end function SettingsMessage
+
+
+// ===========================================================================
+// function fade
+//
+// A function to fade an element
+//
+// Arguments--
+//
+// element:         the name of the HTML element to fade
+//
+// Returns--
+//
+// None
+//
+function fade(element) {
+    var op = 1 // initial opacity
+    var timer = setInterval(function () {
+        if (op <= 0.1) {
+            clearInterval(timer);
+            document.getElementById(element).style.display = 'none'
+        }
+
+        document.getElementById(element).style.opacity = op
+        document.getElementById(element).style.filter = 'alpha(opacity=' + op * 100 + ")"
+
+        op -= op * 0.5
+
+    }, 30);
+} // end: function fade
+
+
+// ===========================================================================
+// function unfade
+//
+// A function to unfade an element
+//
+// Arguments--
+//
+// element:         the name of the HTML element to unfade
+//
+// Returns--
+//
+// None
+//
+function unfade(element) {
+    var op = 0.1 // initial opacity
+    document.getElementById(element).style.display = 'block'
+    var timer = setInterval(function () {
+        if (op >= 1) {
+            clearInterval(timer);
+        }
+
+        document.getElementById(element).style.opacity = op
+        document.getElementById(element).style.filter = 'alpha(opacity=' + op * 100 + ")"
+
+        op += op * 0.5
+
+    }, 50);
+} // end: function fade
 
 
 // +=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+
@@ -231,14 +294,20 @@ function openSettingsTab() {
 
     // Show or hide the 7 textboxes
     if (getComputedStyle(period).display === 'none') {
-        document.getElementById("goToUtilities").style.display = 'none'
-        document.getElementById("submitPeriods").style.display = ''
-        document.getElementById("classes").style.display = ''
+        fade("goToUtilities")
+        unfade("submitPeriods")
+        unfade("classes")
+        // document.getElementById("goToUtilities").style.display = 'none'
+        // document.getElementById("submitPeriods").style.display = ''
+        // document.getElementById("classes").style.display = ''
     }
     else {
-        document.getElementById("goToUtilities").style.display = ''
-        document.getElementById("submitPeriods").style.display = 'none'
-        document.getElementById("classes").style.display = 'none'
+        unfade("goToUtilities")
+        fade("submitPeriods")
+        fade("classes")
+        // document.getElementById("goToUtilities").style.display = ''
+        // document.getElementById("submitPeriods").style.display = 'none'
+        // document.getElementById("classes").style.display = 'none'
     }
 
 } // end: function openSettingsTab
@@ -260,14 +329,20 @@ function openUtilitiesTab() {
 
     // Show or hide the utilities icons
     if (getComputedStyle(util).display === 'none') {
-        document.getElementById("goToSettings").style.display = 'none'
-        document.getElementById("classes").style.display = 'none'
-        document.getElementById("utils").style.display = ''
+        fade("goToSettings")
+        fade("classes")
+        unfade("utils")
+        // document.getElementById("goToSettings").style.display = 'none'
+        // document.getElementById("classes").style.display = 'none'
+        // document.getElementById("utils").style.display = ''
     }
     else {
-        document.getElementById("goToSettings").style.display = ''
-        document.getElementById("classes").style.display = 'none'
-        document.getElementById("utils").style.display = 'none'
+        unfade("goToSettings")
+        fade("classes")
+        fade("utils")
+        // document.getElementById("goToSettings").style.display = ''
+        // document.getElementById("classes").style.display = 'none'
+        // document.getElementById("utils").style.display = 'none'
     }
 
 }
