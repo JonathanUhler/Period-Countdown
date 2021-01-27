@@ -168,21 +168,26 @@ class SchoolYearDefinitions {
     try {
       var cookieData = document.cookie
       var cookieSections = cookieData.split("=")
+
       var periodsFromCookie = cookieSections[1].split(",")
-      // var roomsFromCookie = cookieSections[3].split(",")
-      // var teachersFromCookie = cookieSections[5].split(",")
+
+      // Account for periods with no classes
+      for (var i = 0; i < periodsFromCookie.length; i++) {
+        if (periodsFromCookie[i] === "") {
+          periodsFromCookie[i] = null
+        }
+      }
+
+      console.log(periodsFromCookie)
     }
     catch {
       periodsFromCookie = ["None", "None", "None", "None", "None", "None", "None"]
-      // roomsFromCookie = ["None", "None", "None", "None", "None", "None", "None"]
-      // teachersFromCookie = ["None", "None", "None", "None", "None", "None", "None"]
     }
-    
 
     // Class information array, indexed by period
     const _classInfoArray = [
-      // period     class                Room        Teacher
-      {p: 0,    c:  null,                r: "",                 t: "" },
+      // Period Class                    Room                   Teacher
+      {p: 0,    c: null,                 r: "",                 t: "" },
       {p: 1,    c: periodsFromCookie[0], r: "",                 t: "" },
       {p: 2,    c: periodsFromCookie[1], r: "",                 t: "" },
       {p: 3,    c: periodsFromCookie[2], r: "",                 t: "" },
