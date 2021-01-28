@@ -194,8 +194,8 @@ function saveUserDefaults() {
     for (var i = 0; i <= textIDs.length - 1; i++) {
 
         var classChoice = document.getElementById(textIDs[i]).value
-        if (classChoice.toLowerCase() === "none" || classChoice.toLowerCase() === "n/a") {
-            userClassDefaults.push("Free")
+        if (classChoice.toLowerCase() === "none" || classChoice.toLowerCase() === "n/a" || classChoice.toLowerCase() === "free") {
+            userClassDefaults.push(null)
         }
         else {
             userClassDefaults.push(classChoice)
@@ -297,17 +297,11 @@ function openSettingsTab() {
         fade("goToUtilities")
         unfade("submitPeriods")
         unfade("classes")
-        // document.getElementById("goToUtilities").style.display = 'none'
-        // document.getElementById("submitPeriods").style.display = ''
-        // document.getElementById("classes").style.display = ''
     }
     else {
         unfade("goToUtilities")
         fade("submitPeriods")
         fade("classes")
-        // document.getElementById("goToUtilities").style.display = ''
-        // document.getElementById("submitPeriods").style.display = 'none'
-        // document.getElementById("classes").style.display = 'none'
     }
 
 } // end: function openSettingsTab
@@ -332,17 +326,11 @@ function openUtilitiesTab() {
         fade("goToSettings")
         fade("classes")
         unfade("utils")
-        // document.getElementById("goToSettings").style.display = 'none'
-        // document.getElementById("classes").style.display = 'none'
-        // document.getElementById("utils").style.display = ''
     }
     else {
         unfade("goToSettings")
         fade("classes")
         fade("utils")
-        // document.getElementById("goToSettings").style.display = ''
-        // document.getElementById("classes").style.display = 'none'
-        // document.getElementById("utils").style.display = 'none'
     }
 
 }
