@@ -682,7 +682,7 @@ class SchoolYearDefinitions {
       "2021-01-17": _MVHS_AdvisoryHABAB_Week,  // Martin Luther King day
       "2021-01-24": _MVHS_ACBAB_Week,          // Junior PSAT Week
       "2021-02-14": _MVHS_HHHHH_Week,          // Winter Break
-      "2021-03-14": _MVHS_HBCAB_Week,          // MVHS Recess
+      "2021-03-14": _MVHS_HABAB_Week,          // MVHS Recess
       "2021-04-11": _MVHS_HHHHH_Week,          // Spring Recess
       "2021-05-31": _MVHS_HBCAB_Week,          // Memorial Day
       "2021-06-06": _MVHS_ABCHH_Week,          // End of the school year
