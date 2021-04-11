@@ -6,6 +6,7 @@
 "use strict";
 
 const CalendarVersion = "3.0.3";
+const MVHSSchedule = "./MVHS2020-2021-Hybrid.js";
 
 // Revision History
 //
@@ -82,6 +83,10 @@ const CalendarVersion = "3.0.3";
 //
 //  3.0.3   10/21/2020   Move all of the self-test code out of this file into
 //                       it's own file.
+//
+// 3.0.4    4/11/2021   Add constant variable MVHSSchedule as a pointer to the
+//                      correct MVHS.js file. The name of this file changes
+//                      due to differences in schedules each school year.
 
 // TODO List
 
@@ -1215,7 +1220,7 @@ class Calendar {
     // one has to require the file.
     if (typeof process !== "undefined") {
       CalendarMessage("Attempting to load MVHS.js")
-      const SchoolYearDefinitions = require('./MVHS.js');
+      const SchoolYearDefinitions = require(MVHSSchedule);
       school = new SchoolYearDefinitions ();
     } else {
       school = new SchoolYearDefinitions ();
