@@ -84,7 +84,7 @@ const MVHSSchedule = "./MVHS2020-2021-Hybrid.js";
 //  3.0.3   10/21/2020   Move all of the self-test code out of this file into
 //                       it's own file.
 //
-// 3.0.4    4/11/2021   Add constant variable MVHSSchedule as a pointer to the
+//  3.0.4    4/11/2021  Add constant variable MVHSSchedule as a pointer to the
 //                      correct MVHS.js file. The name of this file changes
 //                      due to differences in schedules each school year.
 
