@@ -5,7 +5,7 @@
 //
 "use strict";
 
-const CalendarVersion = "3.0.3";
+const CalendarVersion = "3.0.4";
 const MVHSSchedule = "./MVHS2020-2021-Hybrid.js";
 
 // Revision History

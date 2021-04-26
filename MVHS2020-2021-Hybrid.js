@@ -42,6 +42,8 @@ const MVHSVersion = "2.2.2";
 //                      arrays of data that may be implemented in the future
 //
 //  2.2.2   4/11/2021   MVHS2020-2021.js deprecated in favor of MVHS2020-2021-Hybrid.js
+//
+//  2.2.3   4/26/2021   Move finals week back one week
 
 // =+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
 // Copyright 2020 Mike Uhler and Jonathan Uhler
@@ -310,7 +312,7 @@ class SchoolYearDefinitions {
         //period      name              startTime    endTime        Comment                         eodAdjust
         {p: -1,   n: "Before School", st: "00:00", et: "09:15", c: "Before school on B day"},
         {p:  2,   n: "P2",            st: "09:15", et: "10:30", c: "Period 2 on B day"},
-        {p: -1,   n: "P2->P4",        st: "10:30", et: "10:30", c: "Passing Period 2->4 on B day"},
+        {p: -1,   n: "P2->P4",        st: "10:30", et: "10:50", c: "Passing Period 2->4 on B day"},
         {p:  4,   n: "P4",            st: "10:50", et: "12:05", c: "Period 4 on B day"},
         {p: -1,   n: "Lunch",         st: "12:05", et: "12:50", c: "Lunch on B day"},
         {p:  6,   n: "P6",            st: "12:50", et: "14:05", c: "Period 6 on B day"},
@@ -320,21 +322,9 @@ class SchoolYearDefinitions {
       [_PeriodsForCDay_k]: [
         // Periods for C Day
         //period      name              startTime    endTime        Comment                         eodAdjust
-        {p: -1,   n: "Before School", st: "00:00", et: "09:30", c: "Before school on C day"},
-        {p:  1,   n: "P1",            st: "09:30", et: "10:00", c: "Period 1 on C day"},
-        {p: -1,   n: "P1->P2",        st: "10:00", et: "10:10", c: "Passing Period 1->2 on C day"},
-        {p:  2,   n: "P2",            st: "10:10", et: "10:40", c: "Period 2 on C day"},
-        {p: -1,   n: "P2->P3",        st: "10:40", et: "10:50", c: "Passing Period 2->3 on C day"},
-        {p:  3,   n: "P3",            st: "10:50", et: "11:20", c: "Period 3 on C day"},
-        {p: -1,   n: "P3->P4",        st: "11:20", et: "11:30", c: "Passing Period 3->4 on C day"},
-        {p:  4,   n: "P4",            st: "11:30", et: "12:00", c: "Period 4 on C day"},
-        {p: -1,   n: "Lunch",         st: "12:00", et: "13:00", c: "Lunch on C day"},
-        {p:  5,   n: "P5",            st: "13:00", et: "13:30", c: "Period 5 on C day"},
-        {p: -1,   n: "P5->P6",        st: "13:30", et: "13:40", c: "Passing Period 5->6 on C day"},
-        {p:  6,   n: "P6",            st: "13:40", et: "14:10", c: "Period 6 on C day"},
-        {p: -1,   n: "P6->P7",        st: "14:10", et: "14:20", c: "Passing Period 6->7 on C day"},
-        {p:  7,   n: "P7",            st: "14:20", et: "14:50", c: "Period 7 on C day"},
-        {p: -1,   n: "After School",  st: "14:50", et: "23:59", c: "After school on C day",         a: true}
+        {p: -1,   n: "Before School", st: "00:00", et: "09:15", c: "Before school on C day"},
+        {p:  1,   n: "Async Work Day",st: "09:15", et: "15:40", c: "Period 1 on C day"},
+        {p: -1,   n: "After School",  st: "15:40", et: "23:59", c: "After school on C day",         a: true}
       ], // [_PeriodsForCDay_k]
 
       [_PeriodsForAAdvisory_k]: [
@@ -688,7 +678,6 @@ class SchoolYearDefinitions {
       "2021-04-11": _MVHS_HHHHH_Week,          // Spring Recess
       "2021-04-25": _MVHS_ACBAB_Week,          // SAT Day
       "2021-05-31": _MVHS_HABAB_Week,          // Memorial Day
-      "2021-06-06": _MVHS_ABCHH_Week,          // End of the school year
     };
 
     // -------------------------------------------------------------------------
