@@ -44,6 +44,8 @@ const MVHSVersion = "2.2.2";
 //  2.2.2   4/11/2021   MVHS2020-2021.js deprecated in favor of MVHS2020-2021-Hybrid.js
 //
 //  2.2.3   4/26/2021   Move finals week back one week
+//
+//  2.2.4   5/17/2021   Add AP testing week
 
 // =+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
 // Copyright 2020 Mike Uhler and Jonathan Uhler
@@ -323,7 +325,7 @@ class SchoolYearDefinitions {
         // Periods for C Day
         //period      name              startTime    endTime        Comment                         eodAdjust
         {p: -1,   n: "Before School", st: "00:00", et: "09:15", c: "Before school on C day"},
-        {p:  1,   n: "Async Work Day",st: "09:15", et: "15:40", c: "Period 1 on C day"},
+        {p: -1,   n: "Async Work",    st: "09:15", et: "15:40", c: "Async work block on C day"},
         {p: -1,   n: "After School",  st: "15:40", et: "23:59", c: "After school on C day",         a: true}
       ], // [_PeriodsForCDay_k]
 
@@ -582,6 +584,17 @@ class SchoolYearDefinitions {
       {dt: _dayTypeWeekend_k,      pa: _PeriodsForWeekend_k }
     ];
 
+    // This is the start of AP testing
+    const _MVHS_ABABC_Week = [
+      {dt: _dayTypeWeekend_k,      pa: _PeriodsForWeekend_k },
+      {dt: _dayTypeSchoolDay_k,    pa: _PeriodsForADay_k    },
+      {dt: _dayTypeSchoolDay_k,    pa: _PeriodsForBDay_k    },
+      {dt: _dayTypeSchoolDay_k,    pa: _PeriodsForADay_k    },
+      {dt: _dayTypeSchoolDay_k,    pa: _PeriodsForBDay_k    },
+      {dt: _dayTypeSchoolDay_k,    pa: _PeriodsForCDay_k    },
+      {dt: _dayTypeWeekend_k,      pa: _PeriodsForWeekend_k }
+    ];
+
     // This is the beginning-of-year week
     const _MVHS_HHCAB_Week = [
       {dt: _dayTypeWeekend_k,        pa: _PeriodsForWeekend_k },
@@ -677,6 +690,7 @@ class SchoolYearDefinitions {
       "2021-03-14": _MVHS_HABAB_Week,          // MVHS Recess
       "2021-04-11": _MVHS_HHHHH_Week,          // Spring Recess
       "2021-04-25": _MVHS_ACBAB_Week,          // SAT Day
+      "2021-05-17": _MVHS_ABABC_Week,          // AP testing starts
       "2021-05-31": _MVHS_HABAB_Week,          // Memorial Day
     };
 
