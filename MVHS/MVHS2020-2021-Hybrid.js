@@ -285,10 +285,14 @@ class SchoolYearDefinitions {
     const _PeriodsForCDay_k     = "PeriodsForCDay";
     const _PeriodsForAAdvisory_k = "PeriodsForAAdvisory";
     const _PeriodsForBAdvisory_k = "PeriodsForBAdvisory";
-    const _PeriodsForFinals1a_k  = "PeriodsForFinals1a"
-    const _PeriodsForFinals1b_k  = "PeriodsForFinals1b"
-    const _PeriodsForFinals1c_k  = "PeriodsForFinals1c"
-    const _PeriodsForFinals1d_k  = "PeriodsForFinals1d"
+    const _PeriodsForFinals1a_k  = "PeriodsForFinals1a";
+    const _PeriodsForFinals1b_k  = "PeriodsForFinals1b";
+    const _PeriodsForFinals1c_k  = "PeriodsForFinals1c";
+    const _PeriodsForFinals1d_k  = "PeriodsForFinals1d";
+    const _PeriodsForFinals2a_k  = "PeriodsForFinals2a";
+    const _PeriodsForFinals2b_k  = "PeriodsForFinals2b";
+    const _PeriodsForFinals2c_k  = "PeriodsForFinals2c";
+    const _PeriodsForFinals2d_k  = "PeriodsForFinals2d";
     const _PeriodsForWeekend_k  = "PeriodsForWeekend";
     const _PeriodsForHoliday_k  = "PeriodsForHoliday";
 
@@ -388,6 +392,42 @@ class SchoolYearDefinitions {
         {p:  6,   n: "P6",            st: "09:30", et: "11:15", c: "Period 6 on Finals1d day"},
         {p: -1,   n: "After School",  st: "11:15", et: "23:59", c: "After school on Finals1d day",   a: true}
       ], // [_PeriodsForFinals1d_k]
+
+      [_PeriodsForFinals2a_k]: [
+        //period      name              startTime    endTime        Comment                         eodAdjust
+        {p: -1,   n: "Before School", st: "00:00", et: "10:00", c: "Before school on Finals2a day"},
+        {p:  1,   n: "P1",            st: "10:00", et: "11:30", c: "Period 1 on Finals2a day"},
+        {p: -1,   n: "Lunch",         st: "11:30", et: "12:30", c: "Lunch on Finals2a day"},
+        {p:  3,   n: "P3",            st: "12:30", et: "14:00", c: "Period 3 on Finals2a day"},
+        {p: -1,   n: "After School",  st: "14:00", et: "23:59", c: "After school on Finals2a day",   a: true}
+      ], // [_PeriodsForFinals2a_k]
+
+      [_PeriodsForFinals2b_k]: [
+        //period      name              startTime    endTime        Comment                         eodAdjust
+        {p: -1,   n: "Before School", st: "00:00", et: "10:00", c: "Before school on Finals2b day"},
+        {p: -1,   n: "AP",            st: "10:00", et: "11:30", c: "AP on Finals2b day"},
+        {p: -1,   n: "Lunch",         st: "11:30", et: "12:30", c: "Lunch on Finals2b day"},
+        {p:  6,   n: "P6",            st: "12:30", et: "14:00", c: "Period 6 testing on Finals2b day"},
+        {p: -1,   n: "After School",  st: "14:00", et: "23:59", c: "After school on Finals2b day",   a: true}
+      ], // [_PeriodsForFinals2b_k]
+
+      [_PeriodsForFinals2c_k]: [
+        //period      name              startTime    endTime        Comment                         eodAdjust
+        {p: -1,   n: "Before School", st: "00:00", et: "10:00", c: "Before school on Finals2c day"},
+        {p:  3,   n: "P3",            st: "10:00", et: "11:30", c: "Period 3 on Finals2c day"},
+        {p: -1,   n: "Lunch",         st: "11:30", et: "12:30", c: "Lunch on Finals2c day"},
+        {p:  7,   n: "P7",            st: "12:30", et: "14:00", c: "Period 7 on Finals2c day"},
+        {p: -1,   n: "After School",  st: "14:00", et: "23:59", c: "After school on Finals2c day",   a: true}
+      ], // [_PeriodsForFinals2c_k]
+
+      [_PeriodsForFinals2d_k]: [
+        //period      name              startTime    endTime        Comment                         eodAdjust
+        {p: -1,   n: "Before School", st: "00:00", et: "10:00", c: "Before school on Finals2d day"},
+        {p:  2,   n: "P2",            st: "10:00", et: "11:30", c: "Period 2 on Finals2d day"},
+        {p: -1,   n: "Lunch",         st: "11:30", et: "12:30", c: "Lunch on Finals2d day"},
+        {p:  4,   n: "P4",            st: "12:30", et: "14:00", c: "Period 4 on Finals2d day"},
+        {p: -1,   n: "After School",  st: "14:00", et: "23:59", c: "After school on Finals2d day",   a: true}
+      ], // [_PeriodsForFinals2d_k]
 
       [_PeriodsForWeekend_k]: [
         // Periods for Weekend
@@ -671,6 +711,18 @@ class SchoolYearDefinitions {
       {dt: _dayTypeSchoolDay_k,      pa: _PeriodsForFinals1d_k },
       {dt: _dayTypeWeekend_k,        pa: _PeriodsForWeekend_k }
     ];
+
+    // This is a Finals 2 week
+    const _MVHS_Finals2_Week = [
+      {dt: _dayTypeWeekend_k,        pa: _PeriodsForWeekend_k },
+      {dt: _dayTypeHoliday_k,        pa: _PeriodsForHoliday_k },
+      {dt: _dayTypeSchoolDay_k,      pa: _PeriodsForFinals2a_k },
+      {dt: _dayTypeSchoolDay_k,      pa: _PeriodsForFinals2b_k },
+      {dt: _dayTypeSchoolDay_k,      pa: _PeriodsForFinals2c_k },
+      {dt: _dayTypeSchoolDay_k,      pa: _PeriodsForFinals2d_k },
+      {dt: _dayTypeWeekend_k,        pa: _PeriodsForWeekend_k }
+    ];
+
     // This is the list of weeks that are different from the default week. The key
     // is the week tag of the exceptional week and the value is the _MVHS_*_Week
     // array for that week
@@ -690,8 +742,8 @@ class SchoolYearDefinitions {
       "2021-03-14": _MVHS_HABAB_Week,          // MVHS Recess
       "2021-04-11": _MVHS_HHHHH_Week,          // Spring Recess
       "2021-04-25": _MVHS_ACBAB_Week,          // SAT Day
-      "2021-05-17": _MVHS_ABABC_Week,          // AP testing starts
-      "2021-05-31": _MVHS_HABAB_Week,          // Memorial Day
+      "2021-05-16": _MVHS_ABABC_Week,          // AP testing starts
+      "2021-05-30": _MVHS_Finals2_Week,        // Finals 2 week
     };
 
     // -------------------------------------------------------------------------
