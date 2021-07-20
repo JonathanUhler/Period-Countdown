@@ -8,8 +8,8 @@
         <canvas width="350" height="350" id="Periods"></canvas>
 
         <!-- Images -->
-        <img src="/reference/settings.png" alt="Open Settings" width="50" height="50" style="position: absolute; left: 15px; top: 305px;" id="goToSettings">
-        <img src="/reference/utilities_menu.png" alt="Open Utilities" width="50" height="50" style="position: absolute; left: 80px; top: 305px;" id="goToUtilities">
+        <img src="/reference/settings.png" draggable="false" title="Settings" alt="Open Settings" width="50" height="50" style="position: absolute; left: 15px; top: 305px;" id="goToSettings">
+        <img src="/reference/utilities_menu.png" draggable="false" title="Utilities" alt="Open Utilities" width="50" height="50" style="position: absolute; left: 80px; top: 305px;" id="goToUtilities">
 
         <!-- All the text input fields for class names (these are shown and hidden by display.js) -->
         <!-- PERIOD SAVE BUTTONS -->
@@ -33,34 +33,29 @@
         <!-- Save classes button -->
         <button id='submitPeriods' type='button' style="position: absolute; left: 80px; top: 315px;">Save Classes</button>
 
+
         <!-- All of the utilities that come with the extension -->
         <!-- UTILITIES -->
         <div id="utils">
             <a href="https://github.com/JonathanUhler/Period-Countdown/issues" target=”_blank”>
-                <img src="/reference/github.png" width="50" height="50" style="position: absolute; left: 40px; top: 135px;">
+                <img src="/reference/github.png" draggable="false" title="Github" width="50" height="50" style="position: absolute; left: 40px; top: 135px;">
             </a>
             <a href="https://mvhs.mvla.net/" target=”_blank”>
-                <img src="/reference/mvhs.png" width="50" height="50" style="position: absolute; left: 115px; top: 135px;">
+                <img src="/reference/mvhs.png" draggable="false" title="MVHS Website" width="50" height="50" style="position: absolute; left: 115px; top: 135px;">
             </a>
             <a href="https://mvhs.mvla.net/Our-School/Campus-Map--Directions/index.html" target=”_blank”>
-                <img src="/reference/map.png" width="50" height="50" style="position: absolute; left: 190px; top: 135px;">
+                <img src="/reference/map.png" draggable="false" title="Map" width="50" height="50" style="position: absolute; left: 190px; top: 135px;">
             </a>
             <a href="https://mvla.asp.aeries.net/Student/LoginParent.aspx" target=”_blank”>
-                <img src="/reference/aeries.png" width="50" height="50" style="position: absolute; left: 265px; top: 135px;">
+                <img src="/reference/aeries.png" draggable="false" title="Aeries" width="50" height="50" style="position: absolute; left: 265px; top: 135px;">
             </a>
         </div>
         <!-- end: UTILITIES -->
     </body>
 
     <!-- Scripts -->
-    <!-- 2020-2021 School Year (non-hybrid schedule) -->
-    <!-- <script src="/MVHS/MVHS2020-2021.js"></script> -->
-
-    <!-- 2020-2021 School Year (hybrid schedule) -->
-    <script src="/MVHS/MVHS2021-2022.js"></script>
-
     <!-- 2021-2022 School Year -->
-    <!-- <script src="/MVHS/MVHS2021-2022.js"></script> -->
+    <script src="/MVHS/MVHS2021-2022.js"></script>
 
     <script src="Calendar.js"></script>
     <script src="settings.js"></script>
