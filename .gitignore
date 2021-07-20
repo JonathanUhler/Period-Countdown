@@ -1,2 +1,4 @@
 .DS_Store
 [DEPRECATED]-content.js
+.idea/*
+.vscode/*

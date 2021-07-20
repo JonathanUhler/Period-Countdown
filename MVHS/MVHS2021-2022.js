@@ -128,8 +128,8 @@ class SchoolYearDefinitions {
     this.version = MVHSVersion;
 
     // Export the day and last day of school
-    this.firstDate = "2020-08-12";
-    this.lastDate = "2021-06-09";
+    this.firstDate = "2021-08-11";
+    this.lastDate = "2022-06-08";
 
     // First and last periods of the school day
     const _firstPeriod_k = 0;
@@ -279,12 +279,6 @@ class SchoolYearDefinitions {
     const _PeriodsForADay_k     = "PeriodsForADay";
     const _PeriodsForBDay_k     = "PeriodsForBDay";
     const _PeriodsForCDay_k     = "PeriodsForCDay";
-    const _PeriodsForAAdvisory_k = "PeriodsForAAdvisory";
-    const _PeriodsForBAdvisory_k = "PeriodsForBAdvisory";
-    const _PeriodsForFinals1a_k  = "PeriodsForFinals1a"
-    const _PeriodsForFinals1b_k  = "PeriodsForFinals1b"
-    const _PeriodsForFinals1c_k  = "PeriodsForFinals1c"
-    const _PeriodsForFinals1d_k  = "PeriodsForFinals1d"
     const _PeriodsForWeekend_k  = "PeriodsForWeekend";
     const _PeriodsForHoliday_k  = "PeriodsForHoliday";
 
@@ -336,66 +330,6 @@ class SchoolYearDefinitions {
         {p:  7,   n: "P7",            st: "14:20", et: "14:50", c: "Period 7 on C day"},
         {p: -1,   n: "After School",  st: "14:50", et: "23:59", c: "After school on C day",         a: true}
       ], // [_PeriodsForCDay_k]
-
-      [_PeriodsForAAdvisory_k]: [
-        // Periods for A Day
-        //period      name              startTime    endTime        Comment                                          eodAdjust
-        {p: -1,   n: "Before School", st: "00:00", et: "09:30", c: "Before school on A day Advisory schedule"},
-        {p:  1,   n: "P1",            st: "09:30", et: "10:40", c: "Period 1 on A day Advisory schedule"},
-        {p: -1,   n: "P1->P3",        st: "10:40", et: "10:50", c: "Passing Period 1->3 on A day Advisory schedule"},
-        {p:  3,   n: "P3",            st: "10:50", et: "12:20", c: "Period 3 on A day Advisory schedule"},
-        {p: -1,   n: "Lunch",         st: "12:20", et: "13:15", c: "Lunch on A day Advisory schedule"},
-        {p:  5,   n: "P5",            st: "13:15", et: "14:25", c: "Period 5 on A day Advisory schedule"},
-        {p: -1,   n: "P5->P7",        st: "14:25", et: "14:35", c: "Passing Period 5->7 on A day Advisory schedule"},
-        {p:  7,   n: "P7",            st: "14:35", et: "15:45", c: "Period 7 on A day Advisory schedule"},
-        {p: -1,   n: "After School",  st: "15:45", et: "23:59", c: "After school on A day Advisory schedule",         a: true}
-      ], // [_PeriodsForAAdvisory_k]
-
-      [_PeriodsForBAdvisory_k]: [
-        // Periods for B Day
-        //period      name              startTime    endTime        Comment                                          eodAdjust
-        {p: -1,   n: "Before School", st: "00:00", et: "09:30", c: "Before school on B day Advisory schedule"},
-        {p:  2,   n: "P2",            st: "09:30", et: "10:40", c: "Period 2 on B day Advisory schedule"},
-        {p: -1,   n: "P2->P4",        st: "10:40", et: "10:50", c: "Passing Period 2->4 on B day Advisory schedule"},
-        {p:  4,   n: "P4",            st: "10:50", et: "12:20", c: "Period 4 on B day Advisory schedule"},
-        {p: -1,   n: "Lunch",         st: "12:20", et: "13:15", c: "Lunch on B day Advisory schedule"},
-        {p:  6,   n: "P6",            st: "13:15", et: "14:25", c: "Period 6 on B day Advisory schedule"},
-        {p: -1,   n: "After School",  st: "14:25", et: "23:59", c: "After school on B day Advisory schedule",         a: true}
-        ], // [_PeriodsForBDay_k]
-
-      [_PeriodsForFinals1a_k]: [
-        //period      name              startTime    endTime        Comment                         eodAdjust
-        {p: -1,   n: "Before School", st: "00:00", et: "09:30", c: "Before school on Finals1a day"},
-        {p:  3,   n: "P3",            st: "09:30", et: "11:15", c: "Period 3 on Finals1a day"},
-        {p: -1,   n: "Lunch",         st: "11:15", et: "13:05", c: "Lunch on Finals1a day"},
-        {p:  5,   n: "P5",            st: "13:05", et: "14:45", c: "Period 5 on Finals1a day"},
-        {p: -1,   n: "After School",  st: "14:45", et: "23:59", c: "After school on Finals1a day",   a: true}
-      ], // [_PeriodsForFinals1a_k]
-
-      [_PeriodsForFinals1b_k]: [
-        //period      name              startTime    endTime        Comment                         eodAdjust
-        {p: -1,   n: "Before School", st: "00:00", et: "09:30", c: "Before school on Finals1b day"},
-        {p:  2,   n: "P2",            st: "09:30", et: "11:15", c: "Period 2 on Finals1b day"},
-        {p: -1,   n: "Lunch",         st: "11:15", et: "13:05", c: "Lunch on Finals1b day"},
-        {p:  7,   n: "P7",            st: "13:05", et: "14:45", c: "Period 7 on Finals1b day"},
-        {p: -1,   n: "After School",  st: "14:45", et: "23:59", c: "After school on Finals1b day",   a: true}
-      ], // [_PeriodsForFinals1b_k]
-
-      [_PeriodsForFinals1c_k]: [
-        //period      name              startTime    endTime        Comment                         eodAdjust
-        {p: -1,   n: "Before School", st: "00:00", et: "09:30", c: "Before school on Finals1c day"},
-        {p:  1,   n: "P1",            st: "09:30", et: "11:15", c: "Period 1 on Finals1c day"},
-        {p: -1,   n: "Lunch",         st: "11:15", et: "13:05", c: "Lunch on Finals1c day"},
-        {p:  4,   n: "P4",            st: "13:05", et: "14:45", c: "Period 4 on Finals1c day"},
-        {p: -1,   n: "After School",  st: "14:45", et: "23:59", c: "After school on Finals1c day",   a: true}
-      ], // [_PeriodsForFinals1c_k]
-
-      [_PeriodsForFinals1d_k]: [
-        //period      name              startTime    endTime        Comment                         eodAdjust
-        {p: -1,   n: "Before School", st: "00:00", et: "09:30", c: "Before school on Finals1d day"},
-        {p:  6,   n: "P6",            st: "09:30", et: "11:15", c: "Period 6 on Finals1d day"},
-        {p: -1,   n: "After School",  st: "11:15", et: "23:59", c: "After school on Finals1d day",   a: true}
-      ], // [_PeriodsForFinals1d_k]
 
       [_PeriodsForWeekend_k]: [
         // Periods for Weekend
@@ -570,81 +504,24 @@ class SchoolYearDefinitions {
       {dt: _dayTypeWeekend_k,      pa: _PeriodsForWeekend_k }
     ];
 
-    // This is the HABAB modified for Advisory week
-    const _MVHS_AdvisoryHABAB_Week = [
-      {dt: _dayTypeWeekend_k,      pa: _PeriodsForWeekend_k  },
-      {dt: _dayTypeHoliday_k,      pa: _PeriodsForHoliday_k  },
-      {dt: _dayTypeSchoolDay_k,    pa: _PeriodsForADay_k     },
-      {dt: _dayTypeSchoolDay_k,    pa: _PeriodsForBDay_k     },
-      {dt: _dayTypeSchoolDay_k,    pa: _PeriodsForAAdvisory_k},
-      {dt: _dayTypeSchoolDay_k,    pa: _PeriodsForBAdvisory_k},
-      {dt: _dayTypeWeekend_k,      pa: _PeriodsForWeekend_k  }
-    ];
-
-    // This is the ACBAB week for Junior PSAT week
-    const _MVHS_ACBAB_Week = [
-      {dt: _dayTypeWeekend_k,      pa: _PeriodsForWeekend_k },
-      {dt: _dayTypeSchoolDay_k,    pa: _PeriodsForADay_k    },
-      {dt: _dayTypeSchoolDay_k,    pa: _PeriodsForCDay_k    },
-      {dt: _dayTypeSchoolDay_k,    pa: _PeriodsForBDay_k    },
-      {dt: _dayTypeSchoolDay_k,    pa: _PeriodsForADay_k    },
-      {dt: _dayTypeSchoolDay_k,    pa: _PeriodsForBDay_k    },
-      {dt: _dayTypeWeekend_k,      pa: _PeriodsForWeekend_k }
-    ];
-
-    // This is the beginning-of-year week
-    const _MVHS_HHCAB_Week = [
-      {dt: _dayTypeWeekend_k,        pa: _PeriodsForWeekend_k },
-      {dt: _dayTypeHoliday_k,        pa: _PeriodsForHoliday_k },
-      {dt: _dayTypeHoliday_k,        pa: _PeriodsForHoliday_k },
-      {dt: _dayTypeSchoolDay_k,      pa: _PeriodsForCDay_k    },
-      {dt: _dayTypeSchoolDay_k,      pa: _PeriodsForADay_k    },
-      {dt: _dayTypeSchoolDay_k,      pa: _PeriodsForBDay_k    },
-      {dt: _dayTypeWeekend_k,        pa: _PeriodsForWeekend_k }
-    ];
-
     // This is a Monday holiday week
-    const _MVHS_HABAB_Week = [
-      {dt: _dayTypeWeekend_k,        pa: _PeriodsForWeekend_k },
-      {dt: _dayTypeHoliday_k,        pa: _PeriodsForHoliday_k },
-      {dt: _dayTypeSchoolDay_k,      pa: _PeriodsForADay_k    },
-      {dt: _dayTypeSchoolDay_k,      pa: _PeriodsForBDay_k    },
-      {dt: _dayTypeSchoolDay_k,      pa: _PeriodsForADay_k    },
-      {dt: _dayTypeSchoolDay_k,      pa: _PeriodsForBDay_k    },
-      {dt: _dayTypeWeekend_k,        pa: _PeriodsForWeekend_k }
+    const _MVHS_Hxxxx_Week = [
+
     ];
 
-    // This is a Monday Staff Dev week
-    const _MVHS_HBCAB_Week = [
-      {dt: _dayTypeWeekend_k,        pa: _PeriodsForWeekend_k },
-      {dt: _dayTypeHoliday_k,        pa: _PeriodsForHoliday_k },
-      {dt: _dayTypeSchoolDay_k,      pa: _PeriodsForBDay_k    },
-      {dt: _dayTypeSchoolDay_k,      pa: _PeriodsForCDay_k    },
-      {dt: _dayTypeSchoolDay_k,      pa: _PeriodsForADay_k    },
-      {dt: _dayTypeSchoolDay_k,      pa: _PeriodsForBDay_k    },
-      {dt: _dayTypeWeekend_k,        pa: _PeriodsForWeekend_k }
+    // This is a Monday/Tuesday holiday week (also the first week of school)
+    const _MVHS_HHxxx_Week = [
+
     ];
 
-    // This is a Wednesday holiday week
-    const _MVHS_ABHAB_Week = [
-      {dt: _dayTypeWeekend_k,        pa: _PeriodsForWeekend_k },
-      {dt: _dayTypeSchoolDay_k,      pa: _PeriodsForADay_k    },
-      {dt: _dayTypeSchoolDay_k,      pa: _PeriodsForBDay_k    },
-      {dt: _dayTypeHoliday_k,        pa: _PeriodsForHoliday_k },
-      {dt: _dayTypeSchoolDay_k,      pa: _PeriodsForADay_k    },
-      {dt: _dayTypeSchoolDay_k,      pa: _PeriodsForBDay_k    },
-      {dt: _dayTypeWeekend_k,        pa: _PeriodsForWeekend_k }
+    // This is a Thursday holiday week
+    const _MVHS_xxxHx_Week = [
+
     ];
 
-    // This is the end-of-year week
-    const _MVHS_ABCHH_Week = [
-      {dt: _dayTypeWeekend_k,        pa: _PeriodsForWeekend_k },
-      {dt: _dayTypeSchoolDay_k,      pa: _PeriodsForADay_k    },
-      {dt: _dayTypeSchoolDay_k,      pa: _PeriodsForBDay_k    },
-      {dt: _dayTypeSchoolDay_k,      pa: _PeriodsForCDay_k    },
-      {dt: _dayTypeHoliday_k,        pa: _PeriodsForHoliday_k },
-      {dt: _dayTypeHoliday_k,        pa: _PeriodsForHoliday_k },
-      {dt: _dayTypeWeekend_k,        pa: _PeriodsForWeekend_k }
+    // This is the last week of school
+    const _MVHS_xxxHH_Week = [
+
     ];
 
     // This is a week-long holiday week
@@ -658,37 +535,24 @@ class SchoolYearDefinitions {
       {dt: _dayTypeWeekend_k,        pa: _PeriodsForWeekend_k }
     ];
 
-    // This is a Finals 1 week
-    const _MVHS_Finals1_Week = [
-      {dt: _dayTypeWeekend_k,        pa: _PeriodsForWeekend_k },
-      {dt: _dayTypeSchoolDay_k,      pa: _PeriodsForCDay_k },
-      {dt: _dayTypeSchoolDay_k,      pa: _PeriodsForFinals1a_k },
-      {dt: _dayTypeSchoolDay_k,      pa: _PeriodsForFinals1b_k },
-      {dt: _dayTypeSchoolDay_k,      pa: _PeriodsForFinals1c_k },
-      {dt: _dayTypeSchoolDay_k,      pa: _PeriodsForFinals1d_k },
-      {dt: _dayTypeWeekend_k,        pa: _PeriodsForWeekend_k }
-    ];
     // This is the list of weeks that are different from the default week. The key
     // is the week tag of the exceptional week and the value is the _MVHS_*_Week
     // array for that week
     const _MVHS_Week_Exceptions = {
-      "2020-08-09": _MVHS_HHCAB_Week,          // Beginning of the school year
-      "2020-09-06": _MVHS_HABAB_Week,          // Labor Day
-      "2020-10-11": _MVHS_HHCAB_Week,          // Columbus Day
-      "2020-11-08": _MVHS_ABHAB_Week,          // Veterans Day
-      "2020-11-22": _MVHS_HHHHH_Week,          // Thanksgiving Break
-      "2020-12-13": _MVHS_Finals1_Week,        // Finals 1 week
-      "2020-12-20": _MVHS_HHHHH_Week,          // Holiday Break
-      "2020-12-27": _MVHS_HHHHH_Week,          // Holiday Break
-      "2021-01-03": _MVHS_HABAB_Week,          // Staff Dev Day
-      "2021-01-17": _MVHS_AdvisoryHABAB_Week,  // Martin Luther King day
-      "2021-01-24": _MVHS_ACBAB_Week,          // Junior PSAT Week
-      "2021-02-14": _MVHS_HHHHH_Week,          // Winter Break
-      "2021-03-14": _MVHS_HABAB_Week,          // MVHS Recess
-      "2021-04-11": _MVHS_HHHHH_Week,          // Spring Recess
-      "2021-04-25": _MVHS_ACBAB_Week,          // SAT Day
-      "2021-05-31": _MVHS_HABAB_Week,          // Memorial Day
-      "2021-06-06": _MVHS_ABCHH_Week,          // End of the school year
+      "2021-08-08": _MVHS_HHxxx_Week, // Beginning of the school year
+      "2021-09-05": _MVHS_Hxxxx_Week, // Labor day
+      "2021-10-10": _MVHS_HHxxx_Week, // Recess days
+      "2021-11-07": _MVHS_xxxHx_Week, // Veteran's day
+      "2021-11-21": _MVHS_HHHHH_Week, // Thanksgiving week
+      "2021-12-19": _MVHS_HHHHH_Week, // Holiday break
+      "2021-12-26": _MVHS_HHHHH_Week, // Holiday break
+      "2022-01-02": _MVHS_Hxxxx_Week, // Teacher service day
+      "2022-01-16": _MVHS_Hxxxx_Week, // Martin Luther King Jr. day
+      "2022-02-20": _MVHS_HHHHH_Week, // Winter break
+      "2022-03-13": _MVHS_Hxxxx_Week, // Recess day
+      "2022-04-10": _MVHS_HHHHH_Week, // Spring break
+      "2022-05-29": _MVHS_Hxxxx_Week, // Memorial day
+      "2022-06-05": _MVHS_xxxHH_Week, // End of the school year
     };
 
     // -------------------------------------------------------------------------

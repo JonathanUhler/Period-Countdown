@@ -398,7 +398,7 @@ class SchoolYearDefinitions {
         {p: -1,   n: "Before School", st: "00:00", et: "10:00", c: "Before school on Finals2a day"},
         {p:  1,   n: "P1",            st: "10:00", et: "11:30", c: "Period 1 on Finals2a day"},
         {p: -1,   n: "Lunch",         st: "11:30", et: "12:30", c: "Lunch on Finals2a day"},
-        {p:  3,   n: "P3",            st: "12:30", et: "14:00", c: "Period 3 on Finals2a day"},
+        {p:  5,   n: "P5",            st: "12:30", et: "14:00", c: "Period 3 on Finals2a day"},
         {p: -1,   n: "After School",  st: "14:00", et: "23:59", c: "After school on Finals2a day",   a: true}
       ], // [_PeriodsForFinals2a_k]
 
