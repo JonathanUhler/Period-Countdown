@@ -6,43 +6,6 @@
 
 const MVHSVersion = "2.2.2";
 
-// Revision History
-//
-//  version    date                     Change
-//  ------- ----------  --------------------------------------------------------
-//  1.0.0   10/08/2020  First usable release of MVHS.js
-//
-//  1.0.1   10/08/2020  Add a module exports statement for runs using node.js
-//                      (not needed in the browser because the html file loads
-//                      MVHS.js before Calendar.js)
-//
-//  1.0.2   10/09/2020  Fix up some comments and documentation
-//
-//  2.0.0   10/09/2020  Change the _periodDayTypeHash structure for each day
-//                      type such that the adjustment field becomes a boolean
-//                      that indicates whether a period is the last one of the
-//                      day and let Calendar.js decide what to do with that
-//                      information. This change requires a corresponding change
-//                      to Calendar.js
-//
-//  2.0.1   10/10/2020  Minor documentation change
-//
-//  2.1.0   12/14/2020  Add the exception for finals week starting 12/13/2020
-//
-//  2.1.1   01/03/2021  Fix the weeks of 1/3/2021 and 1/17/2021. They should both
-//                      be HABAB weeks
-//
-//  2.1.2   01/21/2021  Fix the week of 1/17/2021 again. This is an advisory week
-//                      and Thurs/Fri of that week have modified schedules.
-//
-//  2.2.0   01/24/2021  Added support for cookies and the ability to change class
-//                      choices
-//
-//  2.2.1   01/26/2021  Added 'teachersFromCookie' and 'roomsFromCookie' as unused
-//                      arrays of data that may be implemented in the future
-//
-//  2.2.2   4/11/2021   MVHS2020-2021.js deprecated in favor of MVHS2020-2021-Hybrid.js
-
 // =+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
 // Copyright 2020 Mike Uhler and Jonathan Uhler
 //
@@ -128,6 +91,7 @@ class SchoolYearDefinitions {
     this.version = MVHSVersion;
 
     // Export the day and last day of school
+    this.firstDateTime = "2021-08-11T08:40:00"
     this.firstDate = "2021-08-11";
     this.lastDate = "2022-06-08";
 
@@ -288,47 +252,54 @@ class SchoolYearDefinitions {
       [_PeriodsForADay_k]: [
         // Periods for A Day
         //period      name              startTime    endTime        Comment                         eodAdjust
-        {p: -1,   n: "Before School", st: "00:00", et: "09:30", c: "Before school on A day"},
-        {p:  1,   n: "P1",            st: "09:30", et: "10:45", c: "Period 1 on A day"},
-        {p: -1,   n: "P1->P3",        st: "10:45", et: "11:00", c: "Passing Period 1->3 on A day"},
-        {p:  3,   n: "P3",            st: "11:00", et: "12:15", c: "Period 3 on A day"},
-        {p: -1,   n: "Lunch",         st: "12:15", et: "13:05", c: "Lunch on A day"},
-        {p:  5,   n: "P5",            st: "13:05", et: "14:20", c: "Period 5 on A day"},
-        {p: -1,   n: "P5->P7",        st: "14:20", et: "14:30", c: "Passing Period 5->7 on A day"},
-        {p:  7,   n: "P7",            st: "14:30", et: "15:45", c: "Period 7 on A day"},
-        {p: -1,   n: "After School",  st: "15:45", et: "23:59", c: "After school on A day",         a: true}
+        {p: -1,   n: "Before School", st: "00:00", et: "08:40", c: "Before school on A day"},
+        {p:  1,   n: "P1",            st: "08:40", et: "09:25", c: "Period 1 on A day"},
+        {p: -1,   n: "P1->P2",        st: "09:25", et: "09:32", c: "Passing Period 1->2 on A day"},
+        {p:  2,   n: "P2",            st: "09:32", et: "10:22", c: "Period 2 on A day"},
+        {p: -1,   n: "Brunch",        st: "10:22", et: "10:32", c: "Brunch on A day"},
+        {p: -1,   n: "P2->P3",        st: "10:32", et: "10:39", c: "Passing Period 2->3 on A day"},
+        {p:  3,   n: "P3",            st: "10:39", et: "11:24", c: "Period 3 on A day"},
+        {p: -1,   n: "P3->P4",        st: "11:24", et: "11:31", c: "Passing Period 3->4 on A day"},
+        {p:  4,   n: "P4",            st: "11:31", et: "12:16", c: "Period 4 on A day"},
+        {p: -1,   n: "Lunch",         st: "12:16", et: "13:01", c: "Lunch on A day"},
+        {p: -1,   n: "Lunch->P5",        st: "13:01", et: "13:08", c: "Passing Period Lunch->5 on A day"},
+        {p: 5,    n: "P5",            st: "13:08", et: "13:53", c: "Period 5 on A day"},
+        {p: -1,   n: "P5->P6",        st: "13:53", et: "14:00", c: "Passing Period 5->6 on A day"},
+        {p: 6,    n: "P6",            st: "14:00", et: "14:45", c: "Period 6 on A day"},
+        {p: -1,   n: "P6->P7",        st: "14:45", et: "14:52", c: "Passing Period 6->7 on A day"},
+        {p: 7,    n: "P7",            st: "14:52", et: "15:37", c: "Period 7 on A day"},
+        {p: -1,   n: "After School",  st: "15:37", et: "23:59", c: "After school on A day",         a: true}
       ], // [_PeriodsForADay_k]
 
       [_PeriodsForBDay_k]: [
         // Periods for B Day
         //period      name              startTime    endTime        Comment                         eodAdjust
-        {p: -1,   n: "Before School", st: "00:00", et: "09:30", c: "Before school on B day"},
-        {p:  2,   n: "P2",            st: "09:30", et: "10:45", c: "Period 2 on B day"},
-        {p: -1,   n: "P2->P4",        st: "10:45", et: "11:00", c: "Passing Period 2->4 on B day"},
-        {p:  4,   n: "P4",            st: "11:00", et: "12:15", c: "Period 4 on B day"},
-        {p: -1,   n: "Lunch",         st: "12:15", et: "13:05", c: "Lunch on B day"},
-        {p:  6,   n: "P6",            st: "13:05", et: "14:20", c: "Period 6 on B day"},
-        {p: -1,   n: "After School",  st: "14:20", et: "23:59", c: "After school on B day",         a: true}
+        {p: -1,   n: "Before School", st: "00:00", et: "08:40", c: "Before school on B day"},
+        {p:  1,   n: "P1",            st: "08:40", et: "10:10", c: "Period 2 on B day"},
+        {p: -1,   n: "Brunch",        st: "10:10", et: "10:20", c: "Brunch on B day"},
+        {p: -1,   n: "P1->P3",        st: "10:20", et: "10:27", c: "Passing Period 1->3 on B day"},
+        {p:  3,   n: "P3",            st: "10:27", et: "11:52", c: "Period 4 on B day"},
+        {p: -1,   n: "Lunch",         st: "11:52", et: "12:37", c: "Lunch on B day"},
+        {p: -1,   n: "Lunch->P5",     st: "12:37", et: "12:44", c: "Passing Period Lunch->5 on B day"},
+        {p:  5,   n: "P5",            st: "12:44", et: "14:09", c: "Period 5 on B day"},
+        {p: -1,   n: "P5->P7",        st: "14:09", et: "14:16", c: "Passing Period 5->7 on A day"},
+        {p: 7,    n: "P7",            st: "14:16", et: "15:41", c: "Period 7 on B day"},
+        {p: -1,   n: "After School",  st: "15:41", et: "23:59", c: "After school on B day",         a: true}
         ], // [_PeriodsForBDay_k]
 
       [_PeriodsForCDay_k]: [
         // Periods for C Day
         //period      name              startTime    endTime        Comment                         eodAdjust
-        {p: -1,   n: "Before School", st: "00:00", et: "09:30", c: "Before school on C day"},
-        {p:  1,   n: "P1",            st: "09:30", et: "10:00", c: "Period 1 on C day"},
-        {p: -1,   n: "P1->P2",        st: "10:00", et: "10:10", c: "Passing Period 1->2 on C day"},
-        {p:  2,   n: "P2",            st: "10:10", et: "10:40", c: "Period 2 on C day"},
-        {p: -1,   n: "P2->P3",        st: "10:40", et: "10:50", c: "Passing Period 2->3 on C day"},
-        {p:  3,   n: "P3",            st: "10:50", et: "11:20", c: "Period 3 on C day"},
-        {p: -1,   n: "P3->P4",        st: "11:20", et: "11:30", c: "Passing Period 3->4 on C day"},
-        {p:  4,   n: "P4",            st: "11:30", et: "12:00", c: "Period 4 on C day"},
-        {p: -1,   n: "Lunch",         st: "12:00", et: "13:00", c: "Lunch on C day"},
-        {p:  5,   n: "P5",            st: "13:00", et: "13:30", c: "Period 5 on C day"},
-        {p: -1,   n: "P5->P6",        st: "13:30", et: "13:40", c: "Passing Period 5->6 on C day"},
-        {p:  6,   n: "P6",            st: "13:40", et: "14:10", c: "Period 6 on C day"},
-        {p: -1,   n: "P6->P7",        st: "14:10", et: "14:20", c: "Passing Period 6->7 on C day"},
-        {p:  7,   n: "P7",            st: "14:20", et: "14:50", c: "Period 7 on C day"},
-        {p: -1,   n: "After School",  st: "14:50", et: "23:59", c: "After school on C day",         a: true}
+        {p: -1,   n: "Before School", st: "00:00", et: "08:40", c: "Before school on C day"},
+        {p:  2,   n: "P2",            st: "08:40", et: "10:10", c: "Period 2 on C day"},
+        {p: -1,   n: "Tutorial",      st: "10:10", et: "11:00", c: "Tutorial on C day"},
+        {p: -1,   n: "Brunch",        st: "11:00", et: "11:10", c: "Brunch on C day"},
+        {p: -1,   n: "P2->P4",        st: "11:10", et: "11:17", c: "Passing Period 2->4 on C day"},
+        {p:  4,   n: "P4",            st: "11:17", et: "12:42", c: "Period 4 on C day"},
+        {p: -1,   n: "Lunch",         st: "12:42", et: "13:27", c: "Lunch on C day"},
+        {p: -1,   n: "Lunch->P6",     st: "13:27", et: "13:34", c: "Passing Period Lunch->6 on C day"},
+        {p:  6,   n: "P6",            st: "13:34", et: "14:59", c: "Period 6 on C day"},
+        {p: -1,   n: "After School",  st: "14:59", et: "23:59", c: "After school on C day",         a: true}
       ], // [_PeriodsForCDay_k]
 
       [_PeriodsForWeekend_k]: [
@@ -499,30 +470,30 @@ class SchoolYearDefinitions {
       {dt: _dayTypeSchoolDay_k,    pa: _PeriodsForADay_k    },
       {dt: _dayTypeSchoolDay_k,    pa: _PeriodsForBDay_k    },
       {dt: _dayTypeSchoolDay_k,    pa: _PeriodsForCDay_k    },
-      {dt: _dayTypeSchoolDay_k,    pa: _PeriodsForADay_k    },
       {dt: _dayTypeSchoolDay_k,    pa: _PeriodsForBDay_k    },
+      {dt: _dayTypeSchoolDay_k,    pa: _PeriodsForCDay_k    },
       {dt: _dayTypeWeekend_k,      pa: _PeriodsForWeekend_k }
     ];
 
-    // This is a Monday holiday week
-    const _MVHS_Hxxxx_Week = [
+    // // This is a Monday holiday week
+    // const _MVHS_Hxxxx_Week = [
 
-    ];
+    // ];
 
-    // This is a Monday/Tuesday holiday week (also the first week of school)
-    const _MVHS_HHxxx_Week = [
+    // // This is a Monday/Tuesday holiday week (also the first week of school)
+    // const _MVHS_HHxxx_Week = [
 
-    ];
+    // ];
 
-    // This is a Thursday holiday week
-    const _MVHS_xxxHx_Week = [
+    // // This is a Thursday holiday week
+    // const _MVHS_xxxHx_Week = [
 
-    ];
+    // ];
 
-    // This is the last week of school
-    const _MVHS_xxxHH_Week = [
+    // // This is the last week of school
+    // const _MVHS_xxxHH_Week = [
 
-    ];
+    // ];
 
     // This is a week-long holiday week
     const _MVHS_HHHHH_Week = [
@@ -539,20 +510,20 @@ class SchoolYearDefinitions {
     // is the week tag of the exceptional week and the value is the _MVHS_*_Week
     // array for that week
     const _MVHS_Week_Exceptions = {
-      "2021-08-08": _MVHS_HHxxx_Week, // Beginning of the school year
-      "2021-09-05": _MVHS_Hxxxx_Week, // Labor day
-      "2021-10-10": _MVHS_HHxxx_Week, // Recess days
-      "2021-11-07": _MVHS_xxxHx_Week, // Veteran's day
+      // "2021-08-08": _MVHS_HHxxx_Week, // Beginning of the school year
+      // "2021-09-05": _MVHS_Hxxxx_Week, // Labor day
+      // "2021-10-10": _MVHS_HHxxx_Week, // Recess days
+      // "2021-11-07": _MVHS_xxxHx_Week, // Veteran's day
       "2021-11-21": _MVHS_HHHHH_Week, // Thanksgiving week
       "2021-12-19": _MVHS_HHHHH_Week, // Holiday break
       "2021-12-26": _MVHS_HHHHH_Week, // Holiday break
-      "2022-01-02": _MVHS_Hxxxx_Week, // Teacher service day
-      "2022-01-16": _MVHS_Hxxxx_Week, // Martin Luther King Jr. day
+      // "2022-01-02": _MVHS_Hxxxx_Week, // Teacher service day
+      // "2022-01-16": _MVHS_Hxxxx_Week, // Martin Luther King Jr. day
       "2022-02-20": _MVHS_HHHHH_Week, // Winter break
-      "2022-03-13": _MVHS_Hxxxx_Week, // Recess day
+      // "2022-03-13": _MVHS_Hxxxx_Week, // Recess day
       "2022-04-10": _MVHS_HHHHH_Week, // Spring break
-      "2022-05-29": _MVHS_Hxxxx_Week, // Memorial day
-      "2022-06-05": _MVHS_xxxHH_Week, // End of the school year
+      // "2022-05-29": _MVHS_Hxxxx_Week, // Memorial day
+      // "2022-06-05": _MVHS_xxxHH_Week, // End of the school year
     };
 
     // -------------------------------------------------------------------------
