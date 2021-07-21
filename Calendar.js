@@ -1219,7 +1219,7 @@ class Calendar {
     // and the SchoolYearDefinitions class is visible. If running on node.js,
     // one has to require the file.
     if (typeof process !== "undefined") {
-      CalendarMessage("Attempting to load MVHS.js")
+      CalendarMessage("Attempting to load ", MVHSSchedule)
       const SchoolYearDefinitions = require(MVHSSchedule);
       school = new SchoolYearDefinitions ();
     } else {
