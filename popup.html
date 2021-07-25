@@ -2,32 +2,39 @@
 <html>
     <head>
         <title>MVHS Periods</title>
+
+        <style>
+            #CheckFontSize {position: absolute; visibility: hidden; height: auto; width: auto; white-space: nowrap;}
+        </style>
     </head>
     <body>
         <!-- Canvas -->
         <canvas width="350" height="350" id="Periods"></canvas>
 
+        <!-- Div to check the width of text -->
+        <div id="CheckFontSize"></div>
+
         <!-- Images -->
-        <img src="./reference/settings.png" draggable="false" title="Settings" alt="Open Settings" width="50" height="50" style="position: absolute; left: 15px; top: 305px;" id="goToSettings">
-        <img src="./reference/utilities_menu.png" draggable="false" title="Utilities" alt="Open Utilities" width="50" height="50" style="position: absolute; left: 80px; top: 305px;" id="goToUtilities">
+        <img src="./reference/settings.png" draggable="false" title="Settings" alt="Open Settings" width="50" height="50" style="position: absolute; left: 15px; bottom: 15px;" id="goToSettings">
+        <img src="./reference/utilities_menu.png" draggable="false" title="Utilities" alt="Open Utilities" width="50" height="50" style="position: absolute; left: 80px; bottom: 15px;" id="goToUtilities">
 
         <!-- All the text input fields for class names (these are shown and hidden by display.js) -->
         <!-- PERIOD SAVE BUTTONS -->
         <div name="classes" id="classes">
             <label style="position: absolute; top: 127px;">P1: </label>
-            <input type="text" name="P1" id="P1Text" maxlength="15" style="position: absolute; left: 35px; top: 125px;"/>
+            <input type="text" name="P1" id="P1Text" maxlength="30" style="position: absolute; left: 35px; top: 125px;"/>
             <label style="position: absolute; top: 152px;">P2: </label>
-            <input type="text" name="P2" id="P2Text" maxlength="15" style="position: absolute; left: 35px; top: 150px;"/>
+            <input type="text" name="P2" id="P2Text" maxlength="30" style="position: absolute; left: 35px; top: 150px;"/>
             <label style="position: absolute; top: 177px;">P3: </label>
-            <input type="text" name="P3" id="P3Text" maxlength="15" style="position: absolute; left: 35px; top: 175px;"/>
+            <input type="text" name="P3" id="P3Text" maxlength="30" style="position: absolute; left: 35px; top: 175px;"/>
             <label style="position: absolute; top: 202px;">P4: </label>
-            <input type="text" name="P4" id="P4Text" maxlength="15" style="position: absolute; left: 35px; top: 200px;"/>
+            <input type="text" name="P4" id="P4Text" maxlength="30" style="position: absolute; left: 35px; top: 200px;"/>
             <label style="position: absolute; top: 227px;">P5: </label>
-            <input type="text" name="P5" id="P5Text" maxlength="15" style="position: absolute; left: 35px; top: 225px;"/>
+            <input type="text" name="P5" id="P5Text" maxlength="30" style="position: absolute; left: 35px; top: 225px;"/>
             <label style="position: absolute; top: 252px;">P6: </label>
-            <input type="text" name="P6" id="P6Text" maxlength="15" style="position: absolute; left: 35px; top: 250px;"/>
+            <input type="text" name="P6" id="P6Text" maxlength="30" style="position: absolute; left: 35px; top: 250px;"/>
             <label style="position: absolute; top: 277px;">P7: </label>
-            <input type="text" name="P7" id="P7Text" maxlength="15" style="position: absolute; left: 35px; top: 275px;"/>
+            <input type="text" name="P7" id="P7Text" maxlength="30" style="position: absolute; left: 35px; top: 275px;"/>
         </div>
         <!-- end: PERIOD SAVE BUTTONS -->
         <!-- Save classes button -->

@@ -225,6 +225,29 @@ function refreshRemainingTime(eDate) {
 
 
 // ====================================================================================================
+// function getTextWidth
+//
+// Gets the pixel width of a string given a certain font size and type
+//
+// Arguments--
+//
+// text:            the text to check the size of
+//
+// font:            the font formatting of text
+//
+// Returns--
+//
+// metrics.width:   the width of the text
+//
+function getTextWidth(text, font) {
+    context.font = font;
+    var metrics = context.measureText(text);
+    return metrics.width;
+}
+// end: function getTextWidth
+
+
+// ====================================================================================================
 // function printText
 //
 // Prints formatted text
@@ -250,6 +273,13 @@ function refreshRemainingTime(eDate) {
 // None
 //
 function printText(msg1, divider, msg2, textSize, x, y, color) {
+    var textWidth = 999999
+    while (textWidth > canvas.width - x) {
+        textWidth = getTextWidth(msg1 + divider + msg2, textSize)
+        var size = parseInt(textSize.substring(0, 2)) - 1
+        textSize = size + textSize.substring(2)
+    }
+    
     context.fillStyle = color;
     context.font = textSize;
     context.fillText(msg1 + divider + msg2, x, y);
