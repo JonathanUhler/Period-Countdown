@@ -2,22 +2,6 @@
 History of revisions for all files associated with Period-Countdown.
 
 
-# Other
-Revision History
-
-	version	date      	Change
-	-------	----------- --------------------------------------------------------
-	1.0.0	10/21/20	First full version of Periods Countdown
-	
-	1.0.1	4/26/21		Changes in this version
-							-Move all images into "/reference/" folder
-							-Move MVHS.js files into "/MVHS/" folder
-							-Add extension icon for chrome://extensions
-
-	1.0.2	7/20/21		Changes in this version
-							-Update some reference images
-
-
 # display.js
  Revision History
 
@@ -25,42 +9,45 @@ Revision History
 	-------	----------- --------------------------------------------------------
 	1.0.0	10/04/20  	First usable release of display.js
 
-	1.1.0   10/05/20  	Changes in this version
+	1.1.0   10/05/20  	Changes in this version:
                           	-Add new code from Calendar.js ("toString", removal of CalendarHHMMSSAsString)
                           	-Add "nextMatch" to display the time until the next period if the current period is a pseudo-period (end- of-day or start-of-day)
                           	-Change "timeLeft" by one of two values depending on the type of period
  
-	1.2.0	10/10/20	Changes in this version
+	1.2.0	10/10/20	Changes in this version:
                           	-timeLeft.toString replaced with timeLeft.toString() that calls a function in Calendar.js
                           	-Days do not display anymore and are converted to hours in Calendar.js
 
-	1.2.1	10/10/20  	Changes in this version
+	1.2.1	10/10/20  	Changes in this version:
                           	-Documentation conventions updated to match Calendar.js (no functional changes)
                           	-Additional documentation changes
 
-	1.3.0	10/10/20  	Changes in this version
+	1.3.0	10/10/20  	Changes in this version:
                           	-Added function printText to handle displaying text
                           	-Removed individual print statements (context.fillText()) from refreshPeriod and refreshRemainingTime with a call of printText
                           	-Renamed the textPos object to textDef (text definition) for clarity
                           	-Removed the x and y offset variables from textDef in favor of a single x-position variable (textDef.textX) and independant y-position variables (textDef.nameY for "period name" text and textDef.timeY for "time remaining" text)
 
-	1.3.1	10/10/20  	Changes in this version
+	1.3.1	10/10/20  	Changes in this version:
 							-Minor documentation changes
                           	-Added the "color" argument to printText to allow for changable text-color
 
-	1.4.0	10/11/20  	Changes in this version
+	1.4.0	10/11/20  	Changes in this version:
                           	-Added function "DisplayMessage" to replace console.log commands
                           	-Removed all console.log calls with calls to DisplayMessage
                           	-Minor documentation changes and code cleanup
 
-	2.0.0	10/21/20  	Changes in this version
+	2.0.0	10/21/20  	Changes in this version:
                           	-Fixed major compatibility issues with calendarTest.js
                           	-Added in a declaration for calendar
 
-	2.1.0	7/20/21		Changes in this version
+	2.1.0	7/20/21		Changes in this version:
 							-Added time left in summer
 							-Cleaned up documentation
 							-Cleaned up code
+
+	2.1.1	7/25/21		Changes in this version:
+							-Resize text to keep it on the screen
 
 
 # settings.js
@@ -70,23 +57,23 @@ Revision History
 	-------	----------- --------------------------------------------------------
 	1.0.0   1/24/21   	-First working version of settings.js
 
-	2.0.0   1/24/21   	Changes in this version
+	2.0.0   1/24/21   	Changes in this version:
 							-File I/O replaced with cookies
 							-Default classes set to be "None" for all 7 periods
 							-Issues with cookies fixed
 							-Textboxes will now display default values
 
-	3.0.0	1/26/21  	Changes in this version
+	3.0.0	1/26/21  	Changes in this version:
 							-Minimized and cleaned up code for settings
 							-Rewrote HTML settings elements to minimize code
 							-Added in functions for utilities
 							-Added support for utilities
 							-Condensed utilities and classes into 2 divs
 
-	3.1.0	1/26/21  	Changes in this version
+	3.1.0	1/26/21  	Changes in this version:
 							-A simple fade in/out animation has been added to all elements to improve user experience
 
-	3.1.1	7/20/21		Changes in this version
+	3.1.1	7/20/21		Changes in this version:
 							-Cleaned up documentation
 
 
