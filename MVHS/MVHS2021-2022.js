@@ -262,7 +262,7 @@ class SchoolYearDefinitions {
         {p: -1,   n: "P3->P4",        st: "11:24", et: "11:31", c: "Passing Period 3->4 on A day"},
         {p:  4,   n: "P4",            st: "11:31", et: "12:16", c: "Period 4 on A day"},
         {p: -1,   n: "Lunch",         st: "12:16", et: "13:01", c: "Lunch on A day"},
-        {p: -1,   n: "Lunch->P5",        st: "13:01", et: "13:08", c: "Passing Period Lunch->5 on A day"},
+        {p: -1,   n: "Lunch->P5",     st: "13:01", et: "13:08", c: "Passing Period Lunch->5 on A day"},
         {p: 5,    n: "P5",            st: "13:08", et: "13:53", c: "Period 5 on A day"},
         {p: -1,   n: "P5->P6",        st: "13:53", et: "14:00", c: "Passing Period 5->6 on A day"},
         {p: 6,    n: "P6",            st: "14:00", et: "14:45", c: "Period 6 on A day"},
@@ -477,13 +477,19 @@ class SchoolYearDefinitions {
 
     // // This is a Monday holiday week
     // const _MVHS_Hxxxx_Week = [
-
+      
     // ];
 
     // // This is a Monday/Tuesday holiday week (also the first week of school)
-    // const _MVHS_HHxxx_Week = [
-
-    // ];
+    const _MVHS_HHABC_Week = [
+      {dt: _dayTypeWeekend_k,      pa: _PeriodsForWeekend_k },
+      {dt: _dayTypeHoliday_k,      pa: _PeriodsForHoliday_k },
+      {dt: _dayTypeHoliday_k,      pa: _PeriodsForHoliday_k },
+      {dt: _dayTypeSchoolDay_k,    pa: _PeriodsForADay_k    },
+      {dt: _dayTypeSchoolDay_k,    pa: _PeriodsForBDay_k    },
+      {dt: _dayTypeSchoolDay_k,    pa: _PeriodsForCDay_k    },
+      {dt: _dayTypeWeekend_k,      pa: _PeriodsForWeekend_k }
+    ];
 
     // // This is a Thursday holiday week
     // const _MVHS_xxxHx_Week = [
@@ -510,7 +516,7 @@ class SchoolYearDefinitions {
     // is the week tag of the exceptional week and the value is the _MVHS_*_Week
     // array for that week
     const _MVHS_Week_Exceptions = {
-      // "2021-08-08": _MVHS_HHxxx_Week, // Beginning of the school year
+      "2021-08-08": _MVHS_HHABC_Week, // Beginning of the school year
       // "2021-09-05": _MVHS_Hxxxx_Week, // Labor day
       // "2021-10-10": _MVHS_HHxxx_Week, // Recess days
       // "2021-11-07": _MVHS_xxxHx_Week, // Veteran's day

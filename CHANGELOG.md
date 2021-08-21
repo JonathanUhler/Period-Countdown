@@ -5,8 +5,8 @@ History of revisions for all files associated with Period-Countdown.
 # display.js
  Revision History
 
-	version	date      	Change
-	-------	----------- --------------------------------------------------------
+	version	  date  		changes
+	-------	--------	----------------------------------------------------------------------------------------------------
 	1.0.0	10/04/20  	First usable release of display.js
 
 	1.1.0   10/05/20  	Changes in this version:
@@ -53,8 +53,8 @@ History of revisions for all files associated with Period-Countdown.
 # settings.js
  Revision History
 
-	version	date      	Change
-	-------	----------- --------------------------------------------------------
+	version	  date  		changes
+	-------	--------	----------------------------------------------------------------------------------------------------
 	1.0.0   1/24/21   	-First working version of settings.js
 
 	2.0.0   1/24/21   	Changes in this version:
@@ -80,63 +80,63 @@ History of revisions for all files associated with Period-Countdown.
 # Calendar.js
  Revision History
 
-	version	date      	Change
-	-------	----------- --------------------------------------------------------
-	1.0.0   10/04/2020  First usable release of Calendar.js
+	version	  date  		changes
+	-------	--------	----------------------------------------------------------------------------------------------------
+	1.0.0   10/4/20  	First usable release of Calendar.js
 
-	1.1.0   10/05/2020  Changes is this version:
+	1.1.0   10/5/20  	Changes is this version:
 						   	- Add the "toString" key to the return of Calendar.getTimeRemainingInPeriod that is a string of the remaining time in [h]h:mm:ss format. This saves a call to the CalendarHHMMSSAsString function by the caller.
 						   	- Finish implementing the Calendar.getNextPeriod method
 
-	1.2.0   10/05/2020  Changes in this version:
+	1.2.0   10/5/20  	Changes in this version:
 						   	- Add the Calendar.getTimeRemainingUntilPeriod method, returning the same information as getTimeRemainingInPeriod, but to the start of a specified period.
 						   	- As a byproduct of this addition, add the dDelta key to the timeLeft object to cover the possibility that the time left may be measured not just in hours, but days.
 
-	1.3.0   10/06/2020  Changes in this version:
+	1.3.0   10/6/20  	Changes in this version:
 						   	- Put all of the school-related information into it's own class in preparation for moving it all into a separate file. This will leave Calendar.js as the vehicle that creates the calendar data structures for the school year and provides public class variables and methods through which the data structures are manipulated. Because of the separation, a new school year, or information for a new student can be created without having to edit Calendar.js.
 
-	2.0.0   10/08/2020  Changes is this version:
+	2.0.0   10/8/20  	Changes is this version:
 						   	- Remove all of the school-related information from this file and put it into MVHS.js
 
-	2.0.1   10/09/2020  Changes in this verion:
+	2.0.1   10/9/20  	Changes in this verion:
 						   	- Fix up some comments and documentation
 
-	3.0.0   10/09/2020  Changes in this version:
+	3.0.0   10/9/20  	Changes in this version:
 						   	- Fix up the DST problems by going from a millisecond based comparison of periods, to one that uses the .setHours call to a real date object, and then comparing the .getTime() values for the date object. This requires a corresponding change to MVHS.js.
 						   	- Add a field in every class to specify the type of class. This helps with checking that an argument to a method is of the right type
 						   	- Add improved CalendarAssert calls in methods to ensure that method arguments are of the correct type. This is the manual method of working around the fact that Javascript doesn't do type or argument checking.
 						   	- Convert the .toString property in timeLeft from a variable that is only updated by calculateTimeLeft to function that will generate the pretty-printed string when called. This enables correct values if the timeLeft *Delta variables are updated manually
 						   	- Add an optional boolean argument as the last in the calls to calculateTimeLeft and getTimeRemainingUntilPeriod methods to add (.dDelta*24) to .hDelta and to set .dDelta to zero. This converts days to hours for those cases where that format is desired.
 
-	3.0.1   10/10/2020	Changes in this version:
+	3.0.1   10/10/20	Changes in this version:
 							- Remove getMsSinceMidnight method because the v3.3.0 eliminated the need
 							- Minor commentary and typo fixing that doesn't change the function
 
-	3.0.2   10/11/2020	Bug fix: The getTimeRemainingUntilPeriod method was returning the time remaining until the end of the identified period, not the start.
+	3.0.2   10/11/20	Bug fix: The getTimeRemainingUntilPeriod method was returning the time remaining until the end of the identified period, not the start.
 
-	3.0.3	10/21/2020	Move all of the self-test code out of this file into it's own file.
+	3.0.3	10/21/20	Move all of the self-test code out of this file into it's own file.
 						   
-	3.0.4	4/11/2021	Add constant variable MVHSSchedule as a pointer to the correct MVHS.js file. The name of this file changes due to differences in schedules each school year.
+	3.0.4	4/11/21		Add constant variable MVHSSchedule as a pointer to the correct MVHS.js file. The name of this file changes due to differences in schedules each school year.
 
 
 # MVHS.js
  Revision History
 
-	version	date      	Change
-	-------	----------- --------------------------------------------------------
-	1.0.0	10/08/20  	First usable release of MVHS.js
+	version	  date  		changes
+	-------	--------	----------------------------------------------------------------------------------------------------
+	1.0.0	10/8/20  	First usable release of MVHS.js
 
-	1.0.1   10/08/20  	Add a module exports statement for runs using node.js (not needed in the browser because the html file loads MVHS.js before Calendar.js)
+	1.0.1   10/8/20  	Add a module exports statement for runs using node.js (not needed in the browser because the html file loads MVHS.js before Calendar.js)
 
-	1.0.2   10/09/20  	Fix up some comments and documentation
+	1.0.2   10/9/20  	Fix up some comments and documentation
 
-	2.0.0   10/09/20  	Change the _periodDayTypeHash structure for each day type such that the adjustment field becomes a boolean that indicates whether a period is the last one of the day and let Calendar.js decide what to do with that information. This change requires a corresponding change to Calendar.js
+	2.0.0   10/9/20  	Change the _periodDayTypeHash structure for each day type such that the adjustment field becomes a boolean that indicates whether a period is the last one of the day and let Calendar.js decide what to do with that information. This change requires a corresponding change to Calendar.js
 
-	2.0.1   10/10/20  Minor documentation change
+	2.0.1   10/10/20  	Minor documentation change
 
 	2.1.0   12/14/20	Add the exception for finals week starting 12/13/2020
 
-	2.1.1   1/03/21  	Fix the weeks of 1/3/2021 and 1/17/2021. They should both be HABAB weeks
+	2.1.1   1/3/21  	Fix the weeks of 1/3/2021 and 1/17/2021. They should both be HABAB weeks
 
 	2.1.2   1/21/21  	Fix the week of 1/17/2021 again. This is an advisory week and Thurs/Fri of that week have modified schedules.
 
