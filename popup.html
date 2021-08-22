@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>MVHS Periods</title>
+
+        <style>
+            #CheckFontSize {position: absolute; visibility: hidden; height: auto; width: auto; white-space: nowrap;}
+        </style>
+    </head>
+    <body>
+        <!-- Canvas -->
+        <canvas width="350" height="350" id="Periods"></canvas>
+
+        <!-- Div to check the width of text -->
+        <div id="CheckFontSize"></div>
+
+        <!-- Images -->
+        <img src="./reference/settings.png" draggable="false" title="Settings" alt="Open Settings" width="50" height="50" style="position: absolute; left: 15px; bottom: 15px;" id="goToSettings">
+        <img src="./reference/utilities_menu.png" draggable="false" title="Utilities" alt="Open Utilities" width="50" height="50" style="position: absolute; left: 80px; bottom: 15px;" id="goToUtilities">
+
+        <!-- All the text input fields for class names (these are shown and hidden by display.js) -->
+        <!-- PERIOD SAVE BUTTONS -->
+        <div name="classes" id="classes">
+            <label style="position: absolute; top: 127px;">P1: </label>
+            <input type="text" name="P1" id="P1Text" maxlength="30" style="position: absolute; left: 35px; top: 125px;"/>
+            <label style="position: absolute; top: 152px;">P2: </label>
+            <input type="text" name="P2" id="P2Text" maxlength="30" style="position: absolute; left: 35px; top: 150px;"/>
+            <label style="position: absolute; top: 177px;">P3: </label>
+            <input type="text" name="P3" id="P3Text" maxlength="30" style="position: absolute; left: 35px; top: 175px;"/>
+            <label style="position: absolute; top: 202px;">P4: </label>
+            <input type="text" name="P4" id="P4Text" maxlength="30" style="position: absolute; left: 35px; top: 200px;"/>
+            <label style="position: absolute; top: 227px;">P5: </label>
+            <input type="text" name="P5" id="P5Text" maxlength="30" style="position: absolute; left: 35px; top: 225px;"/>
+            <label style="position: absolute; top: 252px;">P6: </label>
+            <input type="text" name="P6" id="P6Text" maxlength="30" style="position: absolute; left: 35px; top: 250px;"/>
+            <label style="position: absolute; top: 277px;">P7: </label>
+            <input type="text" name="P7" id="P7Text" maxlength="30" style="position: absolute; left: 35px; top: 275px;"/>
+        </div>
+        <!-- end: PERIOD SAVE BUTTONS -->
+        <!-- Save classes button -->
+        <button id='submitPeriods' type='button' style="position: absolute; left: 80px; top: 315px;">Save Classes</button>
+
+
+        <!-- All of the utilities that come with the extension -->
+        <!-- UTILITIES -->
+        <div id="utils">
+            <a href="https://github.com/JonathanUhler/Period-Countdown/issues" target=”_blank”>
+                <img src="./reference/github.png" draggable="false" title="Github" width="50" height="50" style="position: absolute; left: 40px; top: 135px;">
+            </a>
+            <a href="https://mvhs.mvla.net/" target=”_blank”>
+                <img src="./reference/mvhs.png" draggable="false" title="MVHS Website" width="50" height="50" style="position: absolute; left: 115px; top: 135px;">
+            </a>
+            <a href="https://mvhs.mvla.net/Our-School/Campus-Map--Directions/index.html" target=”_blank”>
+                <img src="./reference/map.png" draggable="false" title="Map" width="50" height="50" style="position: absolute; left: 190px; top: 135px;">
+            </a>
+            <a href="https://mvla.asp.aeries.net/Student/LoginParent.aspx" target=”_blank”>
+                <img src="./reference/aeries.png" draggable="false" title="Aeries" width="50" height="50" style="position: absolute; left: 265px; top: 135px;">
+            </a>
+        </div>
+        <!-- end: UTILITIES -->
+    </body>
+
+    <!-- Scripts -->
+    <!-- 2021-2022 School Year -->
+    <script src="./MVHS/MVHS2021-2022.js"></script>
+
+    <script src="Calendar.js"></script>
+    <script src="settings.js"></script>
+    <script src="display.js"></script>
+</html>
