@@ -1,0 +1,125 @@
+{
+    "Days": {
+        "A": [
+            {"Period": -1, "Name": "Before School",  "StartTime": "00:00", "EndTime": "08:40", "Comment": "Before school on A day", "Adjust": false},
+            {"Period": 1, "Name": "Per 1", "StartTime": "08:40", "EndTime": "09:25", "Comment": "Period 1 on A day", "Adjust": false},
+            {"Period": -1, "Name": "1 → 2", "StartTime": "09:25", "EndTime": "09:32", "Comment": "Passing Period 1->2 on A day", "Adjust": false},
+            {"Period": 2, "Name": "Per 2", "StartTime": "09:32", "EndTime": "10:22", "Comment": "Period 2 on A day", "Adjust": false},
+            {"Period": -2, "Name": "Brunch", "StartTime": "10:22", "EndTime": "10:32", "Comment": "Brunch on A day", "Adjust": false},
+            {"Period": -1, "Name": "2 → 3", "StartTime": "10:32", "EndTime": "10:39", "Comment": "Passing Period 2->3 on A day", "Adjust": false},
+            {"Period": 3, "Name": "Per 3", "StartTime": "10:39", "EndTime": "11:24", "Comment": "Period 3 on A day", "Adjust": false},
+            {"Period": -1, "Name": "3 → 4", "StartTime": "11:24", "EndTime": "11:31", "Comment": "Passing Period 3->4 on A day", "Adjust": false},
+            {"Period": 4, "Name": "Per 4", "StartTime": "11:31", "EndTime": "12:16", "Comment": "Period 4 on A day", "Adjust": false},
+            {"Period": -2, "Name": "Lunch", "StartTime": "12:16", "EndTime": "13:01", "Comment": "Lunch on A day", "Adjust": false},
+            {"Period": -1, "Name": "Lunch → 5", "StartTime": "13:01", "EndTime": "13:08", "Comment": "Passing Period Lunch->5 on A day", "Adjust": false},
+            {"Period": 5, "Name": "Per 5", "StartTime": "13:08", "EndTime": "13:53", "Comment": "Period 5 on A day", "Adjust": false},
+            {"Period": -1, "Name": "5 → 6", "StartTime": "13:53", "EndTime": "14:00", "Comment": "Passing Period 5->6 on A day", "Adjust": false},
+            {"Period": 6, "Name": "Per 6", "StartTime": "14:00", "EndTime": "14:45", "Comment": "Period 6 on A day", "Adjust": false},
+            {"Period": -1, "Name": "6 → 7", "StartTime": "14:45", "EndTime": "14:52", "Comment": "Passing Period 6->7 on A day", "Adjust": false},
+            {"Period": 7, "Name": "Per 7", "StartTime": "14:52", "EndTime": "15:37", "Comment": "Period 7 on A day", "Adjust": false},
+            {"Period": -1, "Name": "After School", "StartTime": "15:37", "EndTime": "23:59", "Comment": "After school on A day", "Adjust": true}
+        ],
+        "B": [
+            {"Period": -1, "Name": "Before School", "StartTime": "00:00", "EndTime": "08:40", "Comment": "Before school on A day", "Adjust": false},
+            {"Period": 1, "Name": "Per 1", "StartTime": "08:40", "EndTime": "10:10", "Comment": "Period 1 on A day", "Adjust": false},
+            {"Period": -2, "Name": "Brunch", "StartTime": "10:10", "EndTime": "10:20", "Comment": "Passing Period 1->2 on A day", "Adjust": false},
+            {"Period": -1, "Name": "Brunch → 3", "StartTime": "10:20", "EndTime": "10:27", "Comment": "Passing Period 1->2 on A day", "Adjust": false},
+            {"Period": 3, "Name": "Per 3", "StartTime": "10:27", "EndTime": "11:52", "Comment": "Period 3 on A day", "Adjust": false},
+            {"Period": -2, "Name": "Lunch", "StartTime": "11:52", "EndTime": "12:37", "Comment": "Passing Period 3->4 on A day", "Adjust": false},
+            {"Period": -1, "Name": "Lunch → 5", "StartTime": "12:37", "EndTime": "12:44", "Comment": "Passing Period Lunch->5 on A day", "Adjust": false},
+            {"Period": 5, "Name": "Per 5", "StartTime": "12:44", "EndTime": "14:09", "Comment": "Period 5 on A day", "Adjust": false},
+            {"Period": -1, "Name": "5 → 7", "StartTime": "14:09", "EndTime": "14:16", "Comment": "Passing Period 5->6 on A day", "Adjust": false},
+            {"Period": 7, "Name": "Per 7", "StartTime": "14:16", "EndTime": "15:41", "Comment": "Period 7 on A day", "Adjust": false},
+            {"Period": -1, "Name": "After School","StartTime": "15:41", "EndTime": "23:59", "Comment": "After school on A day", "Adjust": true}
+        ],
+        "C": [
+            {"Period": -1, "Name": "Before School",  "StartTime": "00:00", "EndTime": "08:40", "Comment": "Before school on A day", "Adjust": false},
+            {"Period": 2, "Name": "Per 2", "StartTime": "08:40", "EndTime": "10:10", "Comment": "Period 1 on A day", "Adjust": false},
+            {"Period": -2, "Name": "Tutorial", "StartTime": "10:10", "EndTime": "11:00", "Comment": "Passing Period 1->2 on A day", "Adjust": false},
+            {"Period": -2, "Name": "Brunch", "StartTime": "11:00", "EndTime": "11:10", "Comment": "Passing Period 1->2 on A day", "Adjust": false},
+            {"Period": -1, "Name": "Brunch → 4", "StartTime": "11:10", "EndTime": "11:17", "Comment": "Passing Period 3->4 on A day", "Adjust": false},
+            {"Period": 4, "Name": "Per 4", "StartTime": "11:17", "EndTime": "12:42", "Comment": "Period 3 on A day", "Adjust": false},
+            {"Period": -2, "Name": "Lunch", "StartTime": "12:42", "EndTime": "13:27", "Comment": "Passing Period 3->4 on A day", "Adjust": false},
+            {"Period": -1, "Name": "Lunch → 6", "StartTime": "13:27", "EndTime": "13:34", "Comment": "Passing Period Lunch->5 on A day", "Adjust": false},
+            {"Period": 6, "Name": "Per 6", "StartTime": "13:34", "EndTime": "14:59", "Comment": "Period 5 on A day", "Adjust": false},
+            {"Period": -1, "Name": "After School", "StartTime": "14:59", "EndTime": "23:59", "Comment": "After school on A day", "Adjust": true}
+        ],
+        "D": [
+            {"Period": -1, "Name": "Before School", "StartTime": "00:00", "EndTime": "11:30", "Comment": "Before school on A day", "Adjust": false},
+            {"Period": 1, "Name": "Per 1", "StartTime": "11:30", "EndTime": "12:15", "Comment": "Period 1 on A day", "Adjust": false},
+            {"Period": -2, "Name": "Lunch", "StartTime": "12:15", "EndTime": "13:00", "Comment": "Passing Period 3->4 on A day", "Adjust": false},
+            {"Period": -1, "Name": "Lunch → 3", "StartTime": "13:00", "EndTime": "13:07", "Comment": "Passing Period Lunch->5 on A day", "Adjust": false},
+            {"Period": 3, "Name": "Per 3", "StartTime": "13:07", "EndTime": "13:52", "Comment": "Period 3 on A day", "Adjust": false},
+            {"Period": -1, "Name": "5 → 7", "StartTime": "13:52", "EndTime": "13:59", "Comment": "Passing Period 5->6 on A day", "Adjust": false},
+            {"Period": 5, "Name": "Per 5", "StartTime": "13:59", "EndTime": "14:44", "Comment": "Period 5 on A day", "Adjust": false},
+            {"Period": -1, "Name": "5 → 7", "StartTime": "14:44", "EndTime": "14:51", "Comment": "Passing Period 5->6 on A day", "Adjust": false},
+            {"Period": 7, "Name": "Per 7", "StartTime": "14:51", "EndTime": "15:36", "Comment": "Period 7 on A day", "Adjust": false},
+            {"Period": -1, "Name": "After School","StartTime": "15:36", "EndTime": "23:59", "Comment": "After school on A day", "Adjust": true}
+        ],
+        "E": [
+            {"Period": -1, "Name": "Before School",  "StartTime": "00:00", "EndTime": "11:30", "Comment": "Before school on A day", "Adjust": false},
+            {"Period": 2, "Name": "Per 2", "StartTime": "11:30", "EndTime": "12:15", "Comment": "Period 1 on A day", "Adjust": false},
+            {"Period": -2, "Name": "Lunch", "StartTime": "12:15", "EndTime": "13:00", "Comment": "Passing Period 3->4 on A day", "Adjust": false},
+            {"Period": -1, "Name": "Lunch → 4", "StartTime": "13:00", "EndTime": "13:07", "Comment": "Passing Period Lunch->5 on A day", "Adjust": false},
+            {"Period": 4, "Name": "Per 4", "StartTime": "13:07", "EndTime": "13:52", "Comment": "Period 3 on A day", "Adjust": false},
+            {"Period": -1, "Name": "4 → 6", "StartTime": "13:52", "EndTime": "13:59", "Comment": "Passing Period Lunch->5 on A day", "Adjust": false},
+            {"Period": 6, "Name": "Per 6", "StartTime": "13:59", "EndTime": "14:44", "Comment": "Period 5 on A day", "Adjust": false},
+            {"Period": -1, "Name": "After School", "StartTime": "14:44", "EndTime": "23:59", "Comment": "After school on A day", "Adjust": true}
+        ],
+        "Weekend": [
+            {"Period": -1, "Name": "Weekend", "StartTime": "00:00", "EndTime": "23:59", "Comment": "Weekend day", "Adjust": true}
+        ],
+        "Holiday": [
+            {"Period": -1, "Name": "Weekend", "StartTime": "00:00", "EndTime": "23:59", "Comment": "Weekend day", "Adjust": true}
+        ]
+    },
+    "Weeks":  {
+        "DEFAULT": [
+            {"Name": "Weekend", "Days": "Weekend"},
+            {"Name": "School Day", "Days": "A"},
+            {"Name": "School Day", "Days": "B"},
+            {"Name": "School Day", "Days": "C"},
+            {"Name": "School Day", "Days": "B"},
+            {"Name": "School Day", "Days": "C"},
+            {"Name": "Weekend", "Days": "Weekend"}
+        ],
+        "HHABC_Week": [
+            {"Name": "Weekend", "Days": "Weekend"},
+            {"Name": "Holiday", "Days": "Holiday"},
+            {"Name": "Holiday", "Days": "Holiday"},
+            {"Name": "School Day", "Days": "A"},
+            {"Name": "School Day", "Days": "B"},
+            {"Name": "School Day", "Days": "C"},
+            {"Name": "Weekend", "Days": "Weekend"}
+        ],
+        "HBCBC_Week": [
+            {"Name": "Weekend", "Days": "Weekend"},
+            {"Name": "Holiday", "Days": "Holiday"},
+            {"Name": "School Day", "Days": "B"},
+            {"Name": "School Day", "Days": "C"},
+            {"Name": "School Day", "Days": "B"},
+            {"Name": "School Day", "Days": "C"},
+            {"Name": "Weekend", "Days": "Weekend"}
+        ],
+        "StaffDevMorning_Week": [
+            {"Name": "Weekend", "Days": "Weekend"},
+            {"Name": "School Day", "Days": "A"},
+            {"Name": "School Day", "Days": "D"},
+            {"Name": "School Day", "Days": "E"},
+            {"Name": "School Day", "Days": "B"},
+            {"Name": "School Day", "Days": "C"},
+            {"Name": "Weekend", "Days": "Weekend"}
+        ]
+    },
+    "Exceptions": [
+        {"WeekTag": "2021-08-08", "Weeks": "HHABC_Week", "Comment": "First week of school"},
+        {"WeekTag": "2021-09-05", "Weeks": "HBCBC_Week", "Comment": "Labor day"},
+        {"WeekTag": "2021-09-12", "Weeks": "StaffDevMorning_Week", "Comment": "Staff development in the morning Tues/Wed"}
+    ],
+    "Info": {
+        "FirstPeriod": 1,
+        "LastPeriod": 7,
+        "FirstDate": "2021-08-11",
+        "LastDate": "2022-06-08"
+    }
+}

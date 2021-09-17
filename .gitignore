@@ -1,4 +1,8 @@
 .DS_Store
 .idea/*
 Period-Countdown.iml
+structure/*
+out/*
+jv/*
 deprecated/*
+python/gendata_outline.txt
