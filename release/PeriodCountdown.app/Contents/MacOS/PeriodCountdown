@@ -1,0 +1,6 @@
+#! /bin/bash
+SH_PATH="$0"
+SH_PARENT=`dirname ${SH_PATH}`
+PR_PARENT=`dirname ${SH_PARENT}`
+JAR_PATH="${PR_PARENT}/Java/PeriodCountdown.jar"
+java -jar ${JAR_PATH}

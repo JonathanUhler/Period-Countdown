@@ -7,4 +7,10 @@ Project created 8/22/21 -- Changelog begin:
     1.0.0   9/16/21     Changes in this version:
                             -First working version of Period-Countodwn in Java
 
+    1.1.0   9/25/21     Changes in this version:
+                            -Minor code improvements
+                            -Changed method in which SchoolDisplay finds the json data
+                            -Created compile.sh and jar.sh to automate building a jarfile from the project
+                            -Finished build-mac.sh and Mac .app package creation
+
 ## FULL-RELEASES
