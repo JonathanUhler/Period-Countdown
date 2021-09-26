@@ -45,7 +45,7 @@ public class Settings {
 
 
     public Settings() throws Exception {
-        this.schoolYear = new SchoolYear(SchoolDisplay.schoolData, SchoolDisplay.userData);
+        this.schoolYear = new SchoolYear(SchoolDisplay.getSchoolData(), SchoolDisplay.userData);
     }
 
 
@@ -55,7 +55,7 @@ public class Settings {
         for (int i = SchoolCalendar.getFirstPeriod(); i <= SchoolCalendar.getLastPeriod(); i++) {
             Map<String, Object> period = schoolYear.getUserDataByPeriod(i);
             JTextField periodTextField = new JTextField((String) period.get(SchoolCalendar.getNameTerm));
-            message.add("Period " + i);
+            message.add(this.schoolYear.getPeriodNameByNumber(i));
             message.add(periodTextField);
         }
 
@@ -92,11 +92,11 @@ public class Settings {
             Map<String, Object> period = schoolYear.getUserDataByPeriod(i);
 
             JTextField teacherTextField = new JTextField((String) period.get(SchoolCalendar.getTeacherNameTerm));
-            message.add("Per  " + i + " | Teacher");
+            message.add(this.schoolYear.getPeriodNameByNumber(i) + " | Teacher");
             message.add(teacherTextField);
 
             JTextField roomTextField = new JTextField(String.valueOf(period.get(SchoolCalendar.getRoomNumberTerm)));
-            message.add("Per  " + i + " | Room Number");
+            message.add(this.schoolYear.getPeriodNameByNumber(i) + " | Room Number");
             message.add(roomTextField);
         }
 
@@ -196,6 +196,49 @@ public class Settings {
     }
 
 
+    private void schoolFileAction(String file) throws Exception {
+        this.schoolYear.setUserSchoolFile(file);
+    }
+
+
+    private JMenu getSchoolFile() {
+        JMenu schoolFileMenu = new JMenu("School...");
+
+        JMenuItem MVHS = new JMenuItem("MVHS");
+        JMenuItem custom = new JMenuItem("Custom...");
+
+        MVHS.addActionListener(e -> {
+            try { this.schoolFileAction("MVHS_School.json"); } catch (Exception ex) { ex.printStackTrace(); }
+        });
+        custom.addActionListener(e -> {
+            ArrayList<Object> message = new ArrayList<>();
+            message.add("School Data Filename (in format *.json)");
+            message.add(new JTextField(schoolYear.getSchoolFileName()));
+
+            int confirmEditFile = JOptionPane.showConfirmDialog(
+                    null,
+                    message.toArray(new Object[0]),
+                    "Edit School Data File",
+                    JOptionPane.OK_CANCEL_OPTION,
+                    JOptionPane.PLAIN_MESSAGE,
+                    null);
+
+            if (confirmEditFile == JOptionPane.OK_OPTION) {
+                String newFile = ((JTextField) message.get(1)).getText();
+
+                try {schoolYear.setUserSchoolFile(newFile);}
+                catch (Exception ex) {ex.printStackTrace();}
+            }
+        });
+
+
+        schoolFileMenu.add(MVHS);
+        schoolFileMenu.add(custom);
+
+        return schoolFileMenu;
+    }
+
+
     public JMenuBar getSettingsMenu() {
         JMenuBar settingsBar = new JMenuBar();
         JMenu settingsMenu = new JMenu("Settings");
@@ -204,6 +247,8 @@ public class Settings {
         settingsMenu.add(this.getPeriodInfo());
         settingsMenu.add(this.getTheme());
         settingsMenu.add(this.getNextUp());
+        settingsMenu.add(this.getSchoolFile());
+
         settingsBar.add(settingsMenu);
 
         return settingsBar;

@@ -26,7 +26,8 @@
 +-----------------------------------------------------------------------------------------------------+
 | +SchoolYear(String, String)                                                                         |
 +-----------------------------------------------------------------------------------------------------+
-| -initJsonData(): void                                                                               |
+| -initSchoolData(): void                                                                             |
+| -initUserData(): void                                                                               |
 | +getDayTypes(): ArrayList<String>                                                                   |
 | +getFirstPeriod(): int                                                                              |
 | +getLastPeriod(): int                                                                               |
@@ -34,6 +35,8 @@
 | +getLastDate(): String                                                                              |
 | +getUserNextUp(): int                                                                               |
 | +getUserTheme(): String                                                                             |
+| +getSchoolFileName(): String                                                                        |
+| +getPeriodNameByNumber(int): String                                                                 |
 | +getUserDataByPeriod(int): Map<String, Object>                                                      |
 | +getDayPattern(String): ArrayList<Map<String, Object>>                                              |
 | +getPeriodPatternByIndex(String, int): Map<String, Object>                                          |
@@ -42,6 +45,7 @@
 | +getWeekPattern(String): ArrayList<Map<String, String>>                                             |
 | +getWeekExceptionByWeekTag(String): Map<String, String>                                             |
 | +getDayType(String, int): String                                                                    |
+| +setUserSchoolFile(String): void                                                                    |
 | +setUserNextUp(int): void                                                                           |
 | +setUserTheme(String): void                                                                         |
 | +setUserPeriodNameByPeriod(int, String): void                                                       |
@@ -110,7 +114,8 @@ public class SchoolYear {
                 "SchoolYear.SchoolYear constructed with invalid arguments",
                 schoolStructureFile);
 
-        this.initJsonData();
+        this.initSchoolData();
+        this.initUserData();
 
         // Store a list of the types of days and weeks that have been defined in the JSON files
         this.dayTypes = new ArrayList<>(this.Days.keySet());
@@ -120,9 +125,9 @@ public class SchoolYear {
 
 
     // ====================================================================================================
-    // private void initJsonData
+    // private void initSchoolData
     //
-    // Initialize/update hashmaps representing the json data
+    // Initialize/update hashmaps representing the json school data
     //
     // Arguments--
     //
@@ -132,7 +137,7 @@ public class SchoolYear {
     //
     // None
     //
-    private void initJsonData() throws FileNotFoundException {
+    private void initSchoolData() throws FileNotFoundException {
         // Create a new Gson object to parse
         Gson json = new Gson();
 
@@ -143,9 +148,33 @@ public class SchoolYear {
         this.Weeks = (Map<String, ArrayList<Map<String, String>>>) json.fromJson(new FileReader(schoolStructureFile), Map.class).get(SchoolCalendar.getWeeksTerm);
         this.Exceptions = (ArrayList<Map<String, String>>) json.fromJson(new FileReader(schoolStructureFile), Map.class).get("Exceptions");
         this.Info = (Map<String, Object>) json.fromJson(new FileReader(schoolStructureFile), Map.class).get(SchoolCalendar.getInfoTerm);
+    }
+    // private void initSchoolData
+
+
+    // ====================================================================================================
+    // private void initUserData
+    //
+    // Initialize/update hashmaps representing the json user data
+    //
+    // Arguments--
+    //
+    // None
+    //
+    // Returns--
+    //
+    // None
+    //
+    private void initUserData() throws FileNotFoundException {
+        // Create a new Gson object to parse
+        Gson json = new Gson();
+
+        // Parse all the JSON files and cast
+        // HACK: These lines use unsafe casts, but this is *probably* okay in practice since a Python program
+        // HACK cont: is responsible for generating the JSON files and the correct info should be there
         this.User = (Map<String, Map<String, Object>>) json.fromJson(new FileReader(userFile), Map.class).get(SchoolCalendar.getUserTerm);
     }
-    // private void initJsonData
+    // end: private void initUserData
 
 
     // ====================================================================================================
@@ -171,14 +200,56 @@ public class SchoolYear {
     }
 
     public int getUserNextUp() throws FileNotFoundException {
-        this.initJsonData();
+        this.initSchoolData();
+        this.initUserData();
         return (int) (double) this.User.get(SchoolCalendar.getSettingsTerm).get(SchoolCalendar.getNextUpTerm);
     }
 
     public String getUserTheme() {
         return (String) this.User.get(SchoolCalendar.getSettingsTerm).get(SchoolCalendar.getThemeTerm);
     }
+
+    public String getSchoolFileName() {
+        return (String) this.User.get(SchoolCalendar.getSettingsTerm).get(SchoolCalendar.getSchoolFileTerm);
+    }
     // end: GET methods
+
+
+    // ====================================================================================================
+    // public String getPeriodNameByNumber
+    //
+    // Gets the name of a period from the json data by its period number
+    //
+    // Arguments--
+    //
+    // period:  the period number as an interger to get the name for
+    //
+    // Returns--
+    //
+    // The name of the period, if found
+    //
+    public String getPeriodNameByNumber(int period) throws Exception {
+        // Check that the period passed in is within the first and last possible periods
+        CalendarHelper.calendarAssert((period >= this.getFirstPeriod()) &&
+                (period <= this.getLastPeriod()),
+                "SchoolYear.getPeriodNameByNumber called with invalid arguments",
+                String.valueOf(period));
+
+        // Search through each of the day types
+        for (ArrayList<Map<String, Object>> dayTypeFormat : this.Days.values()) {
+            // Search through each of the periods in each of the days
+            for (Map<String, Object> periodTypeFormat : dayTypeFormat) {
+                // Return the period name if found
+                if ((int) (double) periodTypeFormat.get(SchoolCalendar.getPeriodTerm) == period) {
+                    return (String) periodTypeFormat.get(SchoolCalendar.getNameTerm);
+                }
+            }
+        }
+
+        // If nothing was found, return an empty string
+        return "";
+    }
+    // end: public String getPeriodNameByNumber
 
 
     // ====================================================================================================
@@ -416,6 +487,37 @@ public class SchoolYear {
         return weekStructure.get(dayIndex).get(SchoolCalendar.getDaysTerm);
     }
     // end: public String getDayType
+
+
+    // ====================================================================================================
+    // public void setUserSchoolFile
+    //
+    // Sets the new name of the user's school data json file
+    //
+    // Arguments--
+    //
+    // file:    the name of the new file
+    //
+    // Returns--
+    //
+    // None
+    //
+    public void setUserSchoolFile(String file) throws Exception {
+        // Create and store the new next up data
+        Map<String, Object> newSchoolFile = this.User.get(SchoolCalendar.getSettingsTerm);
+        newSchoolFile.put(SchoolCalendar.getSchoolFileTerm, file);
+        this.User.put(SchoolCalendar.getSettingsTerm, newSchoolFile);
+
+        // Create the entire file structure for the user file
+        Map<String, Map<String, Map<String, Object>>> editedUser = new HashMap<>();
+        editedUser.put(SchoolCalendar.getUserTerm, this.User);
+
+        // Write out the data
+        Writer writer = new FileWriter(SchoolDisplay.userData);
+        new Gson().toJson(editedUser, writer);
+        writer.close();
+    }
+    // end: public void setUserSchoolFile
 
 
     // ====================================================================================================

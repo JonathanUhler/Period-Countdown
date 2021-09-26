@@ -105,7 +105,7 @@ public class NextUp {
     // List of next class matches as strings
     //
     private ArrayList<String> getNextMatchData(Calendar epochCalendar, boolean nameOnly, boolean allMatches) throws Exception {
-        SchoolCalendar schoolCalendar = new SchoolCalendar(SchoolDisplay.schoolData, SchoolDisplay.userData); // Create a local instance of the SchoolCalendar class to get access to its methods
+        SchoolCalendar schoolCalendar = new SchoolCalendar(SchoolDisplay.getSchoolData(), SchoolDisplay.userData); // Create a local instance of the SchoolCalendar class to get access to its methods
         ArrayList<String> matchStrings = new ArrayList<>(); // Initialize an arraylist to hold the next up strings when/if they are found
 
         PeriodData currentDayData = schoolCalendar.getNextPeriod(schoolCalendar.getPeriodByDateAndTime(epochCalendar)); // Get the data for the current day match

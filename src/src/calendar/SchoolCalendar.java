@@ -126,6 +126,7 @@ public class SchoolCalendar {
     public static final String getSettingsTerm = "Settings";
     public static final String getNextUpTerm = "NextUp";
     public static final String getThemeTerm = "Theme";
+    public static final String getSchoolFileTerm = "SchoolFile";
     public List<String> getFreePeriodTerms = Arrays.asList("free", "none", "n/a");
 
     public static final String getFirstPeriod = "FirstPeriod";

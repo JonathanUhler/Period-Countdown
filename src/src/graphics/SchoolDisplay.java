@@ -15,14 +15,20 @@
 |                                            SchoolDisplay                                            |
 +-----------------------------------------------------------------------------------------------------+
 | -schoolCalendar: SchoolCalendar                                                                     |
+| +defaultSchoolData: String                                                                          |
+| +periodCountdownDirectory: String                                                                   |
 | -schoolData: String                                                                                 |
-| -userData: String                                                                                   |
+| +userData: String                                                                                   |
+| -localSchoolData: String                                                                            |
+| -localUserData: String                                                                              |
 | -match: PeriodData                                                                                  |
 | -nextMatch: PeriodData                                                                              |
 +-----------------------------------------------------------------------------------------------------+
 | +SchoolDisplay()                                                                                    |
 +-----------------------------------------------------------------------------------------------------+
 | +getSchoolCalendar(): SchoolCalendar                                                                |
+| +getSchoolData(): String                                                                            |
+| -checkForJsonData(): void                                                                           |
 | +refreshPeriod(Calendar): void                                                                      |
 | +getRemainingTime(Calendar): String                                                                 |
 | +getPeriodStatus(Calendar): String                                                                  |
@@ -36,10 +42,7 @@
 package graphics;
 
 
-import java.io.File;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.Writer;
+import java.io.*;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -59,15 +62,16 @@ public class SchoolDisplay {
 
     private final SchoolCalendar schoolCalendar; // Class instance of the school year calendar data structure and class
 
+    public static final String defaultSchoolData = "MVHS_School.json";
     public static final String periodCountdownDirectory = System.getProperty("user.home") + "/.periodcountdown";
-    public static final String schoolData = System.getProperty("user.home") + "/.periodcountdown/json/School.json"; // Mandatory location for the school json data
+    private static String schoolData = System.getProperty("user.home") + "/.periodcountdown/json/" + defaultSchoolData; // Mandatory location for the school json data
     public static final String userData = System.getProperty("user.home") + "/.periodcountdown/json/User.json"; // Mandatory location for the user specific json data
 
-    public static String localSchoolData;
-    static {try {localSchoolData = new File(new File(new File(SchoolDisplay.class.getProtectionDomain().getCodeSource().getLocation().toURI()).getPath()).getAbsolutePath()).getParent() + "/json/School.json";} catch (URISyntaxException e) {e.printStackTrace();}}
+    private String localSchoolData;
+    {try {localSchoolData = new File(new File(new File(SchoolDisplay.class.getProtectionDomain().getCodeSource().getLocation().toURI()).getPath()).getAbsolutePath()).getParent() + "/json/" + defaultSchoolData;} catch (URISyntaxException e) {e.printStackTrace();}}
 
-    public static String localUserData;
-    static {try {localUserData = new File(new File(new File(SchoolDisplay.class.getProtectionDomain().getCodeSource().getLocation().toURI()).getPath()).getAbsolutePath()).getParent() + "/json/User.json";} catch (URISyntaxException e) {e.printStackTrace();}}
+    private String localUserData;
+    {try {localUserData = new File(new File(new File(SchoolDisplay.class.getProtectionDomain().getCodeSource().getLocation().toURI()).getPath()).getAbsolutePath()).getParent() + "/json/User.json";} catch (URISyntaxException e) {e.printStackTrace();}}
 
     private PeriodData match; // Current period match
     private PeriodData nextMatch; // Next period match
@@ -81,22 +85,12 @@ public class SchoolDisplay {
     // None
     //
     public SchoolDisplay() throws Exception {
-        if (!new File(periodCountdownDirectory).exists() || !new File(periodCountdownDirectory).isDirectory()) {
-            Files.createDirectories(Paths.get(periodCountdownDirectory));
-            Files.createDirectories(Paths.get(periodCountdownDirectory + "/json"));
+        // Make sure the JSON data is in its place
+        this.checkForJsonData();
 
-            Gson json = new Gson();
-            Map schoolDataCopy = json.fromJson(new FileReader(localSchoolData), Map.class);
-            Map userDataCopy = json.fromJson(new FileReader(localUserData), Map.class);
+        schoolData = System.getProperty("user.home") + "/.periodcountdown/json/" + new SchoolYear(localSchoolData, userData).getSchoolFileName();
 
-            Writer schoolDataWriter = new FileWriter(SchoolDisplay.schoolData);
-            new Gson().toJson(schoolDataCopy, schoolDataWriter);
-            schoolDataWriter.close();
-
-            Writer userDataWriter = new FileWriter(SchoolDisplay.userData);
-            new Gson().toJson(userDataCopy, userDataWriter);
-            userDataWriter.close();
-        }
+        this.checkForJsonData();
 
         // Check that the json data exists where it should
         CalendarHelper.calendarAssert((new File(schoolData).exists()) &&
@@ -116,7 +110,54 @@ public class SchoolDisplay {
     public SchoolCalendar getSchoolCalendar() {
         return schoolCalendar;
     }
+
+    public static String getSchoolData() {
+        return schoolData;
+    }
     // end: GET methods
+
+
+    // ====================================================================================================
+    // private void checkForJsonData
+    //
+    // Checks for the presence of required JSON data and creates it if it does not exist
+    //
+    // Arguments--
+    //
+    // None
+    //
+    // Returns--
+    //
+    // None
+    //
+    private void checkForJsonData() throws IOException {
+        // Check if there is a directory at .periodcountdown
+        if (!new File(periodCountdownDirectory).exists() || !new File(periodCountdownDirectory).isDirectory()) {
+            Files.createDirectories(Paths.get(periodCountdownDirectory)); // Create the .periodcountdown directory
+            Files.createDirectories(Paths.get(periodCountdownDirectory + "/json")); // Create the .periodcountdown/json directory
+        }
+
+        // Check if there is a school data file
+        if (!new File(schoolData).exists() || new File(schoolData).isDirectory()) {
+            Gson json = new Gson();
+            Map schoolDataCopy = json.fromJson(new FileReader(localSchoolData), Map.class); // Copy the school data from the local file within the app
+
+            Writer schoolDataWriter = new FileWriter(SchoolDisplay.schoolData); // Write the local data to a new file in .periodcountdown/json
+            new Gson().toJson(schoolDataCopy, schoolDataWriter);
+            schoolDataWriter.close();
+        }
+
+        // Check if there is a user data file
+        if (!new File(userData).exists() || new File(userData).isDirectory()) {
+            Gson json = new Gson();
+            Map userDataCopy = json.fromJson(new FileReader(localUserData), Map.class); // Copy the user data from the local file within the app
+
+            Writer userDataWriter = new FileWriter(SchoolDisplay.userData); // Write the local data to a new file in .periodcountdown/json
+            new Gson().toJson(userDataCopy, userDataWriter);
+            userDataWriter.close();
+        }
+    }
+    // end: private void checkForJsonData
 
 
     // ====================================================================================================

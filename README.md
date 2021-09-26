@@ -10,7 +10,7 @@ Thank you for using Period-Countdown. Before you continue, please read and accep
 
 
 # Installation
-*Note: The installation process will be expanded in the future, but currently only supports Unit-based operating systems (Mac and Linux) (see issue #13 for more information, or consider contributing if you have knowledge on building for Windows and Linux!)*\
+*Note: The installation process will be expanded in the future, but currently only supports Unix-based operating systems (Mac and Linux) (see issue #13 for more information, or consider contributing if you have knowledge on building for Windows!)*
 
 ## MacOS
 ### MacOS Installation
@@ -28,7 +28,7 @@ To build or update the app, follow the process below:
 
 ## Linux Installation
 Clone or download the repository from Github.\
-In Files or Terminal go to the Period-Countdown/release folder.\
+In Files or Terminal go to the Period-Countdown/release folder.
 
 * In Files, double-click on the ```periodcountdown_1.0-1_amd64.deb``` to launch the Linux software manager. Click "Install"
 * In Terminal, type ```sudo apt install ./periodcountdown_1.0-1_amd64.deb``` to install directly using apt
@@ -48,13 +48,13 @@ To build or update the app, follow the process below:
 5) Follow the instructions under Linux Installation to open and use the app
 
 ## Windows
-*Note: The installation process will be expanded in the future, but currently only supports Unit-based operating systems (Mac and Linux) (see issue #13 for more information, or consider contributing if you have knowledge on building for Windows and Linux!)*\
+*Note: The installation process will be expanded in the future, but currently only supports Unix-based operating systems (Mac and Linux) (see issue #13 for more information, or consider contributing if you have knowledge on building for Windows!)*
 \
 *Until an official solution is developed, you can still use the app with ```java -jar PeriodCountdown.jar```*
 
 
 # Usage
-Given the two files School.json and User.json located under Period-Countdown/json/, the app should start counting down once started.\
+Given the two files School.json and User.json located at ~/.periodcountdown/json, the app should start counting down once started.\
 At the top of the screen will be the period status -- a message comprised of the period name and freedom status (ex: "Chemistry | Period 1" or "Lunch | Free")\
 Below that is the timer, which displays the time left in the period mentioned in the period status.\
 Finally, if enabled, is the "next up" display. This shows the next period(s) and has five levels of verbosity: disabled, next period, next period with all info, all periods, and all periods with all info.
@@ -66,7 +66,6 @@ From the dropdown menu that opens, select the setting you want to edit. For ever
 
 
 # Possible Questions
-* [I don't use Mac, how do I use PeriodCountdown?](#I-don't-use-Mac,-how-do-I-use-PeriodCountdown?)
 * [If I don't go to MVHS how do I enter my school's bell schedule?](#If-I-don't-go-to-MVHS-how-do-I-enter-my-school's-bell-schedule?)
 
 ## If I don't go to MVHS how do I enter my school's bell schedule?

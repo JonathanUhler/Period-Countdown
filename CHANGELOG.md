@@ -21,4 +21,9 @@ Project created 8/22/21 -- Changelog begin:
                             -Fixed a possible security issue with Period-Countdown writing to files within itself
                             -Moved all JSON data to ~/.periodcountdown/json/
 
+    1.3.0   9/26/21     Changes in this version:
+                            -Added the "School..." option to allow changing school *.json file
+                            -Added a better error handling routine for when json data is missing
+                            -Changed text displayed in "Period Name" and info popups to be the period name from the json data
+
 ## FULL-RELEASES
