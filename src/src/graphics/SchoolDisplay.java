@@ -37,8 +37,15 @@ package graphics;
 
 
 import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.Writer;
 import java.net.URISyntaxException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.*;
+
+import com.google.gson.Gson;
 import school.*;
 import calendar.*;
 
@@ -52,15 +59,15 @@ public class SchoolDisplay {
 
     private final SchoolCalendar schoolCalendar; // Class instance of the school year calendar data structure and class
 
-    public static String schoolData; // Mandatory location for the school json data
-    static {
-        try { schoolData = new File(new File(new File(SchoolDisplay.class.getProtectionDomain().getCodeSource().getLocation().toURI()).getPath()).getAbsolutePath()).getParent() + "/json/School.json";} catch (URISyntaxException e) {e.printStackTrace();}
-    }
+    public static final String periodCountdownDirectory = System.getProperty("user.home") + "/.periodcountdown";
+    public static final String schoolData = System.getProperty("user.home") + "/.periodcountdown/json/School.json"; // Mandatory location for the school json data
+    public static final String userData = System.getProperty("user.home") + "/.periodcountdown/json/User.json"; // Mandatory location for the user specific json data
 
-    public static String userData; // Mandatory location for the user specific json data
-    static {
-        try {userData = new File(new File(new File(SchoolDisplay.class.getProtectionDomain().getCodeSource().getLocation().toURI()).getPath()).getAbsolutePath()).getParent() + "/json/User.json";} catch (URISyntaxException e) {e.printStackTrace();}
-    }
+    public static String localSchoolData;
+    static {try {localSchoolData = new File(new File(new File(SchoolDisplay.class.getProtectionDomain().getCodeSource().getLocation().toURI()).getPath()).getAbsolutePath()).getParent() + "/json/School.json";} catch (URISyntaxException e) {e.printStackTrace();}}
+
+    public static String localUserData;
+    static {try {localUserData = new File(new File(new File(SchoolDisplay.class.getProtectionDomain().getCodeSource().getLocation().toURI()).getPath()).getAbsolutePath()).getParent() + "/json/User.json";} catch (URISyntaxException e) {e.printStackTrace();}}
 
     private PeriodData match; // Current period match
     private PeriodData nextMatch; // Next period match
@@ -74,6 +81,23 @@ public class SchoolDisplay {
     // None
     //
     public SchoolDisplay() throws Exception {
+        if (!new File(periodCountdownDirectory).exists() || !new File(periodCountdownDirectory).isDirectory()) {
+            Files.createDirectories(Paths.get(periodCountdownDirectory));
+            Files.createDirectories(Paths.get(periodCountdownDirectory + "/json"));
+
+            Gson json = new Gson();
+            Map schoolDataCopy = json.fromJson(new FileReader(localSchoolData), Map.class);
+            Map userDataCopy = json.fromJson(new FileReader(localUserData), Map.class);
+
+            Writer schoolDataWriter = new FileWriter(SchoolDisplay.schoolData);
+            new Gson().toJson(schoolDataCopy, schoolDataWriter);
+            schoolDataWriter.close();
+
+            Writer userDataWriter = new FileWriter(SchoolDisplay.userData);
+            new Gson().toJson(userDataCopy, userDataWriter);
+            userDataWriter.close();
+        }
+
         // Check that the json data exists where it should
         CalendarHelper.calendarAssert((new File(schoolData).exists()) &&
                 (!new File(schoolData).isDirectory()) &&

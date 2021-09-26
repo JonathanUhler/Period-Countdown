@@ -17,4 +17,8 @@ Project created 8/22/21 -- Changelog begin:
                             -Minor file restructure
                             -Changed method for Mac build to use jpackage over javapackager
 
+    1.2.0   9/25/21     Changes in this version:
+                            -Fixed a possible security issue with Period-Countdown writing to files within itself
+                            -Moved all JSON data to ~/.periodcountdown/json/
+
 ## FULL-RELEASES
