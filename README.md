@@ -5,11 +5,12 @@ A light-weight Java application to display time remaining in school periods or c
 # Preface Warning
 Thank you for using Period-Countdown. Before you continue, please read and accept this preface warning:
 1) There is no guarantee Period-Countdown will have an accurate schedule. Always check with teachers and schools about changes in schedules. Do not blame Period-Countdown or its developers for tardies or absences!
-2) While the Period-Countdown developers try to make the app as foolproof as possible, there is no guarantee that all the code will work perfectly. If you encounter issues or have a feature request, please see the Github page online at https://github.com/JonathanUhler/Period-Countdown/issues
+2) Period-Countdown, upon first launch, will create a directory at ~/.periodcountdown in which it will store two JSON files for the school and user data. These files are needed for Period-Countdown to function
+3) While the Period-Countdown developers try to make the app as foolproof as possible, there is no guarantee that all the code will work perfectly. If you encounter issues or have a feature request, please see the Github page online at https://github.com/JonathanUhler/Period-Countdown/issues
 
 
 # Installation
-*Note: The installation process will be expanded in the future, but currently only supports MacOS (see issue #13 for more information, or consider contributing if you have knowledge on building for Windows and Linux!)*\
+*Note: The installation process will be expanded in the future, but currently only supports Unit-based operating systems (Mac and Linux) (see issue #13 for more information, or consider contributing if you have knowledge on building for Windows and Linux!)*\
 
 ## MacOS
 ### MacOS Installation
@@ -25,13 +26,29 @@ To build or update the app, follow the process below:
 4) Build the app bundle with ```./build-mac.sh```
 5) Follow the instructions under MacOS Installation to open and use the app
 
-## Windows
-*Note: The installation process will be expanded in the future, but currently only supports MacOS (see issue #13 for more information, or consider contributing if you have knowledge on building for Windows and Linux!)*\
-\
-*Until an official solution is developed, you can still use the app with ```java -jar PeriodCountdown.jar```*
+## Linux Installation
+Clone or download the repository from Github.\
+In Files or Terminal go to the Period-Countdown/release folder.\
 
-## Linux
-*Note: The installation process will be expanded in the future, but currently only supports MacOS (see issue #13 for more information, or consider contributing if you have knowledge on building for Windows and Linux!)*\
+* In Files, double-click on the ```periodcountdown_1.0-1_amd64.deb``` to launch the Linux software manager. Click "Install"
+* In Terminal, type ```sudo apt install ./periodcountdown_1.0-1_amd64.deb``` to install directly using apt
+
+The launch process is still not completely smooth but does work. To start the app, follow these steps:
+1) If installed with the software manager, figure out where the app was installed by going to the software manager > "Installed" > "periodcountdown"
+2) If installed with apt, the software is likely at ```/opt/periodcountdown/```
+3) Run the executable with ```/path/to/periodcountdown/bin/PeriodCountdown```
+   1) Ex: ```/opt/periodcountdown/bin/PeriodCountdown```
+
+### Linux Build Process
+To build or update the app, follow the process below:
+1) Open Terminal and ```cd``` to the Period-Countdown/ directory
+2) Compile with ```./compile.sh```
+3) Make the jarfile with ```./jar.sh```
+4) Build the app bundle with ```./build-linux.sh```
+5) Follow the instructions under Linux Installation to open and use the app
+
+## Windows
+*Note: The installation process will be expanded in the future, but currently only supports Unit-based operating systems (Mac and Linux) (see issue #13 for more information, or consider contributing if you have knowledge on building for Windows and Linux!)*\
 \
 *Until an official solution is developed, you can still use the app with ```java -jar PeriodCountdown.jar```*
 
@@ -51,11 +68,6 @@ From the dropdown menu that opens, select the setting you want to edit. For ever
 # Possible Questions
 * [I don't use Mac, how do I use PeriodCountdown?](#I-don't-use-Mac,-how-do-I-use-PeriodCountdown?)
 * [If I don't go to MVHS how do I enter my school's bell schedule?](#If-I-don't-go-to-MVHS-how-do-I-enter-my-school's-bell-schedule?)
-
-## I don't use Mac, how do I use PeriodCountdown?
-As explained in more detail in the note under **Installation**, MacOS is the only officially supported operating system by Period-Countdown.\
-We greatly apologize for this inconvenience and are working on a solution (please consider contributing or opening an issue if you have any information about how to use ```javapackager``` on Linux and Windows).\
-In the meantime, you will have to run the jarfile directly. We also suggest using the project that inspired this: periods.io
 
 ## If I don't go to MVHS how do I enter my school's bell schedule?
 If you do not attend Mountain View High School, you can use the gendata.py python script located at Period-Countdown/python/gendata.py\
