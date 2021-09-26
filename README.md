@@ -1,16 +1,40 @@
 # Period-Countdown
 A light-weight Java application to display time remaining in school periods or classes based on a school schedule.
 
+
 # Preface Warning
 Thank you for using Period-Countdown. Before you continue, please read and accept this preface warning:
 1) There is no guarantee Period-Countdown will have an accurate schedule. Always check with teachers and schools about changes in schedules. Do not blame Period-Countdown or its developers for tardies or absences!
 2) While the Period-Countdown developers try to make the app as foolproof as possible, there is no guarantee that all the code will work perfectly. If you encounter issues or have a feature request, please see the Github page online at https://github.com/JonathanUhler/Period-Countdown/issues
 
+
 # Installation
-The installation process will be streamlined in the future with easy-to-use installer packages for MacOS, Linux, and Windows.\
-Currently, the app likely only works on Unix (although with some basic java knowledge, could be compiled on Windows). To install Period-Countdown, download the Github repository or clone it directly onto your machine. If downloaded, unzip the compressed file.\
-Open your machine's terminal/command line tool and use the change directory command (```cd``` on Unix) to go to the Period-Countdown directory.\
-Use ```ls``` to confirm that the ```compile.sh``` script is in your working directory. If it is type ```./compile.sh```. The Period-Countdown app should launch.
+*Note: The installation process will be expanded in the future, but currently only supports MacOS (see issue #13 for more information, or consider contributing if you have knowledge on building for Windows and Linux!)*\
+
+## MacOS
+### MacOS Installation
+Clone or download the repository from Github.\
+In Finder or Terminal go to the Period-Countdown/release folder.\
+Double-click on the ```PeriodCountdown-1.0.dmg``` to launch the installer. The ```PeriodCountdown.app``` application should appear in a new window, drag this to the Applications folder or another location.
+
+### MacOS Build Process
+To build or update the app, follow the process below:
+1) Open Terminal and ```cd``` to the Period-Countdown/ directory
+2) Compile with ```./compile.sh```
+3) Make the jarfile with ```./jar.sh```
+4) Build the app bundle with ```./build-mac.sh```
+5) Follow the instructions under MacOS Installation to open and use the app
+
+## Windows
+*Note: The installation process will be expanded in the future, but currently only supports MacOS (see issue #13 for more information, or consider contributing if you have knowledge on building for Windows and Linux!)*\
+\
+*Until an official solution is developed, you can still use the app with ```java -jar PeriodCountdown.jar```*
+
+## Linux
+*Note: The installation process will be expanded in the future, but currently only supports MacOS (see issue #13 for more information, or consider contributing if you have knowledge on building for Windows and Linux!)*\
+\
+*Until an official solution is developed, you can still use the app with ```java -jar PeriodCountdown.jar```*
+
 
 # Usage
 Given the two files School.json and User.json located under Period-Countdown/json/, the app should start counting down once started.\
@@ -18,6 +42,24 @@ At the top of the screen will be the period status -- a message comprised of the
 Below that is the timer, which displays the time left in the period mentioned in the period status.\
 Finally, if enabled, is the "next up" display. This shows the next period(s) and has five levels of verbosity: disabled, next period, next period with all info, all periods, and all periods with all info.
 
+
 # Settings and Configuration
 To change class names, teacher names, room numbers, and the next up display's verbosity, click on the "Settings" button at the very top of the app.\
 From the dropdown menu that opens, select the setting you want to edit. For everything but the next up option (which is in the same "Settings" menu) a second window will open for you to enter information into. Click "OK" or "Save" to save information.
+
+
+# Possible Questions
+* [I don't use Mac, how do I use PeriodCountdown?](#I-don't-use-Mac,-how-do-I-use-PeriodCountdown?)
+* [If I don't go to MVHS how do I enter my school's bell schedule?](#If-I-don't-go-to-MVHS-how-do-I-enter-my-school's-bell-schedule?)
+
+## I don't use Mac, how do I use PeriodCountdown?
+As explained in more detail in the note under **Installation**, MacOS is the only officially supported operating system by Period-Countdown.\
+We greatly apologize for this inconvenience and are working on a solution (please consider contributing or opening an issue if you have any information about how to use ```javapackager``` on Linux and Windows).\
+In the meantime, you will have to run the jarfile directly. We also suggest using the project that inspired this: periods.io
+
+## If I don't go to MVHS how do I enter my school's bell schedule?
+If you do not attend Mountain View High School, you can use the gendata.py python script located at Period-Countdown/python/gendata.py\
+To run this, ```cd``` to that directory through Terminal and type ```./gendata.py```.\
+Follow the instructions and enter information when prompted.\
+\
+Alternatively, you can create an issue on Github requesting the addition of a school and that JSON data will be added as soon as possible

@@ -13,4 +13,8 @@ Project created 8/22/21 -- Changelog begin:
                             -Created compile.sh and jar.sh to automate building a jarfile from the project
                             -Finished build-mac.sh and Mac .app package creation
 
+    1.1.1   9/25/21     Changes in this version:
+                            -Minor file restructure
+                            -Changed method for Mac build to use jpackage over javapackager
+
 ## FULL-RELEASES
