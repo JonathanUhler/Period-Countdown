@@ -127,7 +127,7 @@ public class SchoolCalendar {
     public static final String getNextUpTerm = "NextUp";
     public static final String getThemeTerm = "Theme";
     public static final String getSchoolFileTerm = "SchoolFile";
-    public List<String> getFreePeriodTerms = Arrays.asList("free", "none", "n/a");
+    public static final List<String> getFreePeriodTerms = Arrays.asList("free", "none", "n/a");
 
     public static final String getFirstPeriod = "FirstPeriod";
     public static final String getLastPeriod = "LastPeriod";
@@ -249,7 +249,9 @@ public class SchoolCalendar {
                 String endTime = (String) this.schoolYear.getPeriodPatternByIndex(dayType, p).get(SchoolCalendar.getEndTimeTerm);
                 boolean eodAdjust = (boolean) this.schoolYear.getPeriodPatternByIndex(dayType, p).get(SchoolCalendar.getAdjustTerm);
                 String comment = (String) this.schoolYear.getPeriodPatternByIndex(dayType, p).get(SchoolCalendar.getCommentTerm);
-                SchoolClass classInfo = (period >= SchoolCalendar.firstPeriod && period <= SchoolCalendar.lastPeriod) ? this.schoolClassArray.get(period) : null;
+
+                String userPeriodName = (period >= SchoolCalendar.firstPeriod && period <= SchoolCalendar.lastPeriod) ? (String) schoolYear.getUserDataByPeriod(period).get(SchoolCalendar.getNameTerm) : "";
+                SchoolClass classInfo = (period >= SchoolCalendar.firstPeriod && period <= SchoolCalendar.lastPeriod && !SchoolCalendar.getFreePeriodTerms.contains(userPeriodName.toLowerCase())) ? this.schoolClassArray.get(period) : null;
 
                 // Check that the JSON data is all valid
                 CalendarHelper.calendarAssert((name != null) &&

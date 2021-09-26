@@ -15,7 +15,7 @@ Thank you for using Period-Countdown. Before you continue, please read and accep
 ## MacOS
 ### MacOS Installation
 Clone or download the repository from Github.\
-In Finder or Terminal go to the Period-Countdown/release folder.\
+In Finder go to the Period-Countdown/release folder.\
 Double-click on the ```PeriodCountdown-1.0.dmg``` to launch the installer. The ```PeriodCountdown.app``` application should appear in a new window, drag this to the Applications folder or another location.
 
 ### MacOS Build Process
@@ -26,7 +26,10 @@ To build or update the app, follow the process below:
 4) Build the app bundle with ```./build-mac.sh```
 5) Follow the instructions under MacOS Installation to open and use the app
 
-## Linux Installation
+## Linux
+*Note: the Linux build of Period-Countdown currently only supports Debian-based distros such as Debian, Ubuntu, etc. RPM-based distros are not currently supported.*
+
+### Linux Installation
 Clone or download the repository from Github.\
 In Files or Terminal go to the Period-Countdown/release folder.
 
@@ -66,7 +69,8 @@ From the dropdown menu that opens, select the setting you want to edit. For ever
 
 
 # Possible Questions
-* [If I don't go to MVHS how do I enter my school's bell schedule?](#If-I-don't-go-to-MVHS-how-do-I-enter-my-school's-bell-schedule?)
+* [I don't go to MVHS, how do I enter my school's bell schedule?](#If-I-don't-go-to-MVHS-how-do-I-enter-my-school's-bell-schedule?)
+* [I don't have all 7 periods, how do I mark some as free?](#I-don't-have-all-7-periods,-how-do-I-mark-some-as-free?)
 
 ## If I don't go to MVHS how do I enter my school's bell schedule?
 If you do not attend Mountain View High School, you can use the gendata.py python script located at Period-Countdown/python/gendata.py\
@@ -74,3 +78,8 @@ To run this, ```cd``` to that directory through Terminal and type ```./gendata.p
 Follow the instructions and enter information when prompted.\
 \
 Alternatively, you can create an issue on Github requesting the addition of a school and that JSON data will be added as soon as possible
+
+## I don't have all 7 periods, how do I mark some as free?
+If you have less than the maximum number of periods (usually 7 for most high schools), then you can mark some as free to skip them when calculating the time left until the next period.\
+To do this, open the app to go to Settings > Period Names.\
+For your free periods name them as either "None", "Free", or "N/A" and they will be skipped.

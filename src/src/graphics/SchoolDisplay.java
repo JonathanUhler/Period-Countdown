@@ -248,7 +248,11 @@ public class SchoolDisplay {
             TimeData timeLeft;
 
             // If the period is between the minimum and maximum periods, it is a real period
-            if (matchPObj.getPeriod() >= this.schoolCalendar.schoolYear.getFirstPeriod() && matchPObj.getPeriod() <= this.schoolCalendar.schoolYear.getLastPeriod() || matchPObj.getPeriod() == SchoolCalendar.freePeriod) {
+            if (
+                    (matchPObj.getPeriod() >= this.schoolCalendar.schoolYear.getFirstPeriod() && // If the period number is between the min and max
+                    matchPObj.getPeriod() <= this.schoolCalendar.schoolYear.getLastPeriod()) ||
+                    matchPObj.getPeriod() == SchoolCalendar.freePeriod // Or the period number is -2 (free period)
+            ) {
                 timeLeft = this.schoolCalendar.getTimeRemainingInPeriod(epochDate, matchPObj); // Calculate the time left
                 // Create and return the formatted string
                 String timeString = timeLeft.getHours() + ":" +

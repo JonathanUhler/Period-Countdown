@@ -26,4 +26,7 @@ Project created 8/22/21 -- Changelog begin:
                             -Added a better error handling routine for when json data is missing
                             -Changed text displayed in "Period Name" and info popups to be the period name from the json data
 
+    1.3.1   9/26/21     Changes in this vesrion:
+                            -Added the ability to mark periods as free using the keywords "Free", "None", or "N/A"
+
 ## FULL-RELEASES
