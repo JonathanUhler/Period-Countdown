@@ -14,11 +14,20 @@
 +-----------------------------------------------------------------------------------------------------+
 |                                               Settings                                              |
 +-----------------------------------------------------------------------------------------------------+
-|
+| -schoolYear: SchoolYear                                                                             |
 +-----------------------------------------------------------------------------------------------------+
-|
+| +Settings()                                                                                         |
 +-----------------------------------------------------------------------------------------------------+
-|
+| -periodNamesAction(): void                                                                          |
+| -getPeriodNames(): JMenuItem                                                                        |
+| -periodInfoAction(): void                                                                           |
+| -getPeriodInfo(): JMenuItem                                                                         |
+| -themeAction(): void                                                                                |
+| -getTheme(): JMenuItem                                                                              |
+| -getNextUp(): JMenu                                                                                 |
+| -schoolFileAction(): void                                                                           |
+| -getSchoolFile(): JMenu                                                                             |
+| +getSettingsMenu(): JMenu                                                                           |
 +-----------------------------------------------------------------------------------------------------+
 
 */
@@ -239,8 +248,7 @@ public class Settings {
     }
 
 
-    public JMenuBar getSettingsMenu() {
-        JMenuBar settingsBar = new JMenuBar();
+    public JMenu getSettingsMenu() {
         JMenu settingsMenu = new JMenu("Settings");
 
         settingsMenu.add(this.getPeriodNames());
@@ -249,9 +257,8 @@ public class Settings {
         settingsMenu.add(this.getNextUp());
         settingsMenu.add(this.getSchoolFile());
 
-        settingsBar.add(settingsMenu);
-
-        return settingsBar;
+        return settingsMenu;
     }
 
 }
+// end: public class Settings

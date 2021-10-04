@@ -1,9 +1,7 @@
 jpackage \
   --name PeriodCountdown \
-  --input ./lib \
-  --input ./json \
   --input ./src \
-  --dest ./release/ \
+  --dest ./release \
   --verbose \
   --icon ./reference/icon.icns \
   --main-jar PeriodCountdown.jar \

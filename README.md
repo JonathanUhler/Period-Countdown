@@ -2,6 +2,10 @@
 A light-weight Java application to display time remaining in school periods or classes based on a school schedule.
 
 
+# Dependencies
+JDK 17 or above - https://www.oracle.com/java/technologies/downloads/
+
+
 # Preface Warning
 Thank you for using Period-Countdown. Before you continue, please read and accept this preface warning:
 1) There is no guarantee Period-Countdown will have an accurate schedule. Always check with teachers and schools about changes in schedules. Do not blame Period-Countdown or its developers for tardies or absences!

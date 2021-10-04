@@ -1,0 +1,1 @@
+jpackage --name PeriodCountdown --input .\src --dest .\release --verbose --main-jar PeriodCountdown.jar --main-class main.PeriodCountdown

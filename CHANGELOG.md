@@ -29,4 +29,11 @@ Project created 8/22/21 -- Changelog begin:
     1.3.1   9/26/21     Changes in this vesrion:
                             -Added the ability to mark periods as free using the keywords "Free", "None", or "N/A"
 
+    2.0.0   10/3/21     Changes in this version:
+                            -Updated MVHS_School.json with 10/4/21 rally week schedule
+                            -Added "Support" menu item to menu bar
+                            -Added update routine requested in issue #15
+                            -Fixed bug described in issue #16
+                            -Added Java JDK 17+ as a dependency
+
 ## FULL-RELEASES

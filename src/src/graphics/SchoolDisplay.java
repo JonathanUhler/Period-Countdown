@@ -47,7 +47,6 @@ import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.*;
-
 import com.google.gson.Gson;
 import school.*;
 import calendar.*;
@@ -62,16 +61,18 @@ public class SchoolDisplay {
 
     private final SchoolCalendar schoolCalendar; // Class instance of the school year calendar data structure and class
 
-    public static final String defaultSchoolData = "MVHS_School.json";
-    public static final String periodCountdownDirectory = System.getProperty("user.home") + "/.periodcountdown";
-    private static String schoolData = System.getProperty("user.home") + "/.periodcountdown/json/" + defaultSchoolData; // Mandatory location for the school json data
-    public static final String userData = System.getProperty("user.home") + "/.periodcountdown/json/User.json"; // Mandatory location for the user specific json data
+    public static final String defaultSchoolData = "MVHS_School.json"; // Default json data file
 
-    private String localSchoolData;
-    {try {localSchoolData = new File(new File(new File(SchoolDisplay.class.getProtectionDomain().getCodeSource().getLocation().toURI()).getPath()).getAbsolutePath()).getParent() + "/json/" + defaultSchoolData;} catch (URISyntaxException e) {e.printStackTrace();}}
+    public static final String periodCountdownDirectory = System.getProperty("user.home") + SchoolCalendar.PC_PATH  + "periodcountdown"; // Path to the hidden appdata folder for Period-Countdown
 
-    private String localUserData;
-    {try {localUserData = new File(new File(new File(SchoolDisplay.class.getProtectionDomain().getCodeSource().getLocation().toURI()).getPath()).getAbsolutePath()).getParent() + "/json/User.json";} catch (URISyntaxException e) {e.printStackTrace();}}
+    private static String schoolData = System.getProperty("user.home") + SchoolCalendar.PC_PATH + "periodcountdown" + SchoolCalendar.FILE_SEP + "json" + SchoolCalendar.FILE_SEP + defaultSchoolData; // Mandatory location for the school json data
+    public static final String userData = System.getProperty("user.home") + SchoolCalendar.PC_PATH + "periodcountdown" + SchoolCalendar.FILE_SEP + "json" + SchoolCalendar.FILE_SEP + "User.json"; // Mandatory location for the user specific json data
+
+    private String localSchoolData; // Local (within the app files) path to the json data
+    {try {localSchoolData = new File(new File(new File(SchoolDisplay.class.getProtectionDomain().getCodeSource().getLocation().toURI()).getPath()).getAbsolutePath()).getParent() + SchoolCalendar.FILE_SEP + "json" + SchoolCalendar.FILE_SEP + defaultSchoolData;} catch (URISyntaxException e) {e.printStackTrace();}}
+
+    private String localUserData; // Local (within the app files) path to the json data
+    {try {localUserData = new File(new File(new File(SchoolDisplay.class.getProtectionDomain().getCodeSource().getLocation().toURI()).getPath()).getAbsolutePath()).getParent() + SchoolCalendar.FILE_SEP + "json" + SchoolCalendar.FILE_SEP + "User.json";} catch (URISyntaxException e) {e.printStackTrace();}}
 
     private PeriodData match; // Current period match
     private PeriodData nextMatch; // Next period match
@@ -88,7 +89,7 @@ public class SchoolDisplay {
         // Make sure the JSON data is in its place
         this.checkForJsonData();
 
-        schoolData = System.getProperty("user.home") + "/.periodcountdown/json/" + new SchoolYear(localSchoolData, userData).getSchoolFileName();
+        schoolData = System.getProperty("user.home") + SchoolCalendar.PC_PATH + "periodcountdown" + SchoolCalendar.FILE_SEP + "json" + SchoolCalendar.FILE_SEP + new SchoolYear(localSchoolData, userData).getSchoolFileName();
 
         this.checkForJsonData();
 

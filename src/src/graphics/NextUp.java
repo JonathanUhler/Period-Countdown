@@ -56,25 +56,6 @@ public class NextUp {
     // ====================================================================================================
     // private String getNextMatchData
     //
-    // Overloaded method 1 for getNextMatchData
-    //
-    // Arguments--
-    //
-    // epochCalendar:   time to get the next up data for
-    //
-    // Returns--
-    //
-    // Call to overloaded method 2 for getNextMatchData
-    //
-    private String getNextMatchData(Calendar epochCalendar) throws Exception {
-        return this.getNextMatchData(epochCalendar, false);
-    }
-    // end: private String getNextMatchData
-
-
-    // ====================================================================================================
-    // private String getNextMatchData
-    //
     // Overloaded method 2 for getNextMatchData
     //
     // Arguments--
@@ -151,69 +132,89 @@ public class NextUp {
 
 
     // ====================================================================================================
-    private String oneName(Calendar epochCalendar) throws Exception {
+    // private String one
+    //
+    // Get the next up string for the next class only
+    //
+    // Arguments--
+    //
+    // epochCalendar:   the calendar object representing the time to get the next up data for
+    //
+    // nameOnly:        whether to include only the class names or the class names + room/teacher info
+    //
+    // Returns--
+    //
+    // The next up string
+    //
+    private String one(Calendar epochCalendar, boolean nameOnly) throws Exception {
         return "<html><br><b>Upcoming Periods</b><br>" + this.getNextMatchData(epochCalendar, true) + "</html>";
     }
+    // end: private String one
 
 
     // ====================================================================================================
-    private String oneAllInfo(Calendar epochCalendar) throws Exception {
-        return "<html><br><b>Upcoming Periods</b><br>" + this.getNextMatchData(epochCalendar) + "</html>";
-    }
-
-
-    // ====================================================================================================
-    private String allName(Calendar epochCalendar) throws Exception {
-        ArrayList<String> periodInformation = this.getNextMatchData(epochCalendar, true, true);
+    // private String all
+    //
+    // Get the next up string for all next classes in the day
+    //
+    // Arguments--
+    //
+    // epochCalendar:   the calendar object representing the time to get the next up data for
+    //
+    // nameOnly:        whether to include only the class names or the class names + room/teacher info
+    //
+    // Returns--
+    //
+    // The next up string
+    //
+    private String all(Calendar epochCalendar, boolean nameOnly) throws Exception {
+        ArrayList<String> periodInformation = this.getNextMatchData(epochCalendar, nameOnly, true); // Get the next up match data for all the periods
         StringBuilder periodInfoString = new StringBuilder();
 
+        // Loop through all the period information and add it to the period string
         for (String periodInfo : periodInformation) {
             periodInfoString.append(periodInfo).append("<br>");
         }
 
+        // Return the finished string
         return "<html><br><b>Upcoming Periods</b><br>" + periodInfoString + "</html>";
     }
+    // end: private String all
 
 
     // ====================================================================================================
-    private String allAllInfo(Calendar epochCalendar) throws Exception {
-        ArrayList<String> periodInformation = this.getNextMatchData(epochCalendar, false, true);
-        StringBuilder periodInfoString = new StringBuilder();
-
-        for (String periodInfo : periodInformation) {
-            periodInfoString.append(periodInfo).append("<br>");
-        }
-
-        return "<html><br><b>Upcoming Periods</b><br>" + periodInfoString + "</html>";
-    }
-
-
-    // ====================================================================================================
+    // public String getNextUpPanel
+    //
+    // Gets the next up string of classes
+    //
+    // Arguments--
+    //
+    // verbosity:       how verbose the list of classes should be
+    //
+    // epochCalendar:   the calendar object representing the time to get the data for
+    //
+    // Returns--
+    //
+    // The next up string
+    //
     public String getNextUpPanel(int verbosity, Calendar epochCalendar) throws Exception {
-        if (verbosity == NONE) { return ""; }
+        if (verbosity == NONE) { return ""; } // If the verbosity is 0, then return
 
-        String output;
-
+        // Switch through the possible options and return the correct menu
         switch (verbosity) {
             case ONE_NAME:
-                output = oneName(epochCalendar);
-                break;
+                return one(epochCalendar, true);
             case ONE_ALL_INFO:
-                output = oneAllInfo(epochCalendar);
-                break;
+                return one(epochCalendar, false);
             case ALL_NAME:
-                output = allName(epochCalendar);
-                break;
+                return all(epochCalendar, true);
             case ALL_ALL_INFO:
-                output = allAllInfo(epochCalendar);
-                break;
+                return all(epochCalendar, false);
             default:
-                output = null;
-                break;
+                return null;
         }
-
-        return output;
     }
+    // end: public String getNextUpPanel
 
 }
 // end: public class NextUp

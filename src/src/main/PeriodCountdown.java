@@ -39,6 +39,7 @@ import graphics.*;
 public class PeriodCountdown {
 
     private static JFrame periodCountdownFrame; // Period Countdown frame
+    public static final String VERSION = "pre-2.0.0";
 
 
     // ====================================================================================================
@@ -54,9 +55,15 @@ public class PeriodCountdown {
     //
     private static void initFrame(String frameName, PeriodPanel frameContents) throws Exception {
         periodCountdownFrame = new JFrame(frameName); // Initialize the JFrame object
-        periodCountdownFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE); // Set the closing behaviour
-        periodCountdownFrame.setJMenuBar(new Settings().getSettingsMenu()); // Add the menu bar at the top
+
+        JMenuBar periodCountdownMenuBar = new JMenuBar();
+        periodCountdownMenuBar.add(new Settings().getSettingsMenu());
+        periodCountdownMenuBar.add(new Support().getSupportMenu());
+        periodCountdownFrame.setJMenuBar(periodCountdownMenuBar); // Add the menu bar at the top
+
         periodCountdownFrame.add(frameContents); // Add the PeriodPanel contents
+
+        periodCountdownFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE); // Set the closing behaviour
         periodCountdownFrame.pack(); // Pack the frame and its components
         periodCountdownFrame.setVisible(true); // Display the frame
     }

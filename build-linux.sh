@@ -1,9 +1,8 @@
 /usr/lib/jvm/jdk-17/bin/jpackage \
   --name PeriodCountdown \
-  --input ./lib \
-  --input ./json \
   --input ./src \
-  --dest ./release/ \
+  --dest ./release \
   --verbose \
+  --icon ./reference/icon.png \
   --main-jar PeriodCountdown.jar \
   --main-class main.PeriodCountdown

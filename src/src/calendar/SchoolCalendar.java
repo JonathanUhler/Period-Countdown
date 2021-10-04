@@ -109,6 +109,10 @@ import school.*;
 //
 public class SchoolCalendar {
 
+    // OS specific strings
+    public static final String FILE_SEP = (System.getProperty("os.name").contains("Window")) ? "\\" : "/";
+    public static final String PC_PATH = (System.getProperty("os.name").contains("Window")) ? "\\AppData\\Local\\" : "/.";
+
     // Terms used to index for specific information
     public static final String getPeriodTerm = "Period";
     public static final String getNameTerm = "Name";
@@ -242,7 +246,7 @@ public class SchoolCalendar {
 
             // Loop through each of the periods in the day
             for (int p = 0; p < periodCount; p++) {
-                // Get all the information for the peirod from the JSON data
+                // Get all the information for the period from the JSON data
                 int period = (int) (double) this.schoolYear.getPeriodPatternByIndex(dayType, p).get(SchoolCalendar.getPeriodTerm);
                 String name = (String) this.schoolYear.getPeriodPatternByIndex(dayType, p).get(SchoolCalendar.getNameTerm);
                 String startTime = (String) this.schoolYear.getPeriodPatternByIndex(dayType, p).get(SchoolCalendar.getStartTimeTerm);
@@ -519,6 +523,7 @@ public class SchoolCalendar {
             endTime.set(Calendar.HOUR_OF_DAY, period.getEndDayAdjust().getHours());
             endTime.set(Calendar.MINUTE, period.getEndDayAdjust().getMinutes());
             endTime.set(Calendar.SECOND, period.getEndDayAdjust().getSeconds());
+            endTime.set(Calendar.MILLISECOND, period.getEndDayAdjust().getMilliseconds());
 
             // Check if the time given is in the period
             if (epochDate.getTime().getTime() >= startTime.getTime().getTime() && epochDate.getTime().getTime() <= endTime.getTime().getTime()) {
