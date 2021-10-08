@@ -36,4 +36,9 @@ Project created 8/22/21 -- Changelog begin:
                             -Fixed bug described in issue #16
                             -Added Java JDK 17+ as a dependency
 
+    2.0.1   10/8/21     Changes in this version:
+                            -Updated in-file documentation
+                            -Added error popup when the "Support > Update" routine fails
+                            -Added SAT/PSAT testing week schedule
+
 ## FULL-RELEASES

@@ -129,6 +129,11 @@
             {"Period": 7, "Name": "Per 7", "StartTime": "14:58", "EndTime": "15:38", "Comment": "", "Adjust": false},
             {"Period": -1, "Name": "After School", "StartTime": "15:38", "EndTime": "23:59", "Comment": "", "Adjust": true}
         ],
+        "SAT": [
+            {"Period": -1, "Name": "Before School", "StartTime": "00:00", "EndTime": "08:00", "Comment": "", "Adjust": false},
+            {"Period": -2, "Name": "SAT & PSAT Testing", "StartTime": "08:00", "EndTime": "12:00", "Comment": "", "Adjust": false},
+            {"Period": -1, "Name": "After School", "StartTime": "12:00", "EndTime": "23:59", "Comment": "", "Adjust": true}
+        ],
         "Weekend": [
             {"Period": -1, "Name": "Weekend", "StartTime": "00:00", "EndTime": "23:59", "Comment": "", "Adjust": true}
         ],
@@ -181,13 +186,23 @@
             {"Name": "School Day", "Days": "A"},
             {"Name": "School Day", "Days": "F"},
             {"Name": "Weekend", "Days": "Weekend"}
+        ],
+        "SAT_Week": [
+            {"Name": "Weekend", "Days": "Weekend"},
+            {"Name": "Holiday", "Days": "Holiday"},
+            {"Name": "Holiday", "Days": "Holiday"},
+            {"Name": "SAT/PSAT Day", "Days": "SAT"},
+            {"Name": "School Day", "Days": "B"},
+            {"Name": "School Day", "Days": "C"},
+            {"Name": "Weekend", "Days": "Weekend"}
         ]
     },
     "Exceptions": [
         {"WeekTag": "2021-08-08", "Weeks": "HHABC_Week", "Comment": "First week of school"},
         {"WeekTag": "2021-09-06", "Weeks": "HBCBC_Week", "Comment": "Labor day"},
         {"WeekTag": "2021-09-12", "Weeks": "StaffDevMorning_Week", "Comment": "Staff development in the morning Tues/Wed"},
-        {"WeekTag": "2021-10-03", "Weeks": "Rally_Week", "Comment": "Rally week"}
+        {"WeekTag": "2021-10-03", "Weeks": "Rally_Week", "Comment": "Rally week"},
+        {"WeekTag": "2021-10-10", "Weeks": "SAT_Week", "Comment": "SAT and PSAT testing week"}
     ],
     "Info": {
         "FirstPeriod": 1,

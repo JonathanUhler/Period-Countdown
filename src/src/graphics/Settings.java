@@ -48,26 +48,52 @@ import calendar.*;
 // public class Settings
 //
 // Class to handle the user changing their settings
+//
 public class Settings {
 
     private final SchoolYear schoolYear;
 
 
+    // ----------------------------------------------------------------------------------------------------
+    // public Settings
+    //
+    // Constructor for Settings class
+    //
+    // Arguments--
+    //
+    // None
+    //
     public Settings() throws Exception {
-        this.schoolYear = new SchoolYear(SchoolDisplay.getSchoolData(), SchoolDisplay.userData);
+        this.schoolYear = new SchoolYear(SchoolDisplay.getSchoolData(), SchoolDisplay.userData); // Initialize the class's SchoolYear object
     }
+    // end: public Settings
 
 
+    // ====================================================================================================
+    // private void periodNamesAction
+    //
+    // Popup for settings the period names
+    //
+    // Arguments--
+    //
+    // None
+    //
+    // Returns--
+    //
+    // None
+    //
     private void periodNamesAction() throws Exception {
-        ArrayList<Object> message = new ArrayList<>();
+        ArrayList<Object> message = new ArrayList<>(); // Initialize an ArrayList to hold the message and textboxes for setting the period names
 
+        // Loop through each of the periods
         for (int i = SchoolCalendar.getFirstPeriod(); i <= SchoolCalendar.getLastPeriod(); i++) {
-            Map<String, Object> period = schoolYear.getUserDataByPeriod(i);
-            JTextField periodTextField = new JTextField((String) period.get(SchoolCalendar.getNameTerm));
-            message.add(this.schoolYear.getPeriodNameByNumber(i));
-            message.add(periodTextField);
+            Map<String, Object> period = schoolYear.getUserDataByPeriod(i);// Get the object from the user data for the period information
+            JTextField periodTextField = new JTextField((String) period.get(SchoolCalendar.getNameTerm)); // Create a textbox with the current period name as the current value
+            message.add(this.schoolYear.getPeriodNameByNumber(i)); // Add a text prompt to the message
+            message.add(periodTextField); // Add the textbox to the message
         }
 
+        // Display the prompt to edit the data
         int confirmEditPeriodNames = JOptionPane.showConfirmDialog(
                 null,
                 message.toArray(new Object[0]),
@@ -76,24 +102,44 @@ public class Settings {
                 JOptionPane.PLAIN_MESSAGE,
                 null);
 
+        // Check if the user confirmed their changes
         if (confirmEditPeriodNames == JOptionPane.OK_OPTION) {
+            // Loop through each of the periods
             for (int i = SchoolCalendar.getFirstPeriod(); i <= SchoolCalendar.getLastPeriod(); i++) {
-                int periodNameTextIndex = 2 * i - 1;
-                schoolYear.setUserPeriodNameByPeriod(i, ((JTextField) message.get(periodNameTextIndex)).getText());
+                int periodNameTextIndex = 2 * i - 1; // Calculate the index of the textbox (because in the ArrayList the order is 0=text, 1=textbox, 2=text...
+                schoolYear.setUserPeriodNameByPeriod(i, ((JTextField) message.get(periodNameTextIndex)).getText()); // Set the new data
             }
         }
     }
+    // end: private void periodNamesAction
 
 
+    // ====================================================================================================
+    // private JMenuItem getPeriodNames
+    //
+    // Get the menu item object for setting the period names
+    //
+    // Arguments--
+    //
+    // None
+    //
+    // Returns--
+    //
+    // periodNamesMenu: the menu item object for setting the period names
+    //
     private JMenuItem getPeriodNames() {
-        JMenuItem periodNamesMenu = new JMenuItem("Period Names");
-        periodNamesMenu.addActionListener(e -> {
+        JMenuItem periodNamesMenu = new JMenuItem("Period Names"); // Create the new object and add a name to it
+
+        periodNamesMenu.addActionListener(e -> { // Add an action listener that calls the periodNamesAction on clicking the button
             try { this.periodNamesAction(); } catch (Exception ex) { ex.printStackTrace(); }
         });
-        return periodNamesMenu;
+
+        return periodNamesMenu; // Return the object
     }
+    // end: private JMenuItem getPeriodNames
 
 
+    // ====================================================================================================
     private void periodInfoAction() throws Exception {
         ArrayList<Object> message = new ArrayList<>();
 
@@ -127,6 +173,7 @@ public class Settings {
     }
 
 
+    // ====================================================================================================
     private JMenuItem getPeriodInfo() {
         JMenuItem periodInfoMenu = new JMenuItem("Period Information");
         periodInfoMenu.addActionListener(e -> {
@@ -136,6 +183,7 @@ public class Settings {
     }
 
 
+    // ====================================================================================================
     private void themeAction() throws Exception {
         ArrayList<Object> message = new ArrayList<>();
         message.add("Theme (3 hex bytes, ex: ffffff)");
@@ -156,6 +204,7 @@ public class Settings {
     }
 
 
+    // ====================================================================================================
     private JMenuItem getTheme() {
         JMenuItem themeMenu = new JMenuItem("Theme");
         themeMenu.addActionListener(e -> {
@@ -165,11 +214,13 @@ public class Settings {
     }
 
 
+    // ====================================================================================================
     private void nextUpAction(int verbosity) throws Exception {
         this.schoolYear.setUserNextUp(verbosity);
     }
 
 
+    // ====================================================================================================
     private JMenu getNextUp() {
         JMenu nextUpMenu = new JMenu("Next Up...");
 
@@ -205,11 +256,13 @@ public class Settings {
     }
 
 
+    // ====================================================================================================
     private void schoolFileAction(String file) throws Exception {
         this.schoolYear.setUserSchoolFile(file);
     }
 
 
+    // ====================================================================================================
     private JMenu getSchoolFile() {
         JMenu schoolFileMenu = new JMenu("School...");
 
@@ -248,6 +301,7 @@ public class Settings {
     }
 
 
+    // ====================================================================================================
     public JMenu getSettingsMenu() {
         JMenu settingsMenu = new JMenu("Settings");
 
