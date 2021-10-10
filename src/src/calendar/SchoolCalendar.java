@@ -567,9 +567,9 @@ public class SchoolCalendar {
             SchoolPeriod periodObj = dayObj.getPeriodList().get(i); // Get each period in the day object
 
             // If only real periods should be matched and the period is not real, then continue
-            if ((periodObj.getPeriod() <= SchoolCalendar.getFirstPeriod() && periodObj.getPeriod() >= SchoolCalendar.getLastPeriod()) && matchOnlyRealPeriod) { continue; }
+            if ((periodObj.getPeriod() <= SchoolCalendar.getFirstPeriod() && periodObj.getPeriod() != SchoolCalendar.freePeriod && periodObj.getPeriod() >= SchoolCalendar.getLastPeriod()) && matchOnlyRealPeriod) { continue; }
             // If the period should have a class and doesn't, then continue
-            if (periodObj.getClassInfo() == null && matchOnlyPeriodWithClass) { continue; }
+            if (periodObj.getClassInfo() == null && periodObj.getPeriod() != SchoolCalendar.freePeriod && matchOnlyPeriodWithClass) { continue; }
 
             // Add the data for the next period match
             match = new PeriodData(dayObj, periodObj, periodIndex);

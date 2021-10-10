@@ -41,4 +41,7 @@ Project created 8/22/21 -- Changelog begin:
                             -Added error popup when the "Support > Update" routine fails
                             -Added SAT/PSAT testing week schedule
 
+    2.0.2   10/9/21     Changes in this version:
+                            -Fixed minor issue in timer skipping -2 (free) periods
+
 ## FULL-RELEASES
