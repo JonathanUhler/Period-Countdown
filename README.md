@@ -14,8 +14,6 @@ Thank you for using Period-Countdown. Before you continue, please read and accep
 
 
 # Installation
-*Note: The installation process will be expanded in the future, but currently only supports Unix-based operating systems (Mac and Linux) (see issue #13 for more information, or consider contributing if you have knowledge on building for Windows!)*
-
 ## MacOS
 ### MacOS Installation
 Clone or download the repository from Github.\
@@ -55,9 +53,21 @@ To build or update the app, follow the process below:
 5) Follow the instructions under Linux Installation to open and use the app
 
 ## Windows
-*Note: The installation process will be expanded in the future, but currently only supports Unix-based operating systems (Mac and Linux) (see issue #13 for more information, or consider contributing if you have knowledge on building for Windows!)*
+### Windows Installation
+Clone or download the repository from Github.\
+In File Explorer go to the Period-Countdown/release folder.\
+Double-click on the ```PeriodCountdown-1.0.exe``` to launch the installer.\
 \
-*Until an official solution is developed, you can still use the app with ```java -jar PeriodCountdown.jar```*
+In order to allow Period-Countdown to be found from the search menu, do the following:
+1) Open File Explorer and go to "C:\Program Files\PeriodCountdown\"
+2) Right-click on the PeriodCountdown executable and select "Create Shortcut"
+3) The shortcut will be created on your desktop. Move it to "C:\ProgramData\Microsoft\Windows\Start Menu\Programs\"
+
+### Windows Build Process
+To build or update the app, follow the process below:
+1) Open Command Prompt and ```cd``` to the Period-Countdown/ directory
+2) Build the app bundle with ```./build-win.bat```
+3) Follow the instructions under Windows Installation to open and use the app
 
 
 # Usage
