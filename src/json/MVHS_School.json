@@ -195,6 +195,15 @@
             {"Name": "School Day", "Days": "B"},
             {"Name": "School Day", "Days": "C"},
             {"Name": "Weekend", "Days": "Weekend"}
+        ],
+        "BCBHC_Week": [
+            {"Name": "Weekend", "Days": "Weekend"},
+            {"Name": "School Day", "Days": "B"},
+            {"Name": "School Day", "Days": "C"},
+            {"Name": "School Day", "Days": "B"},
+            {"Name": "Holiday", "Days": "Holiday"},
+            {"Name": "School Day", "Days": "C"},
+            {"Name": "Weekend", "Days": "Weekend"}
         ]
     },
     "Exceptions": [
@@ -202,7 +211,8 @@
         {"WeekTag": "2021-09-06", "Weeks": "HBCBC_Week", "Comment": "Labor day"},
         {"WeekTag": "2021-09-12", "Weeks": "StaffDevMorning_Week", "Comment": "Staff development in the morning Tues/Wed"},
         {"WeekTag": "2021-10-03", "Weeks": "Rally_Week", "Comment": "Rally week"},
-        {"WeekTag": "2021-10-10", "Weeks": "SAT_Week", "Comment": "SAT and PSAT testing week"}
+        {"WeekTag": "2021-10-10", "Weeks": "SAT_Week", "Comment": "SAT and PSAT testing week"},
+        {"WeekTag": "2021-11-07", "Weeks": "BCBHC_Week", "Comment": "Veteran's Day week"}
     ],
     "Info": {
         "FirstPeriod": 1,
