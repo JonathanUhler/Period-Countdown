@@ -47,4 +47,7 @@ Project created 8/22/21 -- Changelog begin:
     2.0.3   11/17/21    Changes in this version:
                             -Updated JSON data for year, fixed finals schedule
 
+    2.0.3.1 11/17/21    Changes in this version:
+                            -PATCH FOR CRASH IN 2.0.3 IF YOU INSTALLED 2.0.3 UPDATE TO 2.0.3.1
+
 ## FULL-RELEASES

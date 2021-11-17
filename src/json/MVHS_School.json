@@ -156,7 +156,7 @@
         "Finals_4": [
             {"Period": -1, "Name": "Before School", "StartTime": "00:00", "EndTime": "08:40", "Comment": "", "Adjust": false},
             {"Period": 4, "Name": "Per 4 Final", "StartTime": "08:40", "EndTime": "10:25", "Comment": "", "Adjust": false},
-            {"Period": -1, "Name": "After School", "StartTime": "10:25", "EndTime": "23:59", "Comment": "", "Adjust": true},
+            {"Period": -1, "Name": "After School", "StartTime": "10:25", "EndTime": "23:59", "Comment": "", "Adjust": true}
         ],
         "SAT": [
             {"Period": -1, "Name": "Before School", "StartTime": "00:00", "EndTime": "08:00", "Comment": "", "Adjust": false},
