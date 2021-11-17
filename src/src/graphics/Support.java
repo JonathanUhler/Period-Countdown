@@ -217,7 +217,7 @@ public class Support {
             catch (Exception e) {
                 JOptionPane.showConfirmDialog(
                         null,
-                        "The update could not be completed\nError: " + e.getMessage(), // Print out the error message
+                        "The update could not be completed\n\nError: " + e.getMessage() + "\n\nTry:\n\t1) Updating using a privileged account\n\t2) Connecting to the internet", // Print out the error message
                         "Update Failure",
                         JOptionPane.DEFAULT_OPTION,
                         JOptionPane.PLAIN_MESSAGE,

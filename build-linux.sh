@@ -1,4 +1,4 @@
-/usr/lib/jvm/jdk-17/bin/jpackage \
+jpackage \
   --name PeriodCountdown \
   --input ./src \
   --dest ./release \

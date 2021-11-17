@@ -44,4 +44,7 @@ Project created 8/22/21 -- Changelog begin:
     2.0.2   10/9/21     Changes in this version:
                             -Fixed minor issue in timer skipping -2 (free) periods
 
+    2.0.3   11/17/21    Changes in this version:
+                            -Updated JSON data for year, fixed finals schedule
+
 ## FULL-RELEASES
