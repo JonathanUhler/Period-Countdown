@@ -207,7 +207,7 @@
             {"Name": "School Day", "Days": "C"},
             {"Name": "Weekend", "Days": "Weekend"}
         ],
-        "Rally_Week": [
+        "Rally_Minimum_Week": [
             {"Name": "Weekend", "Days": "Weekend"},
             {"Name": "School Day", "Days": "G_2"},
             {"Name": "School Day", "Days": "B"},
@@ -252,6 +252,15 @@
             {"Name": "Holiday", "Days": "Holiday"},
             {"Name": "Weekend", "Days": "Weekend"}
         ],
+        "Rally_Week": [
+            {"Name": "Weekend", "Days": "Weekend"},
+            {"Name": "School Day", "Days": "G_2"},
+            {"Name": "School Day", "Days": "B"},
+            {"Name": "School Day", "Days": "C"},
+            {"Name": "School Day", "Days": "B"},
+            {"Name": "School Day", "Days": "C"},
+            {"Name": "Weekend", "Days": "Weekend"}
+        ],
         "Spring_Finals_1": [
             {"Name": "Weekend", "Days": "Weekend"},
             {"Name": "Holiday", "Days": "Holiday"},
@@ -275,7 +284,7 @@
         {"WeekTag": "2021-08-08", "Weeks": "HHABC_Week", "Comment": "First week of school"},
         {"WeekTag": "2021-09-06", "Weeks": "HBCBC_Week", "Comment": "Labor day"},
         {"WeekTag": "2021-09-12", "Weeks": "StaffDevMorning_Week", "Comment": "Staff development in the morning Tues/Wed"},
-        {"WeekTag": "2021-10-03", "Weeks": "Rally_Week", "Comment": "Rally week"},
+        {"WeekTag": "2021-10-03", "Weeks": "Rally_Minimum_Week", "Comment": "Rally week with Friday minimum day"},
         {"WeekTag": "2021-10-10", "Weeks": "SAT_Week", "Comment": "SAT and PSAT testing week"},
         {"WeekTag": "2021-11-07", "Weeks": "BCBHC_Week", "Comment": "Veteran's Day week"},
         {"WeekTag": "2021-11-21", "Weeks": "HHHHH_Week", "Comment": "Thanksgiving break"},
@@ -284,6 +293,7 @@
         {"WeekTag": "2021-12-26", "Weeks": "HHHHH_Week", "Comment": "Week 2 of winter break"},
         {"WeekTag": "2022-01-02", "Weeks": "HBCBC_Week", "Comment": "First week of semester 2"},
         {"WeekTag": "2022-01-16", "Weeks": "HBCBC_Week", "Comment": "MLK Jr. week"},
+        {"WeekTag": "2022-01-23", "Weeks": "Rally_Week", "Comment": "Cultural rally week"},
         {"WeekTag": "2022-02-20", "Weeks": "HHHHH_Week", "Comment": "Ski week"},
         {"WeekTag": "2022-03-13", "Weeks": "HBCBC_Week", "Comment": "Recess week"},
         {"WeekTag": "2022-04-10", "Weeks": "HHHHH_Week", "Comment": "Spring break"},
