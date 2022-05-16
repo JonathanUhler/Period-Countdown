@@ -20,54 +20,39 @@ public class GenDataPanel extends JPanel {
         JPanel welcomePanel = new JPanel();
         welcomePanel.setLayout(new BoxLayout(welcomePanel, BoxLayout.Y_AXIS));
 
-        String welcomeMessage = "<html><b>" +
-                "Welcome to the Period Countdown Data Generator" +
-                "<br></b>" +
-                "=====================================================" +
-                "<br>" +
-                // General information
-                "Data Generation and Usage Process--" +
-                "<br><ul><li>" +
-                "Follow the instructions given by this python script and enter information when prompted" +
-                "</li><li>" +
-                "Using this script requires:" +
-                "</li><ul><li>" +
-                "Basic knowledge of your school's daily bell schedule for each \"type\" of day" +
-                "</li><li>" +
-                "Basic knowledge of your school's yearly calendar schedule (including weeks that are different such as 4-day weeks with Monday holidays)" +
-                "</ul></ul>" +
-                // Terms
-                "Useful Terminology and Information--" +
-                "<br><ul><li>" +
-                "Number - an integer or decimal number, positive or negative (ex: 4, 3.249, -23.0093)" +
-                "</li><li>" +
-                "String - a sequence of any characters (ex: \"foo\", \"bar@!.foo*\", \"test123\")<br>" +
-                "</li><li>" +
-                "How do you specify a passing period/lunch/other non-class period? - Use the number -1 or -2 for so called \"fake\" periods" +
-                "</li><ul><li>" +
-                "-1 indicates to Period-Countdown that the period is very unimportant (ex: passing period). If multiple periods with -1 are places back-to-back the times in them will be merged" +
-                "</li><li>" +
-                "-2 indicates to Period-Countdown that the period is somewhat unimportant (ex: lunch, tutorial/studyhall). -2 and -1 periods will not have their times merged" +
-                "</li></ul><li>" +
-                "How do you specify times for periods? - Use 24-hour/military time" +
-                "</li><ul><li>" +
-                "The entire scope of the day is between 00:00 (the first millisecond of the day) to 23:59 (the last millisecond of the day)" +
-                "</li></ul></ul>" +
-                // Preface warning to accept
-                "Preface Warning - READ CAREFULLY--" +
-                "<br><ul><li>" +
-                "Before proceeding, please understand and accept that:" +
-                "</li><ul><li>" +
-                "1) There is no guarantee Period-Countdown will have an accurate schedule. Always check with teachers and schools about changes in schedules. Do not blame Period-Countdown or its developers for tardies or absences!<br>" +
-                "</li><li>" +
-                "2) While the Period-Countdown developers try to make it as foolproof as possible, there is no guarantee that all the code will work perfectly. If you encounter issues or have a feature request, please see the Github page online" +
-                "</li></ul></ul></html>";
+        // General information
+        // Terms
+        // Preface warning to accept
+        String welcomeMessage = """
+                Welcome to the Period Countdown Data Generator
+                =====================================================
+                Data Generation and Usage Process--
+                Follow the instructions given by this python script and enter information when prompted
+                Using this script requires:
+                    Basic knowledge of your school's daily bell schedule for each "type" of day
+                    Basic knowledge of your school's yearly calendar schedule (including weeks that are different such as 4-day weeks with Monday holidays)
+                \nUseful Terminology and Information--
+                    Number - an integer or decimal number, positive or negative (ex: 4, 3.249, -23.0093)
+                    String - a sequence of any characters (ex: "foo", "bar@!.foo*", "test123")
+                \nHow do you specify a passing period/lunch/other non-class period? - Use the number -1 or -2 for so called "fake" periods
+                    -1 indicates to Period-Countdown that the period is very unimportant (ex: passing period). If multiple periods with -1 are places back-to-back the times in them will be merged
+                    -2 indicates to Period-Countdown that the period is somewhat unimportant (ex: lunch, tutorial/studyhall). -2 and -1 periods will not have their times merged
+                \nHow do you specify times for periods? - Use 24-hour/military time
+                    The entire scope of the day is between 00:00 (the first millisecond of the day) to 23:59 (the last millisecond of the day)
+                \nPreface Warning - READ CAREFULLY--
+                Before proceeding, please understand and accept that:
+                    1) There is no guarantee Period-Countdown will have an accurate schedule. Always check with teachers and schools about changes in schedules. Do not blame Period-Countdown or its developers for tardies or absences!
+                    2) While the Period-Countdown developers try to make it as foolproof as possible, there is no guarantee that all the code will work perfectly. If you encounter issues or have a feature request, please see the Github page online
+                """;
 
-        JLabel welcomeLabel = new JLabel(welcomeMessage);
-        welcomeLabel.setPreferredSize(this.getPreferredSize());
-        welcomeLabel.setBorder(new EmptyBorder(15, 15, 0, 0));
+        JTextArea responseTextArea = new JTextArea(30, 40);
+        responseTextArea.setText(welcomeMessage);
+        responseTextArea.setEditable(false);
+//        JLabel welcomeLabel = new JLabel(welcomeMessage);
+//        welcomeLabel.setPreferredSize(this.getPreferredSize());
+//        welcomeLabel.setBorder(new EmptyBorder(15, 15, 0, 0));
 
-        welcomePanel.add(welcomeLabel);
+        welcomePanel.add(new JScrollPane(responseTextArea));
 
         return welcomePanel;
     }

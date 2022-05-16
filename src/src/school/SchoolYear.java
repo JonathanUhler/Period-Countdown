@@ -6,57 +6,6 @@
 // +=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
 
 
-// +=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
-// SchoolYear.java
-// Class Diagram
-/*
-
-+-----------------------------------------------------------------------------------------------------+
-|                                              SchoolYear                                             |
-+-----------------------------------------------------------------------------------------------------+
-| -Days: Map<String, ArrayList<Map<String, Object>>>                                                  |
-| -Weeks: Map<String, ArrayList<Map<String, String>>>                                                 |
-| -Exceptions: ArrayList<Map<String, String>>                                                         |
-| -Info: Map<String, Object>                                                                          |
-| -User: Map<String, Map<String, Object>>                                                             |
-| -dayTypes: ArrayList<String>                                                                        |
-| -weekTypes: ArrayList<String>                                                                       |
-| -schoolStructureFile: String                                                                        |
-| -userFile: String                                                                                   |
-+-----------------------------------------------------------------------------------------------------+
-| +SchoolYear(String, String)                                                                         |
-+-----------------------------------------------------------------------------------------------------+
-| -initSchoolData(): void                                                                             |
-| -initUserData(): void                                                                               |
-| +getDayTypes(): ArrayList<String>                                                                   |
-| +getFirstPeriod(): int                                                                              |
-| +getLastPeriod(): int                                                                               |
-| +getFirstDate(): String                                                                             |
-| +getLastDate(): String                                                                              |
-| +getUserNextUp(): int                                                                               |
-| +getUserTheme(): String                                                                             |
-| +getSchoolFileName(): String                                                                        |
-| +getPeriodNameByNumber(int): String                                                                 |
-| +getUserDataByPeriod(int): Map<String, Object>                                                      |
-| +getDayPattern(String): ArrayList<Map<String, Object>>                                              |
-| +getPeriodPatternByIndex(String, int): Map<String, Object>                                          |
-| +getPeriodPatternByName(String, String): Map<String, Object>                                        |
-| +getPeriodPatternByNumber(int): Map<String, Object>                                                 |
-| +getWeekPattern(String): ArrayList<Map<String, String>>                                             |
-| +getWeekExceptionByWeekTag(String): Map<String, String>                                             |
-| +getDayType(String, int): String                                                                    |
-| +setUserSchoolFile(String): void                                                                    |
-| +setUserNextUp(int): void                                                                           |
-| +setUserTheme(String): void                                                                         |
-| +setUserPeriodNameByPeriod(int, String): void                                                       |
-| +setUserPeriodInfoByPeriod(int, String, String): void                                               |
-| +toString(): String                                                                                 |
-+-----------------------------------------------------------------------------------------------------+
-
-*/
-// +=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
-
-
 package school;
 
 
@@ -95,20 +44,17 @@ public class SchoolYear {
     // ----------------------------------------------------------------------------------------------------
     // public SchoolYear
     //
-    // Constructor for SchoolYear class
-    //
     // Arguments--
     //
-    // schoolStructureFile:     the JSON file containing the structure for all school days, weeks, and week exceptions
+    // schoolStructureFile:     the JSON file containing the structure for all school days, weeks,
+    //                          and week exceptions
     //
     // userFile:                the JSON file containing user specific data
     //
     public SchoolYear(String schoolStructureFile, String userFile) throws Exception {
-        // Set json files
         this.schoolStructureFile = schoolStructureFile;
         this.userFile = userFile;
 
-        // Check that all the files exist and are not directories
         CalendarHelper.calendarAssert((new File(schoolStructureFile).exists()) &&
                 (!new File(schoolStructureFile).isDirectory()),
                 "SchoolYear.SchoolYear constructed with invalid arguments",
@@ -117,7 +63,6 @@ public class SchoolYear {
         this.initSchoolData();
         this.initUserData();
 
-        // Store a list of the types of days and weeks that have been defined in the JSON files
         this.dayTypes = new ArrayList<>(this.Days.keySet());
         this.weekTypes = new ArrayList<>(this.Weeks.keySet());
     }
@@ -129,25 +74,20 @@ public class SchoolYear {
     //
     // Initialize/update hashmaps representing the json school data
     //
-    // Arguments--
-    //
-    // None
-    //
-    // Returns--
-    //
-    // None
-    //
     private void initSchoolData() throws FileNotFoundException {
-        // Create a new Gson object to parse
         Gson json = new Gson();
 
         // Parse all the JSON files and cast
         // HACK: These lines use unsafe casts, but this is *probably* okay in practice since a Python program
         // HACK cont: is responsible for generating the JSON files and the correct info should be there
-        this.Days = (Map<String, ArrayList<Map<String, Object>>>) json.fromJson(new FileReader(schoolStructureFile), Map.class).get(SchoolCalendar.getDaysTerm);
-        this.Weeks = (Map<String, ArrayList<Map<String, String>>>) json.fromJson(new FileReader(schoolStructureFile), Map.class).get(SchoolCalendar.getWeeksTerm);
-        this.Exceptions = (ArrayList<Map<String, String>>) json.fromJson(new FileReader(schoolStructureFile), Map.class).get("Exceptions");
-        this.Info = (Map<String, Object>) json.fromJson(new FileReader(schoolStructureFile), Map.class).get(SchoolCalendar.getInfoTerm);
+        this.Days = (Map<String, ArrayList<Map<String, Object>>>)
+                json.fromJson(new FileReader(schoolStructureFile), Map.class).get(SchoolCalendar.getDaysTerm);
+        this.Weeks = (Map<String, ArrayList<Map<String, String>>>)
+                json.fromJson(new FileReader(schoolStructureFile), Map.class).get(SchoolCalendar.getWeeksTerm);
+        this.Exceptions = (ArrayList<Map<String, String>>)
+                json.fromJson(new FileReader(schoolStructureFile), Map.class).get("Exceptions");
+        this.Info = (Map<String, Object>)
+                json.fromJson(new FileReader(schoolStructureFile), Map.class).get(SchoolCalendar.getInfoTerm);
     }
     // private void initSchoolData
 
@@ -157,22 +97,14 @@ public class SchoolYear {
     //
     // Initialize/update hashmaps representing the json user data
     //
-    // Arguments--
-    //
-    // None
-    //
-    // Returns--
-    //
-    // None
-    //
     private void initUserData() throws FileNotFoundException {
-        // Create a new Gson object to parse
         Gson json = new Gson();
 
         // Parse all the JSON files and cast
         // HACK: These lines use unsafe casts, but this is *probably* okay in practice since a Python program
         // HACK cont: is responsible for generating the JSON files and the correct info should be there
-        this.User = (Map<String, Map<String, Object>>) json.fromJson(new FileReader(userFile), Map.class).get(SchoolCalendar.getUserTerm);
+        this.User = (Map<String, Map<String, Object>>)
+                json.fromJson(new FileReader(userFile), Map.class).get(SchoolCalendar.getUserTerm);
     }
     // end: private void initUserData
 
@@ -222,31 +154,27 @@ public class SchoolYear {
     //
     // Arguments--
     //
-    // period:  the period number as an interger to get the name for
+    // period:  the period number as an integer to get the name for
     //
     // Returns--
     //
     // The name of the period, if found
     //
     public String getPeriodNameByNumber(int period) throws Exception {
-        // Check that the period passed in is within the first and last possible periods
         CalendarHelper.calendarAssert((period >= this.getFirstPeriod()) &&
                 (period <= this.getLastPeriod()),
                 "SchoolYear.getPeriodNameByNumber called with invalid arguments",
                 String.valueOf(period));
 
-        // Search through each of the day types
+        // Loop through each of the periods in each of the day types and check for the first instance
+        // of the requested period number. Return name if found. If nothing was ever found, return an
+        // empty string
         for (ArrayList<Map<String, Object>> dayTypeFormat : this.Days.values()) {
-            // Search through each of the periods in each of the days
             for (Map<String, Object> periodTypeFormat : dayTypeFormat) {
-                // Return the period name if found
-                if ((int) (double) periodTypeFormat.get(SchoolCalendar.getPeriodTerm) == period) {
+                if ((int) (double) periodTypeFormat.get(SchoolCalendar.getPeriodTerm) == period)
                     return (String) periodTypeFormat.get(SchoolCalendar.getNameTerm);
-                }
             }
         }
-
-        // If nothing was found, return an empty string
         return "";
     }
     // end: public String getPeriodNameByNumber
@@ -289,7 +217,6 @@ public class SchoolYear {
     // The JSON data defining the day
     //
     public ArrayList<Map<String, Object>> getDayPattern(String dayType) throws Exception {
-        // Check that the day type given exists
         CalendarHelper.calendarAssert((this.Days.containsKey(dayType)),
                 "SchoolYear.getDayPattern called with invalid arguments",
                 dayType);
@@ -315,12 +242,9 @@ public class SchoolYear {
     // The JSON data defining the period
     //
     public Map<String, Object> getPeriodPatternByIndex(String dayType, int index) throws Exception {
-        // Check that the day type given exists
         CalendarHelper.calendarAssert((this.Days.containsKey(dayType)),
                 "SchoolYear.getPeriodPatternByIndex called with invalid arguments",
                 dayType);
-
-        // Check that the index given exists
         CalendarHelper.calendarAssert((this.Days.get(dayType).size() > index),
                 "SchoolYear.getPeriodPatternByIndex called with invalid arguments",
                 Integer.toString(index));
@@ -346,20 +270,17 @@ public class SchoolYear {
     // The JSON data defining the period
     //
     public Map<String, Object> getPeriodPatternByName(String dayType, String name) throws Exception {
-        // Check that the day type given exists
         CalendarHelper.calendarAssert((this.Days.containsKey(dayType)),
                 "SchoolYear.getPeriodPatternByName called with invalid arguments",
                 dayType);
 
-        // Loop through the JSON array of period data to find the correct one
+        // Because the day type which the period should be found in is provided, only loop through the
+        // periods in that day and ignore other day types. Return the period pattern information if
+        // it is found. Otherwise, return null
         for (Map<String, Object> periodPattern : this.Days.get(dayType)) {
-            if (periodPattern.get(SchoolCalendar.getNameTerm).equals(name)) {
-                // Return if found
+            if (periodPattern.get(SchoolCalendar.getNameTerm).equals(name))
                 return periodPattern;
-            }
         }
-
-        // If nothing was found, return null
         return null;
     }
     // end:  public Map<String, Object> getPeriodPatternByName
@@ -379,22 +300,18 @@ public class SchoolYear {
     // The JSON data defining the period
     //
     public Map<String, Object> getPeriodPatternByNumber(int periodID) throws Exception {
-        // Check that the day type given exists
         CalendarHelper.calendarAssert((periodID > 0),
                 "SchoolYear.getPeriodPatternByName called with invalid arguments",
                 Integer.toString(periodID));
 
-        // Loop through the JSON array of period data to find the correct one
+        // Loop through each of the periods in each of the day types to find the period information.
+        // Return the period pattern if found, otherwise return null
         for (String dayType : this.dayTypes) {
             for (Map<String, Object> periodPattern : this.Days.get(dayType)) {
-                if ((int) (double) periodPattern.get(SchoolCalendar.getPeriodTerm) == periodID) {
-                    // Return if found
+                if ((int) (double) periodPattern.get(SchoolCalendar.getPeriodTerm) == periodID)
                     return periodPattern;
-                }
             }
         }
-
-        // If nothing was found, return null
         return null;
     }
     // end:  public Map<String, Object> getPeriodPatternByNumber
@@ -414,7 +331,6 @@ public class SchoolYear {
     // The data about the given week type
     //
     public ArrayList<Map<String, String>> getWeekPattern(String weekType) throws Exception {
-        // Check that the week type given exists
         CalendarHelper.calendarAssert((this.Weeks.containsKey(weekType)),
                 "SchoolYear.getWeekPattern called with invalid arguments",
                 weekType);
@@ -438,15 +354,16 @@ public class SchoolYear {
     // The data about the week exception
     //
     public Map<String, String> getWeekExceptionByWeekTag(String weekTag) {
-        // Loop through the JSON array of week exceptions to find the correct one
+        // Loop through each of the declared week exceptions. If the week tag for a given week exception
+        // matches the provided weekTag, then return that week exception. If no exceptions match, return
+        // null.
         for (Map<String, String> weekException : this.Exceptions) {
-            if (CalendarHelper.createWeekTag(weekException.get(SchoolCalendar.getWeekTagTerm)).equals(CalendarHelper.createWeekTag(weekTag))) {
-                // Return if found
+            String weekExceptionTag = weekException.get(SchoolCalendar.getWeekTagTerm);
+            weekExceptionTag = CalendarHelper.createWeekTag(weekExceptionTag);
+            String providedWeekTag = CalendarHelper.createWeekTag(weekTag);
+            if (weekExceptionTag.equals(providedWeekTag))
                 return weekException;
-            }
         }
-
-        // If nothing was found, return null
         return null;
     }
     // end: public Map<String, String> getWeekExceptionByWeekTag
@@ -468,22 +385,23 @@ public class SchoolYear {
     // The type of the day
     //
     public String getDayType(String weekTag, int dayIndex) throws Exception {
-        // Check that all arguments are valid
         CalendarHelper.calendarAssert((weekTag != null) &&
                         (dayIndex >= 0) &&
                         (dayIndex <= (SchoolCalendar.daysPerWeek - 1)),
                 "SchoolYear.getDayName called with invalid arguments",
                 weekTag, Integer.toString(dayIndex));
 
-        // Get the structure for the default week
+        // Begin by getting the week that corresponds to weekTag. Assume that weekTag does not land
+        // on a week with a week exception. Next do a check so make sure there is no week exception. If
+        // there is, reassign weekStructure to the correct type of week
         ArrayList<Map<String, String>> weekStructure = getWeekPattern(SchoolCalendar.get_DEFAULT_WEEK);
-
-        // Check if there is an exception for the weekTag given, if there is then use that week structure
         if (getWeekExceptionByWeekTag(weekTag) != null) {
-            weekStructure = getWeekPattern(getWeekExceptionByWeekTag(weekTag).get(SchoolCalendar.getWeeksTerm));
+            weekStructure = getWeekPattern(getWeekExceptionByWeekTag(weekTag)
+                    .get(SchoolCalendar.getWeeksTerm));
         }
 
-        // Return the type of day
+        // Now that the week type is known, index into the week structure with the provided dayIndex and
+        // get the type of day at that index
         return weekStructure.get(dayIndex).get(SchoolCalendar.getDaysTerm);
     }
     // end: public String getDayType
@@ -497,10 +415,6 @@ public class SchoolYear {
     // Arguments--
     //
     // file:    the name of the new file
-    //
-    // Returns--
-    //
-    // None
     //
     public void setUserSchoolFile(String file) throws Exception {
         // Create and store the new next up data
@@ -528,10 +442,6 @@ public class SchoolYear {
     // Arguments--
     //
     // verbosity:   the verbosity of the next up display to write to the file
-    //
-    // Returns--
-    //
-    // None
     //
     public void setUserNextUp(int verbosity) throws Exception {
         // Check that the verbosity level is between the least and most verbose
@@ -566,10 +476,6 @@ public class SchoolYear {
     //
     // theme:   the hex number that represents a color
     //
-    // Returns--
-    //
-    // None
-    //
     public void setUserTheme(String theme) throws Exception {
         // Create and store the new theme data
         Map<String, Object> newTheme = this.User.get(SchoolCalendar.getSettingsTerm);
@@ -598,10 +504,6 @@ public class SchoolYear {
     // period:  the period number to set the name for
     //
     // name:    the new name to set
-    //
-    // Returns--
-    //
-    // None
     //
     public void setUserPeriodNameByPeriod(int period, String name) throws Exception {
         // Check that the period number is valid
@@ -640,11 +542,8 @@ public class SchoolYear {
     //
     // roomNUmber:  the room number to set
     //
-    // Returns--
-    //
-    // None
-    //
-    public void setUserPeriodInfoByPeriod(int period, String teacherName, String roomNumber) throws Exception {
+    public void setUserPeriodInfoByPeriod(int period, String teacherName, String roomNumber) throws Exception
+    {
         // Check that the period number is valid
         CalendarHelper.calendarAssert((period >= SchoolCalendar.getFirstPeriod()) &&
                 (period <= SchoolCalendar.getLastPeriod()),
@@ -673,10 +572,6 @@ public class SchoolYear {
     // public String toString
     //
     // SchoolClass toString method
-    //
-    // Arguments--
-    //
-    // None
     //
     // Returns--
     //

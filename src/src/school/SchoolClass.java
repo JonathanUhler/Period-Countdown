@@ -6,32 +6,6 @@
 // +=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
 
 
-// +=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
-// SchoolClass.java
-// Class Diagram
-/*
-
-+-----------------------------------------------------------------------------------------------------+
-|                                             SchoolClass                                             |
-+-----------------------------------------------------------------------------------------------------+
-| -periodNumber: int                                                                                  |
-| -className: String                                                                                  |
-| -roomNumber: String                                                                                 |
-| -teacherName: String                                                                                |
-+-----------------------------------------------------------------------------------------------------+
-| +SchoolClass(int, String, String, String)                                                           |
-+-----------------------------------------------------------------------------------------------------+
-| +getPeriodNumber(): int                                                                             |
-| +getClassName(): String                                                                             |
-| +getRoomNumber(): String                                                                            |
-| +getTeacherName(): String                                                                           |
-| +toString(): String                                                                                 |
-+-----------------------------------------------------------------------------------------------------+
-
-*/
-// +=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
-
-
 package school;
 
 
@@ -54,8 +28,6 @@ public class SchoolClass {
     // ----------------------------------------------------------------------------------------------------
     // public SchoolClass
     //
-    // SchoolClass constructor
-    //
     // Arguments--
     //
     // periodNumber:    the number of the current period
@@ -66,15 +38,14 @@ public class SchoolClass {
     //
     // teacherName:     a string representing the name of the teacher teaching the class
     //
-    public SchoolClass(int periodNumber, String className, String roomNumber, String teacherName) throws Exception {
-        // Check that all constructor arguments are correct
+    public SchoolClass(int periodNumber, String className, String roomNumber, String teacherName)
+            throws Exception {
         CalendarHelper.calendarAssert((periodNumber >= SchoolCalendar.getFirstPeriod()) &&
                 (periodNumber <= SchoolCalendar.getLastPeriod()) &&
                 (teacherName != null),
                 "SchoolClass.SchoolClass constructed with invalid arguments",
                 String.valueOf(periodNumber), className, String.valueOf(roomNumber), teacherName);
 
-        // Set the class variables to the constructor variables
         this.periodNumber = periodNumber;
         this.className = className;
         this.roomNumber = roomNumber;
@@ -108,10 +79,6 @@ public class SchoolClass {
     //
     // SchoolClass toString method
     //
-    // Arguments--
-    //
-    // None
-    //
     // Returns--
     //
     // Textual representation of this class
@@ -119,7 +86,8 @@ public class SchoolClass {
     @Override
     public String toString() {
         String classDescription =  "\n\tperiodNumber:\t" + this.getPeriodNumber() + "\n\tclassName:\t" +
-                this.getClassName() + "\n\tteacherName:\t" + this.getTeacherName() + "\n\troomNumber:\t" + this.getRoomNumber();
+                this.getClassName() + "\n\tteacherName:\t" + this.getTeacherName() + "\n\troomNumber:\t" +
+                this.getRoomNumber();
         return super.toString() + ": " + classDescription;
     }
     // end: public String toString

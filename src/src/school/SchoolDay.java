@@ -6,40 +6,6 @@
 // +=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
 
 
-// +=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
-// SchoolDay.java
-// Class Diagram
-/*
-
-+-----------------------------------------------------------------------------------------------------+
-|                                              SchoolDay                                              |
-+-----------------------------------------------------------------------------------------------------+
-| -dayDateTag: String                                                                                 |
-| -dayArrayIndex: int                                                                                 |
-| -weekDateTag: String                                                                                |
-| -dayType: String                                                                                    |
-| -periodList: ArrayList<SchoolPeriod>                                                                |
-| -epochCalendar: Calendar                                                                            |
-| -stringDate: String                                                                                 |
-| -stringDay: String                                                                                  |
-+-----------------------------------------------------------------------------------------------------+
-| +SchoolDay(String, int, String, String, ArrayList<SchoolPeriod>)                                    |
-+-----------------------------------------------------------------------------------------------------+
-| +getDayDateTag(): String                                                                            |
-| +getDayArrayIndex(): int                                                                            |
-| +getWeekDateTag(): String                                                                           |
-| +getDayType(): String                                                                               |
-| +getPeriodList(): ArrayList<SchoolPeriod>                                                           |
-| +getEpochCalendar(): Calendar                                                                       |
-| +getStringDate(): String                                                                            |
-| +getStringDay(): String                                                                             |
-| +toString(): String                                                                                 |
-+-----------------------------------------------------------------------------------------------------+
-
-*/
-// +=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
-
-
 package school;
 
 
@@ -56,20 +22,21 @@ import calendar.*;
 public class SchoolDay {
 
     private final String dayDateTag; // A string representing the day in format yyyy-mm-dd
-    private final int dayArrayIndex; // The index of the day, in an array of all school days in the year (ex: index 38 = 39th day in the school year)
-    private final String weekDateTag; // A string representing the week in format yyyy-mm-dd. This string references is the SUNDAY of the week in question
+    private final int dayArrayIndex; // The index of the day, in an array of all school days in the year (ex:
+                                     // index 38 = 39th day in the school year)
+    private final String weekDateTag; // A string representing the week in format yyyy-mm-dd. This string
+                                      // references is the SUNDAY of the week in question
     private final String dayType; // The type of day (ex: "School Day", "Holiday", etc.)
     private final ArrayList<SchoolPeriod> periodList; // An arraylist of each period object in the day
 
     private final Calendar epochCalendar; // A calendar object defining the date in dayDateTag
     private final String stringDate; // The string representation of the date in the U.S.A (ex: mm/dd/yyyy)
-    private final String stringDay; // The string representation of the day -> the name of the day of the week (ex: "Tuesday")
+    private final String stringDay; // The string representation of the day -> the name of the day of the week
+                                    // (ex: "Tuesday")
 
 
     // ----------------------------------------------------------------------------------------------------
     // public SchoolDay
-    //
-    // Constructor for SchoolDay class
     //
     // Arguments--
     //
@@ -77,40 +44,40 @@ public class SchoolDay {
     //
     // dayArrayIndex:   index of the day, in an array of all school days in the year
     //
-    // weekDateTag:     string representing the week in format yyyy-mm-dd. This string references is the SUNDAY of the week in question
+    // weekDateTag:     string representing the week in format yyyy-mm-dd. This string references is the
+    //                  SUNDAY of the week in question
     //
     // dayType:         type of the day (ex: "School Day", "Holiday", etc.)
     //
     // periodList:      arraylist of each period object in the day
     //
-    public SchoolDay(String dayDateTag, int dayArrayIndex, String weekDateTag, String dayType, ArrayList<SchoolPeriod> periodList) throws Exception {
-        // Check that all arguments are valid
+    public SchoolDay(String dayDateTag, int dayArrayIndex, String weekDateTag,
+                     String dayType, ArrayList<SchoolPeriod> periodList) throws Exception {
         CalendarHelper.calendarAssert((dayDateTag != null) &&
                 (dayArrayIndex >= 0) &&
                 (weekDateTag != null) &&
                 (dayType != null) &&
                 (periodList != null),
                 "SchoolDay.SchoolDay constructed with invalid arguments",
-                dayDateTag, Integer.toString(dayArrayIndex), weekDateTag, dayType, String.valueOf(periodList));
+                dayDateTag, Integer.toString(dayArrayIndex), weekDateTag,
+                dayType, String.valueOf(periodList));
 
-        // Initialize class variables with constructor variables
         this.dayDateTag = dayDateTag;
         this.dayArrayIndex = dayArrayIndex;
         this.weekDateTag = weekDateTag;
         this.dayType = dayType;
         this.periodList = periodList;
 
-        this.epochCalendar = Calendar.getInstance(); // Create a new Calendar instance for the current time/date of the computer
-        this.epochCalendar.setTime(CalendarHelper.midnightOfDate(dayDateTag)); // Immediately correct the epochCalendar date/time to reference dayDateTag
+        this.epochCalendar = Calendar.getInstance();
+        this.epochCalendar.setTime(CalendarHelper.midnightOfDate(dayDateTag));
 
-        // Create a string representation of the date in the U.S.A in the format mm/dd/yyyy
         int month = this.epochCalendar.get(Calendar.MONTH) + 1;
         int date = this.epochCalendar.get(Calendar.DAY_OF_MONTH);
         int year = this.epochCalendar.get(Calendar.YEAR);
         this.stringDate = month + "/" + date + "/" + year;
 
-        // Create a string representation of the day name (ex: "Tuesday")
-        this.stringDay = SchoolCalendar.dayIndexToName[this.epochCalendar.get(Calendar.DAY_OF_WEEK) - 1];
+        int dayIndex = this.epochCalendar.get(Calendar.DAY_OF_WEEK) - 1;
+        this.stringDay = SchoolCalendar.dayIndexToName[dayIndex];
     }
     // end: public SchoolDay
 
@@ -156,19 +123,16 @@ public class SchoolDay {
     //
     // SchoolPeriod toString method
     //
-    // Arguments--
-    //
-    // None
-    //
     // Returns--
     //
     // Textual representation of this class
     //
     @Override
     public String toString() {
-        String classDescription = "\n\tdayArrayIndex + 1:\t" + (this.getDayArrayIndex() + 1) + "\n\tstringDay:\t" +
-                this.getStringDay() + "\n\tstringDate:\t" + this.getStringDate() + "\n\tdayType:\t" + this.getDayType() +
-                "\n\tweekTag:\t" + this.getWeekDateTag() + "\n\tdayTag:\t" + this.getDayDateTag() + "\n\tperiods:\t" +
+        String classDescription = "\n\tdayArrayIndex + 1:\t" + (this.getDayArrayIndex() + 1) +
+                "\n\tstringDay:\t" + this.getStringDay() + "\n\tstringDate:\t" + this.getStringDate() +
+                "\n\tdayType:\t" + this.getDayType() + "\n\tweekTag:\t" + this.getWeekDateTag() +
+                "\n\tdayTag:\t" + this.getDayDateTag() + "\n\tperiods:\t" +
                 ((this.getPeriodList().size() == 0) ? "no periods" : "periods\n\t\t" + this.getPeriodList());
         return super.toString() + ": " + classDescription;
     }

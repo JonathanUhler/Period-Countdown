@@ -6,33 +6,6 @@
 // +=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
 
 
-// +=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
-// SchoolWeek.java
-// Class Diagram
-/*
-
-+-----------------------------------------------------------------------------------------------------+
-|                                              SchoolWeek                                             |
-+-----------------------------------------------------------------------------------------------------+
-| -weekDateTag: String                                                                                |
-| -weekArrayIndex: int                                                                                |
-| -epochCalendar: Calendar                                                                            |
-| -dayArray: ArrayList<SchoolDay>                                                                     |
-+-----------------------------------------------------------------------------------------------------+
-| +SchoolWeek(String, int)                                                                            |
-+-----------------------------------------------------------------------------------------------------+
-| +setDayArray(ArrayList<SchoolDay>): void                                                            |
-| +getWeekDateTag(): String                                                                           |
-| +getWeekArrayIndex(): int                                                                           |
-| +getEpochCalendar(): Calendar                                                                       |
-| +getDayArray(): ArrayList<SchoolDay>                                                                |
-| +toString(): String                                                                                 |
-+-----------------------------------------------------------------------------------------------------+
-
-*/
-// +=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
-
-
 package school;
 
 
@@ -48,7 +21,7 @@ import calendar.*;
 //
 public class SchoolWeek {
 
-    private final String weekDateTag; // The string tag representing the SUNDAY of this week in format yyyy-mm-dd
+    private final String weekDateTag; // String tag representing the SUNDAY of this week in format yyyy-mm-dd
     private final int weekArrayIndex; // The index of the week in the week array
 
     private final Calendar epochCalendar; // A calendar object representing this week
@@ -64,18 +37,12 @@ public class SchoolWeek {
     //
     // dayArray:    the new array of day objects to set to this.dayArray
     //
-    // Returns--
-    //
-    // None
-    //
     public void setDayArray(ArrayList<SchoolDay> dayArray) throws Exception {
-        // Check that the arguments are valid
         CalendarHelper.calendarAssert((dayArray != null) &&
                 (dayArray.size() == SchoolCalendar.daysPerWeek),
                 "SchoolWeek.setDayArray called with invalid arguments",
                 String.valueOf(dayArray));
 
-        // Set the day array
         this.dayArray = dayArray;
     }
     // end: public void setDayArray
@@ -84,8 +51,6 @@ public class SchoolWeek {
     // ----------------------------------------------------------------------------------------------------
     // public SchoolWeek
     //
-    // Constructor for SchoolWeek class
-    //
     // Arguments--
     //
     // weekDateTag:     the string tag that represents the SUNDAY of the week in format yyyy-mm-dd
@@ -93,19 +58,16 @@ public class SchoolWeek {
     // weekArrayIndex:  the index of this week in the week array
     //
     public SchoolWeek(String weekDateTag, int weekArrayIndex) throws Exception {
-        // Check that all arguments are valid
         CalendarHelper.calendarAssert((weekDateTag != null),
                 "SchoolWeek.SchoolWeek constructed with invalid arguments",
                 weekDateTag, String.valueOf(weekArrayIndex));
 
-        // Set class variables with the constructor variables
         this.weekDateTag = weekDateTag;
         this.weekArrayIndex = weekArrayIndex;
 
-        this.epochCalendar = Calendar.getInstance(); // Create a new Calendar instance for the current time/date of the computer
-        this.epochCalendar.setTime(CalendarHelper.midnightOfDate(weekDateTag)); // Immediately correct the epochCalendar date/time to reference weekDateTag
+        this.epochCalendar = Calendar.getInstance();
+        this.epochCalendar.setTime(CalendarHelper.midnightOfDate(weekDateTag));
 
-        // Initialize the day array
         this.dayArray = new ArrayList<>();
     }
     // end: public SchoolWeek
@@ -135,10 +97,6 @@ public class SchoolWeek {
     // public String toString
     //
     // SchoolPeriod toString method
-    //
-    // Arguments--
-    //
-    // None
     //
     // Returns--
     //

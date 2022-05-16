@@ -1,4 +1,6 @@
 # Period-Countdown Changelog
+**NOTE TO CONTRIBUTORS:** When creating a new version of this software, make sure to update the VERSION constant in
+main.PeriodCountdown.java \
 Project created 8/22/21 -- Changelog begin:
 
 ## PRE-RELEASES

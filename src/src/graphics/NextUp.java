@@ -6,29 +6,6 @@
 // +=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
 
 
-// +=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
-// NextUp.java
-// Class Diagram
-/*
-
-+-----------------------------------------------------------------------------------------------------+
-|                                                NextUp                                               |
-+-----------------------------------------------------------------------------------------------------+
-| +NONE: int
-| +ONE_NAME: int
-| +ONE_ALL_INFO: int
-| +ALL_NAME: int
-| +ALL_ALL_INFO: int
-+-----------------------------------------------------------------------------------------------------+
-|
-+-----------------------------------------------------------------------------------------------------+
-|
-+-----------------------------------------------------------------------------------------------------+
-
-*/
-// +=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
-
-
 package graphics;
 
 
@@ -85,48 +62,80 @@ public class NextUp {
     //
     // List of next class matches as strings
     //
-    private ArrayList<String> getNextMatchData(Calendar epochCalendar, boolean nameOnly, boolean allMatches) throws Exception {
-        SchoolCalendar schoolCalendar = new SchoolCalendar(SchoolDisplay.getSchoolData(), SchoolDisplay.userData); // Create a local instance of the SchoolCalendar class to get access to its methods
-        ArrayList<String> matchStrings = new ArrayList<>(); // Initialize an arraylist to hold the next up strings when/if they are found
+    private ArrayList<String> getNextMatchData(Calendar epochCalendar, boolean nameOnly, boolean allMatches)
+            throws Exception {
+        String schoolDataFile = SchoolDisplay.getSchoolData();
+        SchoolCalendar schoolCalendar = new SchoolCalendar(schoolDataFile, SchoolDisplay.userData);
+        ArrayList<String> matchStrings = new ArrayList<>();
 
-        PeriodData currentDayData = schoolCalendar.getNextPeriod(schoolCalendar.getPeriodByDateAndTime(epochCalendar)); // Get the data for the current day match
-        SchoolDay currentDay = currentDayData.getDay(); // Get the current day object from the current day match data
-
-        // Loop through each of the periods in the current day match
-        for (int i = 0; i < currentDay.getPeriodList().size(); i++) {
-            // If the period is the last of the day, exit the loop
-            if (schoolCalendar.getPeriodByDateAndTime(epochCalendar).getPeriod().getEndTime().equals("23:59")) { break; }
-
-            // Update the current day and period data
-            currentDayData = schoolCalendar.getNextPeriod(schoolCalendar.getPeriodByDateAndTime(epochCalendar));
-            SchoolPeriod currentPeriod = currentDayData.getPeriod();
-
-            // If the period is real or free (anything but -1/fake)
-            if (currentPeriod.getPeriod() != -1) {
-                SchoolClass matchClass = currentPeriod.getClassInfo(); // Get the class object for the period
-
-                // Assemble data
-                if ((nameOnly && matchClass == null) || (!nameOnly && matchClass == null)) matchStrings.add(currentPeriod.getName() + " | " + currentPeriod.getStartTime() + "-" + currentPeriod.getEndTime()); // If only the name is wanted and there is no class info OR all info is wanted and there is no class info
-                else if (nameOnly) matchStrings.add(matchClass.getClassName() + " | " + currentPeriod.getStartTime() + "-" + currentPeriod.getEndTime()); // If only the name is wanted and there is class info
-                else matchStrings.add(matchClass.getClassName() + " | " + currentPeriod.getStartTime() + "-" + currentPeriod.getEndTime() + " | " + matchClass.getTeacherName() + ", " + matchClass.getRoomNumber()); // If all info is wanted and there is class info
-
-                // If the caller only wants the next 1 match, exit the loop after 1 match has been found.
-                if (!allMatches) break;
-            }
-
-            // If the end time of the current period being looked at is the end of the day, exit the loop
-            if (currentPeriod.getEndTime().equals("23:59")) { break; }
-
-            // Update the epoch calendar
-            epochCalendar = CalendarHelper.createEpochTime(epochCalendar.get(Calendar.YEAR) + "-" +
-                    CalendarHelper.padStringLeft(String.valueOf(epochCalendar.get(Calendar.MONTH) + 1), 2, '0') + "-" +
-                    CalendarHelper.padStringLeft(String.valueOf(epochCalendar.get(Calendar.DATE)), 2, '0') + "T" +
-                    currentPeriod.getStartTime().split(":")[0] + ":" +
-                    currentPeriod.getStartTime().split(":")[1] + ":00");
+        // If there is no match for this time period, then it is probably summer. In order to avoid
+        // an error by passing null into methods later on, this routine can be ended here
+        PeriodData lastMatch = schoolCalendar.getPeriodByDateAndTime(epochCalendar);
+        if (lastMatch == null) {
+            matchStrings.add("None");
+            return matchStrings;
         }
 
-        if (matchStrings.size() == 0) matchStrings.add("None"); // If there have been no matches found, add the term "None"
-        return matchStrings; // Return the list of next up matches
+        PeriodData currentDayData = schoolCalendar.getNextPeriod(lastMatch);
+        SchoolDay currentDay = currentDayData.getDay();
+
+        // Loop through each of the periods in the matching day. If the period found is either the last
+        // period of the day or the first period found when only one is requested, then the loop can
+        // exit. Otherwise, keep looping and adding the period data to the matchStrings list
+        for (int i = 0; i < currentDay.getPeriodList().size(); i++) {
+            if (lastMatch.getPeriod().getEndTime().equals("23:59"))
+                break;
+
+            currentDayData = schoolCalendar.getNextPeriod(lastMatch);
+            SchoolPeriod currentPeriod = currentDayData.getPeriod();
+
+            if (currentPeriod.getPeriod() != -1) {
+                SchoolClass matchClass = currentPeriod.getClassInfo();
+
+                // Possibility 1: The period is a free period (no matter how much info is requested). In this
+                //                case, use the default name of the period (ex: "Period 5")
+                if ((nameOnly && matchClass == null) || (!nameOnly && matchClass == null))
+                    matchStrings.add(currentPeriod.getName() + " | " +
+                            currentPeriod.getStartTime() + "-" +
+                            currentPeriod.getEndTime());
+                // Possibility 2: Only the name of the period is requested, and it is not a free period. Use
+                //                the user-defined name for the period (ex: "Chemistry")
+                else if (nameOnly)
+                    matchStrings.add(matchClass.getClassName() + " | " +
+                            currentPeriod.getStartTime() + "-" +
+                            currentPeriod.getEndTime());
+                // Possibility 3: All the information about the period is requested. Return the entire
+                //                string of information including the teacher name and room number
+                else
+                    matchStrings.add(matchClass.getClassName() + " | " +
+                            currentPeriod.getStartTime() + "-" +
+                            currentPeriod.getEndTime() + " | " +
+                            matchClass.getTeacherName() + ", " +
+                            matchClass.getRoomNumber());
+
+                if (!allMatches)
+                    break;
+            }
+
+            if (currentPeriod.getEndTime().equals("23:59"))
+                break;
+
+            // Each time through the loop update the time to check for during the next iteration through
+            // the loop so that a list of periods can be found instead of just returning the same period
+            // over and over
+            epochCalendar = CalendarHelper.createEpochTime(epochCalendar.get(Calendar.YEAR) + "-" +
+                    CalendarHelper.padStringLeft(String.valueOf(epochCalendar.get(Calendar.MONTH)+1), 2, '0')
+                    + "-" +
+                    CalendarHelper.padStringLeft(String.valueOf(epochCalendar.get(Calendar.DATE)), 2, '0')
+                    + "T" +
+                    currentPeriod.getStartTime().split(":")[0] + ":" +
+                    currentPeriod.getStartTime().split(":")[1] + ":00");
+            lastMatch = schoolCalendar.getPeriodByDateAndTime(epochCalendar);
+        }
+
+        if (matchStrings.size() == 0)
+            matchStrings.add("None");
+        return matchStrings;
     }
     // end: private ArrayList<String> getNextMatchData
 
@@ -147,7 +156,9 @@ public class NextUp {
     // The next up string
     //
     private String one(Calendar epochCalendar, boolean nameOnly) throws Exception {
-        return "<html><br><b>Upcoming Periods</b><br>" + this.getNextMatchData(epochCalendar, true) + "</html>";
+        return "<html><br><b>Upcoming Periods</b><br>" +
+                this.getNextMatchData(epochCalendar, nameOnly) +
+                "</html>";
     }
     // end: private String one
 
@@ -168,15 +179,14 @@ public class NextUp {
     // The next up string
     //
     private String all(Calendar epochCalendar, boolean nameOnly) throws Exception {
-        ArrayList<String> periodInformation = this.getNextMatchData(epochCalendar, nameOnly, true); // Get the next up match data for all the periods
+        // Get the matching period information for the rest of the day and add the requested information
+        // to a string that is returned and displayed with the proper formatting using html tags
+        ArrayList<String> periodInformation = this.getNextMatchData(epochCalendar, nameOnly, true);
         StringBuilder periodInfoString = new StringBuilder();
 
-        // Loop through all the period information and add it to the period string
-        for (String periodInfo : periodInformation) {
+        for (String periodInfo : periodInformation)
             periodInfoString.append(periodInfo).append("<br>");
-        }
 
-        // Return the finished string
         return "<html><br><b>Upcoming Periods</b><br>" + periodInfoString + "</html>";
     }
     // end: private String all
@@ -198,21 +208,16 @@ public class NextUp {
     // The next up string
     //
     public String getNextUpPanel(int verbosity, Calendar epochCalendar) throws Exception {
-        if (verbosity == NONE) { return ""; } // If the verbosity is 0, then return
+        if (verbosity == NONE)
+            return "";
 
-        // Switch through the possible options and return the correct menu
-        switch (verbosity) {
-            case ONE_NAME:
-                return one(epochCalendar, true);
-            case ONE_ALL_INFO:
-                return one(epochCalendar, false);
-            case ALL_NAME:
-                return all(epochCalendar, true);
-            case ALL_ALL_INFO:
-                return all(epochCalendar, false);
-            default:
-                return null;
-        }
+        return switch (verbosity) {
+            case ONE_NAME -> one(epochCalendar, true);
+            case ONE_ALL_INFO -> one(epochCalendar, false);
+            case ALL_NAME -> all(epochCalendar, true);
+            case ALL_ALL_INFO -> all(epochCalendar, false);
+            default -> null;
+        };
     }
     // end: public String getNextUpPanel
 

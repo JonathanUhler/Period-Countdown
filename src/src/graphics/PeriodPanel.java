@@ -6,32 +6,6 @@
 // +=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
 
 
-// +=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
-// PeriodPanel.java
-// Class Diagram
-/*
-
-+-----------------------------------------------------------------------------------------------------+
-|                                             PeriodPanel                                             |
-+-----------------------------------------------------------------------------------------------------+
-| -width: int                                                                                         |
-| -height: int                                                                                        |
-| -periodStatus: JLabel                                                                               |
-| -periodTime: JLabel                                                                                 |
-| -nextUp: JLabel                                                                                     |
-| -schoolDisplay: SchoolDisplay                                                                       |
-+-----------------------------------------------------------------------------------------------------+
-| +PeriodPanel(int, int)                                                                              |
-+-----------------------------------------------------------------------------------------------------+
-| +getPreferredSize(): Dimension                                                                      |
-| +paintComponent(Graphics): void                                                                     |
-| +animate(): void                                                                                    |
-+-----------------------------------------------------------------------------------------------------+
-
-*/
-// +=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
-
-
 package graphics;
 
 
@@ -61,8 +35,6 @@ public class PeriodPanel extends JPanel {
     // ----------------------------------------------------------------------------------------------------
     // public PeriodPanel
     //
-    // PeriodPanel constructor
-    //
     // Arguments--
     //
     // width:   width of the panel
@@ -70,20 +42,20 @@ public class PeriodPanel extends JPanel {
     // height:  height of the panel
     //
     public PeriodPanel(int width, int height) throws Exception {
-        // Set the dimensions of the panel
         this.width = width;
         this.height = height;
 
-        // Initialize the information labels
         this.periodStatus = new JLabel();
         this.periodTime = new JLabel();
         this.nextUp = new JLabel();
 
-        // Initialize the school display object
         this.schoolDisplay = new SchoolDisplay();
 
-        this.setLayout(new BoxLayout(this, BoxLayout.Y_AXIS)); // Set the layout manager of the app
-        // Set the borders of each label
+        // In order to prevent graphical components from stacking vertically on top of each other in the
+        // center of the app, a BoxLayout is used. This stacks elements from the top down on top of each
+        // other. To provide finer control over layout, EmptyBorders are used which add transparent
+        // spacers on the 4 sides of the component.
+        this.setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
         this.periodStatus.setBorder(new EmptyBorder(10, 15, 0, 0));
         this.periodTime.setBorder(new EmptyBorder(0, 15, 0, 0));
         this.nextUp.setBorder(new EmptyBorder(0, 15, 0, 0));
@@ -95,10 +67,6 @@ public class PeriodPanel extends JPanel {
     // public Dimension getPreferredSize
     //
     // Return the size of the panel
-    //
-    // Arguments--
-    //
-    // None
     //
     // Returns--
     //
@@ -120,14 +88,9 @@ public class PeriodPanel extends JPanel {
     //
     // g:   the Graphics object to use to paint
     //
-    // Returns--
-    //
-    // None
-    //
     public void paintComponent(Graphics g) {
         super.paintComponent(g);
 
-        // Add all of the labels
         this.add(this.periodStatus);
         this.add(this.periodTime);
         this.add(this.nextUp);
@@ -138,44 +101,50 @@ public class PeriodPanel extends JPanel {
     // ====================================================================================================
     // public void animate
     //
-    // Animate the labels
-    //
-    // Arguments--
-    //
-    // None
-    //
-    // Returns--
-    //
-    // None
+    // Animate the changing values/information within the labels every "frame"
     //
     public void animate() throws Exception {
-        // Loop the animation forever
+        // Loop the animation forever with a 1-second delay at the very end to avoid high CPU usage
         while (true) {
-            Calendar currentDateTime = Calendar.getInstance(); // Get the current time and date
+            // Step 1: get the current time from the computer's clock/timezone in order to use for
+            //         displaying and computing the differences between periods
+            Calendar currentDateTime = Calendar.getInstance();
 
-            this.setBackground(Color.decode("0x" + schoolDisplay.getSchoolCalendar().getSchoolYear().getUserTheme()));
+            // Step 2: update pretty graphical elements such as the background color and window size.
+            //         The window size is used later on to change the size of the text if the window is
+            //         shrunk below a certain threshold
+            this.setBackground(Color.decode("0x" + schoolDisplay
+                    .getSchoolCalendar()
+                    .getSchoolYear()
+                    .getUserTheme()));
+            this.setSize(this.getParent().getSize());
 
-            this.setSize(this.getParent().getSize()); // Set the size of the panel
-
-            this.periodStatus.setText(schoolDisplay.getPeriodStatus(currentDateTime)); // Set the period status
-            this.periodStatus.setFont(GraphicsHelper.fitTextIntoWidth( // Set the font size of the period status depending on the size of the panel
+            // Step 3: display the three major components (status, time remaining, and next up data)
+            //         The status is a message about what the period is such as "Period 4: Chemistry"
+            //         The time remaining is the number of hours/min/sec in the period, ex "1:08:23"
+            //         The next up panel is a list of the next periods (if any) in the day
+            this.periodStatus.setText(schoolDisplay.getPeriodStatus(currentDateTime));
+            this.periodStatus.setFont(GraphicsHelper.fitTextIntoWidth(
                     new Font("Arial", Font.PLAIN, 35),
                     this.periodStatus.getText(),
                     this.periodStatus.getX(),
                     this.getSize().width - 25)
             );
 
-            this.periodTime.setText(schoolDisplay.getRemainingTime(currentDateTime)); // Set the period time left
-            this.periodTime.setFont(GraphicsHelper.fitTextIntoWidth( // Set the font size of the period time depending on the size of the panel
+            this.periodTime.setText(schoolDisplay.getRemainingTime(currentDateTime));
+            this.periodTime.setFont(GraphicsHelper.fitTextIntoWidth(
                     new Font("Arial", Font.PLAIN, 60),
                     this.periodTime.getText(),
                     this.periodTime.getX(),
                     this.getSize().width - 25)
             );
 
-            NextUp nextUpObject = new NextUp(); // Initialize a NextUp object to get next up data
-            this.nextUp.setText(nextUpObject.getNextUpPanel(this.schoolDisplay.getSchoolCalendar().getSchoolYear().getUserNextUp(), currentDateTime)); // Set the next up text
-            this.nextUp.setFont( // Set the font size of the next up text depending on the size of the panel
+            NextUp nextUpObject = new NextUp();
+            this.nextUp.setText(nextUpObject.getNextUpPanel(this.schoolDisplay
+                    .getSchoolCalendar()
+                    .getSchoolYear()
+                    .getUserNextUp(), currentDateTime));
+            this.nextUp.setFont(
                     GraphicsHelper.fitTextIntoWidth(
                         new Font("Arial", Font.PLAIN, 20),
                         this.nextUp.getText(),
@@ -191,4 +160,4 @@ public class PeriodPanel extends JPanel {
     }
     // end: public void animate
 }
-// end: public class Periodpanel extends JPanel
+// end: public class PeriodPanel extends JPanel

@@ -6,28 +6,6 @@
 // +=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
 
 
-// +=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
-// CalendarHelper.java
-// Class Diagram
-/*
-
-+-----------------------------------------------------------------------------------------------------+
-|                                           CalendarHelper                                            |
-+-----------------------------------------------------------------------------------------------------+
-| +calendarAssert(boolean, String, String...): void                                                   |
-| +calendarMessage(String, String...): void                                                           |
-| +midnightOfDate(String): Date                                                                       |
-| +padStringLeft(String, int, char): String                                                           |
-| +padStringRight(String, int, char): String                                                          |
-| +createStringTime(int, int, int): String                                                            |
-| +createStringTime(int, int, int, int, boolean): String                                              |
-| +createEpochTime(String): Calendar                                                                  |
-+-----------------------------------------------------------------------------------------------------+
-
-*/
-// +=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
-
-
 package calendar;
 
 
@@ -56,42 +34,18 @@ public class CalendarHelper {
     //
     // ...extraArgs:    a variable number of extra arguments to print to help with error debug
     //
-    // Returns--
-    //
-    // None
-    //
-    public static void calendarAssert(boolean assertion, String failureMessage, String... extraArgs) throws Exception {
+    public static void calendarAssert(boolean assertion, String failureMessage, String... extraArgs)
+            throws Exception {
         if (!assertion) { // Check if the assertion is not true
             // Create and print the error message
-            String err = "ERROR: calendarAssert Assertion Failed: " + failureMessage + ((extraArgs.length > 0) ? ": " + String.join("\n", extraArgs) : "");
+            String err = "ERROR: calendarAssert Assertion Failed: " + failureMessage +
+                    ((extraArgs.length > 0) ? ": " + String.join("\n", extraArgs) : "");
             System.out.println(err);
             // Throw a new error to stop the operation
             throw new Exception("Assertion Failed");
         }
     }
     // end: public static void calendarAssert
-
-
-    // ====================================================================================================
-    // public static void calendarMessage
-    //
-    // A substitute for System.out.println() to manage console output from a central location
-    //
-    // Arguments--
-    //
-    // message: the primary message to print
-    //
-    // ...args: an optional list of variable arguments to print along with the message
-    //
-    // Returns--
-    //
-    // None
-    //
-    public static void calendarMessage(String message, String... args) {
-        String msg = "Calendar Message: " + message + ((args.length > 0) ? String.join(",\n", args) : "");
-        System.out.println(msg);
-    }
-    // end: public static void calendarMessage
 
 
     // ====================================================================================================
@@ -108,11 +62,12 @@ public class CalendarHelper {
     // The formatted datetime string with the midnight time appended
     //
     public static Date midnightOfDate(String stringDate) throws Exception {
-        // Check that the stringDate is not null
-        calendarAssert(stringDate != null, "CalendarHelper.midnightOfDate called with invalid arguments", stringDate);
+        calendarAssert(stringDate != null,
+                "CalendarHelper.midnightOfDate called with invalid arguments",
+                stringDate);
 
-        String stringDateAndTime = stringDate + "T00:00:00"; // Append the 0 time to set the time to midnight
-        return new SimpleDateFormat(SchoolCalendar.dateTimeFormat).parse(stringDateAndTime); // Return the datetime as a Date() object
+        String stringDateAndTime = stringDate + "T00:00:00";
+        return new SimpleDateFormat(SchoolCalendar.dateTimeFormat).parse(stringDateAndTime);
     }
     // end: public static Date midnightOfDate
 
@@ -207,17 +162,19 @@ public class CalendarHelper {
     //
     // The formatted stringTime
     //
-    public static String createStringTime(int hours, int minutes, int seconds, int days, boolean convertDaysToHours) throws Exception {
-        calendarAssert((hours >= 0 && hours <= 23) && (minutes >= 0 && minutes <= 59) && (seconds >= 0 && seconds <= 59),
-                "CalendarHelper.createStringTime called with invalid argumnts",
+    public static String createStringTime(int hours, int minutes, int seconds,
+                                          int days, boolean convertDaysToHours) throws Exception {
+        calendarAssert((hours >= 0 && hours <= 23) &&
+                        (minutes >= 0 && minutes <= 59) &&
+                        (seconds >= 0 && seconds <= 59),
+                "CalendarHelper.createStringTime called with invalid arguments",
                 String.valueOf(hours), String.valueOf(minutes), String.valueOf(seconds));
 
         StringBuilder stringTime = new StringBuilder();
 
         int dayCount = (days > 0 && !convertDaysToHours) ? days : 0;
-        if (dayCount > 0) {
+        if (dayCount > 0)
             stringTime.append(dayCount);
-        }
 
         stringTime.append(hours + ((convertDaysToHours) ? (days * 24) : 0))
                 .append(padStringLeft(String.valueOf(minutes), 2, '0'))
@@ -235,37 +192,48 @@ public class CalendarHelper {
     //
     // Arguments--
     //
-    // stringTime:  a string representing the time to create in format yyyy-mm-ddThh:mm:ss (with literal 'T' char)
+    // stringTime:  a string representing the time to create in format yyyy-mm-ddThh:mm:ss
+    //              (with literal 'T' char)
     //
     // Returns--
     //
     // epochTime:   the string time converted to a Calendar object
     //
     public static Calendar createEpochTime(String stringTime) throws Exception {
-        // Make sure the stringTime given matches the expected regex
         calendarAssert(stringTime.matches("\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}"),
                 "CalendarHelper.createEpochTime called with invalid arguments",
                 stringTime);
 
-        String[] dateTimeSplit = stringTime.split("T"); // Split the time into the date and time separately
-        String[] dateSplit = dateTimeSplit[0].split("-"); // Split the date into its components
-        String[] timeSplit = dateTimeSplit[1].split(":"); // Split the time into its components
+        String[] dateTimeSplit = stringTime.split("T");
+        String[] dateSplit = dateTimeSplit[0].split("-");
+        String[] timeSplit = dateTimeSplit[1].split(":");
 
-        Calendar epochTime = Calendar.getInstance(); // Create a new Calendar instance
-
-        // Set all the information for the calendar date/time
+        Calendar epochTime = Calendar.getInstance();
         epochTime.set(Calendar.YEAR, Integer.parseInt(dateSplit[0]));
         epochTime.set(Calendar.MONTH, Integer.parseInt(dateSplit[1]) - 1);
         epochTime.set(Calendar.DATE, Integer.parseInt(dateSplit[2]));
         epochTime.set(Calendar.HOUR_OF_DAY, Integer.parseInt(timeSplit[0]));
         epochTime.set(Calendar.MINUTE, Integer.parseInt(timeSplit[1]));
         epochTime.set(Calendar.SECOND, Integer.parseInt(timeSplit[2]));
-
-        return epochTime; // Return the new Calendar object
+        return epochTime;
     }
     // end: public static Calendar createEpochTime
 
 
+    // ====================================================================================================
+    // public static String createWeekTag
+    //
+    // Create the week tag (string date in format yyyy-mm-dd on the sunday of the week) based on the week
+    // containing the date in dayTag
+    //
+    // Arguments--
+    //
+    // dayTag:  the day within the week to create the week tag for
+    //
+    // Returns--
+    //
+    // The week tag of the week that contains dayTag
+    //
     public static String createWeekTag(String dayTag) {
         String[] dayTagSplit = dayTag.split("-");
         Calendar epochDate = Calendar.getInstance();
@@ -281,6 +249,7 @@ public class CalendarHelper {
                 newDate.get(Calendar.MONTH) + "-" +
                 newDate.get(Calendar.DATE);
     }
+    // end: public static String createWeekTag
 
 }
 // end: public class CalendarHelper

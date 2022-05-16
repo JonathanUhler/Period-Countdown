@@ -6,28 +6,6 @@
 // +=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
 
 
-// +=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
-// Support.java
-// Class Diagram
-/*
-
-+-----------------------------------------------------------------------------------------------------+
-|                                               Support                                               |
-+-----------------------------------------------------------------------------------------------------+
-| -versionAction(): void                                                                              |
-| -getVersion(): JMenuItem                                                                            |
-| -getIssue(): JMenuItem                                                                              |
-| -updateJsonAction(): void                                                                           |
-| -updateJarAction(): void                                                                            |
-| -updateAction(): void                                                                               |
-| -getUpdate(): JMenuItem                                                                             |
-| +getSupportMenu(): JMenu                                                                            |
-+-----------------------------------------------------------------------------------------------------+
-
-*/
-// +=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
-
-
 package graphics;
 
 
@@ -37,6 +15,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.io.File;
 import java.io.IOException;
+import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -56,16 +35,7 @@ public class Support {
     //
     // Popup to show the app version
     //
-    // Arguments--
-    //
-    // None
-    //
-    // Returns--
-    //
-    // None
-    //
     private void versionAction() {
-        // Display the popup with the version message
         JOptionPane.showConfirmDialog(
                 null,
                 "Version " + PeriodCountdown.VERSION,
@@ -80,24 +50,21 @@ public class Support {
     // ====================================================================================================
     // private JMenuItem getVersion
     //
-    // Gets the menu item object for the version
-    //
-    // Arguments--
-    //
-    // None
+    // Initializes and returns the menu item object for the version
     //
     // Returns--
     //
     // versionMenu: the version menu item object
     //
     private JMenuItem getVersion() {
-        JMenuItem versionMenu = new JMenuItem("Version"); // Set the text for the version button
+        JMenuItem versionMenu = new JMenuItem("Version");
 
         versionMenu.addActionListener(e -> {
-            try { this.versionAction(); } catch (Exception ex) { ex.printStackTrace(); } // Add an action listener that calls the versionAction method upon clicking the button
+            try { this.versionAction(); }
+            catch (Exception ex) { ex.printStackTrace(); }
         });
 
-        return versionMenu; // Return the menu item
+        return versionMenu;
     }
     // end: private JMenuItem getVersion
 
@@ -105,24 +72,22 @@ public class Support {
     // ====================================================================================================
     // private JMenuItem getIssue
     //
-    // Gets the menu item object for the Github issue hyperlink
-    //
-    // Arguments--
-    //
-    // None
+    // Initializes and returns the menu item object for the Github issue hyperlink
     //
     // Returns--
     //
     // issueMenu:   the issue hyperlink JMenuItem object
     //
     private JMenuItem getIssue() {
-        JMenuItem issueMenu = new JMenuItem("Submit an Issue"); // Set the name of the new menu item
+        JMenuItem issueMenu = new JMenuItem("Submit an Issue");
 
-        issueMenu.addActionListener(e -> { // Add an action listener that opens the github issue link upon clicking
-            try {Desktop.getDesktop().browse(java.net.URI.create("https://github.com/JonathanUhler/Period-Countdown/issues/new"));} catch (IOException ex) {ex.printStackTrace();}
+        issueMenu.addActionListener(e -> {
+            String githubIssueLink = "https://github.com/JonathanUhler/Period-Countdown/issues/new";
+            try { Desktop.getDesktop().browse(URI.create(githubIssueLink)); }
+            catch (IOException ex) { ex.printStackTrace(); }
         });
 
-        return issueMenu; // Return the menu item
+        return issueMenu;
     }
     // end: private JMenuItem getIssue
 
@@ -132,26 +97,23 @@ public class Support {
     //
     // Downloads and updates the JSON school data
     //
-    // Arguments--
-    //
-    // None
-    //
-    // Returns--
-    //
-    // None
-    //
     private void updateJsonAction() throws Exception {
-        // Download the file from the github URL
+        // To complete the update routine, begin by downloading the new json file from the github page.
+        // Determine the source path where the file was downloaded to (this is 1 level up from the
+        // path of the code being run). Finally, move the downloaded json file to the correct location
         Download.download("https://raw.githubusercontent.com/JonathanUhler/Period-Countdown/main/src/json/MVHS_School.json");
 
-        // Get the location of the downloaded file
-        Path source = Paths.get(new File(new File(new File(SchoolDisplay.class.getProtectionDomain().getCodeSource().getLocation().toURI()).getPath()).getAbsolutePath()).getParent() +
-                SchoolCalendar.FILE_SEP + "MVHS_School.json");
-        // Set the destination of the file as the ~/.periodcountdown/json directory
-        Path dest = Paths.get(SchoolDisplay.periodCountdownDirectory + SchoolCalendar.FILE_SEP + "json" + SchoolCalendar.FILE_SEP + SchoolDisplay.defaultSchoolData);
+        String codePath = new File(SchoolDisplay.class.getProtectionDomain()
+                .getCodeSource()
+                .getLocation()
+                .toURI()).getPath();
+        String codePathParent = new File(new File(codePath).getAbsolutePath()).getParent();
+        Path source = Paths.get( codePathParent + SchoolCalendar.FILE_SEP + "MVHS_School.json");
+        Path dest = Paths.get(SchoolDisplay.periodCountdownDirectory +
+                SchoolCalendar.FILE_SEP + "json" + SchoolCalendar.FILE_SEP + SchoolDisplay.defaultSchoolData);
 
-        Files.delete(dest); // Delete the file if it exists
-        Files.move(source, dest); // Move the new file to its place
+        Files.delete(dest);
+        Files.move(source, dest);
     }
     // end: private void updateJsonAction
 
@@ -161,17 +123,10 @@ public class Support {
     //
     // Downloads and updates the JAR file for Period-Countdown
     //
-    // Arguments--
-    //
-    // None
-    //
-    // Returns--
-    //
-    // None
-    //
     private void updateJarAction() throws Exception {
         // Download the new JAR file
-        // The new file will be in the same place as the current JAR and will replace it immediately, but a restart is needed for the chages to take effect
+        // The new file will be in the same place as the current JAR and will replace it immediately, but a
+        // // restart is needed for the changes to take effect
         Download.download("https://raw.githubusercontent.com/JonathanUhler/Period-Countdown/main/src/PeriodCountdown.jar");
     }
     // end: private void updateJarAction
@@ -182,22 +137,12 @@ public class Support {
     //
     // Updates the JSON school data and the JAR file
     //
-    // Arguments--
-    //
-    // None
-    //
-    // Returns--
-    //
-    // None
-    //
     private void updateAction() {
-        // Set the message to display warning the user that the update process will pull remote files to their computer
         ArrayList<Object> message = new ArrayList<>();
         message.add("Current Version " + PeriodCountdown.VERSION +
-                "\nUpdating this software will pull the latest changes from https://github.com/JonathanUhler/Period-Countdown/ to your local machine" +
+                "\nUpdating this software will pull the latest changes from " +
+                "https://github.com/JonathanUhler/Period-Countdown/ to your local machine" +
                 "\nIf you do not consent to pulling remote files to your machine, press \"Cancel\"");
-
-        // Display the update confirmation dialog box
         int confirmUpdate = JOptionPane.showConfirmDialog(
                 null,
                 message.toArray(new Object[0]),
@@ -206,31 +151,34 @@ public class Support {
                 JOptionPane.PLAIN_MESSAGE,
                 null);
 
-        // If the user is okay with the update process, continue
+        // After the user accepts a prompt warning them of how the update process works, continue with
+        // the update by downloading the json and jar files from github. If either or both fail to
+        // download, print an error message and some advice to the user. If both were downloaded
+        // successfully, display a success message to the user.
+        // Because a new jarfile is downloaded to replace the old one, the app must be relaunched
+        // to start using the new jarfile, so the user is reminded of this if the download succeeds
         if (confirmUpdate == JOptionPane.OK_OPTION) {
-            // Try to update the JSON and JAR files
             try {
                 this.updateJsonAction();
                 this.updateJarAction();
             }
-            // Catch any errors from the update process
             catch (Exception e) {
                 JOptionPane.showConfirmDialog(
                         null,
-                        "The update could not be completed\n\nError: " + e.getMessage() + "\n\nTry:\n\t1) Updating using a privileged account\n\t2) Connecting to the internet", // Print out the error message
+                        "The update could not be completed\n\n" +
+                                "Error: " + e.getMessage() + "\n\nTry:\n\t1) Updating using a privileged " +
+                                "account\n\t2) Connecting to the internet",
                         "Update Failure",
                         JOptionPane.DEFAULT_OPTION,
                         JOptionPane.PLAIN_MESSAGE,
                         null);
-
-                // Exit the method
                 return;
             }
 
-            // Show a confirmation message and prompt the user to restart the app
             JOptionPane.showConfirmDialog(
                     null,
-                    "Latest branch from Github has successfully been pulled.\nA restart of this software is needed for changes to take effect.",
+                    "Latest branch from Github has successfully been pulled.\nA restart of this " +
+                            "software is needed for changes to take effect.",
                     "Update Success",
                     JOptionPane.DEFAULT_OPTION,
                     JOptionPane.PLAIN_MESSAGE,
@@ -243,24 +191,16 @@ public class Support {
     // ====================================================================================================
     // private JMenuItem getUpdate
     //
-    // Gets the menu item for the update button
-    //
-    // Arguments--
-    //
-    // None
+    // Initialize and returns the menu item for the update button
     //
     // Returns--
     //
     // updateMenu:  the JMenuItem object for the update button
     //
     private JMenuItem getUpdate() {
-        JMenuItem updateMenu = new JMenuItem("Update"); // Set the name of a new JMenuItem
-
-        updateMenu.addActionListener(e -> {
-            this.updateAction(); // Add an action listener that calls the updateAction method upon click
-        });
-
-        return updateMenu; // Return the button
+        JMenuItem updateMenu = new JMenuItem("Update");
+        updateMenu.addActionListener(e -> this.updateAction());
+        return updateMenu;
     }
 
 
@@ -269,23 +209,18 @@ public class Support {
     //
     // Returns the "support" menu with the issues hyperlink, update routine, and other choices
     //
-    // Arguments--
-    //
-    // None
-    //
     // Returns--
     //
     // supportMenu: the JMenu for the support options
     //
     public JMenu getSupportMenu() {
-        JMenu supportMenu = new JMenu("Support"); // Create and name the new menu
+        JMenu supportMenu = new JMenu("Support");
 
-        // Add all the options to the menu
         supportMenu.add(this.getVersion());
         supportMenu.add(this.getUpdate());
         supportMenu.add(this.getIssue());
 
-        return supportMenu; // Return the menu
+        return supportMenu;
     }
     // end: public JMenu getSupportMenu
 

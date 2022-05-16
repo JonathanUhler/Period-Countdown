@@ -6,24 +6,6 @@
 // +=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
 
 
-// +=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
-// GraphicsHelper.java
-// Class Diagram
-/*
-
-+-----------------------------------------------------------------------------------------------------+
-|                                                GraphicsHelper                                       |
-+-----------------------------------------------------------------------------------------------------+
-| +getTextWidth(Font, String): int                                                                    |
-| +getWidestElement(Font, String, String): int                                                        |
-| +fitTextIntoWidth(Font, String, int, int): Font                                                     |
-| +fitTextIntoWidth(Font, String, int, int, String): Font                                             |
-+-----------------------------------------------------------------------------------------------------+
-
-*/
-// +=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
-
-
 package graphics;
 
 
@@ -58,8 +40,11 @@ public class GraphicsHelper {
         // getStringBounds(String, FontRenderContext): Get the bounds of the string
         // | |
         // | +--> String: the text
-        // +----> FontRenderContext: a builtin font renderer that defines the size and style of the font the text is in
-        return (int) (font.getStringBounds(text, new FontRenderContext(new AffineTransform(), true, true)).getWidth());
+        // +----> FontRenderContext: a builtin font renderer that defines the size and style of the font the
+        //                           text is in
+        return (int) (font.getStringBounds(text,
+                new FontRenderContext(new AffineTransform(), true, true))
+                .getWidth());
     }
     // end: public static int getTextWidth
 
@@ -82,15 +67,17 @@ public class GraphicsHelper {
     // longest:             the width of the widest element
     //
     public static int getWidestElement(Font font, String text, String newLineCharacter) {
-        String[] textElements = text.split(newLineCharacter); // Split the text into its elements by the newline char
-        int longest = 0; // Initialize a variable to hold the size of the widest element
+        String[] textElements = text.split(newLineCharacter);
+        int longest = 0;
 
         for (String textElem : textElements) {
-            int width = (int) (font.getStringBounds(textElem, new FontRenderContext(new AffineTransform(), true, true)).getWidth()); // Get the width of the element
-            longest = Math.max(width, longest); // Set the longest to the max between itself and the element just analyzed
+            int width = (int) (font.getStringBounds(textElem,
+                    new FontRenderContext(new AffineTransform(), true, true))
+                    .getWidth());
+            longest = Math.max(width, longest);
         }
 
-        return longest; // Return the longest element
+        return longest;
     }
     // end: public static int getWidestElement
 
@@ -115,15 +102,15 @@ public class GraphicsHelper {
     // font:        the new font that will properly fit the text
     //
     public static Font fitTextIntoWidth(Font font, String text, int xOffset, int maxWidth) {
-        int textWidth = maxWidth + 1; // Initial text width
-
-        // Loop forever until the text width is within the correct scale
+        // Use a loop to continue shrinking the text width until it fits within the provided maximum.
+        // Every time through the loop create a new font with a slightly smaller text size until the width
+        // of the text will fit. At that point, return a Font object using that text width
+        int textWidth = maxWidth + 1;
         while (textWidth > maxWidth - xOffset) {
-            textWidth = getTextWidth(font, text); // Update the text width
-            font = new Font(font.getName(), font.getStyle(), font.getSize() - 1); // Update the width of the font object
+            textWidth = getTextWidth(font, text);
+            font = new Font(font.getName(), font.getStyle(), font.getSize() - 1);
         }
-
-        return font; // Return the edited font object
+        return font;
     }
     // end: public static Font fitTextIntoWidth
 
@@ -149,16 +136,18 @@ public class GraphicsHelper {
     //
     // font:                the new font that will properly fit the text
     //
-    public static Font fitTextIntoWidth(Font font, String text, int xOffset, int maxWidth, String newLineCharacter) {
-        int textWidth = maxWidth + 1; // Initial text width
-
-        // Loop forever until the text width is within the correct scale
+    public static Font fitTextIntoWidth(Font font, String text, int xOffset, int maxWidth,
+                                        String newLineCharacter) {
+        // Complete the same process as the overloaded method fitTextIntoWidth(Font, String, int, int)
+        // from above. With this instance of the method, the text can be split by a newline character
+        // and the widest of the elements (widest line) will be the return of the method
+        int textWidth = maxWidth + 1;
         while (textWidth > maxWidth - xOffset) {
-            textWidth = getWidestElement(font, text, newLineCharacter); // Update the text width
-            font = new Font(font.getName(), font.getStyle(), font.getSize() - 1); // Update the width of the font object
+            textWidth = getWidestElement(font, text, newLineCharacter);
+            font = new Font(font.getName(), font.getStyle(), font.getSize() - 1);
         }
 
-        return font; // Return the edited font object
+        return font;
     }
     // end: public static Font fitTextIntoWidth
 
