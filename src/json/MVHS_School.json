@@ -226,7 +226,7 @@
             {"Name": "School Day", "Days": "A"},
             {"Name": "School Day", "Days": "A"},
             {"Name": "School Day", "Days": "A"},
-            {"Name": "Holiday", "Days": "H"},
+            {"Name": "Holiday", "Days": "Holiday"},
             {"Name": "Weekend", "Days": "Weekend"}
         ],
 		"Spring_Finals_Week": [
