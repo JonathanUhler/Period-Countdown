@@ -21,7 +21,7 @@ import graphics.*;
 public class PeriodCountdown {
 
     private static JFrame periodCountdownFrame; // Period Countdown frame
-    public static final String VERSION = "pre-2.0.3.1"; // Current version string
+    public static final String VERSION = "pre-2.0.4"; // Current version string
 
 
     // ====================================================================================================
