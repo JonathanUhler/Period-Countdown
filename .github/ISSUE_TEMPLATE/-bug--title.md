@@ -1,5 +1,5 @@
 ---
-name: "[Bug] TITLE"
+name: "Bug Report"
 about: Create a new issue with the following format when a bug or issue is found
 title: ''
 labels: ''
@@ -11,9 +11,9 @@ assignees: ''
 
 
 **Steps to Reproduce**
-1) 
-2) 
-3) 
+1. 
+2. 
+3. 
 
 **Expected Behavior**
 
