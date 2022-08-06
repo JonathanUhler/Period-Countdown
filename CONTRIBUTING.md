@@ -4,8 +4,8 @@ The following are a set of general guidelines and important information about co
 We appreciate you taking the time to contribute. \
 \
 **Table of Contents** \
-[How You Can Contribute](#how-you-can-contribute) \
-* [Reporting Bugs and Issues](#reporting-bugs-and-issues) \
+[How You Can Contribute](#how-you-can-contribute)
+* [Reporting Bugs and Issues](#reporting-bugs-and-issues)
 * [Suggesting Features](#suggesting-features)
 
 
