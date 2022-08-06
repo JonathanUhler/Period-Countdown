@@ -53,7 +53,7 @@ Usage: ./compile.sh \[options\] \
 ### jar.sh
 Builds a jar file in ```bin``` from the compiled source in ```obj```. \
 Usage: ./jar.sh \[options\] \
-       \[-t <target>\]    \(Builds for "native" or "web"\)
+       \[-t <target>\]    \(Builds for "native" or "web"\) \
 	   \[-h\]             \(Displays a help message and exits\)
 
 ### build.sh
@@ -81,6 +81,7 @@ Usage: ./build.sh [options] \
 ## Windows
 *Note: ".sh" scripts will not work on Windows. There are some ways to get around this, but it is not advised to build from source on Windows.*
 1) Install a bash environment.
+   1) We recommend Git Bash, which can be opened by right-clicking on a window in File Explorer.
 2) Clone or download the repository from GitHub.
 3) In command prompt, ```cd``` to the Period-Countdown folder.
 4) Run ```./compile.sh -t native```.
@@ -95,15 +96,15 @@ From the dropdown menu that opens, select the setting you wish to edit. Once a n
 
 
 # Possible Questions
-* [I don't go to MVHS, how do I use my school's bell schedule?](#I-don't-go-to-MVHS,-how-do-I-use-my-school's-bell-schedule?)
-* [How do I mark periods as free?](#How-do-I-mark-periods-as-free?)
-* [How do I uninstall Period-Countdown?](#How-do-I-uninstall-Period-Countdown?)
-* [How do I contribute?](#How-do-I-contribute?)
+* [I don't go to MVHS, how do I use my school's bell schedule?](#i-dont-go-to-mvhs-how-do-i-use-my-schools-bell-schedule)
+* [How do I mark periods as free?](#how-do-i-mark-periods-as-free)
+* [How do I uninstall Period-Countdown?](#how-do-i-uninstall-period-countdown)
+* [How do I contribute?](#how-do-i-contribute)
 
 ## I don't go to MVHS, how do I use my school's bell schedule?
 If you do not attend Mountain View High School or another supported institution, you can either:
 1) Submit a [GitHub issue](https://github.com/JonathanUhler/Period-Countdown/issues/new) requesting the addition of a school, and that JSON data will be added as soon as possible, or
-2) If you have some experience with JSON, you can try creating your own file (see [How do I contribute?](#How-do-I-contribute?) for more details).
+2) If you have some experience with JSON, you can try creating your own file (see [How do I contribute?](#how-do-i-contribute) for more details).
 
 ## How do I mark periods as free?
 To skip free periods in Period-Countdown, open the app and go to Settings > Class Information. \
