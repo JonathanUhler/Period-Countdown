@@ -122,4 +122,4 @@ To completely remove Period-Countdown from your system:
    3) Windows: delete the directory at HOME\\AppData\\PeriodCountdown
 
 ## How do I contribute?
-Contributions to Period-Countdown are highly appreciated. Please read the CONTRIBUTING.md file for more information.
+Please read the CONTRIBUTING.md file for more information.

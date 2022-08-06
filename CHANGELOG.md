@@ -52,4 +52,8 @@ version   date                                 changes
 			-Class names, teachers, and rooms added to a single option
 			-Replaced school file chooser with a JComboBox that scans for valid json files
 			-Version number bundled with the package, leaving the operating system to display it
+
+3.0.1	8/6/22		-Resolved issue #18
+			-Resolved issue #19
+			-Added CONTRIBUTING.md
 ```

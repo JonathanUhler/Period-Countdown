@@ -60,6 +60,7 @@ public class Menu extends JMenuBar {
 		if (periodNumbers == null)
 			return;
 		HashMap<String, HashMap<String, JTextField>> periodInputFields = new HashMap<>();
+		ArrayList<JPanel> periodInputPanels = new ArrayList<>();
 
 		// Initialize periodInputFields
 		for (String periodNumber : periodNumbers) {
@@ -86,21 +87,23 @@ public class Menu extends JMenuBar {
 			periodInputField.put(UserJson.ROOM, roomTextField);
 
 			periodInputFields.put(periodNumber, periodInputField);
+
+			JPanel periodInputPanel = new JPanel();
+			periodInputPanel.add(new JLabel(periodNumber + ": "));
+			periodInputPanel.add(new JLabel(UserJson.NAME));
+			periodInputPanel.add(nameTextField);
+			periodInputPanel.add(new JLabel(UserJson.TEACHER));
+			periodInputPanel.add(teacherTextField);
+			periodInputPanel.add(new JLabel(UserJson.ROOM));
+			periodInputPanel.add(roomTextField);
+			periodInputPanels.add(periodInputPanel);
 		}
 
 			
 		JPanel panel = new JPanel();
-		panel.setPreferredSize(new Dimension(500, 35 * periodNumbers.size()));
-		// Set up panel
-		for (String key : periodInputFields.keySet()) {
-			JPanel info = new JPanel();
-			panel.add(new JLabel(key + ": "));
-			HashMap<String, JTextField> periodInputField = periodInputFields.get(key);
-
-			for (String field : periodInputField.keySet()) {
-				panel.add(new JLabel(field));
-				panel.add(periodInputField.get(field));
-			}			
+		panel.setPreferredSize(new Dimension(550, 50 * periodNumbers.size()));
+		for (JPanel periodInputPanel : periodInputPanels) {
+			panel.add(periodInputPanel);
 		}
 
 		int confirm = JOptionPane.showConfirmDialog(null, panel, "Class Information",
