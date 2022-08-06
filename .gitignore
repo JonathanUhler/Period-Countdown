@@ -1,6 +1,7 @@
+# Compiled/artifact files
 .DS_Store
 *~
-src/json/Amherst_School.json
+obj/
+
+# Additional files to ignore
 deprecated/*
-jv/*
-python/gendata_outline.txt

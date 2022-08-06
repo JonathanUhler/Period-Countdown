@@ -1,0 +1,265 @@
+{
+    "Info": {
+        "FirstPeriod": "1",
+        "LastPeriod": "7",
+        "FirstDayTag": "2022-08-10",
+        "LastDayTag": "2023-06-08"
+    },
+    "Days": {
+        "A": [
+            {"Type": "Nothing", "Name": "Before School",  "Start": "00:00", "End": "08:40"},
+            {"Type": "1", "Name": "Per 1", "Start": "08:40", "End": "09:25"},
+            {"Type": "Nothing", "Name": "Passing", "Start": "09:25", "End": "09:32"},
+            {"Type": "2", "Name": "Per 2", "Start": "09:32", "End": "10:22"},
+            {"Type": "Special", "Name": "Brunch", "Start": "10:22", "End": "10:32"},
+            {"Type": "Nothing", "Name": "Passing", "Start": "10:32", "End": "10:39"},
+            {"Type": "3", "Name": "Per 3", "Start": "10:39", "End": "11:24"},
+            {"Type": "Nothing", "Name": "Passing", "Start": "11:24", "End": "11:31"},
+            {"Type": "4", "Name": "Per 4", "Start": "11:31", "End": "12:16"},
+            {"Type": "Special", "Name": "Lunch", "Start": "12:16", "End": "13:01"},
+            {"Type": "Nothing", "Name": "Passing", "Start": "13:01", "End": "13:08"},
+            {"Type": "5", "Name": "Per 5", "Start": "13:08", "End": "13:53"},
+            {"Type": "Nothing", "Name": "Passing", "Start": "13:53", "End": "14:00"},
+            {"Type": "6", "Name": "Per 6", "Start": "14:00", "End": "14:45"},
+            {"Type": "Nothing", "Name": "Passing", "Start": "14:45", "End": "14:52"},
+            {"Type": "7", "Name": "Per 7", "Start": "14:52", "End": "15:37"},
+            {"Type": "Nothing", "Name": "After School", "Start": "15:37", "End": "23:59"}
+        ],
+        "B": [
+            {"Type": "Nothing", "Name": "Before School", "Start": "00:00", "End": "08:40"},
+            {"Type": "1", "Name": "Per 1", "Start": "08:40", "End": "10:10"},
+            {"Type": "Special", "Name": "Brunch", "Start": "10:10", "End": "10:20"},
+            {"Type": "Nothing", "Name": "Passing", "Start": "10:20", "End": "10:27"},
+            {"Type": "3", "Name": "Per 3", "Start": "10:27", "End": "11:52"},
+            {"Type": "Special", "Name": "Lunch", "Start": "11:52", "End": "12:37"},
+            {"Type": "Nothing", "Name": "Passing", "Start": "12:37", "End": "12:44"},
+            {"Type": "5", "Name": "Per 5", "Start": "12:44", "End": "14:09"},
+            {"Type": "Nothing", "Name": "Passing", "Start": "14:09", "End": "14:16"},
+            {"Type": "7", "Name": "Per 7", "Start": "14:16", "End": "15:41"},
+            {"Type": "Nothing", "Name": "After School","Start": "15:41", "End": "23:59"}
+        ],
+        "C": [
+            {"Type": "Nothing", "Name": "Before School",  "Start": "00:00", "End": "08:40"},
+            {"Type": "2", "Name": "Per 2", "Start": "08:40", "End": "10:10"},
+            {"Type": "Special", "Name": "Tutorial", "Start": "10:10", "End": "11:00"},
+            {"Type": "Special", "Name": "Brunch", "Start": "11:00", "End": "11:10"},
+            {"Type": "Nothing", "Name": "Passing", "Start": "11:10", "End": "11:17"},
+            {"Type": "4", "Name": "Per 4", "Start": "11:17", "End": "12:42"},
+            {"Type": "Special", "Name": "Lunch", "Start": "12:42", "End": "13:27"},
+            {"Type": "Nothing", "Name": "Passing", "Start": "13:27", "End": "13:34"},
+            {"Type": "6", "Name": "Per 6", "Start": "13:34", "End": "14:59"},
+            {"Type": "Nothing", "Name": "After School", "Start": "14:59", "End": "23:59"}
+        ],
+        "D": [
+            {"Type": "Nothing", "Name": "Before School", "Start": "00:00", "End": "11:30"},
+            {"Type": "1", "Name": "Per 1", "Start": "11:30", "End": "12:15"},
+            {"Type": "Special", "Name": "Lunch", "Start": "12:15", "End": "13:00"},
+            {"Type": "Nothing", "Name": "Passing", "Start": "13:00", "End": "13:07"},
+            {"Type": "3", "Name": "Per 3", "Start": "13:07", "End": "13:52"},
+            {"Type": "Nothing", "Name": "Passing", "Start": "13:52", "End": "13:59"},
+            {"Type": "5", "Name": "Per 5", "Start": "13:59", "End": "14:44"},
+            {"Type": "Nothing", "Name": "Passing", "Start": "14:44", "End": "14:51"},
+            {"Type": "7", "Name": "Per 7", "Start": "14:51", "End": "15:36"},
+            {"Type": "Nothing", "Name": "After School","Start": "15:36", "End": "23:59"}
+        ],
+        "E": [
+            {"Type": "Nothing", "Name": "Before School",  "Start": "00:00", "End": "11:30"},
+            {"Type": "2", "Name": "Per 2", "Start": "11:30", "End": "12:15"},
+            {"Type": "Special", "Name": "Lunch", "Start": "12:15", "End": "13:00"},
+            {"Type": "Nothing", "Name": "Passing", "Start": "13:00", "End": "13:07"},
+            {"Type": "4", "Name": "Per 4", "Start": "13:07", "End": "13:52"},
+            {"Type": "Nothing", "Name": "Passing", "Start": "13:52", "End": "13:59"},
+            {"Type": "6", "Name": "Per 6", "Start": "13:59", "End": "14:44"},
+            {"Type": "Nothing", "Name": "After School", "Start": "14:44", "End": "23:59"}
+        ],
+        "F": [
+            {"Type": "Nothing", "Name": "Before School",  "Start": "00:00", "End": "08:40"},
+            {"Type": "1", "Name": "Per 1", "Start": "08:40", "End": "09:08"},
+            {"Type": "Nothing", "Name": "Passing", "Start": "09:08", "End": "09:15"},
+            {"Type": "2", "Name": "Per 2", "Start": "09:15", "End": "09:43"},
+            {"Type": "Nothing", "Name": "Passing", "Start": "09:43", "End": "09:50"},
+            {"Type": "3", "Name": "Per 3", "Start": "09:50", "End": "10:18"},
+            {"Type": "Nothing", "Name": "Passing", "Start": "10:18", "End": "10:25"},
+            {"Type": "4", "Name": "Per 4", "Start": "10:25", "End": "10:53"},
+            {"Type": "Special", "Name": "Brunch", "Start": "10:53", "End": "11:03"},
+            {"Type": "Nothing", "Name": "Passing", "Start": "11:03", "End": "11:10"},
+            {"Type": "5", "Name": "Per 5", "Start": "11:10", "End": "11:38"},
+            {"Type": "Nothing", "Name": "Passing", "Start": "11:38", "End": "11:45"},
+            {"Type": "6", "Name": "Per 6", "Start": "11:45", "End": "12:13"},
+            {"Type": "Nothing", "Name": "Passing", "Start": "12:13", "End": "12:20"},
+            {"Type": "7", "Name": "Per 7", "Start": "12:20", "End": "12:48"},
+            {"Type": "Nothing", "Name": "After School", "Start": "12:48", "End": "23:59"}
+        ],
+        "G_4": [
+            {"Type": "Nothing", "Name": "Before School",  "Start": "00:00", "End": "08:40"},
+            {"Type": "1", "Name": "Per 1", "Start": "08:40", "End": "09:15"},
+            {"Type": "Nothing", "Name": "Passing", "Start": "09:15", "End": "09:22"},
+            {"Type": "Special", "Name": "Rally A", "Start": "09:22", "End": "09:52"},
+            {"Type": "Nothing", "Name": "Passing", "Start": "09:52", "End": "09:59"},
+            {"Type": "Special", "Name": "Rally B", "Start": "09:59", "End": "10:22"},
+            {"Type": "Nothing", "Name": "Passing", "Start": "10:22", "End": "10:29"},
+            {"Type": "Special", "Name": "Rally C", "Start": "10:29", "End": "10:52"},
+            {"Type": "Nothing", "Name": "Passing", "Start": "10:52", "End": "10:59"},
+            {"Type": "Special", "Name": "Rally D", "Start": "10:59", "End": "11:22"},
+            {"Type": "Nothing", "Name": "Passing", "Start": "11:22", "End": "11:29"},
+            {"Type": "3", "Name": "Per 3", "Start": "11:29", "End": "12:04"},
+            {"Type": "Special", "Name": "Lunch", "Start": "12:04", "End": "12:49"},
+            {"Type": "Nothing", "Name": "Passing", "Start": "12:49", "End": "12:56"},
+            {"Type": "4", "Name": "Per 4", "Start": "12:56", "End": "13:31"},
+            {"Type": "Nothing", "Name": "Passing", "Start": "13:31", "End": "13:38"},
+            {"Type": "5", "Name": "Per 5", "Start": "13:38", "End": "14:13"},
+            {"Type": "Nothing", "Name": "Passing", "Start": "14:13", "End": "14:20"},
+            {"Type": "6", "Name": "Per 6", "Start": "14:20", "End": "14:55"},
+            {"Type": "Nothing", "Name": "Passing", "Start": "14:55", "End": "15:02"},
+            {"Type": "7", "Name": "Per 7", "Start": "15:02", "End": "15:37"},
+            {"Type": "Nothing", "Name": "After School", "Start": "15:37", "End": "23:59"}
+        ],
+        "G_2": [
+            {"Type": "Nothing", "Name": "Before School",  "Start": "00:00", "End": "08:40"},
+            {"Type": "1", "Name": "Per 1", "Start": "08:40", "End": "09:20"},
+            {"Type": "Nothing", "Name": "Passing", "Start": "09:20", "End": "09:27"},
+            {"Type": "Special", "Name": "Rally A", "Start": "09:27", "End": "10:07"},
+            {"Type": "Nothing", "Name": "Passing", "Start": "10:07", "End": "10:14"},
+            {"Type": "Special", "Name": "Rally B", "Start": "10:14", "End": "10:54"},
+            {"Type": "Nothing", "Name": "Brunch", "Start": "10:54", "End": "11:04"},
+            {"Type": "Nothing", "Name": "Passing", "Start": "11:04", "End": "11:11"},
+            {"Type": "3", "Name": "Per 3", "Start": "11:11", "End": "11:51"},
+            {"Type": "Nothing", "Name": "Passing", "Start": "11:51", "End": "11:58"},
+            {"Type": "4", "Name": "Per 4", "Start": "11:58", "End": "12:38"},
+            {"Type": "Special", "Name": "Lunch", "Start": "12:38", "End": "13:18"},
+            {"Type": "Nothing", "Name": "Passing", "Start": "13:18", "End": "13:23"},
+            {"Type": "5", "Name": "Per 5", "Start": "13:23", "End": "14:03"},
+            {"Type": "Nothing", "Name": "Passing", "Start": "14:03", "End": "14:11"},
+            {"Type": "6", "Name": "Per 6", "Start": "14:11", "End": "14:51"},
+            {"Type": "Nothing", "Name": "Passing", "Start": "14:51", "End": "14:58"},
+            {"Type": "7", "Name": "Per 7", "Start": "14:58", "End": "15:38"},
+            {"Type": "Nothing", "Name": "After School", "Start": "15:38", "End": "23:59"}
+        ],
+        "Finals_1": [
+            {"Type": "Nothing", "Name": "Before School", "Start": "00:00", "End": "08:40"},
+            {"Type": "1", "Name": "Per 1 Final", "Start": "08:40", "End": "10:25"},
+            {"Type": "Special", "Name": "Brunch", "Start": "10:25", "End": "10:55"},
+            {"Type": "Nothing", "Name": "Break", "Start": "10:55", "End": "11:02"},
+            {"Type": "6", "Name": "Per 6 Final", "Start": "11:02", "End": "12:47"},
+            {"Type": "Nothing", "Name": "After School", "Start": "12:47", "End": "23:59"}
+        ],
+        "Finals_2": [
+            {"Type": "Nothing", "Name": "Before School", "Start": "00:00", "End": "08:40"},
+            {"Type": "2", "Name": "Per 2 Final", "Start": "08:40", "End": "10:25"},
+            {"Type": "Special", "Name": "Brunch", "Start": "10:25", "End": "10:55"},
+            {"Type": "Nothing", "Name": "Break", "Start": "10:55", "End": "11:02"},
+            {"Type": "5", "Name": "Per 5 Final", "Start": "11:02", "End": "12:47"},
+            {"Type": "Nothing", "Name": "After School", "Start": "12:47", "End": "23:59"}
+        ],
+        "Finals_3": [
+            {"Type": "Nothing", "Name": "Before School", "Start": "00:00", "End": "08:40"},
+            {"Type": "3", "Name": "Per 3 Final", "Start": "08:40", "End": "10:25"},
+            {"Type": "Special", "Name": "Brunch", "Start": "10:25", "End": "10:55"},
+            {"Type": "Nothing", "Name": "Break", "Start": "10:55", "End": "11:02"},
+            {"Type": "7", "Name": "Per 7 Final", "Start": "11:02", "End": "12:47"},
+            {"Type": "Nothing", "Name": "After School", "Start": "12:47", "End": "23:59"}
+        ],
+        "Finals_4": [
+            {"Type": "Nothing", "Name": "Before School", "Start": "00:00", "End": "08:40"},
+            {"Type": "4", "Name": "Per 4 Final", "Start": "08:40", "End": "10:25"},
+            {"Type": "Nothing", "Name": "After School", "Start": "10:25", "End": "23:59"}
+        ],
+        "Weekend": [
+            {"Type": "Nothing", "Name": "Weekend", "Start": "00:00", "End": "23:59"}
+        ],
+        "Holiday": [
+            {"Type": "Nothing", "Name": "Weekend", "Start": "00:00", "End": "23:59"}
+        ]
+    },
+    "Weeks":  {
+        "DEFAULT": [
+			"Weekend",
+			"A",
+			"B",
+			"C",
+			"B",
+			"C",
+			"Weekend"
+        ],
+        "HHHHH": [
+			"Weekend",
+			"Holiday",
+			"Holiday",
+			"Holiday",
+			"Holiday",
+			"Holiday",
+			"Weekend"
+		],
+		"HHABC": [
+			"Weekend",
+			"Holiday",
+			"Holiday",
+			"A",
+			"B",
+			"C",
+			"Weekend"
+        ],
+		"HBCBC": [
+			"Weekend",
+			"Holiday",
+			"B",
+			"C",
+			"B",
+			"C",
+			"Weekend"
+        ],
+		"ABCHH": [
+			"Weekend",
+			"A",
+			"B",
+			"C",
+			"Holiday",
+			"Holiday",
+			"Weekend"
+        ],
+		"BCBCH": [
+			"Weekend",
+			"A",
+			"B",
+			"C",
+			"B",
+			"Holiday",
+			"Weekend"
+        ],
+		"Winter_Finals": [
+			"Weekend",
+			"A",
+			"A",
+			"A",
+			"A",
+			"Holiday",
+			"Weekend"
+        ],
+		"Spring_Finals": [
+			"Weekend",
+			"A",
+			"A",
+			"A",
+			"A",
+			"Holiday",
+			"Weekend"
+        ]
+    },
+    "Exceptions": [
+        {"WeekTag": "2022-08-07", "Type": "HHABC", "Comment": "First week of school"},
+		{"WeekTag": "2022-09-04", "Type": "HBCBC", "Comment": "Labor day"},
+		{"WeekTag": "2022-10-09", "Type": "ABCHH", "Comment": "October recess days"},
+		{"WeekTag": "2022-11-06", "Type": "BCBCH", "Comment": "Veterans day"},
+		{"WeekTag": "2022-11-20", "Type": "HHHHH", "Comment": "Thanksgiving break"},
+		{"WeekTag": "2022-12-18", "Type": "Winter_Finals", "Comment": "Winter finals week"},
+		{"WeekTag": "2022-12-25", "Type": "HHHHH", "Comment": "Winter break week 1"},
+		{"WeekTag": "2023-01-01", "Type": "HHHHH", "Comment": "Winter break week 2"},
+		{"WeekTag": "2023-01-08", "Type": "HBCBC", "Comment": "First week of second semester"},
+		{"WeekTag": "2023-01-15", "Type": "HBCBC", "Comment": "Martin Luther King Jr day"},
+		{"WeekTag": "2023-02-19", "Type": "HHHHH", "Comment": "Winter recess"},
+		{"WeekTag": "2023-03-12", "Type": "HBCBC", "Comment": "Recess day"},
+		{"WeekTag": "2023-04-09", "Type": "HHHHH", "Comment": "Spring recess"},
+		{"WeekTag": "2023-05-28", "Type": "HBCBC", "Commetn": "Memorial day"},
+		{"WeekTag": "2023-06-04", "Type": "Spring_Finals", "Comment": "Spring finals week"}
+    ]
+}

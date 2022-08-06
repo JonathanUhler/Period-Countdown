@@ -1,99 +1,124 @@
 # Period-Countdown
-A light-weight Java application to display time remaining in school periods or classes based on a school schedule.
+A Java productivity application to display time remaining until a class based on a school schedule.
 
 
 # Dependencies
-JDK 17 or above - https://www.oracle.com/java/technologies/downloads/
+Java (Standard Edition) 17 or above - https://www.oracle.com/java/technologies/downloads/ \
+Google GSON 2.2.2 or above - Included automatically in builds of Period Countdown found in the "release" folder
 
 
 # Preface Warning
-Thank you for using Period-Countdown. Before you continue, please read and accept this preface warning:
-1) There is no guarantee Period-Countdown will have an accurate schedule. Always check with teachers and schools about changes in schedules. Do not blame Period-Countdown or its developers for tardies or absences!
-2) Period-Countdown, upon first launch, will create a directory at ~/.periodcountdown in which it will store two JSON files for the school and user data. These files are needed for Period-Countdown to function
-3) While the Period-Countdown developers try to make the app as foolproof as possible, there is no guarantee that all the code will work perfectly. If you encounter issues or have a feature request, please see the Github page online at https://github.com/JonathanUhler/Period-Countdown/issues
+Thank you for using Period-Countdown. Before you continue, please read and accept this warning:
+1) There is no guarantee Period-Countdown will have an accurate schedule. Always check with teachers and school authority about official schedules. Do not blame Period-Countdown for tardies or absences!
+2) Period-Countdown, upon first launch, will create a directory at "\~/Library/Application Support/PeriodCountdown" for Mac OS X, "\~/.PeriodCountdown" for Linux, or "HOME\\AppData\\PeriodCountdown" for Windows. This will store the file "User.json" which holds required user configuration.
 
 
-# Installation
-## MacOS
-### MacOS Installation
-Clone or download the repository from Github.\
-In Finder go to the Period-Countdown/release folder.\
-Double-click on the ```PeriodCountdown-1.0.dmg``` to launch the installer. The ```PeriodCountdown.app``` application should appear in a new window, drag this to the Applications folder or another location.
-
-### MacOS Build Process
-To build or update the app, follow the process below:
-1) Open Terminal and ```cd``` to the Period-Countdown/ directory
-2) Compile with ```./compile.sh```
-3) Make the jarfile with ```./jar.sh```
-4) Build the app bundle with ```./build-mac.sh```
-5) Follow the instructions under MacOS Installation to open and use the app
+# Installation (From Package)
+## Mac OS X
+1) Clone or download the repository from GitHub.
+2) In Finder, go to the Period-Countdown/release folder.
+3) Double-click on the "PeriodCountdown-x.x.x.dmg" file to launch the installer. A new window with "PeriodCountdown.app" should appear. Drag the .app file to the /Applications folder or another location.
 
 ## Linux
-*Note: the Linux build of Period-Countdown currently only supports Debian-based distros such as Debian, Ubuntu, etc. RPM-based distros are not currently supported.*
-
-### Linux Installation
-Clone or download the repository from Github.\
-In Files or Terminal go to the Period-Countdown/release folder.
-
-* In Files, double-click on the ```periodcountdown_1.0-1_amd64.deb``` to launch the Linux software manager. Click "Install"
-* In Terminal, type ```sudo apt install ./periodcountdown_1.0-1_amd64.deb``` to install directly using apt
+*Note: the Linux build of Period-Countdown currently only supports Debian-based distros. RPM-based distros are not supported at this time. You can try building from source for RPM, but it hasn't been tried.*
+1) Clone or download the repository from GitHub.
+2) In Files, go to the Period-Countdown/release folder.
+3) Double-click on the "PeriodCountdown_x.x.x-1_amd64.deb" file to launch the Linux software manager. Click "Install". Alternatively, install through apt with "sudo apt install ./PeriodCountdown_x.x.x-1_amd64.deb".
 
 The launch process is still not completely smooth but does work. To start the app, follow these steps:
-1) If installed with the software manager, figure out where the app was installed by going to the software manager > "Installed" > "periodcountdown"
-2) If installed with apt, the software is likely at ```/opt/periodcountdown/```
+1) If installed with the software manager, figure out where the app was installed by going to the software manager > "Installed" > "PeriodCountdown"
+2) If installed with apt, the software is likely at ```/opt/PeriodCountdown/```
 3) Run the executable with ```/path/to/periodcountdown/bin/PeriodCountdown```
    1) Ex: ```/opt/periodcountdown/bin/PeriodCountdown```
 
-### Linux Build Process
-To build or update the app, follow the process below:
-1) Open Terminal and ```cd``` to the Period-Countdown/ directory
-2) Compile with ```./compile.sh```
-3) Make the jarfile with ```./jar.sh```
-4) Build the app bundle with ```./build-linux.sh```
-5) Follow the instructions under Linux Installation to open and use the app
+## Windows
+1) Clone or download the repository from GitHub.
+2) In File Explorer, go to the Period-Countdown/release folder.
+3) Double-click on the "PeriodCountdown-x.x.x.exe" file to launch the installer.
+
+In order to allow Period-Countdown to be found from the search menu, do the following:
+1) Open File Explorer and go to "C:\\Program Files\\PeriodCountdown".
+2) Right-click on the PeriodCountdown exactuable and select "Create Shortcut".
+3) The shortcut will be created on your desktop. Move it to "C:\\ProgramData\\Microsoft\\Windows\\Start Menu\\Programs".
+
+
+# Build (From Source)
+## Build Files
+### compile.sh
+Compiles the java source code into the ```obj``` directory. \
+Usage: ./compile.sh \[options\] \
+       \[-t <target>\]    \(Builds for "native" or "web"\) \
+	   \[-h\]             \(Displays a help message and exits\)
+
+### jar.sh
+Builds a jar file in ```bin``` from the compiled source in ```obj```. \
+Usage: ./jar.sh \[options\] \
+       \[-t <target>\]    \(Builds for "native" or "web"\)
+	   \[-h\]             \(Displays a help message and exits\)
+
+### build.sh
+Builds a release of the app in ```release``` from the jar in ```bin```. \
+Usage: ./build.sh [options] \
+       \[-t <target>\]    \(Builds for "mac", "linux", "windows", or "web"\) \
+	   \[-h\]             \(Displays a help message and exits\)
+
+## Mac OS X
+1) Clone or download the repository from GitHub.
+2) In Terminal, ```cd``` to the Period-Countdown folder.
+3) Run ```./compile.sh -t native```.
+4) Run ```./jar.sh -t native```.
+5) Run ```java -jar bin/PeriodCountdown-native.jar``` to run the jar file, or
+6) Run ```./build.sh -t mac```, then follow the installation instructions above.
+
+## Linux
+1) Clone or download the repository from GitHub.
+2) In the terminal, ```cd``` to the Period-Countdown folder.
+3) Run ```./compile.sh -t native```.
+4) Run ```./jar.sh -t native```.
+5) Run ```java -jar bin/PeriodCountdown-native.jar``` to run the jar file, or
+6) Run ```./build.sh -t linux```, then follow the installation instructions above.
 
 ## Windows
-### Windows Installation
-Clone or download the repository from Github.\
-In File Explorer go to the Period-Countdown/release folder.\
-Double-click on the ```PeriodCountdown-1.0.exe``` to launch the installer.\
-\
-In order to allow Period-Countdown to be found from the search menu, do the following:
-1) Open File Explorer and go to "C:\Program Files\PeriodCountdown\"
-2) Right-click on the PeriodCountdown executable and select "Create Shortcut"
-3) The shortcut will be created on your desktop. Move it to "C:\ProgramData\Microsoft\Windows\Start Menu\Programs\"
-
-### Windows Build Process
-To build or update the app, follow the process below:
-1) Open Command Prompt and ```cd``` to the Period-Countdown/ directory
-2) Build the app bundle with ```./build-win.bat```
-3) Follow the instructions under Windows Installation to open and use the app
-
-
-# Usage
-Given the two files School.json and User.json located at ~/.periodcountdown/json, the app should start counting down once started.\
-At the top of the screen will be the period status -- a message comprised of the period name and freedom status (ex: "Chemistry | Period 1" or "Lunch | Free")\
-Below that is the timer, which displays the time left in the period mentioned in the period status.\
-Finally, if enabled, is the "next up" display. This shows the next period(s) and has five levels of verbosity: disabled, next period, next period with all info, all periods, and all periods with all info.
+*Note: ".sh" scripts will not work on Windows. There are some ways to get around this, but it is not advised to build from source on Windows.*
+1) Install a bash environment.
+2) Clone or download the repository from GitHub.
+3) In command prompt, ```cd``` to the Period-Countdown folder.
+4) Run ```./compile.sh -t native```.
+5) Run ```./jar.sh -t native```.
+6) Run ```java -jar bin\PeriodCountdown-native.jar``` to run the jar file, or
+7) Run ```./build.sh -t windows```, then follow the installation instructions above.
 
 
 # Settings and Configuration
-To change class names, teacher names, room numbers, and the next up display's verbosity, click on the "Settings" button at the very top of the app.\
-From the dropdown menu that opens, select the setting you want to edit. For everything but the next up option (which is in the same "Settings" menu) a second window will open for you to enter information into. Click "OK" or "Save" to save information.
+To change user options, click on the "Settings" menu at the top of the app. \
+From the dropdown menu that opens, select the setting you wish to edit. Once a new option is chosen, click "OK". To cancel, click "Cancel". If the app does not update within a few seconds, try closing and reopening it.
 
 
 # Possible Questions
-* [I don't go to MVHS, how do I enter my school's bell schedule?](#If-I-don't-go-to-MVHS-how-do-I-enter-my-school's-bell-schedule?)
-* [I don't have all 7 periods, how do I mark some as free?](#I-don't-have-all-7-periods,-how-do-I-mark-some-as-free?)
+* [I don't go to MVHS, how do I use my school's bell schedule?](#I-don't-go-to-MVHS,-how-do-I-use-my-school's-bell-schedule?)
+* [How do I mark periods as free?](#How-do-I-mark-periods-as-free?)
+* [How do I uninstall Period-Countdown?](#How-do-I-uninstall-Period-Countdown?)
+* [How do I contribute?](#How-do-I-contribute?)
 
-## If I don't go to MVHS how do I enter my school's bell schedule?
-If you do not attend Mountain View High School, you can use the gendata.py python script located at Period-Countdown/python/gendata.py\
-To run this, ```cd``` to that directory through Terminal and type ```./gendata.py```.\
-Follow the instructions and enter information when prompted.\
-\
-Alternatively, you can create an issue on Github requesting the addition of a school and that JSON data will be added as soon as possible
+## I don't go to MVHS, how do I use my school's bell schedule?
+If you do not attend Mountain View High School or another supported institution, you can either:
+1) Submit a [GitHub issue](https://github.com/JonathanUhler/Period-Countdown/issues/new) requesting the addition of a school, and that JSON data will be added as soon as possible, or
+2) If you have some experience with JSON, you can try creating your own file (see [How do I contribute?](#How-do-I-contribute?) for more details).
 
-## I don't have all 7 periods, how do I mark some as free?
-If you have less than the maximum number of periods (usually 7 for most high schools), then you can mark some as free to skip them when calculating the time left until the next period.\
-To do this, open the app to go to Settings > Period Names.\
-For your free periods name them as either "None", "Free", or "N/A" and they will be skipped.
+## How do I mark periods as free?
+To skip free periods in Period-Countdown, open the app and go to Settings > Class Information. \
+For your free periods, set the "Name" as either "None", "Free", or "N/A" (case insensitive) and they will be ignored.
+
+## How do I uninstall Period-Countdown?
+To completely remove Period-Countdown from your system:
+1) Uninstall the application file.
+   1) Mac OS X: delete the PeriodCountdown.app file, which was recommended to be installed at /Applications
+   2) Linux: uninstall the .deb. Go to the software manager, find PeriodCountdown, and click "Uninstall"
+   3) Windows: delete any shortcuts created, then uninstall the .exe
+2) Remove the app data.
+   1) Mac OS X: delete the directory at \~/Library/Application Support/PeriodCountdown
+   2) Linux: delete the directory at \~/.PeriodCountdown
+   3) Windows: delete the directory at HOME\\AppData\\PeriodCountdown
+
+## How do I contribute?
+Contributions to Period-Countdown are highly appreciated. Please read the CONTRIBUTING.md file for more information.
