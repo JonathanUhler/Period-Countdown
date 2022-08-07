@@ -94,6 +94,31 @@ Usage: ./build.sh [options] \
 To change user options, click on the "Settings" menu at the top of the app. \
 From the dropdown menu that opens, select the setting you wish to edit. Once a new option is chosen, click "OK". To cancel, click "Cancel". If the app does not update within a few seconds, try closing and reopening it.
 
+## Class Information
+Allows entry of user-specific class information. The data entered here is used to customize information displayed on the app and is purely cosmetic. \
+Teacher names and room numbers can be left blank to be ignored. \
+See [How do I mark periods as free?](#how-do-i-mark-periods-as-free) for ignoring classes.
+
+## School Information
+Allows choosing a different school to base time calculations off of. \
+Choose a file with your school name from the list of supported institutions. If your school does not exist, see [here](#i-dont-go-to-mvhs-how-do-i-use-my-schools-bell-schedule).
+
+## Next Up
+A feature to display some or all of the remaining periods in the day (shows a future schedule in addition to the main timer). \
+Choose "Disabled" to disable this feature completely. \
+Choose "Next Class" to display information for just the next class. \
+Choose "All Classes" to display information for all classes remaining in the current day. \
+The format of upcoming periods is "<Name> | <Start>-<End> [| <Teacher>, <Room>]". The teacher/room information in "[ ]" is only displayed if it is not blank in Class Information.
+
+## Theme
+Allows a custom color for the app. \
+To select a color, either choose from one of the preset values in the "Swatches" tab, or enter your own value in HSV, HSL, RGB, or CMYK format.
+
+## Font
+Allows choosing a different font for the main timer and Next Up feature. \
+This feature reads all the available fonts on your system, so choices may vary. New fonts, such as OpenDyslexic to aid in reading, can be downloaded onto your system and used. This process depends on your OS. \
+*Note: some unusual fonts, or fonts that substitute with non-ASCII characters, may overlap or otherwise display incorrectly. Most common fonts should work fine.*
+
 
 # Possible Questions
 * [I don't go to MVHS, how do I use my school's bell schedule?](#i-dont-go-to-mvhs-how-do-i-use-my-schools-bell-schedule)
