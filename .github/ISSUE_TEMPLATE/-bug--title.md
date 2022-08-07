@@ -1,8 +1,8 @@
 ---
 name: "Bug Report"
 about: Create a new issue with the following format when a bug or issue is found
-title: ''
-labels: ''
+title: '[BUG] '
+labels: 'bug'
 assignees: ''
 
 ---
