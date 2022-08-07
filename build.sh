@@ -71,7 +71,7 @@ elif [ "$target" = "windows" ]; then
 		--input bin \
 		--dest release \
 		--verbose \
-		--icon src/assets/icon.png \
+		--icon src/assets/icon.ico \
 		--main-jar PeriodCountdown-native.jar \
 		--main-class natfe.PeriodCountdown
 elif [ "$target" = "web" ]; then

@@ -8,6 +8,16 @@ All notable changes to Period-Countdown should be documented in this file.
 ### Fixed
 ### Changed
 
+## [3.0.2] - 8/7/22
+### Added
+* Added option to change font based on available fonts in the system
+### Fixed
+* Fixed minor issue with "Next Up" feature not properly displaying classes
+* Windows icon file now works
+### Changed
+* SchoolPeriod getStartTime and getEndTime are now public, and their behavior (reason for DateTime arg) is documented
+* Duration toString now only removes hours if they are 0. Thus the shortest format is "00:01" not "01"
+
 ## [3.0.1] - 8/6/22
 ### Added
 ### Fixed

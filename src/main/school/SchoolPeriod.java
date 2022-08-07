@@ -38,7 +38,7 @@ public class SchoolPeriod {
 	}
 
 
-	protected DateTime getStartTime(DateTime date) {
+	public DateTime getStartTime(DateTime date) {
 		if (date == null)
 			return null;
 		
@@ -48,18 +48,13 @@ public class SchoolPeriod {
 	}
 
 
-	protected DateTime getEndTime(DateTime date) {
+	public DateTime getEndTime(DateTime date) {
 		if (date == null)
 			return null;
 		
 		return DateTime.getInstance(date.getDayTag() +
 									DateTime.DATE_TIME_DELIMITER + this.end +
 									DateTime.TIME_DELIMITER + "00" + DateTime.TIME_DELIMITER + "000");
-	}
-
-
-	public DateTime getEndTime() {
-		return this.getEndTime(new DateTime()); // Default to right now
 	}
 
 

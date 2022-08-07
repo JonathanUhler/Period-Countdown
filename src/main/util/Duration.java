@@ -74,12 +74,9 @@ public class Duration {
 
 	@Override
 	public String toString() {
-		if (this.hours == 0) {
-			if (this.minutes == 0)
-				return Tools.pad(Integer.toString(this.seconds), 2, '0');
+		if (this.hours == 0)
 			return Tools.pad(Integer.toString(this.minutes), 2, '0') + ":" +
 				Tools.pad(Integer.toString(this.seconds), 2, '0');
-		}
 		return this.hours + ":" +
 			Tools.pad(Integer.toString(this.minutes), 2, '0') + ":" +
 			Tools.pad(Integer.toString(this.seconds), 2, '0');

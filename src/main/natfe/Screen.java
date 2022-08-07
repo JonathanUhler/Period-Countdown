@@ -27,8 +27,8 @@ public class Screen extends JPanel {
 
 	// Size and display constants
 	// Fonts
-	public static final String FONT_NAME = "Arial";
-	public static final int FONT_STYLE = Font.PLAIN;
+	private static String FONT_NAME = "Arial";
+	private static int FONT_STYLE = Font.PLAIN;
 
 	// Display margins
 	private int MARGIN = this.getSize().width / 40;
@@ -41,6 +41,7 @@ public class Screen extends JPanel {
 	public Screen() {
 		try {
 			this.userAPI = new UserAPI(UserJson.DEFAULT_FILE);
+			Screen.FONT_NAME = this.userAPI.getFont();
 		}
 		catch (FileNotFoundException | IllegalArgumentException e) {
 			Log.gfxmsg("Error", "Screen: Exception when creating UserAPI\n\n" + e);
@@ -131,6 +132,20 @@ public class Screen extends JPanel {
 	}
 
 
+	protected String getUserFont() {
+		if (this.userAPI == null)
+			return null;
+		return this.userAPI.getFont();
+	}
+
+
+	protected void setUserFont(String font) {
+		if (this.userAPI != null)
+			this.userAPI.setFont(font);
+		Screen.FONT_NAME = font;
+	}
+
+
 	public void start() {
 		while (true) {
 			this.repaint();
@@ -172,12 +187,10 @@ public class Screen extends JPanel {
 	@Override
 	public void paintComponent(Graphics g) {
 		super.paintComponent(g);
-		this.MARGIN = this.getSize().width / 40;
-		int textY = 0;
-		
 		if (this.schoolAPI == null || this.userAPI == null)
 			return;
 
+		// Get current time
 		DateTime now = new DateTime();
 
 		// School json API information
@@ -208,14 +221,17 @@ public class Screen extends JPanel {
 				nextPeriod.getStartTimeString() + "-" + nextPeriod.getEndTimeString();
 			if (!nextPeriod.isFree() && !nextClass.isFree() && nextClass != null)
 				periodString += " | " + nextClass.getTeacher() + ", " + nextClass.getRoom();
-			nextPeriods.add(periodString);
+			if (nextPeriod.isCounted())
+				nextPeriods.add(periodString);
 			
-			nextPeriod = this.schoolAPI.getNextPeriodToday(nextPeriod.getEndTime());
+			nextPeriod = this.schoolAPI.getNextPeriodToday(nextPeriod.getStartTime(now));
 			if (nextUp.equals(UserJson.NEXT_UP_ONE))
 				break;
 		}
 
 		// Displaying
+		this.MARGIN = this.getSize().width / 40; // Update margin size if the screen has changed size
+		int textY = 0;
 		this.setBackground(new Color(this.getUserTheme()));
 
 		// Displaying user data
@@ -228,9 +244,14 @@ public class Screen extends JPanel {
 		g.drawString(userStr, this.MARGIN, textY);
 
 		// Displaying time data
+		// Create timeRemainingLen as a string which is the length of the current time string as all zeros. This
+		// fixes a minor bug with fonts where digits are not the same width and the time remaining will resize
+		// every time it changes which looks bad. Because this string is constant (at least until a significant
+		// digit changes, like hours going 100 -> 99), the font size is also constant.
+		String timeRemainingLen = "0".repeat(String.valueOf(timeRemaining.hr()).length()) + ":00:00";
 		String timeRemainingStr = timeRemaining.toString();
 		int timeRemainingWidth = this.getSize().width - (this.MARGIN * 2);
-		Font timeRemainingFont = this.getFontForWidth(timeRemainingStr, timeRemainingWidth);
+		Font timeRemainingFont = this.getFontForWidth(timeRemainingLen, timeRemainingWidth);
 		textY += timeRemainingFont.getSize() + this.MARGIN;
 		g.setFont(timeRemainingFont);
 		g.setColor(Color.BLACK);
@@ -238,8 +259,7 @@ public class Screen extends JPanel {
 
 		// Displaying next up
 		int nextUpWidth = this.getSize().width - (this.MARGIN);
-		Font nextUpFont = this.getFontForWidth("*************** | **:**-**:** | ***************, ***************",
-											   nextUpWidth);
+		Font nextUpFont = this.getFontForWidth("********** | **:**-**:** | **********, **********", nextUpWidth);
 		if (!nextUp.equals(UserJson.NEXT_UP_DISABLED)) {
 			textY += this.MARGIN + this.MARGIN + nextUpFont.getSize();
 			g.setFont(new Font(Screen.FONT_NAME, Font.BOLD, nextUpFont.getSize()));
@@ -253,7 +273,7 @@ public class Screen extends JPanel {
 		}
 		for (int i = 0; i < nextPeriods.size(); i++) {
 			String nextPeriodStr = nextPeriods.get(i);
-			textY += (this.MARGIN / 2) + ((nextUpFont.getSize() + (this.MARGIN / 2)) * i);
+			textY += (this.MARGIN / 2) + ((nextUpFont.getSize() + (this.MARGIN / 2)));
 			g.drawString(nextPeriodStr, this.MARGIN, textY);
 		}
 	}

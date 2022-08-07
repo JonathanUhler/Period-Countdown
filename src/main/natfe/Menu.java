@@ -15,6 +15,7 @@ import java.util.jar.JarFile;
 import java.util.jar.JarEntry;
 import java.awt.Dimension;
 import java.awt.Color;
+import java.awt.GraphicsEnvironment;
 import javax.swing.JMenuItem;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
@@ -52,6 +53,10 @@ public class Menu extends JMenuBar {
 		JMenuItem theme = new JMenuItem("Theme");
 		theme.addActionListener(e -> this.theme());
 		settings.add(theme);
+
+		JMenuItem font = new JMenuItem("Font");
+		font.addActionListener(e -> this.font());
+		settings.add(font);
 	}
 
 
@@ -202,6 +207,27 @@ public class Menu extends JMenuBar {
 		if (confirm == JOptionPane.OK_OPTION) {
 			Color color = colorChooser.getColor();
 			this.screen.setUserTheme(color.getRed(), color.getGreen(), color.getBlue());
+		}
+		
+	}
+
+
+	private void font() {
+		JPanel panel = new JPanel();
+		String[] fonts = GraphicsEnvironment.getLocalGraphicsEnvironment().getAvailableFontFamilyNames();
+		JComboBox<String> options = new JComboBox<>(fonts);
+
+		options.setSelectedItem(this.screen.getUserFont());
+		panel.add(new JLabel("Select font: "));
+		panel.add(options);
+
+		int confirm = JOptionPane.showConfirmDialog(null, panel, "Font",
+													JOptionPane.OK_CANCEL_OPTION,
+													JOptionPane.PLAIN_MESSAGE, null);
+
+		if (confirm == JOptionPane.OK_OPTION) {
+			String font = (String) options.getSelectedItem();
+			this.screen.setUserFont(font);
 		}
 		
 	}

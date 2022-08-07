@@ -197,6 +197,17 @@ public class UserAPI {
 	}
 
 
+	public String getFont() {
+		return this.json.settings.get(UserJson.FONT);
+	}
+
+
+	public void setFont(String font) {
+		this.json.settings.put(UserJson.FONT, font);
+		this.updateJsonFile();
+	}
+
+
 	private void updateJsonFile() {
 		try {
 			FileWriter writer = new FileWriter(this.jsonPath);
