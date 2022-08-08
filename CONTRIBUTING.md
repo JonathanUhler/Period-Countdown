@@ -13,7 +13,7 @@ We appreciate you taking the time to contribute. \
 ## How You Can Contribute
 
 ### Reporting Bugs and Issues
-When submitting bug and issue reports, please be as descriptive as possible. Include as much information as you can following the [bug report template](https://github.com/JonathanUhler/Period-Countdown/issues/new?assignees=&labels=&template=-bug--title.md&title=). \
+When submitting bug and issue reports, please be as descriptive as possible. Include as much information as you can following the [bug report template](https://github.com/JonathanUhler/Period-Countdown/issues/new?assignees=&labels=bug&template=bug-report.md&title=%5BBug%5D+). \
 Try to include:
 * A clear title
 * A detailed description of the bug (observed behavior) and what you expect the behavior should have been
