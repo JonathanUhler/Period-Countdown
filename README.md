@@ -108,7 +108,7 @@ A feature to display some or all of the remaining periods in the day (shows a fu
 Choose "Disabled" to disable this feature completely. \
 Choose "Next Class" to display information for just the next class. \
 Choose "All Classes" to display information for all classes remaining in the current day. \
-The format of upcoming periods is "<Name> | <Start>-<End> [| <Teacher>, <Room>]". The teacher/room information in "[ ]" is only displayed if it is not blank in Class Information.
+The format of upcoming periods is "\<Name\> | \<Start\>-\<End\> [| \<Teacher\>, \<Room\>]". The teacher/room information in "[ ]" is only displayed if it is not blank in Class Information.
 
 ## Theme
 Allows a custom color for the app. \
@@ -128,7 +128,7 @@ This feature reads all the available fonts on your system, so choices may vary. 
 
 ## I don't go to MVHS, how do I use my school's bell schedule?
 If you do not attend Mountain View High School or another supported institution, you can either:
-1) Submit a [GitHub issue](https://github.com/JonathanUhler/Period-Countdown/issues/new) requesting the addition of a school, and that JSON data will be added as soon as possible, or
+1) Submit an [issue](https://github.com/JonathanUhler/Period-Countdown/issues/new?assignees=&labels=school+data&template=school-request.md&title=%5BSchool+Request%5D+) requesting the addition of a school, and that JSON data will be added as soon as possible, or
 2) If you have some experience with JSON, you can try creating your own file (see [How do I contribute?](#how-do-i-contribute) for more details).
 
 ## How do I mark periods as free?
