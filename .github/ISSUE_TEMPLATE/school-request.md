@@ -1,7 +1,7 @@
 ---
 name: "School Request"
 about: Create a new issue with the following format when requesting a school be supported
-title: '[SCHOOL REQUEST] '
+title: '[School Request] '
 labels: 'school data'
 assignees: ''
 
