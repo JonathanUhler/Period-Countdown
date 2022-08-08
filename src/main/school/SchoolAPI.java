@@ -1,3 +1,11 @@
+// +=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
+// SchoolAPI.java
+// Period-Countdown
+//
+// Created by Jonathan Uhler
+// +=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
+
+
 package school;
 
 
@@ -8,25 +16,64 @@ import java.util.List;
 import java.io.FileNotFoundException;
 
 
+// +=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
+// public class SchoolAPI
+//
+// Interface for accessing information derived from the school json file. This includes things like
+// time remaining, upcoming periods, and the current period. More data is available from the other
+// classes in this package, but it is avised to use this API instead
+//
 public class SchoolAPI {
 
 	private SchoolYear year;
 	
 
+	// ----------------------------------------------------------------------------------------------------
+	// public SchoolAPI
+	//
 	public SchoolAPI(String jsonName) throws FileNotFoundException,
 											 IllegalArgumentException
 	{
 		this(jsonName, null);
 	}
+	// end: public SchoolAPI
 
 
+	// ----------------------------------------------------------------------------------------------------
+	// public SchoolAPI
+	//
+	// Throws exceptions upon invalid declaration of the SchoolYear object "year"
+	//
+	// Arguments--
+	//
+	//  jsonName: the name of the school json file
+	//
+	//  days:     an optional parameter to replace the "Days" field in the school json file. Can be null if
+	//            already defined in the school json file. The school json file definition also takes
+	//            precedence over this parameter
+	//
 	public SchoolAPI(String jsonName, Map<String, List<Map<String, String>>> days) throws FileNotFoundException,
 																						  IllegalArgumentException
 	{
 		this.year = new SchoolYear(SchoolJson.EXPECTED_PATH + jsonName, days);
 	}
+	// end: public SchoolAPI
 	
 
+	// ====================================================================================================
+	// public SchoolPeriod getCurrentPeriod
+	//
+	// Returns the current period
+	//
+	// Arguments--
+	//
+	//  now: a DateTime object representing the time to search for the current period
+	//
+	// Returns--
+	//
+	//  The period that the argument now falls within. Upon an invalid (out of range for the year or
+	//  null) argument, will return null
+	//
 	public SchoolPeriod getCurrentPeriod(DateTime now) {
 		if (now == null)
 			return null;
@@ -41,8 +88,22 @@ public class SchoolAPI {
 		
 		return currentDay.getPeriod(now);
 	}
+	// end: public SchoolPeriod getCurrentPeriod
 
 
+	// ====================================================================================================
+	// public SchoolPeriod getNextPeriod
+	//
+	// Returns the next period
+	//
+	// Arguments--
+	//
+	//  now: a DateTime object representing the time to search for the next period
+	//
+	// Returns--
+	//
+	//  The next period on any day for the next year. If no such period can be found, returns null
+	//
 	public SchoolPeriod getNextPeriod(DateTime now) {
 		SchoolPeriod currentPeriod = this.getCurrentPeriod(now);
 		
@@ -59,7 +120,7 @@ public class SchoolAPI {
 			DateTime walk = (DateTime) now.clone();
 
 			// Scan the next year for a valid period
-			for (int i = 0; i < Duration.DAYS_PER_YEAR; i++) {
+			for (int i = 0; i < Duration.DAYS_PER_YEAR; i++) { // i counts by days
 				SchoolPeriod nextPeriod = this.getNextPeriodToday(walk);
 				if (nextPeriod != null && nextPeriod.isCounted())
 					return nextPeriod;
@@ -75,20 +136,53 @@ public class SchoolAPI {
 			return null;
 		}
 	}
+	// end: public SchoolPeriod getNextPeriod
 
 
+	// ====================================================================================================
+	// public SchoolPeriod getNextPeriodToday
+	//
+	// Returns the next period today
+	//
+	// Arguments--
+	//
+	//  now: a DateTime object representing the time and day to search for the next period
+	//
+	// Returns--
+	//
+	//  The next period in the current day (as defined by the argument now). If no such period exists,
+	//  returns null
+	//
 	public SchoolPeriod getNextPeriodToday(DateTime now) {
+		// If the current period is null or the last period in the day, there is not another valid
+		// period today
 		SchoolPeriod currentPeriod = this.getCurrentPeriod(now);
-		if (currentPeriod == null)
+		if (currentPeriod == null || currentPeriod.isLast())
 			return null;
-		
+
+		// If the current period is not the last one, get the next period (which by definition is
+		// at or before the last period today)
 		DateTime nextPeriodStart = currentPeriod.getEndTime(now);
 		return this.getCurrentPeriod(nextPeriodStart);
 	}
+	// end: public SchoolPeriod getNextPeriodToday
 
 
+	// ====================================================================================================
+	// public Duration getTimeRemaining
+	//
 	// Unconditionally gets time until the start of the next period to be counted, even if a match
 	// is not found on the current day specified by the argument now.
+	//
+	// Arguments--
+	//
+	//  now: the current time (start time for the duration until the start of the next period)
+	//
+	// Returns--
+	//
+	//  A Duration object representing the time until the next period. If no period can be found with the
+	//  next year (as limited by getNextPeriod(DateTime)), returns null
+	//
 	public Duration getTimeRemaining(DateTime now) {
 		DateTime walk = (DateTime) now.clone();
 
@@ -118,5 +212,7 @@ public class SchoolAPI {
 			
 		return null;
 	}
+	// end: public Duration getTimeRemaining
 	
 }
+// end: public class SchoolAPI

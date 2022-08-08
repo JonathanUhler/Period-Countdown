@@ -1,3 +1,11 @@
+// +=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
+// DateTime.java
+// Period-Countdown
+//
+// Created by Jonathan Uhler
+// +=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
+
+
 package util;
 
 
@@ -6,6 +14,12 @@ import java.util.TimeZone;
 import java.util.Locale;
 
 
+// +=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
+// public class DateTime extends GregorianCalendar
+//
+// Wrapper for the Java Calendar class that includes extra utilites for constructing based on the
+// information accessible from the json files and comparing with the concept of day and week tags
+//
 public class DateTime extends GregorianCalendar {
 
 	public static final String DATE_DELIMITER = "-";
@@ -22,28 +36,86 @@ public class DateTime extends GregorianCalendar {
 	public static final String DATE_TIME_FORMAT = DATE_FORMAT + DATE_TIME_DELIMITER + TIME_FORMAT;
 
 
+	// ----------------------------------------------------------------------------------------------------
+	// public DateTime
+	//
 	public DateTime() {
 		super();
 	}
+	// end: public DateTime
 
 
+	// ----------------------------------------------------------------------------------------------------
+	// public DateTime
+	//
+	// Overriden constructor of the GregorianCalendar class, but not used in the base version of
+	// Period-Countdown
+	//
 	public DateTime(TimeZone zone, Locale aLocale) {
 		super(zone, aLocale);
 	}
+	// end: public DateTime
 	
 
+	// ----------------------------------------------------------------------------------------------------
+	// public DateTime
+	//
+	// Arguments--
+	//
+	//  year:   the 4-digit (at least for the next 8000 years) year
+	//
+	//  month:  the month of the year from 1-12
+	//
+	//  day:    the day of the month from 0-[28-31]
+	//
+	//  hour:   the hour of the day from 0-23
+	//
+	//  minute: the minute of the time from 0-59
+	//
+	//  second: the second of the time from 0-59
+	//
+	//  ms:     the millisecond of the time from 0-999
+	//
 	public DateTime(int year, int month, int day, int hour, int minute, int second, int ms) {
 		super(year, month - 1, day, hour, minute, second); // -1900/-1 for weird alignments in GregorianCalendar
 		this.set(DateTime.MILLISECOND, ms);
 		this.set(DateTime.ZONE_OFFSET, this.getTimeZone().getRawOffset());
 		this.set(DateTime.DST_OFFSET, this.getTimeZone().getDSTSavings());
 	}
+	// end: public DateTime
 
 
-	public static DateTime getInstance(String tag) {
+	// ====================================================================================================
+	// public static DateTime getInstance
+	//
+	// Factory-style constructor. Constructs and returns a DateTime object based on a string tag in one
+	// of two forms.
+	//
+	// Arguments--
+	//
+	//  tag: the string date/time to build a DateTime object from. Must be in one of the following formats
+	//       and must be a valid date and time (including leap years)
+	//       - YYYY-MM-DD, or
+	//       - YYYY-MM-DDTHH:MM:SS:mmm, where
+	//
+	//       - Y = year
+	//       - M = month, minute
+	//       - D = day
+	//       - H = hour
+	//       - m = millisecond
+	//       - "-" = literal char
+	//       - "T" = literal char
+	//       - ":" = literal char
+	//
+	// Returns--
+	//
+	//  A DateTime object if one could be constructed. Throws an exception if the argument tag is invalid
+	//
+	public static DateTime getInstance(String tag) throws IllegalArgumentException {
 		if (!tag.matches(DateTime.DATE_TIME_FORMAT) &&
 			!tag.matches(DateTime.DATE_FORMAT))
-			return null;
+			throw new IllegalArgumentException(Log.format(Log.ERROR, "DateTime",
+														  "getInstance called with invalid tag: " + tag));
 		
 		// Note: Parsing as integers is safe after a match has been confirmed. The regex check confirms the
 		//       sections are valid integers in range
@@ -58,12 +130,14 @@ public class DateTime extends GregorianCalendar {
 
 		String dateTag = tag;
 		String timeTag = tag;
+		// If the argument matches the whole format, split into the date and time tags individually
 		if (tag.matches(DateTime.DATE_TIME_FORMAT)) {
 			String[] dateTimeTagSplit = tag.split(DateTime.DATE_TIME_DELIMITER);
 			dateTag = dateTimeTagSplit[0];
 			timeTag = dateTimeTagSplit[1];
 		}
 
+		// Process the date and time components separately
 		if (dateTag.matches(DateTime.DATE_FORMAT)) {
 			String[] dateTagSplit = dateTag.split(DateTime.DATE_DELIMITER);
 			year = Integer.parseInt(dateTagSplit[0]);
@@ -80,20 +154,11 @@ public class DateTime extends GregorianCalendar {
 
 		return new DateTime(year, month, day, hour, minute, second, ms);
 	}
+	// end: public static DateTime getInstance
 
 
-	@Override
-	public void add(int field, int amount) {
-		if (field < 0 || field >= FIELD_COUNT) {
-			Log.gfxmsg("Internal Error", "DateTime.add called with invalid field\nfield: " + field);
-			return;
-		}
-		
-		int prevValue = this.get(field);
-		this.set(field, prevValue + amount);
-	}
-
-
+	// ====================================================================================================
+	// GET methods
 	public long getEpoch() {
 		return this.getTimeInMillis();
 	}
@@ -102,22 +167,6 @@ public class DateTime extends GregorianCalendar {
 	public int getDayIndex() {
 		return this.get(DateTime.DAY_OF_WEEK) - 1; // Days Sun-Sat are 1 aligned, so subtract 1 to get an index
 	}
-
-
-	public void setEpoch(long epoch) {
-		this.setTimeInMillis(epoch);
-	}
-
-
-	public void setToMidnight() {
-		this.set(DateTime.AM_PM, DateTime.AM);
-		this.set(DateTime.HOUR, 0);
-		this.set(DateTime.HOUR_OF_DAY, 0);
-		this.set(DateTime.MINUTE, 0);
-		this.set(DateTime.SECOND, 0);
-		this.set(DateTime.MILLISECOND, 0);
-	}
-
 
 	public String getDayTag() {
 		int year = this.get(DateTime.YEAR);
@@ -151,5 +200,36 @@ public class DateTime extends GregorianCalendar {
 	public String getWeekTag() {
 		return this.getTagForClosest(DateTime.SUNDAY);
 	}
+	// end: GET methods
+
+
+	// ====================================================================================================
+	// SET methods
+	public void setEpoch(long epoch) {
+		this.setTimeInMillis(epoch);
+	}
+
+
+	public void setToMidnight() {
+		this.set(DateTime.AM_PM, DateTime.AM);
+		this.set(DateTime.HOUR, 0);
+		this.set(DateTime.HOUR_OF_DAY, 0);
+		this.set(DateTime.MINUTE, 0);
+		this.set(DateTime.SECOND, 0);
+		this.set(DateTime.MILLISECOND, 0);
+	}
+	
+	@Override
+	public void add(int field, int amount) {
+		if (field < 0 || field >= FIELD_COUNT) {
+			Log.gfxmsg("Internal Error", "DateTime.add called with invalid field\nfield: " + field);
+			return;
+		}
+		
+		int prevValue = this.get(field);
+		this.set(field, prevValue + amount);
+	}
+	// end: SET methods
 	
 }
+// end: public class DateTime

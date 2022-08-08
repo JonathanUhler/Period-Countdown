@@ -51,8 +51,8 @@ if [ "$target" = "mac" ]; then
 		--dest release \
 		--verbose \
 		--icon src/assets/icon.icns \
-		--main-jar PeriodCountdown-native.jar \
-		--main-class natfe.PeriodCountdown \
+		--main-jar PeriodCountdown-desktop.jar \
+		--main-class desktop.PCDesktopApp \
 		--mac-package-name "Period Countdown"
 elif [ "$target" = "linux" ]; then
 	jpackage \
@@ -62,8 +62,8 @@ elif [ "$target" = "linux" ]; then
 		--dest release \
 		--verbose \
 		--icon src/assets/icon.png \
-		--main-jar PeriodCountdown-native.jar \
-		--main-class natfe.PeriodCountdown
+		--main-jar PeriodCountdown-desktop.jar \
+		--main-class desktop.PCDesktopApp
 elif [ "$target" = "windows" ]; then
 	jpackage \
 		--name PeriodCountdown \
@@ -72,8 +72,8 @@ elif [ "$target" = "windows" ]; then
 		--dest release \
 		--verbose \
 		--icon src/assets/icon.ico \
-		--main-jar PeriodCountdown-native.jar \
-		--main-class natfe.PeriodCountdown
+		--main-jar PeriodCountdown-desktop.jar \
+		--main-class desktop.PCDesktopApp
 elif [ "$target" = "web" ]; then
 	mkdir -p "release/PeriodCountdown-$version-web/"
 	rm -rf "release/PeriodCountdown-$version-web/"

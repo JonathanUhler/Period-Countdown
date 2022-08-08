@@ -1,3 +1,11 @@
+// +=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
+// SchoolJson.java
+// Period-Countdown
+//
+// Created by Jonathan Uhler
+// +=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
+
+
 package school;
 
 
@@ -6,6 +14,11 @@ import java.util.List;
 import com.google.gson.annotations.SerializedName;
 
 
+// +=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
+// public class SchoolJson
+//
+// Java representation of the entire school json file
+//
 public class SchoolJson {
 
 	// +=+= CONSTANTS =+=+
@@ -48,3 +61,4 @@ public class SchoolJson {
 	// end: JSON DATA
 
 }
+// end: public class SchoolJson

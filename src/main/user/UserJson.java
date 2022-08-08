@@ -1,3 +1,11 @@
+// +=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
+// UserJson.java
+// Period-Countdown
+//
+// Created by Jonathan Uhler
+// +=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
+
+
 package user;
 
 
@@ -6,6 +14,11 @@ import java.util.List;
 import com.google.gson.annotations.SerializedName;
 
 
+// +=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
+// public class UserJson
+//
+// Java representation of the raw user json file
+//
 public class UserJson {
 
 	// +=+= CONSTANTS =+=+
@@ -58,3 +71,4 @@ public class UserJson {
 	// end: JSON DATA 
 
 }
+// end: public class UserJson

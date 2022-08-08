@@ -1,3 +1,11 @@
+// +=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
+// UserAPI.java
+// Period-Countdown
+//
+// Created by Jonathan Uhler
+// +=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
+
+
 package user;
 
 
@@ -18,13 +26,24 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonSyntaxException;
 import com.google.gson.stream.JsonReader;
 
-
+// +=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
+// public class UserAPI
+//
+// API interface to access the information in the user json file
+//
 public class UserAPI {
 	
 	private String jsonPath;
 	private UserJson json;
 	
 
+	// ----------------------------------------------------------------------------------------------------
+	// public UserAPI
+	//
+	// Arguments--
+	//
+	//  jsonName: name of the user json file
+	//
 	public UserAPI(String jsonName) throws FileNotFoundException,
 										   IllegalArgumentException
 	{
@@ -65,7 +84,8 @@ public class UserAPI {
 			}
 		}
 
-		
+
+		// Read the user json file once it is certain the local file structure has been created
 		try {
 			userReader = new FileReader(this.jsonPath);
 			this.json = gson.fromJson(userReader, UserJson.class);
@@ -74,10 +94,15 @@ public class UserAPI {
 			throw new IllegalArgumentException(Log.format(Log.ERROR, "UserAPI", "json cannot be parsed: " + e));
 		}
 
+		// Validate the json data
 		this.validate();
 	}
 
-
+	// ====================================================================================================
+	// private void validate
+	//
+	// Validates the user json file
+	//
 	private void validate() throws IllegalArgumentException {
 		if (this.json == null)
 			throw new IllegalArgumentException(Log.format(Log.ERROR, "UserAPI", "json is null, cannot validate"));
@@ -100,32 +125,42 @@ public class UserAPI {
 				throw new IllegalArgumentException(Log.format(Log.ERROR, "UserAPI", "period missing key: " + period));
 		}
 	}
+	// end: private void validate
+	
 
-
+	// ====================================================================================================
+	// public Map<String, List<Map<String, String>>> attemptGetDays
+	//
+	// Attempts to get the definition for the "Days" structure present in the school json file from the
+	// user file instead. This is useful for institutions where a generic school file will not work
+	// (like universities where each student has different "bell" schedules). The structure returned
+	// is the raw structure of the "Days" definition
+	//
+	// Returns--
+	//
+	//  (See function description above)
 	public Map<String, List<Map<String, String>>> attemptGetDays() {
 		return this.json.days;
 	}
+	// end: public Map<String, List<Map<String, String>>> attemptGetDays
 
 
+	// ====================================================================================================
+	// GET methods
 	public String getSchoolFile() {
 		return this.json.settings.get(UserJson.SCHOOL_JSON);
 	}
-
-
-	public void setSchoolFile(String file) {
-		if (!file.matches(UserJson.FILE_NAME_REGEX) || file == null)
-			return;
-		this.json.settings.put(UserJson.SCHOOL_JSON, file);
-		this.updateJsonFile();
-	}
-
 
 	public ArrayList<String> getPeriodKeys() {
 		return new ArrayList<>(this.json.periods.keySet());
 	}
 
 
+	// Returns an UserPeriod object based on a SchoolPeriod object. Uses the type of the SchoolPeriod to index
+	// the data in the user json file
 	public UserPeriod getPeriod(SchoolPeriod schoolPeriod) {
+		// Null period means nothing could be found for the next year, so the current time is probably
+		// out of range for the school json file
 		if (schoolPeriod == null)
 			return new UserPeriod("Summer", "Free");
 
@@ -154,23 +189,9 @@ public class UserAPI {
 		return new UserPeriod(userPeriodName, schoolPeriod.getName(), userPeriodTeacher, userPeriodRoom);
 	}
 
-
-	public void setPeriod(String key, Map<String, String> value) {
-		this.json.periods.put(key, value);
-		this.updateJsonFile();
-	}
-
-
 	public String getNextUp() {
 		return this.json.settings.get(UserJson.NEXT_UP);
 	}
-
-
-	public void setNextUp(String verbosity) {
-		this.json.settings.put(UserJson.NEXT_UP, verbosity);
-		this.updateJsonFile();
-	}
-
 
 	public int getTheme() {
 		String rgbStr = this.json.settings.get(UserJson.THEME);
@@ -182,6 +203,41 @@ public class UserAPI {
 		}
 	}
 
+	public String getFont() {
+		return this.json.settings.get(UserJson.FONT);
+	}
+	// end: GET methods
+
+
+	// ====================================================================================================
+	// SET methods
+	//
+	// Each of these methods calls the updateJsonFile() method to store the local changes to this.json
+	// into the user's file
+	//
+	public void setSchoolFile(String file) {
+		if (!file.matches(UserJson.FILE_NAME_REGEX) || file == null)
+			return;
+		this.json.settings.put(UserJson.SCHOOL_JSON, file);
+		this.updateJsonFile();
+	}
+
+	public void setPeriod(String key, Map<String, String> value) {
+		if (key == null ||
+			value == null ||
+			!value.containsKey(UserJson.TEACHER) ||
+			!value.containsKey(UserJson.ROOM) ||
+			!value.containsKey(UserJson.NAME))
+			return;
+		
+		this.json.periods.put(key, value);
+		this.updateJsonFile();
+	}
+
+	public void setNextUp(String verbosity) {
+		this.json.settings.put(UserJson.NEXT_UP, verbosity);
+		this.updateJsonFile();
+	}
 
 	public void setTheme(int r, int g, int b) {
 		if (r < 0 || r > 255 || g < 0 || g > 255 || b < 0 || b > 255) {
@@ -196,18 +252,17 @@ public class UserAPI {
 		this.updateJsonFile();
 	}
 
-
-	public String getFont() {
-		return this.json.settings.get(UserJson.FONT);
-	}
-
-
 	public void setFont(String font) {
 		this.json.settings.put(UserJson.FONT, font);
 		this.updateJsonFile();
 	}
+	// end: SET methods
 
-
+	// ====================================================================================================
+	// private void updateJsonFile
+	//
+	// Updates the user's json file based on this.json
+	//
 	private void updateJsonFile() {
 		try {
 			FileWriter writer = new FileWriter(this.jsonPath);
@@ -220,5 +275,7 @@ public class UserAPI {
 			return;
 		}
 	}
+	// end: private void updateJsonFile
 
 }
+// end: public class UserAPI

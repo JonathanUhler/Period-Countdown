@@ -8,6 +8,16 @@ All notable changes to Period-Countdown should be documented in this file.
 ### Fixed
 ### Changed
 
+## [3.0.3] - 8/8/22
+### Added
+* Add in-line documentation
+* Add miscellaneous precondition checks
+### Fixed
+### Changed
+* Prefer the term "desktop" over "native" because "native" is a reserved keyword in java
+  * Change package names, scripts, and manifests to follow this convention
+* Week exceptions in the school json files can now be day tags within some week, although week tags are still preferred
+
 ## [3.0.2] - 8/7/22
 ### Added
 * Added option to change font based on available fonts in the system
