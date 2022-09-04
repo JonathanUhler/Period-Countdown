@@ -47,13 +47,13 @@ In order to allow Period-Countdown to be found from the search menu, do the foll
 ### compile.sh
 Compiles the java source code into the ```obj``` directory. \
 Usage: ./compile.sh \[options\] \
-       \[-t <target>\]    \(Builds for "native" or "web"\) \
+       \[-t <target>\]    \(Builds for "desktop" or "web"\) \
 	   \[-h\]             \(Displays a help message and exits\)
 
 ### jar.sh
 Builds a jar file in ```bin``` from the compiled source in ```obj```. \
 Usage: ./jar.sh \[options\] \
-       \[-t <target>\]    \(Builds for "native" or "web"\) \
+       \[-t <target>\]    \(Builds for "desktop" or "web"\) \
 	   \[-h\]             \(Displays a help message and exits\)
 
 ### build.sh
