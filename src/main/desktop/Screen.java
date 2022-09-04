@@ -12,6 +12,7 @@ package desktop;
 import util.Log;
 import util.DateTime;
 import util.Duration;
+import util.Tools;
 import school.SchoolAPI;
 import school.SchoolPeriod;
 import school.SchoolJson;
@@ -100,6 +101,12 @@ public class Screen extends JPanel {
 		if (this.userAPI == null)
 			return null;
 		return this.userAPI.getSchoolFile();
+	}
+
+	protected ArrayList<String> getAvailableSchools() {
+		if (this.userAPI == null)
+			return new ArrayList<>();
+		return this.userAPI.getAvailableSchools();
 	}
 
 	protected String getUserNextUp() {
@@ -222,34 +229,7 @@ public class Screen extends JPanel {
 
 		// Next up information
 		String nextUp = this.userAPI.getNextUp();
-		ArrayList<String> nextPeriods = new ArrayList<>();
-		
-		SchoolPeriod nextPeriod = this.schoolAPI.getNextPeriodToday(now);
-		while (nextPeriod != null) {
-			if (nextUp.equals(UserJson.NEXT_UP_DISABLED))
-				break;
-
-			// Get the class (with user data like teacher and room) based on the generic period
-			UserPeriod nextClass = null;
-			if (nextPeriod.isCounted())
-				nextClass = this.userAPI.getPeriod(nextPeriod);
-
-			// Format the string
-			// Default periodString is "<period/class name> | <start>-<end>"
-			String periodString = ((nextClass == null) ? nextPeriod.getName() : nextClass.getName()) + " | " +
-				nextPeriod.getStartTimeString() + "-" + nextPeriod.getEndTimeString();
-			// If the school period has a class during it add " | <teacher>, <room>"
-			if (!nextPeriod.isFree() && nextClass != null && !nextClass.isFree())
-				periodString += " | " + nextClass.getTeacher() + ", " + nextClass.getRoom();
-			// If the period has something during it (a period, lunch, brunch, etc.) add it to the list
-			if (nextPeriod.isCounted())
-				nextPeriods.add(periodString);
-
-			// Get next period
-			nextPeriod = this.schoolAPI.getNextPeriodToday(nextPeriod.getStartTime(now));
-			if (nextUp.equals(UserJson.NEXT_UP_ONE))
-				break;
-		}
+		ArrayList<String> nextPeriods = Tools.getNextUpList(this.schoolAPI, this.userAPI, now);
 
 		// Displaying
 		this.MARGIN = this.getSize().width / 40; // Update margin size if the screen has changed size

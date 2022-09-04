@@ -9,6 +9,14 @@
 package util;
 
 
+import school.SchoolAPI;
+import school.SchoolPeriod;
+import user.UserAPI;
+import user.UserPeriod;
+import user.UserJson;
+import java.util.ArrayList;
+
+
 // +=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
 // public class Tools
 //
@@ -36,6 +44,65 @@ public class Tools {
 		return String.format("%" + width + "s", str).replace(' ', character);
 	}
 	// end: public static String pad
+
+
+	public static ArrayList<String> getNextUpList(SchoolAPI schoolAPI, UserAPI userAPI) {
+		return Tools.getNextUpList(schoolAPI, userAPI, new DateTime());
+	}
+	
+
+	public static ArrayList<String> getNextUpList(SchoolAPI schoolAPI, UserAPI userAPI, DateTime now) {
+		if (schoolAPI == null || userAPI == null)
+			return new ArrayList<>();
+		
+		String nextUp = userAPI.getNextUp();
+		ArrayList<String> nextUpList = new ArrayList<>();
+		
+		SchoolPeriod nextPeriod = schoolAPI.getNextPeriodToday(now);
+		while (nextPeriod != null) {
+			if (nextUp.equals(UserJson.NEXT_UP_DISABLED))
+				break;
+
+			// Get the class (with user data like teacher and room) based on the generic period, if that
+			// generic period can have a class
+			UserPeriod nextClass = null;
+			if (nextPeriod.isCounted())
+				nextClass = userAPI.getPeriod(nextPeriod);
+
+			// Format the string
+			// Default periodString is "<period/class name> | <start>-<end>"
+			String periodString =
+				((nextClass == null) ? nextPeriod.getName() : nextClass.getName()) +
+				" | " + nextPeriod.getStartTimeString() +
+				"-" + nextPeriod.getEndTimeString();
+			
+			// If the school period has a class during it add " | <teacher>, <room>"
+			if (!nextPeriod.isFree() && nextClass != null && !nextClass.isFree()) {
+				String teacher = nextClass.getTeacher();
+				String room = nextClass.getRoom();
+
+				// Format based on what data is available (either one, the other, both, or neither)
+				if (!teacher.equals("") && room.equals(""))
+					periodString += " | " + teacher;
+				else if (!room.equals("") && teacher.equals(""))
+					periodString += " | " + room;
+				else if (!room.equals("") && !teacher.equals(""))
+					periodString += " | " + teacher + ", " + room;
+			}
+			// If the period has something during it (a period, lunch, brunch, etc.) add it to the list
+			if (nextPeriod.isCounted())
+				nextUpList.add(periodString);
+
+			// Get next period
+			nextPeriod = schoolAPI.getNextPeriodToday(nextPeriod.getStartTime(now));
+
+			// If only the next period should be shown and that period has been found, skip the rest of the search
+			if (nextUp.equals(UserJson.NEXT_UP_ONE) && nextUpList.size() == 1)
+				break;
+		}
+
+		return nextUpList;
+	}
 
 }
 // end: public class Tools

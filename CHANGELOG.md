@@ -8,6 +8,20 @@ All notable changes to Period-Countdown should be documented in this file.
 ### Fixed
 ### Changed
 
+## [3.1.0] - 9/4/22
+### Added
+* Add general framework for web-server
+  * Add specification for web communcation to documents/
+  * Create a separate "main" package for the web build (web.transport instead of desktop) and a Java transport system
+  * Create a Python web server to display generic data (from default User.json and MVHS_School.json) for now
+    * Future releases will likely include database functionality, allowing the same features as the native app
+* Add a constructor flag to UserAPI that allows loading from the local User.json packaged with the jar file
+### Fixed
+* Fix a problem with the last class of the day not displaying in "Next Class" mode for the Next Up feature
+* Fix the day index check in SchoolWeek.getDay() to correctly be [0, 6] instead of [1, 6]
+* Fix a minor issue with the Next Up display. If name, room, or both are missing and Next Up is enabled, the displayed format will be adjusted
+### Changed
+
 ## [3.0.3] - 8/8/22
 ### Added
 * Add in-line documentation

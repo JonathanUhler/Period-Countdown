@@ -77,11 +77,11 @@ public class SchoolAPI {
 	public SchoolPeriod getCurrentPeriod(DateTime now) {
 		if (now == null)
 			return null;
-		
+
 		SchoolWeek currentWeek = this.year.getWeek(now);
 		if (currentWeek == null)
 			return null;
-		
+
 		SchoolDay currentDay = currentWeek.getDay(now);
 		if (currentDay == null)
 			return null;
@@ -188,7 +188,14 @@ public class SchoolAPI {
 
 		// Scan the next year for a valid period
 		for (int i = 0; i < Duration.DAYS_PER_YEAR; i++) {
+			SchoolPeriod currentPeriod = this.getCurrentPeriod(walk);
 			SchoolPeriod nextPeriod = this.getNextPeriodToday(walk);
+
+			// If the next period is not counted but the current one is, then the time remaining is not until
+			// the next counted period, but until the end of the current period
+			if (currentPeriod.isCounted() && !nextPeriod.isCounted())
+				return new Duration(now, currentPeriod.getEndTime(walk));
+			
 			// Loop through the periods today to check for the next counted period in this day
 			while (nextPeriod != null && !nextPeriod.isLast()) {
 				if (nextPeriod != null && nextPeriod.isCounted())
@@ -200,6 +207,7 @@ public class SchoolAPI {
 				// found period, then get the new current period and check again
 				walk = nextPeriod.getEndTime(walk);
 				nextPeriod = this.getCurrentPeriod(walk);
+				System.out.println(nextPeriod + " --> " + nextPeriod.isCounted());
 			}
 
 			// If no period was found today, increase to the next day. Set the walk time to the very start

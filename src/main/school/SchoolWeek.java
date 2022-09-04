@@ -59,7 +59,7 @@ public class SchoolWeek {
 			return null;
 		
 		int dayIndex = when.getDayIndex();
-		if (dayIndex > 0 && dayIndex < 7)
+		if (dayIndex >= 0 && dayIndex < 7)
 			return this.days.get(dayIndex);
 		return null;
 	}

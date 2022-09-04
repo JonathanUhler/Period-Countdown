@@ -26,6 +26,7 @@ import javax.swing.JOptionPane;
 //
 public class Log {
 
+	private static final boolean ENABLE_LOG = false;
 	private static final String STDLOG_FILE = "PeriodCountdown.log";
 
 
@@ -135,16 +136,18 @@ public class Log {
 			Log.stdout(level, location, message);
 
 		// Write to the log file
-		try (BufferedWriter writer = Files.newBufferedWriter(Paths.get(Log.STDLOG_FILE),
-														 StandardCharsets.UTF_8,
-														 StandardOpenOption.APPEND,
-														 StandardOpenOption.CREATE)) {
-			if (level < Log.DEBUG || level > Log.FATAL)
-				writer.write("Log.stdout (" + location + ")  " + message + "\n");
-			else
-				writer.write(levelToString[level] + " (" + location + ")  " + message + "\n");
-		} catch (IOException e) {
-			e.printStackTrace();
+		if (Log.ENABLE_LOG) {
+			try (BufferedWriter writer = Files.newBufferedWriter(Paths.get(Log.STDLOG_FILE),
+																 StandardCharsets.UTF_8,
+																 StandardOpenOption.APPEND,
+																 StandardOpenOption.CREATE)) {
+				if (level < Log.DEBUG || level > Log.FATAL)
+					writer.write("Log.stdout (" + location + ")  " + message + "\n");
+				else
+					writer.write(levelToString[level] + " (" + location + ")  " + message + "\n");
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
 		}
 
 		// If the message was a fatal error, assume there is no way to recover and close to program to

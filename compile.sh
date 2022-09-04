@@ -6,7 +6,7 @@ target="desktop"
 usage() {
 	echo "Usage: $0 [options]";
 	echo "       [-t <target>]    (Builds for \"desktop\" or \"web\". Default $target)"
-	}
+}
 
 while getopts "ht:" flag
 do

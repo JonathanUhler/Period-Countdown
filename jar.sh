@@ -6,7 +6,7 @@ target="desktop"
 usage() {
 	echo "Usage: $0 [options]";
 	echo "       [-t <target>]    (Builds for \"desktop\" or \"web\". Default $target)"
-	}
+}
 
 while getopts "ht:" flag
 do
@@ -35,9 +35,12 @@ if [ "$target" = "desktop" ]; then
 	mkdir bin/lib
 	cp src/lib/gson-2.2.2.jar bin/lib
 elif [ "$target" = "web" ]; then
-	cp -a src/lib/ bin/lib
+	cp -a src/lib bin/lib
 	echo "[jar.sh] Copying python files to bin/ for web build"
-	cp -a src/main/web/python bin/python
+	cp -a src/main/web/server bin/server
+	echo "[jar.sh] Copying key generation scripts for web build"
+	mkdir bin/keys
+	cp $(find src/main/web/keys -name '*.sh') bin/keys # Ignore any actual key/cert files
 else
 	echo "[jar.sh] Target $target not recognized, cannot package dependencies"
 	exit 1

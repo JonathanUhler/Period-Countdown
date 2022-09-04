@@ -2,6 +2,11 @@
 .DS_Store
 *~
 obj/
+*.log
 
 # Additional files to ignore
 deprecated/*
+documentation/AWS-Setup.txt
+*.pem
+*.jks
+run_test.sh

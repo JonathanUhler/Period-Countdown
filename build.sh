@@ -4,7 +4,7 @@
 usage() {
 	echo "Usage: $0 [options]";
 	echo "       [-t <target>]    (Builds for \"mac\", \"linux\", \"windows\", or \"web\")"
-	}
+}
 
 while getopts "ht:" flag
 do

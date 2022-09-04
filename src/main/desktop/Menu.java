@@ -15,12 +15,9 @@ import user.UserJson;
 import user.UserPeriod;
 import java.io.IOException;
 import java.io.File;
-import java.util.Enumeration;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.HashMap;
-import java.util.jar.JarFile;
-import java.util.jar.JarEntry;
 import java.awt.Dimension;
 import java.awt.Color;
 import java.awt.GraphicsEnvironment;
@@ -181,33 +178,7 @@ public class Menu extends JMenuBar {
 	// with the jar file
 	//
 	private void schoolInformation() {
-		// Get and load the path to the running jar file, independent of the working directory
-		String jarPath = PCDesktopApp.class.getProtectionDomain().getCodeSource().getLocation().getPath();
-		JarFile jarFile = null;
-		try {
-			jarFile = new JarFile(jarPath);
-		}
-		catch (IOException e) {
-			Log.gfxmsg("Internal Error", "Cannot load jarfile resources: " + e);
-			return;
-		}
-		
-		ArrayList<String> schoolJsonNames = new ArrayList<>();
-		// Read all of the resource entries in the jar file
-		Enumeration<JarEntry> jarResources = jarFile.entries();
-		while (jarResources.hasMoreElements()) {
-			JarEntry jarResource = jarResources.nextElement();
-			String resourceName = jarResource.getName();
-			// If the resource is not the User.json file and otherwise matches the json file regex, then
-			// add just the file name (SchoolJson.EXPECTED_PATH == "/assets/json", which is removed to just
-			// get the name of the file)
-			if (!resourceName.endsWith(UserJson.DEFAULT_FILE) && resourceName.matches(UserJson.FILE_NAME_REGEX)) {
-				if (resourceName.startsWith(SchoolJson.EXPECTED_PATH))
-					schoolJsonNames.add(resourceName.substring(SchoolJson.EXPECTED_PATH.length()));
-				else
-					schoolJsonNames.add(resourceName);
-			}
-		}
+		ArrayList<String> schoolJsonNames = this.screen.getAvailableSchools();
 
 		// Main panel
 		JPanel panel = new JPanel();

@@ -1,0 +1,44 @@
+<!doctype html>
+<html>
+  <head>
+	<title>Period Countdown</title>
+	<link rel= "stylesheet" type= "text/css" href= "{{ url_for('static', filename='styles/index.css') }}">
+
+	<meta http-equiv="refresh" content="1">
+  </head>
+
+  
+  <body>
+	<div id="status">
+	  <p>{{ status }}</p>
+	</div>
+	
+	<div id="time_remaining">
+	  <p>{{ time_remaining }}</p>
+	</div>
+
+	<div id="next_up">
+	  {% if (next_up_list != none) %}
+	  <table>
+		<td>
+		  <b>Upcoming Periods</b>
+		</td>
+		
+		<tbody>
+		  {% if (next_up_list|length == 0) %}
+		  <tr>
+			<td>No more classes today</td>
+		  </tr>
+		  {% endif %}
+		  
+		  {% for next_class in next_up_list %}
+		  <tr>
+			<td>{{ next_class }}</td>
+		  </tr>
+		  {% endfor %}
+		</tbody>
+	  </table>
+	  {% endif %}
+	</div>
+  </body>
+</html>

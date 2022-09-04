@@ -37,7 +37,7 @@ public class SchoolPeriod {
 	//          - "Nothing": an event used to fill time. Does not matter and should NOT be counted
 	//            (e.g. passing periods, before/after school starts)
 	//
-	//  name:  the namer of the period. Defined by the programmer. Can be anything
+	//  name:  the name of the period. Defined by the programmer. Can be anything
 	//
 	//  start: the start time of the period in format HH:MM
 	//

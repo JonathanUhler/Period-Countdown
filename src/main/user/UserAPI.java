@@ -11,9 +11,11 @@ package user;
 
 import util.Log;
 import school.SchoolPeriod;
+import school.SchoolJson;
 import java.util.Map;
 import java.util.List;
 import java.util.ArrayList;
+import java.util.Enumeration;
 import java.io.File;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -21,10 +23,12 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.jar.JarFile;
+import java.util.jar.JarEntry;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonSyntaxException;
-import com.google.gson.stream.JsonReader;
+
 
 // +=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
 // public class UserAPI
@@ -35,6 +39,17 @@ public class UserAPI {
 	
 	private String jsonPath;
 	private UserJson json;
+
+
+	// ----------------------------------------------------------------------------------------------------
+	// public UserAPI
+	//
+	public UserAPI(String jsonName) throws FileNotFoundException,
+										   IllegalArgumentException
+	{
+		this(jsonName, false);
+	}
+	// end: public UserAPI
 	
 
 	// ----------------------------------------------------------------------------------------------------
@@ -44,8 +59,54 @@ public class UserAPI {
 	//
 	//  jsonName: name of the user json file
 	//
-	public UserAPI(String jsonName) throws FileNotFoundException,
-										   IllegalArgumentException
+	//  useLocal: whether to use the local (built with the jar) User.json file or the stored file
+	//
+	public UserAPI(String jsonName, boolean useLocal) throws FileNotFoundException,
+															 IllegalArgumentException
+	{
+		if (useLocal)
+			this.loadLocal(jsonName);
+		else
+			this.loadStored(jsonName);
+
+
+		// Validate the json data
+		this.validate();
+	}
+	// end: public UserAPI
+
+
+	// ----------------------------------------------------------------------------------------------------
+	// public UserAPI
+	//
+	// Arguments--
+	//
+	//  json: a pre-prepared UserJson object
+	//
+	public UserAPI(UserJson json) throws IllegalArgumentException {		
+		this.json = json;
+
+		// Validate the json data
+		this.validate();
+	}
+	// end: public UserAPI
+
+
+	// ====================================================================================================
+	// private void loadStored
+	//
+	// Load a User.json file stored on the current machine
+	//
+	// Arguments--
+	//
+	//  jsonName: the name of the json file (without the path)
+	//
+	// Returns--
+	//
+	//  This method mutates the instance variables jsonPath and json directly
+	//
+	private void loadStored(String jsonName) throws FileNotFoundException,
+													IllegalArgumentException
 	{
 		Gson gson = new Gson();
 		this.jsonPath = UserJson.EXPECTED_PATH + jsonName;
@@ -55,25 +116,17 @@ public class UserAPI {
 			userReader = new FileReader(this.jsonPath);
 		}
 		catch (FileNotFoundException e) {
-			// File structure does not exist. Create it
-			// Read the User.json file kept within the jar file
-			String tempPath = UserJson.INTERNAL_PATH + jsonName;
-			InputStream tempStream = Thread.currentThread().getContextClassLoader().getResourceAsStream(tempPath);
-			if (tempStream == null)
-				throw new FileNotFoundException(Log.format(Log.ERROR, "UserAPI",
-														   "json resource \"" + this.jsonPath + "\" was null." +
-														   "\nwhile attempting to create the resource, the template " +
-														   "resource \"" + tempPath + "\" was also null"));
+			this.loadLocal(jsonName);
 
 			// Write the template User.json file to the expected path
-			InputStreamReader tempReader = new InputStreamReader(tempStream);
 			try {
+				this.jsonPath = UserJson.EXPECTED_PATH + jsonName; // Override jsonPath from the loadLocal() call
 				File userDirectory = new File(UserJson.EXPECTED_PATH);
 				if (!userDirectory.exists())
 					userDirectory.mkdir();
 				
 				FileWriter userWriter = new FileWriter(this.jsonPath);
-				gson.toJson(gson.fromJson(tempReader, UserJson.class), userWriter);
+				gson.toJson(this.json, userWriter); // this.json is set from the loadLocal() call above
 				userWriter.flush();
 				userWriter.close();
 			}
@@ -93,10 +146,47 @@ public class UserAPI {
 		catch (FileNotFoundException | JsonSyntaxException e) {
 			throw new IllegalArgumentException(Log.format(Log.ERROR, "UserAPI", "json cannot be parsed: " + e));
 		}
-
-		// Validate the json data
-		this.validate();
 	}
+	// end: private void loadStored
+
+
+	// ====================================================================================================
+	// private void loadLocal
+	//
+	// Load the default User.json file packaged with the jar archive
+	//
+	// Arguments--
+	//
+	//  jsonName: the name of the json file within the jar archive (without the path)
+	//
+	// Returns--
+	//
+	//  This method mutates the instance variables jsonPath and json directly
+	//
+	private void loadLocal(String jsonName) throws FileNotFoundException,
+												   IllegalArgumentException
+	{
+		Gson gson = new Gson();
+		this.jsonPath = UserJson.INTERNAL_PATH + jsonName;
+
+		// Get the file as a stream
+		InputStream jsonStream = Thread.currentThread().getContextClassLoader().getResourceAsStream(this.jsonPath);
+		if (jsonStream == null)
+			throw new FileNotFoundException(Log.format(Log.ERROR, "UserAPI",
+													   "json resource \"" + this.jsonPath + "\" was null"));
+
+		// Read the stream with a reader and load with GSON
+		InputStreamReader jsonReader = new InputStreamReader(jsonStream);
+
+		try {
+			this.json = gson.fromJson(jsonReader, UserJson.class);
+		}
+		catch (JsonSyntaxException e) {
+			throw new IllegalArgumentException(Log.format(Log.ERROR, "UserAPI", "json cannot be loaded locally: " + e));
+		}
+	}
+	// end: private void loadLocal
+	
 
 	// ====================================================================================================
 	// private void validate
@@ -149,6 +239,39 @@ public class UserAPI {
 	// GET methods
 	public String getSchoolFile() {
 		return this.json.settings.get(UserJson.SCHOOL_JSON);
+	}
+
+
+	public ArrayList<String> getAvailableSchools() {
+		// Get and load the path to the running jar file, independent of the working directory
+		String jarPath = UserAPI.class.getProtectionDomain().getCodeSource().getLocation().getPath();
+		JarFile jarFile = null;
+		try {
+			jarFile = new JarFile(jarPath);
+		}
+		catch (IOException e) {
+			Log.stdlog(Log.ERROR, "UserAPI", "cannot load jarfile resources: " + e);
+			return new ArrayList<>();
+		}
+		
+		ArrayList<String> schoolJsonNames = new ArrayList<>();
+		// Read all of the resource entries in the jar file
+		Enumeration<JarEntry> jarResources = jarFile.entries();
+		while (jarResources.hasMoreElements()) {
+			JarEntry jarResource = jarResources.nextElement();
+			String resourceName = jarResource.getName();
+			// If the resource is not the User.json file and otherwise matches the json file regex, then
+			// add just the file name (SchoolJson.EXPECTED_PATH == "/assets/json", which is removed to just
+			// get the name of the file)
+			if (!resourceName.endsWith(UserJson.DEFAULT_FILE) && resourceName.matches(UserJson.FILE_NAME_REGEX)) {
+				if (resourceName.startsWith(SchoolJson.EXPECTED_PATH))
+					schoolJsonNames.add(resourceName.substring(SchoolJson.EXPECTED_PATH.length()));
+				else
+					schoolJsonNames.add(resourceName);
+			}
+		}
+
+		return schoolJsonNames;
 	}
 
 	public ArrayList<String> getPeriodKeys() {
