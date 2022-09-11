@@ -4,18 +4,14 @@
 running_dir=$( dirname -- "$0"; )
 transport_keystore="$running_dir/transport_keystore.jks"
 transport_certfile="$running_dir/transport_cert.pem"
-server_keystore="$running_dir/server_keystore.pem"
-server_certfile="$running_dir/server_cert.pem"
 
 transport_host="localhost"
-server_host="localhost"
 validity=365
 password="changeit"
 
 usage() {
 	echo "Usage: $0 [options]"
-	echo "       [-1 <host>]     (Set the alias parameter for the transport. Default $transport_host)"
-	echo "       [-2 <host>]     (Set the alias parameter for the server. Default $server_host)"
+	echo "       [-a <host>]     (Set the alias parameter for the transport. Default $transport_host)"
 	echo "       [-u <org unit>] (Set the organizational unit parameter)"
 	echo "       [-o <org name>] (Set the organizational name parameter)"
 	echo "       [-l <locality>] (Set the locality/city name parameter)"
@@ -27,18 +23,15 @@ usage() {
 	echo "       [-h]            (Print this message and exit)"
 }
 
-while getopts "h1:2:u:o:l:s:c:d:p:" flag
+while getopts "ha:u:o:l:s:c:d:p:" flag
 do
 	case $flag in
 		h)
 			usage
 			exit
 			;;
-		1)
+		a)
 			transport_host=${OPTARG}
-			;;
-		2)
-			server_host=${OPTARG}
 			;;
 		u)
 			org_unit=${OPTARG}
@@ -66,7 +59,6 @@ done
 
 
 transport_dname="cn=$transport_host, ou=$org_unit, o=$org_name, l=$locality, s=$state, c=$country"
-server_dname="/C=$country/ST=$state/L=$locality/O=$org_name/OU=$org_unit/CN=$server_host"
 
 # Generate transport's key pair to use in the certificate (cert contains the public key)
 echo "[gen_keys] Creating keystore for $transport_host"
@@ -89,17 +81,3 @@ keytool \
 	-keystore "$transport_keystore" \
 	-rfc \
 	-storepass "$password"
-
-
-# Generate key and cert for web server
-echo ""
-echo ""
-echo "[gen_keys] Creating key and certificate for $server_host"
-openssl req \
-		-x509 \
-		-newkey rsa:2048 \
-		-nodes \
-		-subj "$server_dname" \
-		-out "$server_certfile" \
-		-keyout "$server_keystore" \
-		-days $validity

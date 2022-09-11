@@ -2,6 +2,7 @@
 .DS_Store
 *~
 obj/
+bin/
 *.log
 
 # Additional files to ignore
@@ -10,3 +11,4 @@ documentation/AWS-Setup.txt
 *.pem
 *.jks
 run_test.sh
+install_web.sh

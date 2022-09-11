@@ -27,6 +27,7 @@ done
 
 
 echo "[compile.sh] Clearing obj directory"
+mkdir -p obj
 rm -rf obj/*
 
 
