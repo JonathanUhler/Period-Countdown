@@ -2,7 +2,7 @@
 .DS_Store
 *~
 obj/
-bin/
+bin/*
 *.log
 
 # Additional files to ignore
