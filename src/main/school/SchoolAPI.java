@@ -9,7 +9,7 @@
 package school;
 
 
-import util.DateTime;
+import util.UTCTime;
 import util.Duration;
 import java.util.Map;
 import java.util.List;
@@ -58,35 +58,35 @@ public class SchoolAPI {
 		this.year = new SchoolYear(SchoolJson.EXPECTED_PATH + jsonName, days);
 	}
 	// end: public SchoolAPI
-	
+
+
+	// ====================================================================================================
+	// public String getTimezone
+	//
+	public String getTimezone() {
+		return this.year.getTimezone();
+	}
+	// end: public String getTimezone
+
 
 	// ====================================================================================================
 	// public SchoolPeriod getCurrentPeriod
 	//
-	// Returns the current period
+	// Gets the current period defined by the time "now"
 	//
 	// Arguments--
 	//
-	//  now: a DateTime object representing the time to search for the current period
+	//  now: the time to search for
 	//
 	// Returns--
 	//
-	//  The period that the argument now falls within. Upon an invalid (out of range for the year or
-	//  null) argument, will return null
+	//  The current SchoolPeriod object if one is found, otherwise null
 	//
-	public SchoolPeriod getCurrentPeriod(DateTime now) {
+	public SchoolPeriod getCurrentPeriod(UTCTime now) {
 		if (now == null)
 			return null;
-
-		SchoolWeek currentWeek = this.year.getWeek(now);
-		if (currentWeek == null)
-			return null;
-
-		SchoolDay currentDay = currentWeek.getDay(now);
-		if (currentDay == null)
-			return null;
 		
-		return currentDay.getPeriod(now);
+		return this.year.getPeriod(now);
 	}
 	// end: public SchoolPeriod getCurrentPeriod
 
@@ -94,45 +94,40 @@ public class SchoolAPI {
 	// ====================================================================================================
 	// public SchoolPeriod getNextPeriod
 	//
-	// Returns the next period
+	// Gets the next period in the school year
 	//
 	// Arguments--
 	//
-	//  now: a DateTime object representing the time to search for the next period
+	//  now: the time to search for
 	//
 	// Returns--
 	//
-	//  The next period on any day for the next year. If no such period can be found, returns null
+	//  The next period if one exists, otherwise null
 	//
-	public SchoolPeriod getNextPeriod(DateTime now) {
+	public SchoolPeriod getNextPeriod(UTCTime now) {
 		SchoolPeriod currentPeriod = this.getCurrentPeriod(now);
-		
-		if (currentPeriod != null) {
-			DateTime nextPeriodStart = currentPeriod.getEndTime(now);
 
-			// End of day adjust
-			if (currentPeriod.isLast())
-				nextPeriodStart.add(DateTime.MINUTE, 1); // Bump by 1 minute to go from 23:59 to 00:00 the next day
-			
+		if (currentPeriod != null) {
+			UTCTime currentPeriodEnd = currentPeriod.getEnd();
+			// Go from AA:BB:59.999 -> CC:DD:00.000. Periods should be defined in the json file to the second
+			// precision, and milliseconds are added as either 000 or 999 depending on if the time is the
+			// start or the end of the period
+			UTCTime nextPeriodStart = currentPeriodEnd.plus(1, UTCTime.MILLISECONDS);
+
 			return this.getCurrentPeriod(nextPeriodStart);
 		}
 		else {
-			DateTime walk = (DateTime) now.clone();
+			UTCTime walk = now;
 
-			// Scan the next year for a valid period
-			for (int i = 0; i < Duration.DAYS_PER_YEAR; i++) { // i counts by days
+			for (int i = 0; i < Duration.DAYS_PER_YEAR; i++) {
 				SchoolPeriod nextPeriod = this.getNextPeriodToday(walk);
 				if (nextPeriod != null && nextPeriod.isCounted())
 					return nextPeriod;
-
-				// If no period was found today, increase to the next day. Set the walk time to the very start
-				// of the day at this point so no periods are skipped. setToMidnight can't be called before
-				// or at the start of the loop because that would include more time if the argument now is after
-				// 00:00:00.000
-				walk.add(DateTime.DATE, 1);
-				walk.setToMidnight();
+				
+				walk = walk.plus(1, UTCTime.DAYS);
+				walk = walk.toMidnight();
 			}
-			
+
 			return null;
 		}
 	}
@@ -142,27 +137,23 @@ public class SchoolAPI {
 	// ====================================================================================================
 	// public SchoolPeriod getNextPeriodToday
 	//
-	// Returns the next period today
+	// Gets the next period up until the last period in the current day
 	//
 	// Arguments--
 	//
-	//  now: a DateTime object representing the time and day to search for the next period
+	//  now: the time to search for
 	//
 	// Returns--
 	//
-	//  The next period in the current day (as defined by the argument now). If no such period exists,
-	//  returns null
+	//  The next period in the current day if one exists, otherwise null
 	//
-	public SchoolPeriod getNextPeriodToday(DateTime now) {
-		// If the current period is null or the last period in the day, there is not another valid
-		// period today
+	public SchoolPeriod getNextPeriodToday(UTCTime now) {
 		SchoolPeriod currentPeriod = this.getCurrentPeriod(now);
 		if (currentPeriod == null || currentPeriod.isLast())
 			return null;
 
-		// If the current period is not the last one, get the next period (which by definition is
-		// at or before the last period today)
-		DateTime nextPeriodStart = currentPeriod.getEndTime(now);
+		UTCTime currentPeriodEnd = currentPeriod.getEnd();
+		UTCTime nextPeriodStart = currentPeriodEnd.plus(1, UTCTime.MILLISECONDS);
 		return this.getCurrentPeriod(nextPeriodStart);
 	}
 	// end: public SchoolPeriod getNextPeriodToday
@@ -171,56 +162,42 @@ public class SchoolAPI {
 	// ====================================================================================================
 	// public Duration getTimeRemaining
 	//
-	// Unconditionally gets time until the start of the next period to be counted, even if a match
-	// is not found on the current day specified by the argument now.
+	// Gets the time remaining in the current period or until the next real period
 	//
 	// Arguments--
 	//
-	//  now: the current time (start time for the duration until the start of the next period)
+	//  now: the start time
 	//
 	// Returns--
 	//
-	//  A Duration object representing the time until the next period. If no period can be found with the
-	//  next year (as limited by getNextPeriod(DateTime)), returns null
+	//  A Duratin object representing the amount of time between "now" and the end of the current
+	//  period (if counted) or the start of the next counted period
 	//
-	public Duration getTimeRemaining(DateTime now) {
-		DateTime walk = (DateTime) now.clone();
+	public Duration getTimeRemaining(UTCTime now) {
+		UTCTime walk = now;
 
-		// Scan the next year for a valid period
 		for (int i = 0; i < Duration.DAYS_PER_YEAR; i++) {
 			SchoolPeriod currentPeriod = this.getCurrentPeriod(walk);
-			SchoolPeriod nextPeriod = this.getNextPeriodToday(walk);
+			SchoolPeriod nextPeriod = this.getNextPeriod(walk);
 
-			// If the next period is not counted but the current one is, then the time remaining is not until
-			// the next counted period, but until the end of the current period
 			if (currentPeriod.isCounted() && !nextPeriod.isCounted())
-				return new Duration(now, currentPeriod.getEndTime(walk));
-			
-			// Loop through the periods today to check for the next counted period in this day
-			while (nextPeriod != null && !nextPeriod.isLast()) {
-				if (nextPeriod != null && nextPeriod.isCounted())
-					// The next period was found. The time remaining in the current period is from the argument
-					// now until the start time of the next period
-					return new Duration(now, nextPeriod.getStartTime(walk));
+				return new Duration(now, currentPeriod.getEnd().plus(1, UTCTime.MILLISECONDS));
 
-				// If the next period was not found, set the current search/walk time to the end of the last
-				// found period, then get the new current period and check again
-				walk = nextPeriod.getEndTime(walk);
+			while (nextPeriod != null && !nextPeriod.isLast()) {
+				if (nextPeriod.isCounted())
+					return new Duration(now, nextPeriod.getStart());
+
+				walk = nextPeriod.getEnd().plus(1, UTCTime.MILLISECONDS);
 				nextPeriod = this.getCurrentPeriod(walk);
-				System.out.println(nextPeriod + " --> " + nextPeriod.isCounted());
 			}
 
-			// If no period was found today, increase to the next day. Set the walk time to the very start
-			// of the day at this point so no periods are skipped. setToMidnight can't be called before
-			// or at the start of the loop because that would include more time if the argument now is after
-			// 00:00:00.000
-			walk.add(DateTime.DATE, 1);
-			walk.setToMidnight();
+			walk = walk.plus(1, UTCTime.DAYS);
+			walk = walk.toMidnight();
 		}
-			
+		
 		return null;
 	}
 	// end: public Duration getTimeRemaining
-	
+
 }
 // end: public class SchoolAPI

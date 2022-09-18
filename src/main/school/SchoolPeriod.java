@@ -9,55 +9,68 @@
 package school;
 
 
-import util.DateTime;
+import util.UTCTime;
 
 
 // +=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
 // public class SchoolPeriod
 //
-// Java representation of one of the maps within a day defined in the "Days" section of the school json
+// Represents the concept of a block of time during the school year defined by the json file. This can
+// include: scheduled classes, special blocks like lunch or study hall, and filler blocks like
+// passing periods.
+//
+// Each period has a start and end time defined to millisecond precision as util.UTCTime objects. For
+// any period P_(n) that is not the first or last period in the school year:
+//
+//  P_(n).start < P_(n).end
+//  P_(n).end = 1ms + P_(n + 1).start
+//
+// The properties of a SchoolPeriod object are defined by the type field. The options of this field
+// are defined in more detail in the documentation for the constructor.
 //
 public class SchoolPeriod {
 
 	private String type;
 	private String name;
-	private String start;
-	private String end;
-	
+	private UTCTime start;
+	private UTCTime end;
+	private boolean isLast;
+
 
 	// ----------------------------------------------------------------------------------------------------
 	// public SchoolPeriod
 	//
 	// Arguments--
 	//
-	//  type:  the period type. Must be:
-	//          - Any integer N: signifies the period/class number for a period
-	//          - "Special": something that is not a period, but is an important event and should be
-	//            counted in time calculations and the Next Up feature (e.g. lunch, study hall, etc.)
-	//          - "Nothing": an event used to fill time. Does not matter and should NOT be counted
-	//            (e.g. passing periods, before/after school starts)
+	//  type:   the "type" of the period, not null. Can be one of the following:
+	//            "Nothing": this period is a filler event. It should not be counted by isCounted and
+	//                       does not contain an education class (isFree == true)
+	//            "Special": this period has an important event other than an educational class.
+	//                       It WILL be included by isCounted, but is still "free"
+	//            {N | N > 0, N = Z}: identifies the number of an educational class which should be
+	//                                counted and is NOT free
 	//
-	//  name:  the name of the period. Defined by the programmer. Can be anything
+	//  name:   the name of the period, can be anything, not null
 	//
-	//  start: the start time of the period in format HH:MM
+	//  start:  the start time of the period, not null
 	//
-	//  end:   the end time of the period in format HH:MM
+	//  end:    the end time of the period, not null
+	//
+	//  isLast: whether this period is the last in its containing day (local time)
 	//
 	public SchoolPeriod(String type, String name,
-						String start, String end) throws IllegalArgumentException
+						UTCTime start, UTCTime end,
+						boolean isLast) throws IllegalArgumentException
 	{
 		if (type == null || name == null || start == null || end == null)
 			throw new IllegalArgumentException("SchoolPeriod constructed with null argument(s)\ntype: " + type +
 											   "\nname: " + name + "\nstart: " + start + "\nend: " + end);
 
-		if (!start.matches(DateTime.SIMPLE_TIME_FORMAT) || !end.matches(DateTime.SIMPLE_TIME_FORMAT))
-			throw new IllegalArgumentException("SchoolPeriod constructed with invalid times\nstart: " + start +
-											   "\nend: " + end);
-
 		try {
 			Integer.parseInt(type);
 		}
 		catch (NumberFormatException e) {
+			// If the type is not a number, not "NOTHING" and not "SPECIAL", then it is an error
 			if (!type.equals(SchoolJson.NOTHING) && !type.equals(SchoolJson.SPECIAL))
 				throw new IllegalArgumentException("SchoolPeriod constructed with invalid type\ntype: " + type);
 		}
@@ -66,104 +79,50 @@ public class SchoolPeriod {
 		this.name = name;
 		this.start = start;
 		this.end = end;
-	}
-	// end: public SchoolPeriod
-
-
-	// ====================================================================================================
-	// public DateTime getStartTime
-	//
-	// Returns the start time of this period as a DateTime object based on the date listed in the argument.
-	// Because this SchoolPeriod is generic (it only has start/end time, but no date that it is on) an
-	// argument must be given to supply the date
-	//
-	// Arguments--
-	//
-	//  date: the date the period occurs on, which is appended to the start time to get the final DateTime
-	//
-	// Returns--
-	//
-	//  A DateTime object representing the date and time the period starts
-	//
-	public DateTime getStartTime(DateTime date) {
-		if (date == null)
-			return null;
-		
-		return DateTime.getInstance(date.getDayTag() +
-									DateTime.DATE_TIME_DELIMITER + this.start +
-									DateTime.TIME_DELIMITER + "00" + DateTime.TIME_DELIMITER + "000");
-	}
-	// end: public DateTime getStartTime
-
-
-	// ====================================================================================================
-	// public DateTime getEndTime
-	//
-	// Returns the end time of this period as a DateTime object based on the date listed in the argument.
-	// Because this SchoolPeriod is generic (it only has start/end time, but no date that it is on) an
-	// argument must be given to supply the date
-	//
-	// Arguments--
-	//
-	//  date: the date the period occurs on, which is appended to the end time to get the final DateTime
-	//
-	// Returns--
-	//
-	//  A DateTime object representing the date and time the period ends
-	//
-	public DateTime getEndTime(DateTime date) {
-		if (date == null)
-			return null;
-		
-		return DateTime.getInstance(date.getDayTag() +
-									DateTime.DATE_TIME_DELIMITER + this.end +
-									DateTime.TIME_DELIMITER + "00" + DateTime.TIME_DELIMITER + "000");
-	}
-	// end: public DateTime getEndTime
-
-
-	// ====================================================================================================
-	// GET methods
-	public String getStartTimeString() {
-		return this.start;
+		this.isLast = isLast;
 	}
 
-	public String getEndTimeString() {
-		return this.end;
-	}
 
 	public String getName() {
 		return this.name;
 	}
 
+
 	public String getType() {
 		return this.type;
 	}
 
-	public boolean isLast() {
-		return this.end.equals("23:59");
+
+	public UTCTime getStart() {
+		return this.start;
 	}
 
+
+	public UTCTime getEnd() {
+		return this.end;
+	}
+
+
+	public boolean isLast() {
+		return this.isLast;
+	}
+
+	
 	public boolean isCounted() {
 		return !this.type.equals(SchoolJson.NOTHING);
 	}
 
+
 	public boolean isFree() {
-		return (this.type.equals(SchoolJson.NOTHING) || this.type.equals(SchoolJson.SPECIAL));
+		return (this.type.equals(SchoolJson.NOTHING) ||
+				this.type.equals(SchoolJson.SPECIAL));
 	}
-	// end: GET methods
 
 
-	// ====================================================================================================
-	// public String toString
-	//
-	// Returns a string representation of this SchoolPeriod
-	//
 	@Override
 	public String toString() {
-		return "SCHOOLPERIOD: Type=" + this.type + ",Name=" + this.name + ",Start=" + this.start + ",End=" + this.end;
+		return this.start + " - " + this.end + "\tType=" + this.type + ", Name=" + this.name;
 	}
-	// end: public String toString
 
 }
 // end: public class SchoolPeriod

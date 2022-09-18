@@ -39,7 +39,7 @@ public class GetNextUpList extends Command {
 		String userID = command.userID;
 
 		String nextUp = userAPI.getNextUp();
-		List<String> nextUpList = Tools.getNextUpList(schoolAPI, userAPI);
+		List<String> nextUpList = Tools.getNextUpList(schoolAPI, userAPI, schoolAPI.getTimezone());
 
 		GetNextUpList response = new GetNextUpList();
 		response.outputPayload = response.new OutputPayload();

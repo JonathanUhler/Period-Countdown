@@ -24,6 +24,7 @@ public class UserJson {
 	// +=+= CONSTANTS =+=+
 	// Misc
 	public static final int MAX_FIELD_LEN = 15;
+	public static final String LAST_TIME = "23:59";
 
 	// Operating system
 	private static final String HOME = System.getProperty("user.home");

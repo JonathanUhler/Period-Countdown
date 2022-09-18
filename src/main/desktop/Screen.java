@@ -10,7 +10,7 @@ package desktop;
 
 
 import util.Log;
-import util.DateTime;
+import util.UTCTime;
 import util.Duration;
 import util.Tools;
 import school.SchoolAPI;
@@ -94,7 +94,7 @@ public class Screen extends JPanel {
 		if (this.userAPI == null)
 			return null;
 		// Access to getPeriod here only needs the key, so the other information can be placeholder
-		return this.userAPI.getPeriod(new SchoolPeriod(key, "", "00:00", "00:00"));
+		return this.userAPI.getPeriod(new SchoolPeriod(key, "", UTCTime.now(), UTCTime.now(), false));
 	}
 
 	protected String getUserSchoolFile() {
@@ -214,8 +214,7 @@ public class Screen extends JPanel {
 			return;
 
 		// Get current time
-		DateTime now = new DateTime();
-
+		UTCTime now = UTCTime.now();
 		// School json API information
 		SchoolPeriod schoolPeriod = schoolAPI.getCurrentPeriod(now);
 		Duration timeRemaining = schoolAPI.getTimeRemaining(now);
@@ -229,7 +228,8 @@ public class Screen extends JPanel {
 
 		// Next up information
 		String nextUp = this.userAPI.getNextUp();
-		ArrayList<String> nextPeriods = Tools.getNextUpList(this.schoolAPI, this.userAPI, now);
+		ArrayList<String> nextPeriods = Tools.getNextUpList(this.schoolAPI, this.userAPI,
+															this.schoolAPI.getTimezone(), now);
 
 		// Displaying
 		this.MARGIN = this.getSize().width / 40; // Update margin size if the screen has changed size

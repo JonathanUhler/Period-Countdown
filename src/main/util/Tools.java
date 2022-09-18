@@ -46,12 +46,14 @@ public class Tools {
 	// end: public static String pad
 
 
-	public static ArrayList<String> getNextUpList(SchoolAPI schoolAPI, UserAPI userAPI) {
-		return Tools.getNextUpList(schoolAPI, userAPI, new DateTime());
+	public static ArrayList<String> getNextUpList(SchoolAPI schoolAPI, UserAPI userAPI, String timezone) {
+		return Tools.getNextUpList(schoolAPI, userAPI, timezone, UTCTime.now());
 	}
 	
 
-	public static ArrayList<String> getNextUpList(SchoolAPI schoolAPI, UserAPI userAPI, DateTime now) {
+	public static ArrayList<String> getNextUpList(SchoolAPI schoolAPI, UserAPI userAPI,
+												  String timezone, UTCTime now)
+	{
 		if (schoolAPI == null || userAPI == null)
 			return new ArrayList<>();
 		
@@ -71,10 +73,26 @@ public class Tools {
 
 			// Format the string
 			// Default periodString is "<period/class name> | <start>-<end>"
+			UTCTime periodStart = nextPeriod.getStart();
+			UTCTime periodEnd = nextPeriod.getEnd();
+
+			// Add 1 to the end time ms to make the end time the same as the start time of the next period
+			periodEnd = periodEnd.plus(1, UTCTime.MILLISECONDS);
+
+			try {
+				periodStart = periodStart.to(timezone);
+				periodEnd = periodEnd.to(timezone);
+			}
+			catch (IllegalArgumentException e) {
+				// Ignore, just continue with UTC time
+			}
+
 			String periodString =
-				((nextClass == null) ? nextPeriod.getName() : nextClass.getName()) +
-				" | " + nextPeriod.getStartTimeString() +
-				"-" + nextPeriod.getEndTimeString();
+				((nextClass == null) ? nextPeriod.getName() : nextClass.getName()) + " | " +
+				Tools.pad(Integer.toString(periodStart.get(UTCTime.HOUR)), 2, '0') + ":" +
+				Tools.pad(Integer.toString(periodStart.get(UTCTime.MINUTE)), 2, '0') + "-" +
+				Tools.pad(Integer.toString(periodEnd.get(UTCTime.HOUR)), 2, '0') + ":" +
+				Tools.pad(Integer.toString(periodEnd.get(UTCTime.MINUTE)), 2, '0');
 			
 			// If the school period has a class during it add " | <teacher>, <room>"
 			if (!nextPeriod.isFree() && nextClass != null && !nextClass.isFree()) {
@@ -94,7 +112,7 @@ public class Tools {
 				nextUpList.add(periodString);
 
 			// Get next period
-			nextPeriod = schoolAPI.getNextPeriodToday(nextPeriod.getStartTime(now));
+			nextPeriod = schoolAPI.getNextPeriodToday(periodStart);
 
 			// If only the next period should be shown and that period has been found, skip the rest of the search
 			if (nextUp.equals(UserJson.NEXT_UP_ONE) && nextUpList.size() == 1)

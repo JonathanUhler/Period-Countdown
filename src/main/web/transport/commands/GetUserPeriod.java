@@ -1,7 +1,7 @@
 package web.transport.commands;
 
 
-import util.DateTime;
+import util.UTCTime;
 import school.SchoolAPI;
 import school.SchoolPeriod;
 import user.UserAPI;
@@ -50,11 +50,11 @@ public class GetUserPeriod extends Command {
 		String opcode = command.opcode;
 		String userID = command.userID;
 
-		SchoolPeriod schoolPeriod = schoolAPI.getCurrentPeriod(new DateTime());
+		SchoolPeriod schoolPeriod = schoolAPI.getCurrentPeriod(UTCTime.now());
 		UserPeriod userPeriod = null;
 		if (command.inputPayload != null && command.inputPayload.type != null) {
 			String type = command.inputPayload.type;
-			schoolPeriod = new SchoolPeriod(type, "", "00:00", "00:00");
+			schoolPeriod = new SchoolPeriod(type, "", UTCTime.now(), UTCTime.now(), false);
 		}
 		userPeriod = userAPI.getPeriod(schoolPeriod);
 

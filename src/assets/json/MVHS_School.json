@@ -3,7 +3,8 @@
         "FirstPeriod": "1",
         "LastPeriod": "7",
         "FirstDayTag": "2022-08-10",
-        "LastDayTag": "2023-06-08"
+        "LastDayTag": "2023-06-08",
+		"Timezone": "America/Los_Angeles"
     },
     "Days": {
         "A": [

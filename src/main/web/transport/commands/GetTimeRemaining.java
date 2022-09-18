@@ -1,7 +1,7 @@
 package web.transport.commands;
 
 
-import util.DateTime;
+import util.UTCTime;
 import util.Duration;
 import school.SchoolAPI;
 import user.UserAPI;
@@ -37,7 +37,7 @@ public class GetTimeRemaining extends Command {
 		String opcode = command.opcode;
 		String userID = command.userID;
 
-		Duration timeRemaining = schoolAPI.getTimeRemaining(new DateTime());
+		Duration timeRemaining = schoolAPI.getTimeRemaining(UTCTime.now());
 
 		GetTimeRemaining response = new GetTimeRemaining();
 		response.outputPayload = response.new OutputPayload();

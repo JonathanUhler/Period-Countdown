@@ -31,6 +31,7 @@ public class SchoolJson {
 	public static final String LAST_PERIOD = "LastPeriod";
 	public static final String FIRST_DAY_TAG = "FirstDayTag";
 	public static final String LAST_DAY_TAG = "LastDayTag";
+	public static final String TIMEZONE = "Timezone";
 
 	// Days
 	public static final String TYPE = "Type";

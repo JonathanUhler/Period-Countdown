@@ -273,6 +273,7 @@ public class UserAPI {
 
 		return schoolJsonNames;
 	}
+	
 
 	public ArrayList<String> getPeriodKeys() {
 		return new ArrayList<>(this.json.periods.keySet());

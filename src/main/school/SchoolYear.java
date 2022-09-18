@@ -10,8 +10,10 @@ package school;
 
 
 import util.Log;
-import util.DateTime;
+import util.Interval;
+import util.UTCTime;
 import util.Duration;
+import user.UserJson;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Map;
@@ -26,28 +28,22 @@ import com.google.gson.JsonSyntaxException;
 // +=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
 // public class SchoolYear
 //
-// Slightly cleaned Java representation of the json data in the school json file. The closest
-// representation of the json data would be a SchoolJson object, although that is much harder to work with
+// Holds all the SchoolPeriod objects for the entire year, as constructed from the school json file
 //
 public class SchoolYear {
 
 	private SchoolJson schoolJson;
-	private HashMap<String, SchoolWeek> weekDefs; // Map of each unique type of week defined in the school json. The
-	                                              // keys are the week type/name (e.g. DEFAULT or HBCBC) and the
-	                                              // values are the generic week (with no date association) of that
-	                                              // type
-	private HashMap<String, SchoolWeek> year; // Map of all the weeks that overlap with the school year. The keys
-	                                          // are the week tags (date of the Sunday of that week in format
-	                                          // yyyy-mm-dd) and the values are that week in the year
+	private ArrayList<SchoolPeriod> year;
 
 	// Information from the "Info" section of the school json file
 	private String firstPeriod;
 	private String lastPeriod;
 	private String firstDayTag;
 	private String lastDayTag;
-	
+	private String timezone;
 
-	// ----------------------------------------------------------------------------------------------------
+
+    // ----------------------------------------------------------------------------------------------------
 	// public SchoolYear
 	//
 	// Throws exceptions upon invalid json file or json data
@@ -63,6 +59,9 @@ public class SchoolYear {
 	public SchoolYear(String jsonPath, Map<String, List<Map<String, String>>> days) throws FileNotFoundException,
 																						   IllegalArgumentException
 	{
+		// Init objects
+		this.year = new ArrayList<>();
+		
 		// Read the json file as a jar resource stream
 		InputStream schoolStream = Thread.currentThread().getContextClassLoader().getResourceAsStream(jsonPath);
 		if (schoolStream == null)
@@ -84,120 +83,64 @@ public class SchoolYear {
 		if (this.schoolJson.days == null) {
 			if (days != null)
 				this.schoolJson.days = days;
-			else
+			else {
 				throw new IllegalArgumentException(Log.format(Log.ERROR, "SchoolYear",
 															  "\"Days\" was not specified in school file " +
 															  "and \"days\" argument is null"));
+			}
 		}
 
 		// Initialize class information
 		this.initInfo();
-		this.initWeekDefs();
 		this.initYear();
 	}
+	// end: public SchoolYear
 
 
 	// ====================================================================================================
 	// private void initInfo
 	//
-	// Initializes this class with the "Info" section of the school json file
+	// Initializes this class with the "Info" section of the school json file. Only does basic checks
+    // for valid data and sets instance variables
 	//
 	private void initInfo() throws IllegalArgumentException {
 		if (!this.schoolJson.info.containsKey(SchoolJson.FIRST_PERIOD) ||
 			!this.schoolJson.info.containsKey(SchoolJson.LAST_PERIOD) ||
 			!this.schoolJson.info.containsKey(SchoolJson.FIRST_DAY_TAG) ||
-			!this.schoolJson.info.containsKey(SchoolJson.LAST_DAY_TAG))
-			throw new IllegalArgumentException("school json Info missing key");
+			!this.schoolJson.info.containsKey(SchoolJson.LAST_DAY_TAG) ||
+			!this.schoolJson.info.containsKey(SchoolJson.TIMEZONE))
+			throw new IllegalArgumentException("school json Info missing key. Required keys are:\n" +
+											   "- " + SchoolJson.FIRST_PERIOD + "\n" +
+											   "- " + SchoolJson.LAST_PERIOD + "\n" +
+											   "- " + SchoolJson.FIRST_DAY_TAG + "\n" +
+											   "- " + SchoolJson.LAST_DAY_TAG + "\n" +
+											   "- " + SchoolJson.TIMEZONE);
 
 		this.firstPeriod = this.schoolJson.info.get(SchoolJson.FIRST_PERIOD);
 		this.lastPeriod = this.schoolJson.info.get(SchoolJson.LAST_PERIOD);
 		this.firstDayTag = this.schoolJson.info.get(SchoolJson.FIRST_DAY_TAG);
 		this.lastDayTag = this.schoolJson.info.get(SchoolJson.LAST_DAY_TAG);
+		this.timezone = this.schoolJson.info.get(SchoolJson.TIMEZONE);
 	}
 	// end: private void initInfo
 
 
-	// ====================================================================================================
-	// private void initWeekDefs
+    // ====================================================================================================
+    // private void initYear
+    //
+	// Initializes the this.year structure
 	//
-	// Initializes a list of all unique week definitions from the "Weeks" section of the school json file
-	//
-	private void initWeekDefs() throws IllegalArgumentException {
-		this.weekDefs = new HashMap<>(); // Keys are week definition names, values are the SchoolWeek objects
-		
-		if (!this.schoolJson.weeks.containsKey(SchoolJson.DEFAULT))
-			throw new IllegalArgumentException(Log.format(Log.ERROR, "SchoolYear",
-														  "json does not contain DEFAULT week"));
+    private void initYear() throws IllegalArgumentException {
+		UTCTime firstDay = UTCTime.of(this.firstDayTag, this.timezone);
+		UTCTime lastDay = UTCTime.of(this.lastDayTag, this.timezone);
 
-		for (String weekType : this.schoolJson.weeks.keySet()) {
-			// For each week, create a list of the SchoolDay objects within that week
-			ArrayList<SchoolDay> dayDefs = new ArrayList<>();
-			List<String> dayTypes = this.schoolJson.weeks.get(weekType);
-			
-			if (dayTypes.size() != Duration.DAYS_PER_WEEK)
-				throw new IllegalArgumentException(Log.format(Log.ERROR, "SchoolYear",
-															  "week type \"" + weekType + "\" does not have 7 days"));
+		UTCTime current = firstDay.shiftedToClosest(UTCTime.SUNDAY);
+		UTCTime end = lastDay.shiftedToClosest(UTCTime.SATURDAY);
 
-			for (String dayType : dayTypes) {
-				// For each of the days, create a list of the SchoolPeriod objects within that day
-				ArrayList<SchoolPeriod> periodDefs = new ArrayList<>();
-			    List<Map<String, String>> periodsInDay = this.schoolJson.days.get(dayType);
-
-				if (periodsInDay.size() == 0)
-					throw new IllegalArgumentException(Log.format(Log.ERROR, "SchoolYear",
-																  "day type \"" + dayType + "\" has 0 periods"));
-
-				for (Map<String, String> period : periodsInDay) {
-					if (!period.containsKey(SchoolJson.TYPE) ||
-						!period.containsKey(SchoolJson.NAME) ||
-						!period.containsKey(SchoolJson.START) ||
-						!period.containsKey(SchoolJson.END))
-						throw new IllegalArgumentException(Log.format(Log.ERROR, "SchoolYear",
-																	  "period has missing key: " + period));
-
-					String type = period.get(SchoolJson.TYPE);
-					String name = period.get(SchoolJson.NAME);
-					String start = period.get(SchoolJson.START);
-					String end = period.get(SchoolJson.END);
-					periodDefs.add(new SchoolPeriod(type, name, start, end));
-				}
-
-				dayDefs.add(new SchoolDay(dayType, periodDefs));
-			}
-
-			this.weekDefs.put(weekType, new SchoolWeek(weekType, dayDefs));
-		}
-	}
-	// end: private void initWeekDefs
-
-	
-	// ====================================================================================================
-	// private void initYear
-	//
-	// Initializes a list of every week in the year in order
-	//
-	private void initYear() throws IllegalArgumentException {
-		this.year = new HashMap<>(); // Keys are the week tags in formation YYYY-MM-DD of the sunday for that week
-		
-		// The declaration of these DateTime objects without a catch for the IllegalArgumentException is fine since
-		// this method can throw exceptions while parsing anyway. The intent of this class is to be initialized
-		// with a catch
-		DateTime firstDay = DateTime.getInstance(this.firstDayTag);
-		DateTime lastDay = DateTime.getInstance(this.lastDayTag);
-
-		DateTime current = DateTime.getInstance(firstDay.getTagForClosest(DateTime.SUNDAY));
-		DateTime end = DateTime.getInstance(lastDay.getTagForClosest(DateTime.SATURDAY));
-
-		// Loop through the bounds of the year defined in the school json file
-		while (current.before(end)) {
+		while (current.isBefore(end)) {
+			// Search for a week exception in order to get the correct week structure
 			String weekTag = current.getWeekTag();
-
-			// Add the default week
-			if (!this.weekDefs.containsKey(SchoolJson.DEFAULT))
-				throw new IllegalArgumentException(Log.format(Log.ERROR, "SchoolYear", "default week not available"));
-			this.year.put(weekTag, this.weekDefs.get(SchoolJson.DEFAULT));
-
-			// Check for an exception for this week
+			String weekType = SchoolJson.DEFAULT;
 			for (Map<String, String> exception : this.schoolJson.exceptions) {
 				if (!exception.containsKey(SchoolJson.TYPE) || !exception.containsKey(SchoolJson.WEEK_TAG))
 					throw new IllegalArgumentException(Log.format(Log.ERROR, "SchoolYear",
@@ -207,75 +150,187 @@ public class SchoolYear {
 				String exceptionTag = exception.get(SchoolJson.WEEK_TAG);
 				// Week tags are preferred to be used for the week exception list, but a day tag within that
 				// week can also be used. The tag is converted to be a week tag with this line
-				String exceptionWeekTag = DateTime.getInstance(exceptionTag).getWeekTag();
+				String exceptionWeekTag = UTCTime.of(exceptionTag, this.timezone).getWeekTag();
 				if (weekTag.equals(exceptionWeekTag)) {
-					// A match was found, now validate that the "Type" for the exception exists and add to the
-					// list of SchoolWeek objects for the year
-					String exceptionType = exception.get(SchoolJson.TYPE);
-					if (!this.weekDefs.containsKey(exceptionType))
-						throw new IllegalArgumentException(Log.format(Log.ERROR, "SchoolYear",
-																	  "week exception has invalid type: " +
-																	  exceptionType));
-
-					this.year.put(weekTag, this.weekDefs.get(exceptionType));
+					weekType = exception.get(SchoolJson.TYPE);
+					break;
 				}
 			}
 
-			current.add(DateTime.DATE, Duration.DAYS_PER_WEEK);
+			// At this point, we have either "DEFAULT" or the name of a special week type in the weekType variables.
+			// We want to search for that week type, then go through each of the day types in that week, and finally
+			// each of the period definitions for those days. This should create all the periods for a given week
+			if (!this.schoolJson.weeks.containsKey(weekType))
+				throw new IllegalArgumentException(Log.format(Log.ERROR, "SchoolYear",
+															  "json does not contain week type def: " + weekType));
+
+			List<String> dayTypes = this.schoolJson.weeks.get(weekType);
+
+			if (dayTypes.size() != Duration.DAYS_PER_WEEK)
+				throw new IllegalArgumentException(Log.format(Log.ERROR, "SchoolYear",
+															  "week \"" + weekType + "\" does not have 7 days"));
+
+			for (String dayType : dayTypes) {
+				if (!this.schoolJson.days.containsKey(dayType))
+					throw new IllegalArgumentException(Log.format(Log.ERROR, "SchoolYear",
+																  "json does not contain day type def: " + dayType));
+
+				// Get the list of period definitions for this day. Then loop through each of the periods and
+				// create a SchoolPeriod object to add to the year
+				List<Map<String, String>> periodDefs = this.schoolJson.days.get(dayType);
+
+				if (periodDefs.size() == 0)
+					throw new IllegalArgumentException(Log.format(Log.ERROR, "SchoolYear",
+																  "day \"" + dayType + "\" has 0 periods"));
+
+				UTCTime previousEndTime = null;
+
+				for (Map<String, String> periodDef : periodDefs) {
+					if (!periodDef.containsKey(SchoolJson.TYPE) ||
+						!periodDef.containsKey(SchoolJson.NAME) ||
+						!periodDef.containsKey(SchoolJson.START) ||
+						!periodDef.containsKey(SchoolJson.END))
+						throw new IllegalArgumentException(Log.format(Log.ERROR, "SchoolYear",
+																	  "period has missing key: " + periodDef));
+
+					String type = periodDef.get(SchoolJson.TYPE);
+					String name = periodDef.get(SchoolJson.NAME);
+					String startStr = periodDef.get(SchoolJson.START);
+					String endStr = periodDef.get(SchoolJson.END);
+
+					// Convert the "current" time to the timezone specified by the json. Use the day tag of
+					// that local object to create the local strings for the start/end. Then construct
+					// UTCTime objects for the start/end in UTC
+					UTCTime localDate = current.to(this.timezone);
+					UTCTime startTime = UTCTime.of(localDate.getDayTag() + "T" + startStr + ":00.000", this.timezone);
+					UTCTime endTime = null;
+					if (!endStr.equals(UserJson.LAST_TIME)) {
+						endTime = UTCTime.of(localDate.getDayTag() + "T" + endStr + ":00.999", this.timezone);
+						endTime = endTime.plus(-1, UTCTime.SECONDS);
+					}
+					else {
+						endTime = UTCTime.of(localDate.plus(1, UTCTime.DAYS).getDayTag() +
+											 "T00:00:00.000", this.timezone);
+						endTime = endTime.plus(-1, UTCTime.MILLISECONDS);
+					}
+
+					// Add 1 ms to shift from **:**:59.999 to **:**:00.000, which should be the start time of the
+					// current period. If that shift from the previous end time does not yield the current period
+					// there is a discontinuity of >1 ms which is illegal
+					if (previousEndTime != null &&
+						!(previousEndTime.plus(1, UTCTime.MILLISECONDS)).isEqual(startTime))
+						throw new IllegalArgumentException(Log.format(Log.ERROR, "SchoolYear",
+																	  "previous end + 1ms != next start: " +
+																	  previousEndTime + ", " + startTime));
+					previousEndTime = endTime;
+					
+					this.year.add(new SchoolPeriod(type, name, startTime, endTime, endStr.equals(UserJson.LAST_TIME)));
+				}
+
+				// Go to the next day
+				current = current.plus(1, UTCTime.DAYS);
+			}
 		}
 	}
 	// end: private void initYear
 
 
 	// ====================================================================================================
-	// public SchoolWeek getWeek
+	// private int periodSearch
 	//
-	// Returns a week given a time
+	// Binary search implementation to find the period that occupies the target "now" time
 	//
-	// Argument--
+	// Arguments--
 	//
-	//  when: a DateTime object representing some point within the week to get
+	//  now: the target time to find a period for
+	//
+	//  min: the minimum index to search
+	//
+	//  max: the maximum index to search
 	//
 	// Returns--
 	//
-	//  A SchoolWeek object if one is found during the argument when, otherwise null
+	//  The index of the element, or -1 if no such element is found
 	//
-	public SchoolWeek getWeek(DateTime when) {
-		if (when == null)
+	private int periodSearch(UTCTime now, int min, int max) {
+		if (min <= max) {
+			int middle = (min + max) / 2;
+
+			SchoolPeriod period = this.year.get(middle);
+			UTCTime start = period.getStart();
+			UTCTime end = period.getEnd();
+
+			if (start.compareTo(now) <= 0 && now.compareTo(end) <= 0) // period is during now
+				return middle;
+			else if (start.compareTo(now) > 0) // period is after now
+				return this.periodSearch(now, min, middle - 1);
+			else
+				return this.periodSearch(now, middle + 1, max); // period is before now
+		}
+
+		return -1;
+	}
+	// end: private int periodSearch
+
+
+	// ====================================================================================================
+	// public SchoolPeriod getPeriod
+	//
+	// Gets a period from the year structure at a given time
+	//
+	// Arguments--
+	//
+	//  now: the time to get a period for, not null
+	//
+	// Returns--
+	//
+	//  The period if one could be found, otherwise null
+	//
+	public SchoolPeriod getPeriod(UTCTime now) {
+		if (now == null)
 			return null;
 		
-		String weekTag = when.getWeekTag();
-		if (this.year.containsKey(weekTag))
-			return this.year.get(weekTag);
-		return null;
+		int index = this.periodSearch(now, 0, this.year.size());
+
+		if (index == -1 || index >= this.year.size())
+			return null;
+		else
+			return this.year.get(index);
 	}
-	// end: public SchoolWeek getWeek
+	// end: public SchoolPeriod getPeriod
+
+
+	// ====================================================================================================
+	// public String getTimezone
+	//
+	// Returns--
+	//
+	//  The timezone ID string for the json file
+	//
+	public String getTimezone() {
+		return this.timezone;
+	}
+	// end: public String getTimezone
 
 
 	// ====================================================================================================
 	// public String toString
 	//
-	// Returns a string representation of the SchoolYear
-	//
 	// Returns--
 	//
-	//  A string with all the information for the school year. This is created using the toString methods
-	//  for the other classes in this package. This returns a very long string, but one that is good for
-	//  verbose debugging
+	//  A string representation of this object
 	//
 	@Override
 	public String toString() {
-		String str = super.toString() +
-			";FirstPeriod=" + this.firstPeriod +
-			",LastPeriod=" + this.lastPeriod +
-			",FirstDayTag=" + this.firstDayTag +
-			",LastDayTag=" + this.lastDayTag +
-			",Weeks=[";
+		String str = "";
 
-		for (String weekTag : this.year.keySet())
-			str += "\n\t" + weekTag + "=" + this.year.get(weekTag).toString().replace("\n", "\n\t");
+		for (SchoolPeriod period : this.year) {
+			str += period + "\n";
 
-		str += "\n]";
+			if (period.isLast())
+				str += "\n";
+		}
+
 		return str;
 	}
 	// end: public String toString

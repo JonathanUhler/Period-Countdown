@@ -40,7 +40,7 @@ public class Duration {
 	//  end:   a DateTime object representing the end of a duration. If before start, the resulting
 	//         duration will be 0:00:00.000
 	//
-	public Duration(DateTime start, DateTime end) {
+	public Duration(UTCTime start, UTCTime end) {
 		// Get epoch values
 		long startEpoch = start.getEpoch();
 		long endEpoch = end.getEpoch();
@@ -118,6 +118,7 @@ public class Duration {
 	// Returns--
 	//
 	//  A string in format H:MM:SS if this.hours > 0, otherwise MM:SS
+	//
 	@Override
 	public String toString() {
 		if (this.hours == 0)
