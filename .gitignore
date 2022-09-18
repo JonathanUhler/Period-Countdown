@@ -3,7 +3,6 @@
 *~
 obj/
 bin/*
-*.log
 
 # Additional files to ignore
 deprecated/*
