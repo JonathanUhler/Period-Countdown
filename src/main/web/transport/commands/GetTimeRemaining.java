@@ -20,6 +20,8 @@ public class GetTimeRemaining extends Command {
 	public class OutputPayload {
 		@SerializedName("TimeRemaining")
 		public String timeRemaining;
+		@SerializedName("End")
+		public String end;
 	}
 
 	@SerializedName("InputPayload")
@@ -45,6 +47,7 @@ public class GetTimeRemaining extends Command {
 		response.userID = userID;
 		response.returnCode = Command.SUCCESS;
 		response.outputPayload.timeRemaining = timeRemaining.toString();
+		response.outputPayload.end = timeRemaining.getEnd().toString();
 
 		return gson.toJson(response);
 	}

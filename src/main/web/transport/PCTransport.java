@@ -13,6 +13,12 @@ import util.Log;
 import javacli.annotations.Option;
 import javacli.annotations.Version;
 import javacli.OptionParser;
+import java.io.BufferedWriter;
+import java.io.IOException;
+import java.nio.file.StandardOpenOption;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Paths;
+import java.nio.file.Files;
 
 
 // +=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
@@ -22,6 +28,9 @@ import javacli.OptionParser;
 // json data on the Java side and the Python web server
 //
 public class PCTransport {
+
+	public static final String PID_FILE = "/var/www/Period-Countdown-WSGI/logs/PCTransport.pid";
+	
 
 	@Option(name = "transport-ip",
 			abbreviation = 'i',
@@ -63,6 +72,17 @@ public class PCTransport {
 		}
 		catch (Exception e) {
 			Log.stdlog(Log.FATAL, "PCTransport", "cannot parse command line arguments");
+		}
+
+		// Write the pid file
+		try (BufferedWriter writer = Files.newBufferedWriter(Paths.get(PCTransport.PID_FILE),
+														   StandardCharsets.UTF_8,
+														   StandardOpenOption.WRITE,
+														   StandardOpenOption.CREATE)) {
+			writer.write(ProcessHandle.current().pid() + "");
+		} catch (IOException e) {
+			Log.stdlog(Log.FATAL, "PCTransport", "Could not get pid, cannot start transport");
+			System.exit(1);
 		}
 		
 		SSLServer transportServer = new SSLServer(PCTransport.transport_ip, PCTransport.transport_port);

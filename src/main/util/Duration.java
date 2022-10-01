@@ -22,7 +22,9 @@ public class Duration {
 	public static final int MS_PER_SECOND = 1000;
 	public static final int MS_PER_MINUTE = MS_PER_SECOND * SECONDS_PER_MINUTE;
 	public static final int MS_PER_HOUR = MS_PER_MINUTE * MINUTES_PER_HOUR;
-	
+
+	private UTCTime start;
+	private UTCTime end;
 
 	private int hours;
 	private int minutes;
@@ -41,6 +43,9 @@ public class Duration {
 	//         duration will be 0:00:00.000
 	//
 	public Duration(UTCTime start, UTCTime end) {
+		this.start = start;
+		this.end = end;
+		
 		// Get epoch values
 		long startEpoch = start.getEpoch();
 		long endEpoch = end.getEpoch();
@@ -82,6 +87,9 @@ public class Duration {
 	//  millis:  milliseconds in the duration
 	//
 	public Duration(int hours, int minutes, int seconds, int millis) {
+		this.start = null;
+		this.end = null;
+		
 		this.hours = hours;
 		this.minutes = minutes;
 		this.seconds = seconds;
@@ -92,6 +100,14 @@ public class Duration {
 
 	// ====================================================================================================
 	// GET methods
+	public UTCTime getStart() {
+		return this.start;
+	}
+
+	public UTCTime getEnd() {
+		return this.end;
+	}
+	
 	public int hr() {
 		return this.hours;
 	}

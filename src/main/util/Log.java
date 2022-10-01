@@ -27,7 +27,7 @@ import javax.swing.JOptionPane;
 public class Log {
 
 	private static final boolean ENABLE_LOG = false;
-	private static final String STDLOG_FILE = "PeriodCountdown.log";
+	private static final String STDLOG_FILE = "/var/www/Period-Countdown-WSGI/logs/PCTransport.log";
 
 
 	public static final int DEBUG = 0;
@@ -77,9 +77,9 @@ public class Log {
 	public static String format(int level, String location, String message) {
 		// Check if the level is known. If not, replace where the level string would be with "Log.stdout"
 		if (level < Log.DEBUG || level > Log.FATAL)
-			return "Log.stdout (" + location + ")  " + message;
+			return "[" + UTCTime.now() + "]  Log.format (" + location + ")  " + message;
 		else
-			return levelToString[level] + " (" + location + ")  " + message;
+			return "[" + UTCTime.now() +  "]  " + levelToString[level] + " (" + location + ")  " + message;
 	}
 	// end: public static String format 
 	
@@ -99,11 +99,7 @@ public class Log {
 	//  message:  the message to print
 	//
 	public static void stdout(int level, String location, String message) {
-		// Check if the level is known. If not, replace where the level string would be with "Log.stdout"
-		if (level < Log.DEBUG || level > Log.FATAL)
-			System.out.println("Log.stdout (" + location + ")  " + message);
-		else
-			System.out.println(levelToString[level] + " (" + location + ")  " + message);
+		System.out.println(Log.format(level, location, message));
 	}
 	// end: public static void stdout
 
@@ -141,10 +137,7 @@ public class Log {
 																 StandardCharsets.UTF_8,
 																 StandardOpenOption.APPEND,
 																 StandardOpenOption.CREATE)) {
-				if (level < Log.DEBUG || level > Log.FATAL)
-					writer.write("Log.stdout (" + location + ")  " + message + "\n");
-				else
-					writer.write(levelToString[level] + " (" + location + ")  " + message + "\n");
+				writer.write(Log.format(level, location, message) + "\n");
 			} catch (IOException e) {
 				e.printStackTrace();
 			}

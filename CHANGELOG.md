@@ -13,6 +13,8 @@ All notable changes to Period-Countdown should be documented in this file.
 * Add a .wsgi file to load the web server from
 * Add a logs folder and blank log files to the web build
 * Add the apache configuration file period-countdown.conf to the web build
+* Add a favicon
+* Transport will now write to a pid file
 ### Fixed
 ### Changed
 * Change the abilities of the gen_keys.sh script (now only generates for the transport)
@@ -20,6 +22,7 @@ All notable changes to Period-Countdown should be documented in this file.
 * Move server configuration files to src/assets/web
 * Add a required timezone code tag to the school (or user) json files
 * All internal operations are now done in UTC, before being converted to the client's timezone as needed
+* Logging operations simplified slightly, log files for transport and server added
 
 ## [3.1.0] - 9/4/22
 ### Added

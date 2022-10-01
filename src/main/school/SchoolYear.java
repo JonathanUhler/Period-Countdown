@@ -290,7 +290,7 @@ public class SchoolYear {
 		if (now == null)
 			return null;
 		
-		int index = this.periodSearch(now, 0, this.year.size());
+		int index = this.periodSearch(now, 0, this.year.size() - 1);
 
 		if (index == -1 || index >= this.year.size())
 			return null;
