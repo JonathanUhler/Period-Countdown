@@ -41,12 +41,14 @@ Create your new school JSON file at ```Period-Countdown/src/assets/json```. Here
 	 - LastPeriod: the last valid period/class, as an integer >= FirstPeriod
 	 - FirstDayTag: the day tag in format YYYY-MM-DD of the first day of school
 	 - LastDayTag: the day tag in format YYYY-MM-DD of the last day of school
+	 - Timezone: the unix timezone ID for which this json data was created. A good list can be found at: https://manpages.ubuntu.com/manpages/focal/man3/DateTime::TimeZone::Catalog.3pm.html
 	*/
     "Info": {
         "FirstPeriod": "1",
         "LastPeriod": "7",
         "FirstDayTag": "2022-08-10",
-        "LastDayTag": "2023-06-08"
+        "LastDayTag": "2023-06-08",
+		"Timezone": "America/Los_Angeles"
     },
 	/*
 	Days
