@@ -8,13 +8,14 @@ All notable changes to Period-Countdown should be documented in this file.
 ### Fixed
 ### Changed
 
-## [4.0.0] - M/D/YY
+## [4.0.0] - 10/2/22
 ### Added
 * Add a .wsgi file to load the web server from
 * Add a logs folder and blank log files to the web build
 * Add the apache configuration file period-countdown.conf to the web build
 * Add a favicon
 * Transport will now write to a pid file
+* Add upcoming special schedules
 ### Fixed
 ### Changed
 * Change the abilities of the gen_keys.sh script (now only generates for the transport)
