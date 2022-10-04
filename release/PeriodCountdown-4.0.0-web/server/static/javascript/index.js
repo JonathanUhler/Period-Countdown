@@ -125,14 +125,6 @@ function updateTimeRemaining() {
 						  newDoc.getElementById(STATUS).innerHTML,
 						  newDoc.getElementById(TIME_REMAINING).innerHTML,
 						  newDoc.getElementById(NEXT_UP).innerHTML);
-
-			// Update session storage (since the DOM is not cached, some fields like the "status" will not be saved
-			// and might be displayed incorrectly upon the next load)
-			components = getComponents();
-			sessionStorage.setItem(END_TIME, encodeURIComponent(components[END_TIME]));
-			sessionStorage.setItem(STATUS, encodeURIComponent(components[STATUS]));
-			sessionStorage.setItem(TIME_REMAINING, encodeURIComponent(components[TIME_REMAINING]));
-			sessionStorage.setItem(NEXT_UP, encodeURIComponent(components[NEXT_UP]));
 		}).catch(function (error) {
 			throw new Error("error fetching updated information from server: " + error);
 		})
@@ -140,35 +132,6 @@ function updateTimeRemaining() {
 	}
 
 	timeRemainingDiv.getElementsByTagName("p")[0].innerHTML = timeRemaining.toString();
-}
-
-
-onload = () => {
-	var components = getComponents();
-	var endTime = components[END_TIME];
-	var status = components[STATUS];
-	var timeRemaining = components[TIME_REMAINING];
-	var nextUp = components[NEXT_UP];
-
-	if (sessionStorage.getItem(END_TIME) === null ||
-		sessionStorage.getItem(STATUS) === null ||
-		sessionStorage.getItem(TIME_REMAINING) === null ||
-		sessionStorage.getItem(NEXT_UP) === null) {
-		sessionStorage.setItem(END_TIME, encodeURIComponent(endTime));
-		sessionStorage.setItem(STATUS, encodeURIComponent(status));
-		sessionStorage.setItem(TIME_REMAINING, encodeURIComponent(timeRemaining));
-		sessionStorage.setItem(NEXT_UP, encodeURIComponent(nextUp));
-	}
-	else {
-		// Only update session storage if the period has changed, otherwise don't bother since no data will be lost
-		// upon a new load
-		if (status !== decodeURIComponent(sessionStorage.getItem(STATUS))) {
-			setComponents(decodeURIComponent(sessionStorage.getItem(END_TIME)),
-						  decodeURIComponent(sessionStorage.getItem(STATUS)),
-						  decodeURIComponent(sessionStorage.getItem(TIME_REMAINING)),
-						  decodeURIComponent(sessionStorage.getItem(NEXT_UP)));
-		}
-	}
 }
 
 
