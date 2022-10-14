@@ -20,8 +20,10 @@ public class GetTimeRemaining extends Command {
 	public class OutputPayload {
 		@SerializedName("TimeRemaining")
 		public String timeRemaining;
-		@SerializedName("End")
-		public String end;
+		@SerializedName("EndTime")
+		public String endTime;
+		@SerializedName("ExpireTime")
+		public String expireTime;
 	}
 
 	@SerializedName("InputPayload")
@@ -39,7 +41,8 @@ public class GetTimeRemaining extends Command {
 		String opcode = command.opcode;
 		String userID = command.userID;
 
-		Duration timeRemaining = schoolAPI.getTimeRemaining(UTCTime.now());
+		UTCTime now = UTCTime.now();
+		Duration timeRemaining = schoolAPI.getTimeRemaining(now);
 
 		GetTimeRemaining response = new GetTimeRemaining();
 		response.outputPayload = response.new OutputPayload();
@@ -47,7 +50,12 @@ public class GetTimeRemaining extends Command {
 		response.userID = userID;
 		response.returnCode = Command.SUCCESS;
 		response.outputPayload.timeRemaining = timeRemaining.toString();
-		response.outputPayload.end = timeRemaining.getEnd().toString();
+		response.outputPayload.endTime = timeRemaining.getEnd().toString();
+		// The expiry time of the time remaining data may or may not be the same as the "End" time. It is defined
+		// as the end of the current period (e.g. 23:59:59.999 for something like an "After School" period). This
+		// is an useful distinction to make when the period changes (e.g. during midnight), but the time
+		// remaining does not since those two periods are merged
+		response.outputPayload.expireTime = schoolAPI.getCurrentPeriod(now).getEnd().toString();
 
 		return gson.toJson(response);
 	}

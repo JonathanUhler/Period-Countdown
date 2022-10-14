@@ -71,13 +71,15 @@ def index() -> str:
         period_name: str = user_period["OutputPayload"]["Name"]
         period_status: str = user_period["OutputPayload"]["Status"]
         time: str = time_remaining["OutputPayload"]["TimeRemaining"]
-        end: str = time_remaining["OutputPayload"]["End"]
+        end_time: str = time_remaining["OutputPayload"]["EndTime"]
+        expire_time: str = time_remaining["OutputPayload"]["ExpireTime"]
         next_up_level: str = next_up_list["OutputPayload"]["NextUp"]
         next_up: list = next_up_list["OutputPayload"]["NextUpList"]
 
         # Return the rendered template
         return render_template("index.html",
-                               end=f"{end}",
+                               end_time=f"{end_time}",
+                               expire_time=f"{expire_time}",
                                status=f"{period_name} | {period_status}",
                                time_remaining=f"{time}",
                                next_up_list=next_up if next_up_level != "Disabled" else None)

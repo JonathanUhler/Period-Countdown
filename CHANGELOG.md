@@ -8,6 +8,14 @@ All notable changes to Period-Countdown should be documented in this file.
 ### Fixed
 ### Changed
 
+## [4.0.1] - 10/13/22
+### Added
+* Add a "ExpireTime" field to GetTimeRemaining, indicating the end of the current period (which may be the same as "EndTime")
+### Fixed
+* Fix an issue with merging periods to calculate time remaining on the web build
+### Changed
+* Minor syntax changes to GetTimeRemaining
+
 ## [4.0.0] - 10/2/22
 ### Added
 * Add a .wsgi file to load the web server from

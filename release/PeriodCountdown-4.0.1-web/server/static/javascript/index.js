@@ -2,6 +2,7 @@
 
 
 const END_TIME = "end_time";
+const EXPIRE_TIME = "expire_time";
 const TIME_REMAINING = "time_remaining";
 const STATUS = "status";
 const NEXT_UP = "next_up";
@@ -75,12 +76,14 @@ class Duration {
 
 function getComponents() {
 	var endTime = document.querySelector('meta[name="' + END_TIME + '"]').getAttribute("content");
+	var expireTime = document.querySelector('meta[name="' + EXPIRE_TIME + '"]').getAttribute("content");
 	var status = document.getElementById(STATUS).innerHTML;
 	var timeRemaining = document.getElementById(TIME_REMAINING).innerHTML;
 	var nextUp = document.getElementById(NEXT_UP).innerHTML;
 
 	return {
 		[END_TIME]: endTime,
+		[EXPIRE_TIME]: expireTime,
 		[STATUS]: status,
 		[TIME_REMAINING]: timeRemaining,
 		[NEXT_UP]: nextUp
@@ -88,18 +91,21 @@ function getComponents() {
 }
 
 
-function setComponents(endTime, status, timeRemaining, nextUp) {
+function setComponents(endTime, expireTime, status, timeRemaining, nextUp) {
 	if (typeof endTime !== "string" ||
+		typeof expireTime !== "string" ||
 		typeof status !== "string" ||
 		typeof timeRemaining !== "string" ||
 		typeof nextUp !== "string")
-		throw new TypeError("unexpected type: should be (string, string, string, string), found (" +
+		throw new TypeError("unexpected type: should be (string, string, string, string, string), found (" +
 							(typeof endTime) + ", " +
+							(typeof expireTime) + ", " +
 							(typeof status) + ", " +
 							(typeof timeRemaining) + ", " +
 							(typeof nextUp) + ")");
 
 	document.querySelector('meta[name="' + END_TIME + '"]').setAttribute("content", endTime);
+	document.querySelector('meta[name="' + EXPIRE_TIME + '"]').setAttribute("content", expireTime);
 	document.getElementById(STATUS).innerHTML = status;
 	document.getElementById(TIME_REMAINING).innerHTML = timeRemaining;
 	document.getElementById(NEXT_UP).innerHTML = nextUp;
@@ -107,11 +113,19 @@ function setComponents(endTime, status, timeRemaining, nextUp) {
 
 
 function updateTimeRemaining() {
-	var timeRemainingDiv = document.getElementById("time_remaining");
-
+	var timeRemainingDiv = document.getElementById(TIME_REMAINING);
 	var components = getComponents();
+	
 	var endTime = components[END_TIME];
 	var timeRemaining = new Duration(endTime);
+
+	var expireTime = components[EXPIRE_TIME];
+	var timeValid = new Duration(expireTime);
+
+	if (timeValid.isOver()) {
+		window.location.reload(true);
+		return;
+	}
 
 	if (timeRemaining.isOver()) {
 		fetch("/").then(function (response) {
@@ -122,6 +136,7 @@ function updateTimeRemaining() {
 			var newDoc = parser.parseFromString(html, "text/html");
 
 			setComponents(newDoc.querySelector('meta[name="' + END_TIME + '"]').getAttribute("content"),
+						  newDoc.querySelector('meta[name="' + EXPIRE_TIME + '"]').getAttribute("content"),
 						  newDoc.getElementById(STATUS).innerHTML,
 						  newDoc.getElementById(TIME_REMAINING).innerHTML,
 						  newDoc.getElementById(NEXT_UP).innerHTML);
