@@ -3,6 +3,8 @@
 *~
 obj/
 bin/*
+release/PeriodCountdown-*-web/
+release/PeriodCountdown-*-web/**
 
 # Additional files to ignore
 deprecated/*

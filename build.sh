@@ -78,6 +78,10 @@ elif [ "$target" = "web" ]; then
 	mkdir -p "release/PeriodCountdown-$version-web/"
 	rm -rf "release/PeriodCountdown-$version-web/"
 	cp -a bin/ "release/PeriodCountdown-$version-web/"
+	cd "release/PeriodCountdown-$version-web"
+	tar -czvf "../PeriodCountdown-$version-web.tar.gz" *
+	cd ../..
+	rm -rf "release/PeriodCountdown-$version-web/"
 else
 	echo "[build.sh] Target $target not recognized, cannot build"
 	exit 1

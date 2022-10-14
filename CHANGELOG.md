@@ -8,6 +8,12 @@ All notable changes to Period-Countdown should be documented in this file.
 ### Fixed
 ### Changed
 
+## [4.0.2] - 10/13/22
+### Added
+### Fixed
+### Changed
+* Web build now comes as a tar.gz archive
+
 ## [4.0.1] - 10/13/22
 ### Added
 * Add a "ExpireTime" field to GetTimeRemaining, indicating the end of the current period (which may be the same as "EndTime")
