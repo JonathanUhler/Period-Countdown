@@ -8,6 +8,13 @@ All notable changes to Period-Countdown should be documented in this file.
 ### Fixed
 ### Changed
 
+## [5.0.0] - 10/15/22
+### Added
+* Minor documentation changes and additions
+### Fixed
+### Changed
+* Change the structure of the User.json file to include a "Schools" table that can contain period info for many schools
+
 ## [4.0.2] - 10/13/22
 ### Added
 ### Fixed

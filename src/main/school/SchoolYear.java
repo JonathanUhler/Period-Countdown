@@ -36,8 +36,8 @@ public class SchoolYear {
 	private ArrayList<SchoolPeriod> year;
 
 	// Information from the "Info" section of the school json file
-	private String firstPeriod;
-	private String lastPeriod;
+	private int firstPeriod;
+	private int lastPeriod;
 	private String firstDayTag;
 	private String lastDayTag;
 	private String timezone;
@@ -109,15 +109,27 @@ public class SchoolYear {
 			!this.schoolJson.info.containsKey(SchoolJson.FIRST_DAY_TAG) ||
 			!this.schoolJson.info.containsKey(SchoolJson.LAST_DAY_TAG) ||
 			!this.schoolJson.info.containsKey(SchoolJson.TIMEZONE))
-			throw new IllegalArgumentException("school json Info missing key. Required keys are:\n" +
-											   "- " + SchoolJson.FIRST_PERIOD + "\n" +
-											   "- " + SchoolJson.LAST_PERIOD + "\n" +
-											   "- " + SchoolJson.FIRST_DAY_TAG + "\n" +
-											   "- " + SchoolJson.LAST_DAY_TAG + "\n" +
-											   "- " + SchoolJson.TIMEZONE);
+			throw new IllegalArgumentException(Log.format(Log.ERROR, "SchoolYear.java",
+														  "school json Info missing key. Required keys are:\n" +
+														  "- " + SchoolJson.FIRST_PERIOD + "\n" +
+														  "- " + SchoolJson.LAST_PERIOD + "\n" +
+														  "- " + SchoolJson.FIRST_DAY_TAG + "\n" +
+														  "- " + SchoolJson.LAST_DAY_TAG + "\n" +
+														  "- " + SchoolJson.TIMEZONE));
 
-		this.firstPeriod = this.schoolJson.info.get(SchoolJson.FIRST_PERIOD);
-		this.lastPeriod = this.schoolJson.info.get(SchoolJson.LAST_PERIOD);
+		try {
+			this.firstPeriod = Integer.parseInt(this.schoolJson.info.get(SchoolJson.FIRST_PERIOD));
+			this.lastPeriod = Integer.parseInt(this.schoolJson.info.get(SchoolJson.LAST_PERIOD));
+		}
+		catch (NumberFormatException e) {
+			throw new IllegalArgumentException(Log.format(Log.ERROR, "SchoolYear.java",
+														  "first or last period is not parsable as an integer"));
+		}
+		if (this.firstPeriod > this.lastPeriod) {
+			throw new IllegalArgumentException(Log.format(Log.ERROR, "SchoolYear.java",
+														  "first period is greater than last period"));
+		}
+		
 		this.firstDayTag = this.schoolJson.info.get(SchoolJson.FIRST_DAY_TAG);
 		this.lastDayTag = this.schoolJson.info.get(SchoolJson.LAST_DAY_TAG);
 		this.timezone = this.schoolJson.info.get(SchoolJson.TIMEZONE);
@@ -311,6 +323,32 @@ public class SchoolYear {
 		return this.timezone;
 	}
 	// end: public String getTimezone
+
+
+	// ====================================================================================================
+	// public int getFirstperiod
+	//
+	// Returns--
+	//
+	//  The first number period of classes
+	//
+	public int getFirstPeriod() {
+		return this.firstPeriod;
+	}
+	// end: public int getFirstPeriod
+
+
+	// ====================================================================================================
+	// public int getLastPeriod
+	//
+	// Returns--
+	//
+	//  The first number period of classes
+	//
+	public int getLastPeriod() {
+		return this.lastPeriod;
+	}
+	// end: public int getLastPeriod
 
 
 	// ====================================================================================================

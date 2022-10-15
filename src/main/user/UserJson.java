@@ -44,7 +44,9 @@ public class UserJson {
 	public static final String FILE_NAME_REGEX = "[a-zA-Z0-9_/\\\\]+\\.json";
 	
 	// Period information
+	public static final String SCHOOLS = "Schools";
 	public static final String PERIODS = "Periods";
+	public static final String DAYS = "Days";
 	public static final String NAME = "Name";
 	public static final String TEACHER = "Teacher";
 	public static final String ROOM = "Room";
@@ -62,11 +64,8 @@ public class UserJson {
 	
 
 	// +=+= JSON DATA =+=+
-	@SerializedName("Days")
-	// Allows user-specific day data (like for colleges) to be in the user file instead of the school file
-	public Map<String, List<Map<String, String>>> days;
-	@SerializedName("Periods")
-	public Map<String, Map<String, String>> periods;
+	@SerializedName("Schools")
+	public Map<String, UserJsonSchoolDef> schools;
 	@SerializedName("Settings")
 	public Map<String, String> settings;
 	// end: JSON DATA 
