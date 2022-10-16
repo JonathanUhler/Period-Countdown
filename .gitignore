@@ -11,6 +11,6 @@ deprecated/*
 documentation/AWS-Setup.txt
 *.pem
 *.jks
-run_test.sh
 install_web.sh
 percountdown
+percountdown_dev

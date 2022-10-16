@@ -8,6 +8,7 @@
 
 import log
 import commands
+import os
 import sys
 import click
 import ssl
@@ -17,8 +18,8 @@ from flask import Flask, request, render_template
 from flask_cors import CORS
 
 
-# web_server is the Flask web server, which should be run through a production framework like Gunicorn
-# send_socket is a secure socket to communicate with the Java transport
+# * web_server is the Flask web server, which should be run through a production framework like Apache
+# * send_socket is a secure socket to communicate with the Java transport
 web_server: Final = Flask(__name__)
 CORS(web_server) # Add preflight response capabilities (approves HTTP verbs)
 send_socket: Final = ssl.wrap_socket(socket.socket(socket.AF_INET, socket.SOCK_STREAM));
@@ -167,8 +168,7 @@ def nextup():
 # purposes and can be run with "python3 pc_server.py [OPTIONS]" (see the __name__ == "__main__"
 # block below).
 #
-# For running this web server in production, use the run(str, str) method as an entry point with
-# a framework like Gunicorn.
+# For running this web server in production, use the run(str, str) method as an entry point
 #
 # Arguments--
 #
@@ -181,16 +181,17 @@ def nextup():
 @click.option("--transport-port", nargs=1, default=9000, show_default=True, type=int, help="set transport port")
 @click.option("--keyfile", nargs=1, default="server_keystore.pem", show_default=True, help="set server keystore file")
 @click.option("--certfile", nargs=1, default="server_cert.pem", show_default=True, help="set server certificate file")
+@click.option("--log-file", nargs=1, help="set log file; if not set, log file will not be written")
 def run_development(server_ip: str, server_port: int,
                     transport_ip: str, transport_port: int,
-                    keyfile: str, certfile: str) -> None:
-    log.stdout(log.WARN, "pc_server",
-               "SERVER IS RUNNING IN DEVELOPMENT MODE! If this was intended, ignore this message")
+                    keyfile: str, certfile: str,
+                    log_file: str) -> None:
+    log.stdout(log.WARN, "pc_server", "Starting in development mode! If this was intended, ignore this message")
 
     # Use the run method below, which connects the send_socket and just returns the web server object.
     # In a production setting, the returned Flask object from run(str, str) is configured further by
     # the framework
-    run(transport_ip, transport_port)
+    run(transport_ip, transport_port, log_file)
 
     # In the development environment, configure the web server manually
     try:
@@ -217,7 +218,10 @@ def run_development(server_ip: str, server_port: int,
 #
 #  The Flask object web_server, for further configuration by the caller of this method
 #
-def run(transport_ip: str, transport_port: int) -> Flask:
+def run(transport_ip: str, transport_port: int, log_file: str) -> Flask:
+    if (log_file != None):
+        os.environ[log.LOG_FILE_SYS_PROPERTY] = log_file
+    
     try:
         send_socket.settimeout(30) # 30 second timeout
         send_socket.connect((transport_ip, transport_port))
@@ -238,15 +242,6 @@ def run(transport_ip: str, transport_port: int) -> Flask:
 # Main entry
 #
 if (__name__ == "__main__"):
-    """
-    Can run either normally with:
-    'python3 pc_server.py [OPTIONS]' 
-    or with:
-    'python3 -m gunicorn --bind <host>:<port> "pc_server:run(<kwargs>)" --keyfile <keyfile> --certfile <certfile>'
-
-    See more here:  https://stackoverflow.com/questions/8495367/using-additional-command-line-arguments-with-gunicorn
-    """
-    
     try:
         run_development()
     except Exception as e:

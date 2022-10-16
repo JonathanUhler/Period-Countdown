@@ -26,8 +26,8 @@ import javax.swing.JOptionPane;
 //
 public class Log {
 
-	private static final boolean ENABLE_LOG = false;
-	private static final String STDLOG_FILE = "/var/www/Period-Countdown-WSGI/logs/PCTransport.log";
+	public static final String LOG_FILE_SYS_PROPERTY = "pc_transport_log_file";
+	private static final String STDLOG_FILE = System.getProperty(Log.LOG_FILE_SYS_PROPERTY);
 
 
 	public static final int DEBUG = 0;
@@ -132,7 +132,7 @@ public class Log {
 			Log.stdout(level, location, message);
 
 		// Write to the log file
-		if (Log.ENABLE_LOG) {
+		if (Log.STDLOG_FILE != null) {
 			try (BufferedWriter writer = Files.newBufferedWriter(Paths.get(Log.STDLOG_FILE),
 																 StandardCharsets.UTF_8,
 																 StandardOpenOption.APPEND,
@@ -141,6 +141,9 @@ public class Log {
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
+		}
+		else {
+			Log.stdout(level, location, "(STDLOG_FILE was null) " + message);
 		}
 
 		// If the message was a fatal error, assume there is no way to recover and close to program to

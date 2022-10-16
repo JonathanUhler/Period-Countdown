@@ -8,6 +8,12 @@ All notable changes to Period-Countdown should be documented in this file.
 ### Fixed
 ### Changed
 
+## [5.1.0] - 10/16/22
+### Added
+### Fixed
+### Changed
+* Moved log and pid files to command line options instead of hard-coded paths
+
 ## [5.0.0] - 10/15/22
 ### Added
 * Minor documentation changes and additions

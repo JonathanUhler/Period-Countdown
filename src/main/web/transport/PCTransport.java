@@ -27,10 +27,7 @@ import java.nio.file.Files;
 // Main class for the web version of Period Countdown. Acts as a transport between the APIs to access
 // json data on the Java side and the Python web server
 //
-public class PCTransport {
-
-	public static final String PID_FILE = "/var/www/Period-Countdown-WSGI/logs/PCTransport.pid";
-	
+public class PCTransport {	
 
 	@Option(name = "transport-ip",
 			abbreviation = 'i',
@@ -49,40 +46,63 @@ public class PCTransport {
 			showDefault = true,
 			help = "set transport port")
 	public static Integer transport_port;
+
+	@Option(name = "pid-file",
+			abbreviation = 'p',
+			nargs = 1,
+			type = String.class,
+			help = "set pid file; if not set, pid file will not be written")
+	public static String pid_file;
+
+	@Option(name = "log-file",
+			abbreviation = 'l',
+			nargs = 1,
+			type = String.class,
+			help = "set log file; if not set, log file will not be written")
+	public static String log_file;
 	
 
 	// ====================================================================================================
 	// public static void main
 	//
 	public static void main(String[] args) {
-		// Check for the keystore and keystore password arguments. If these aren't specified (e.g. they're
-		// null) then the transport cannot start securely
-		if (System.getProperty("javax.net.ssl.keyStore") == null ||
-			System.getProperty("javax.net.ssl.keyStorePassword") == null) {
-			Log.stdlog(Log.ERROR, "PCTransport", "keystore file or password not specified");
-			Log.stdlog(Log.ERROR, "PCTransport", "\t" +
-					   "keyStore=" + System.getProperty("javax.net.ssl.keyStore") + ", " + 
-					   "keyStorePassword=" + System.getProperty("javax.net.ssl.keyStorePassword"));
-			System.exit(Log.ERROR);
-		}
-
+		// Parse command line options
 		try {
 			OptionParser optionParser = new OptionParser(PCTransport.class);
 			optionParser.parse(args);
 		}
 		catch (Exception e) {
-			Log.stdlog(Log.FATAL, "PCTransport", "cannot parse command line arguments");
+			Log.stdout(Log.FATAL, "PCTransport", "cannot parse command line arguments");
+		}
+
+		// If specified by the command line, set log file as a system property to be picked up once by util.Log
+		if (PCTransport.log_file != null)
+			System.setProperty(Log.LOG_FILE_SYS_PROPERTY, PCTransport.log_file);
+		
+		// Check for the keystore and keystore password arguments. If these aren't specified (e.g. they're
+		// null) then the transport cannot start securely
+		if (System.getProperty("javax.net.ssl.keyStore") == null ||
+			System.getProperty("javax.net.ssl.keyStorePassword") == null) {
+			Log.stdlog(Log.ERROR, "PCTransport", "keystore file or password not specified");
+			Log.stdlog(Log.ERROR, "PCTransport",
+					   "\tkeyStore=" + System.getProperty("javax.net.ssl.keyStore"));
+			Log.stdlog(Log.ERROR, "PCTransport",
+					   "\tkeyStorePassword=" + System.getProperty("javax.net.ssl.keyStorePassword"));
+			System.exit(Log.ERROR);
 		}
 
 		// Write the pid file
-		try (BufferedWriter writer = Files.newBufferedWriter(Paths.get(PCTransport.PID_FILE),
-														   StandardCharsets.UTF_8,
-														   StandardOpenOption.WRITE,
-														   StandardOpenOption.CREATE)) {
-			writer.write(ProcessHandle.current().pid() + "");
-		} catch (IOException e) {
-			Log.stdlog(Log.FATAL, "PCTransport", "Could not get pid, cannot start transport");
-			System.exit(1);
+		if (PCTransport.pid_file != null) {
+			try (BufferedWriter writer = Files.newBufferedWriter(Paths.get(PCTransport.pid_file),
+																 StandardCharsets.UTF_8,
+																 StandardOpenOption.WRITE,
+																 StandardOpenOption.CREATE)) {
+				writer.write(ProcessHandle.current().pid() + "");
+			} catch (IOException e) {
+				Log.stdlog(Log.FATAL, "PCTransport",
+						   "Could not write pid, will not start transport. Leave out --pid-file to start anyway");
+				System.exit(1);
+			}
 		}
 		
 		SSLServer transportServer = new SSLServer(PCTransport.transport_ip, PCTransport.transport_port);

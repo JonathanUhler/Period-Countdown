@@ -6,6 +6,7 @@
 # +=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
 
 
+import os
 import sys
 from datetime import datetime
 from typing import Final
@@ -13,15 +14,8 @@ from typing import Final
 
 ENCODING: Final = "utf8" # Put this here because python can't import this field statically from other files :(
 
-
-# *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=
-# THE FOLLOWING OPTIONS CAN BE CHANGED IF DESIRED
-#
-ENABLE_LOG: Final = False
-STDLOG_FILE: Final = "/var/www/Period-Countdown-WSGI/logs/PCServer.log"
-#
-# *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=
-
+LOG_FILE_SYS_PROPERTY: Final = "pc_server_log_file"
+STDLOG_FILE: str = os.getenv(LOG_FILE_SYS_PROPERTY)
 
 DEBUG: Final = 0
 INFO: Final = 1
@@ -107,15 +101,21 @@ def stdlog(level: int, location: str, message: str, prnt: bool = False) -> None:
         print(f"WARN (log)  \tmessage: {message}")
         return
 
+    global STDLOG_FILE
+    if (STDLOG_FILE == None and os.getenv(LOG_FILE_SYS_PROPERTY) != None):
+        STDLOG_FILE = os.getenv(LOG_FILE_SYS_PROPERTY)
+
     if (prnt == False):
         prnt = (level == WARN or level == ERROR or level == FATAL)
 
     if (prnt):
         stdout(level, location, message)
 
-    if (ENABLE_LOG):
+    if (STDLOG_FILE != None):
         with open(STDLOG_FILE, "a") as writer:
             writer.write(f"{format(level, location, message)}\n")
+    else:
+        stdout(level, location, f"(STDLOG_FILE was null) {message}")
 
     if (level == FATAL):
         sys.exit(FATAL)
