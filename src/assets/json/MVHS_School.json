@@ -99,7 +99,7 @@
             {"Type": "Nothing", "Name": "Passing", "Start": "09:20", "End": "09:27"},
             {"Type": "Special", "Name": "Rally A", "Start": "09:27", "End": "10:07"},
             {"Type": "Special", "Name": "Rally B", "Start": "10:07", "End": "10:47"},
-            {"Type": "Nothing", "Name": "Brunch", "Start": "10:47", "End": "10:57"},
+            {"Type": "Special", "Name": "Brunch", "Start": "10:47", "End": "10:57"},
             {"Type": "Nothing", "Name": "Passing", "Start": "10:57", "End": "11:04"},
             {"Type": "3", "Name": "Per 3", "Start": "11:04", "End": "11:44"},
             {"Type": "Nothing", "Name": "Passing", "Start": "11:44", "End": "11:51"},

@@ -8,6 +8,20 @@ All notable changes to Period-Countdown should be documented in this file.
 ### Fixed
 ### Changed
 
+## [5.1.2] - 10/17/22
+### Added
+### Fixed
+* Change "Brunch" for G schedule from "Nothing" to "Special"
+### Changed
+
+## [5.1.1] - 10/17/22
+### Added
+### Fixed
+### Changed
+* Enable "Next Up" by default (allow viewing on the generic website)
+
+## [5.1.0] - 10/16/22
+
 ## [5.1.1] - 10/17/22
 ### Added
 ### Fixed
