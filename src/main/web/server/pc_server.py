@@ -15,13 +15,11 @@ import ssl
 import socket
 from typing import Final
 from flask import Flask, request, render_template
-from flask_cors import CORS
 
 
 # * web_server is the Flask web server, which should be run through a production framework like Apache
 # * send_socket is a secure socket to communicate with the Java transport
 web_server: Final = Flask(__name__)
-CORS(web_server) # Add preflight response capabilities (approves HTTP verbs)
 send_socket: Final = ssl.wrap_socket(socket.socket(socket.AF_INET, socket.SOCK_STREAM));
 
 
