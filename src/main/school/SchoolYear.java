@@ -147,6 +147,7 @@ public class SchoolYear {
 		UTCTime lastDay = UTCTime.of(this.lastDayTag, this.timezone);
 
 		UTCTime current = firstDay.shiftedToClosest(UTCTime.SUNDAY);
+		UTCTime previousEndTime = null; // Running previous end time, to check continuity through the year
 		UTCTime end = lastDay.shiftedToClosest(UTCTime.SATURDAY);
 
 		while (current.isBefore(end)) {
@@ -195,8 +196,6 @@ public class SchoolYear {
 					throw new IllegalArgumentException(Log.format(Log.ERROR, "SchoolYear",
 																  "day \"" + dayType + "\" has 0 periods"));
 
-				UTCTime previousEndTime = null;
-
 				for (Map<String, String> periodDef : periodDefs) {
 					if (!periodDef.containsKey(SchoolJson.TYPE) ||
 						!periodDef.containsKey(SchoolJson.NAME) ||
@@ -213,15 +212,14 @@ public class SchoolYear {
 					// Convert the "current" time to the timezone specified by the json. Use the day tag of
 					// that local object to create the local strings for the start/end. Then construct
 					// UTCTime objects for the start/end in UTC
-					UTCTime localDate = current.to(this.timezone);
-					UTCTime startTime = UTCTime.of(localDate.getDayTag() + "T" + startStr + ":00.000", this.timezone);
+					UTCTime startTime = UTCTime.of(current.getDayTag() + "T" + startStr + ":00.000", this.timezone);
 					UTCTime endTime = null;
 					if (!endStr.equals(UserJson.LAST_TIME)) {
-						endTime = UTCTime.of(localDate.getDayTag() + "T" + endStr + ":00.999", this.timezone);
+						endTime = UTCTime.of(current.getDayTag() + "T" + endStr + ":00.999", this.timezone);
 						endTime = endTime.plus(-1, UTCTime.SECONDS);
 					}
 					else {
-						endTime = UTCTime.of(localDate.plus(1, UTCTime.DAYS).getDayTag() +
+						endTime = UTCTime.of(current.plus(1, UTCTime.DAYS).getDayTag() +
 											 "T00:00:00.000", this.timezone);
 						endTime = endTime.plus(-1, UTCTime.MILLISECONDS);
 					}
@@ -235,8 +233,11 @@ public class SchoolYear {
 																	  "previous end + 1ms != next start: " +
 																	  previousEndTime + ", " + startTime));
 					previousEndTime = endTime;
-					
-					this.year.add(new SchoolPeriod(type, name, startTime, endTime, endStr.equals(UserJson.LAST_TIME)));
+
+					SchoolPeriod addition = new SchoolPeriod(type, name,
+															 startTime, endTime,
+															 endStr.equals(UserJson.LAST_TIME));
+					this.year.add(addition);
 				}
 
 				// Go to the next day

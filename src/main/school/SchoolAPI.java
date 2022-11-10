@@ -85,7 +85,7 @@ public class SchoolAPI {
 	public SchoolPeriod getCurrentPeriod(UTCTime now) {
 		if (now == null)
 			return null;
-		
+
 		return this.year.getPeriod(now);
 	}
 	// end: public SchoolPeriod getCurrentPeriod

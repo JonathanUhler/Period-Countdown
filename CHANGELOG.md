@@ -8,6 +8,13 @@ All notable changes to Period-Countdown should be documented in this file.
 ### Fixed
 ### Changed
 
+## [5.1.3] - 11/10/22
+### Added
+### Fixed
+* Fixed a DST issue
+### Changed
+* The previousEndTime variable is now persisted throughout the entire creation of a SchoolYear, rather than just inside of each day definition. This will help catch discontinuities across days or weeks
+
 ## [5.1.2] - 10/17/22
 ### Added
 ### Fixed
