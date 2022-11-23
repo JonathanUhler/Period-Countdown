@@ -12,5 +12,4 @@ documentation/AWS-Setup.txt
 *.pem
 *.jks
 install_web.sh
-percountdown
-percountdown_dev
+sensitive/*
