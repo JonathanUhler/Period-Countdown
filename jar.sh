@@ -42,9 +42,6 @@ elif [ "$target" = "web" ]; then
 	echo "[jar.sh] Copying key generation scripts for web build"
 	mkdir bin/keys
 	cp $(find src/assets/web/keys -name '*.sh') bin/keys # Ignore any actual key/cert files
-	echo "[jar.sh] Copying website config and logs for web build"
-	cp -a src/assets/web/logs bin/logs
-	cp src/assets/web/period-countdown.conf bin/
 else
 	echo "[jar.sh] Target $target not recognized, cannot package dependencies"
 	exit 1

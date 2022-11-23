@@ -75,6 +75,7 @@ OAUTH_SECRET: Final = None
 def append_paths(head: str, tail: str) -> str:
     if (tail.startswith("/")):
         try:
+            os.makedirs(os.path.dirname(tail), exist_ok=True)
             with open(tail, "a+") as test:
                 pass
         except Exception as e:
@@ -93,6 +94,7 @@ def append_paths(head: str, tail: str) -> str:
 
     path: str = head + "/" + tail
     try:
+        os.makedirs(os.path.dirname(path), exist_ok=True)
         with open(path, "a+") as test:
             pass
     except Exception as e:

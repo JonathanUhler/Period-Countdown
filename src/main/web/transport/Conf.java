@@ -10,12 +10,9 @@ package web.transport;
 
 
 import java.util.Map;
-import java.io.BufferedWriter;
+import java.io.File;
 import java.io.IOException;
-import java.nio.file.StandardOpenOption;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.nio.file.Paths;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -108,10 +105,10 @@ public class Conf {
 	//
 	private static String appendPaths(String head, String tail) {
 		if (tail != null && tail.startsWith("/")) {
-			try (BufferedWriter test = Files.newBufferedWriter(Paths.get(tail),
-															   StandardCharsets.UTF_8,
-															   StandardOpenOption.APPEND,
-															   StandardOpenOption.CREATE)) {
+			try {
+				File file = new File(tail);
+				file.getParentFile().mkdirs();
+				file.createNewFile();
 				return tail; // File successfully check for existance
 			}
 			catch (IOException e) {
@@ -130,10 +127,10 @@ public class Conf {
 			head = head.substring(0, head.length() - 1);
 		
 		String path = head + "/" + tail;
-		try (BufferedWriter test = Files.newBufferedWriter(Paths.get(path),
-														   StandardCharsets.UTF_8,
-														   StandardOpenOption.APPEND,
-														   StandardOpenOption.CREATE)) {
+		try {
+			File file = new File(path);
+			file.getParentFile().mkdirs();
+			file.createNewFile();
 			return path; // File successfully checked for existance
 		}
 		catch (IOException e) {
