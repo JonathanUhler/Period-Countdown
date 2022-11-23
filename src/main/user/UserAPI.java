@@ -47,10 +47,13 @@ public class UserAPI {
 	// ----------------------------------------------------------------------------------------------------
 	// public UserAPI
 	//
-	public UserAPI(String jsonName) throws FileNotFoundException,
-										   IllegalArgumentException
+	// Loads the default User.json file from the jar
+	//
+	public UserAPI() throws FileNotFoundException,
+							IllegalArgumentException
 	{
-		this(jsonName, false);
+		this.loadFromJar();
+		this.validate();
 	}
 	// end: public UserAPI
 	
@@ -58,21 +61,16 @@ public class UserAPI {
 	// ----------------------------------------------------------------------------------------------------
 	// public UserAPI
 	//
+	// Loads an user json file from a specified local path on the disk
+	//
 	// Arguments--
 	//
-	//  jsonName:    name of the user json file
+	//  jsonPath: absolute path of the user json file
 	//
-	//  loadFromJar: whether to use the local (built with the jar) User.json file or the stored file
-	//
-	public UserAPI(String jsonName, boolean loadFromJar) throws FileNotFoundException,
-																IllegalArgumentException
+	public UserAPI(String jsonPath) throws FileNotFoundException,
+										   IllegalArgumentException
 	{
-		if (loadFromJar)
-			this.loadFromJar(jsonName);
-		else
-			this.loadFromDisk(jsonName);
-
-		// Validate the json data
+		this.loadFromDisk(jsonPath);
 		this.validate();
 	}
 	// end: public UserAPI
@@ -101,31 +99,32 @@ public class UserAPI {
 	//
 	// Arguments--
 	//
-	//  jsonName: the name of the json file (without the path)
+	//  jsonPath: the absolute path of the json file on the local disk
 	//
 	// Returns--
 	//
 	//  This method mutates the instance variables jsonPath and json directly
 	//
-	private void loadFromDisk(String jsonName) throws FileNotFoundException,
+	private void loadFromDisk(String jsonPath) throws FileNotFoundException,
 													IllegalArgumentException
 	{
 		Gson gson = new Gson();
-		this.jsonPath = UserJson.EXPECTED_PATH + jsonName;
+		this.jsonPath = jsonPath;
 
 		FileReader userReader = null;
 		try {
 			userReader = new FileReader(this.jsonPath);
 		}
 		catch (FileNotFoundException e) {
-		    this.loadFromJar(jsonName);
+			// Load from jar to get the local version of the file that can be written to the newly created file
+		    this.loadFromJar();
 
 			// Write the template User.json file to the expected path
 			try {
-				this.jsonPath = UserJson.EXPECTED_PATH + jsonName; // Override jsonPath from the loadFromJar() call
-				File userDirectory = new File(UserJson.EXPECTED_PATH);
-				if (!userDirectory.exists())
-					userDirectory.mkdir();
+				this.jsonPath = jsonPath; // Override jsonPath from the loadFromJar() call
+				File userDirectory = new File(this.jsonPath);
+				if (!userDirectory.getParentFile().exists())
+					userDirectory.getParentFile().mkdirs();
 				
 				FileWriter userWriter = new FileWriter(this.jsonPath);
 				gson.toJson(this.json, userWriter); // this.json is set from the loadFromJar() call above
@@ -157,19 +156,15 @@ public class UserAPI {
 	//
 	// Load the default User.json file packaged with the jar archive
 	//
-	// Arguments--
-	//
-	//  jsonName: the name of the json file within the jar archive (without the path)
-	//
 	// Returns--
 	//
 	//  This method mutates the instance variables jsonPath and json directly
 	//
-	private void loadFromJar(String jsonName) throws FileNotFoundException,
+	private void loadFromJar() throws FileNotFoundException,
 												   IllegalArgumentException
 	{
 		Gson gson = new Gson();
-		this.jsonPath = UserJson.INTERNAL_PATH + jsonName;
+		this.jsonPath = UserJson.INTERNAL_PATH + UserJson.DEFAULT_FILE;
 
 		// Get the file as a stream
 		InputStream jsonStream = Thread.currentThread().getContextClassLoader().getResourceAsStream(this.jsonPath);

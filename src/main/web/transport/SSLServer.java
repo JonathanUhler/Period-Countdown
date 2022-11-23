@@ -219,22 +219,23 @@ public class SSLServer {
 		// If there is no user ID, use the default User.json file for getting data
 		if (userID.equals("")) {
 			try {
-				userAPI = new UserAPI(UserJson.DEFAULT_FILE, true);
+				userAPI = new UserAPI();
 			}
 			catch (FileNotFoundException | IllegalArgumentException e) {
 				return Command.returnErr("exception when creating UserAPI: " + e, opcode, userID, Command.ERR_INIT);
 			}
 		}
 		else {
-			/* MARK: Access data base here
-		    1) Check if userID is a key in the database
-			   a) If it is: read the json string and parse as a UserJson object
-			   b) If not: store the User.json template, then do the read
-			2) Initialize the UserAPI object with the UserJson object
-			*/
+			String database = Conf.DATABASE_DIR;
+			String databasePath = (database.endsWith("/")) ? database.substring(0, database.length() - 1) : database;
+			String path = databasePath + "/" + userID + "/" + UserJson.DEFAULT_FILE;
 			
-			/* MARK: only until database is set up */
-			return Command.returnErr("user IDs are not yet supported", opcode, userID, Command.ERR_INIT);
+			try {
+				userAPI = new UserAPI(path);
+			}
+			catch (FileNotFoundException | IllegalArgumentException e) {
+				return Command.returnErr("exception when creating UserAPI: " + e, opcode, userID, Command.ERR_INIT);
+			}
 		}
 
 		// Load school file, which is the same regardless of the user's User.json file
@@ -258,8 +259,6 @@ public class SSLServer {
 				return new GetTimeRemaining().process(recv, schoolAPI, userAPI);
 			case Command.GET_USER_PERIOD:
 				return new GetUserPeriod().process(recv, schoolAPI, userAPI);
-			case Command.LOGIN_USER:
-				return new LoginUser().process(recv, schoolAPI, userAPI);
 			case Command.SET_CURRENT_SCHOOL:
 				return new SetCurrentSchool().process(recv, schoolAPI, userAPI);
 			case Command.SET_NEXT_UP:

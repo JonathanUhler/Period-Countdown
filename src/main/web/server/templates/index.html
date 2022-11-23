@@ -3,6 +3,7 @@
   <head>
 	<title>Period Countdown</title>
 	<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='styles/index.css') }}">
+	<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='styles/button.css') }}">
 	<link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
 
 	<meta name="end_time" content="{{ end_time }}">
@@ -40,6 +41,15 @@
 		  {% endfor %}
 		</tbody>
 	  </table>
+	  {% endif %}
+	</div>
+
+	<div id="operations">
+	  {% if (authenticated != true) %}
+	  <button onclick="location.href = 'login';">Sign in with Google</button>
+	  {% else %}
+	  <button onclick="location.href = 'logout';">Sign out</button>
+	  <button onclick="location.href = 'settings';">Settings</button>
 	  {% endif %}
 	</div>
 

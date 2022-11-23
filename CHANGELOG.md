@@ -8,6 +8,19 @@ All notable changes to Period-Countdown should be documented in this file.
 ### Fixed
 ### Changed
 
+## [6.0.0] - 11/22/22
+### Added
+* Implemented support for google login
+* Added a whitelist for the login feature
+* Added a settings page and associated style/template files
+### Fixed
+### Changed
+* Moved website configuration information to a single file and system (Conf.java and conf.py respectively)
+* Miscellaneous minor security improvements
+* Changed the constructor format for UserAPI. No arguments now indicates loading from jar, and the path argument must be absolute if used
+* Removed the deprecated LoginUser command
+* Minor style and template changes
+
 ## [5.1.3] - 11/10/22
 ### Added
 ### Fixed

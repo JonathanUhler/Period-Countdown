@@ -46,20 +46,6 @@ public class PCTransport {
 			showDefault = true,
 			help = "set transport port")
 	public static Integer transport_port;
-
-	@Option(name = "pid-file",
-			abbreviation = 'p',
-			nargs = 1,
-			type = String.class,
-			help = "set pid file; if not set, pid file will not be written")
-	public static String pid_file;
-
-	@Option(name = "log-file",
-			abbreviation = 'l',
-			nargs = 1,
-			type = String.class,
-			help = "set log file; if not set, log file will not be written")
-	public static String log_file;
 	
 
 	// ====================================================================================================
@@ -75,25 +61,29 @@ public class PCTransport {
 			Log.stdout(Log.FATAL, "PCTransport", "cannot parse command line arguments");
 		}
 
-		// If specified by the command line, set log file as a system property to be picked up once by util.Log
-		if (PCTransport.log_file != null)
-			System.setProperty(Log.LOG_FILE_SYS_PROPERTY, PCTransport.log_file);
+		// Set log file as a JVM property, to allow for the log class to also be used by the desktop app
+		if (Conf.TRANSPORT_LOG_FILE != null &&
+			!Conf.TRANSPORT_LOG_FILE.equals(""))
+			System.setProperty(Log.LOG_FILE_SYS_PROPERTY, Conf.TRANSPORT_LOG_FILE);
 		
-		// Check for the keystore and keystore password arguments. If these aren't specified (e.g. they're
+		// Check for the keystore file and keystore password. If these aren't specified (e.g. they're
 		// null) then the transport cannot start securely
-		if (System.getProperty("javax.net.ssl.keyStore") == null ||
-			System.getProperty("javax.net.ssl.keyStorePassword") == null) {
+		if (Conf.TRANSPORT_KEYSTORE_FILE == null ||
+		    Conf.TRANSPORT_KEYSTORE_PASSWORD == null ||
+			Conf.TRANSPORT_KEYSTORE_FILE.equals("") ||
+		    Conf.TRANSPORT_KEYSTORE_PASSWORD.equals("")) {
 			Log.stdlog(Log.ERROR, "PCTransport", "keystore file or password not specified");
-			Log.stdlog(Log.ERROR, "PCTransport",
-					   "\tkeyStore=" + System.getProperty("javax.net.ssl.keyStore"));
-			Log.stdlog(Log.ERROR, "PCTransport",
-					   "\tkeyStorePassword=" + System.getProperty("javax.net.ssl.keyStorePassword"));
+			Log.stdlog(Log.ERROR, "PCTransport", "\tkeyStore=" + Conf.TRANSPORT_KEYSTORE_FILE);
+			Log.stdlog(Log.ERROR, "PCTransport", "\tkeyStorePassword=" + Conf.TRANSPORT_KEYSTORE_PASSWORD);
 			System.exit(Log.ERROR);
 		}
+		// Set the JVM properties so java can access them
+		System.setProperty("javax.net.ssl.keyStore", Conf.TRANSPORT_KEYSTORE_FILE);
+		System.setProperty("javax.net.ssl.keyStorePassword", Conf.TRANSPORT_KEYSTORE_PASSWORD);
 
 		// Write the pid file
-		if (PCTransport.pid_file != null) {
-			try (BufferedWriter writer = Files.newBufferedWriter(Paths.get(PCTransport.pid_file),
+		if (Conf.TRANSPORT_PID_FILE != null) {
+			try (BufferedWriter writer = Files.newBufferedWriter(Paths.get(Conf.TRANSPORT_PID_FILE),
 																 StandardCharsets.UTF_8,
 																 StandardOpenOption.WRITE,
 																 StandardOpenOption.CREATE)) {

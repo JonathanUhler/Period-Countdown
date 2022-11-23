@@ -60,7 +60,7 @@ public class Screen extends JPanel {
 	public Screen() {
 		// userAPI must be defined first, since data within it is needed to define schoolAPI
 		try {
-			this.userAPI = new UserAPI(UserJson.DEFAULT_FILE);
+			this.userAPI = new UserAPI(UserJson.EXPECTED_PATH + UserJson.DEFAULT_FILE);
 			Screen.FONT_NAME = this.userAPI.getFont(); // Set user's preferred font
 		}
 		catch (FileNotFoundException | IllegalArgumentException e) {

@@ -30,7 +30,6 @@ GET_NEXT_UP_LIST: Final = "GetNextUpList"
 SET_USER_PERIOD: Final = "SetUserPeriod"
 SET_CURRENT_SCHOOL: Final = "SetCurrentSchool"
 SET_NEXT_UP: Final = "SetNextUp"
-LOGIN_USER: Final = "LoginUser"
 #
 # *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=
 

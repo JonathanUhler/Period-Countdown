@@ -2,26 +2,27 @@
 	font-family: Arial;
 	margin-top: 0;
 	margin-bottom: 3vw;
+	top: 0;
+	left: 0;
 }
 
 #status {
-	top: 0;
-	left: 0;
 	padding-top: 3vw;
 	padding-left: 3vw;
 	font-size: 8vw;
 }
 
 #time_remaining {
-	top: 0;
-	left: 0;
 	padding-left: 3vw;
 	font-size: 16vw;
 }
 
 #next_up {
-	top: 0;
-	left: 0;
 	padding-left: 3vw;
 	font-size: 4vw;
+}
+
+#operations {
+	padding-top: 3vw;
+	padding-left: 3vw;
 }
