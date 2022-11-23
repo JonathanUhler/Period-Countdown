@@ -21,6 +21,7 @@ from typing import Final
 from flask import Flask, request, render_template, redirect, url_for
 from flask_login import LoginManager, current_user, login_required, login_user, logout_user, login_required
 from oauthlib.oauth2 import WebApplicationClient
+from flask import Flask, request, render_template
 
 
 GOOGLE_AUTHORIZATION_ENDPOINT: Final = "authorization_endpoint"
