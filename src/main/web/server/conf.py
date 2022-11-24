@@ -78,10 +78,11 @@ def append_paths(head: str, tail: str) -> str:
         try:
             os.makedirs(os.path.dirname(tail), exist_ok=True)
             with open(tail, "a+") as test:
-                pass
+                return tail
+        except PermissionError:
+            return tail
         except Exception as e:
             raise ValueError(f"tail for file path starts with / but is invalid: {e}")
-        return tail
     
     if (head == None or tail == None):
         raise ValueError(f"head or tail for file path is null: {head}, {tail}")
@@ -97,10 +98,11 @@ def append_paths(head: str, tail: str) -> str:
     try:
         os.makedirs(os.path.dirname(path), exist_ok=True)
         with open(path, "a+") as test:
-            pass
+            return path
+    except PermissionError:
+        return path
     except Exception as e:
         raise ValueError(f"merged path is invalid: {e}")
-    return path
 # end: def append_paths
 
 

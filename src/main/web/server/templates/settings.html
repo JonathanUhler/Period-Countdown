@@ -20,11 +20,11 @@
 		  <div>
 			<label>{{ period_index + 1 }}: </label>
 			<label>Name</label>
-			<input type="text" name={{ "SetUserPeriod" + (period_index + 1)|string + "Name" }} value={{ periods[(period_index + 1)|string]["Name"] }}>
+			<input type="text" name="{{ 'SetUserPeriod' + (period_index + 1)|string + 'Name' }}" value="{{ periods[(period_index + 1)|string]['Name'] }}">
 			<label>Teacher</label>
-			<input type="text" name={{ "SetUserPeriod" + (period_index + 1)|string + "Teacher" }} value={{ periods[(period_index + 1)|string]["Teacher"] }}>
+			<input type="text" name="{{ 'SetUserPeriod' + (period_index + 1)|string + 'Teacher' }}" value="{{ periods[(period_index + 1)|string]['Teacher'] }}">
 			<label>Room</label>
-			<input type="text" name={{ "SetUserPeriod" + (period_index + 1)|string + "Room" }} value={{ periods[(period_index + 1)|string]["Room"] }}>
+			<input type="text" name="{{ 'SetUserPeriod' + (period_index + 1)|string + 'Room' }}" value="{{ periods[(period_index + 1)|string]['Room'] }}">
 		  </div>
 		  {% endfor %}
 		</div>
@@ -35,9 +35,9 @@
 		<select name="SetCurrentSchool">
 		  {% for school in schools_list %}
 		  {% if current_school == school %}
-		  <option value={{ school }} selected>{{ school }}</option>
+		  <option value="{{ school }}" selected>{{ school }}</option>
 		  {% else %}
-		  <option value={{ school }}>{{ school }}</option>
+		  <option value="{{ school }}">{{ school }}</option>
 		  {% endif %}
 		  {% endfor %}
 		</select>

@@ -280,7 +280,8 @@ def login():
     request_uri = oauth_client.prepare_request_uri(
         authorization_endpoint,
         redirect_uri=request.base_url + "/callback", # Redirect to ".../login" (current) + "/callback"
-        scope=["openid"] # Request only the user's UID
+        scope=["openid"], # Request only the user's UID
+        prompt="consent"
     )
 
     return redirect(request_uri)
@@ -328,6 +329,7 @@ def login_callback():
 
         # Check whitelist
         if (not str(unique_id) in whitelist):
+            logout_user()
             return render_template("whitelist.html", sub=unique_id)
 
         # Login user
