@@ -27,7 +27,7 @@ import com.google.gson.JsonSyntaxException;
 public class Conf {
 
 	private static boolean IS_LOADED; // Whether configuration data has already been loaded
-	private static final String CONF_FILE_SYS_PROPERTY = "pc_conf_file";
+	private static final String CONF_FILE = System.getProperty("user.home") + "/PCConfig.json";
 	private static final String[] CONF_FILE_KEYS = new String[] {
 		"codebase_dir",
 		"database_dir",
@@ -150,13 +150,15 @@ public class Conf {
 		if (Conf.IS_LOADED)
 			return;
 		Conf.IS_LOADED = true;
-
-		String confFilePath = System.getenv(Conf.CONF_FILE_SYS_PROPERTY);
-		if (confFilePath == null || confFilePath.equals(""))
-			throw new IllegalArgumentException("Configuration file system property not set or is blank");
 		
 		Gson gson = new Gson();
-		Map<String, String> confProperties = gson.fromJson(Files.newBufferedReader(Paths.get(confFilePath)), Map.class);
+		Map<String, String> confProperties;
+		try {
+			confProperties = gson.fromJson(Files.newBufferedReader(Paths.get(Conf.CONF_FILE)), Map.class);
+		}
+		catch (Exception e) {
+			throw new IOException("could not load configuration file expected at \"" + Conf.CONF_FILE + "\": " + e);
+		}
 
 		for (String key : Conf.CONF_FILE_KEYS) {
 			if (!confProperties.containsKey(key))

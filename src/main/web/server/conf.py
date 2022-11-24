@@ -9,12 +9,13 @@
 import os
 import sys
 import json
+import pathlib
 import traceback
 from typing import Final
 
 
 IS_LOADED: Final = None
-CONF_FILE_SYS_PROPERTY: Final = "pc_conf_file"
+CONF_FILE: Final = f"{pathlib.Path.home()}/PCConfig.json"
 CONF_FILE_KEYS: Final = [
     "codebase_dir",
     "database_dir",
@@ -132,12 +133,11 @@ def load() -> None:
     global OAUTH_TOKEN
     global OAUTH_SECRET
 
-    conf_file_path: str = os.getenv(CONF_FILE_SYS_PROPERTY)
-    if (conf_file_path == None or conf_file_path == ""):
-        raise ValueError("Configuration file system property not set or is blank")
-
-    with open(conf_file_path, "r") as conf_file: # Error should be handled by the caller
-        conf_properties: dict = json.load(conf_file)
+    try:
+        with open(CONF_FILE, "r") as conf_file: # Error should be handled by the caller
+            conf_properties: dict = json.load(conf_file)
+    except Exception as e:
+        raise IOError(f"could not load configuration file expected at \"{CONF_FILE}\": {e}")
 
     if (not isinstance(conf_properties, dict)):
         raise TypeError(f"conf json file is not dict, found {type(conf_properties)}")
