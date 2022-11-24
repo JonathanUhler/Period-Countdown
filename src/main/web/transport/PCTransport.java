@@ -83,15 +83,19 @@ public class PCTransport {
 
 		// Write the pid file
 		if (Conf.TRANSPORT_PID_FILE != null) {
-			try (BufferedWriter writer = Files.newBufferedWriter(Paths.get(Conf.TRANSPORT_PID_FILE),
-																 StandardCharsets.UTF_8,
-																 StandardOpenOption.WRITE,
-																 StandardOpenOption.CREATE)) {
+			BufferedWriter writer;
+			try {
+				writer = Files.newBufferedWriter(Paths.get(Conf.TRANSPORT_PID_FILE),
+												 StandardCharsets.UTF_8,
+												 StandardOpenOption.WRITE,
+												 StandardOpenOption.CREATE);
 				writer.write(ProcessHandle.current().pid() + "");
-			} catch (IOException e) {
+				writer.close();
+			}
+			catch (IOException e) {
 				Log.stdlog(Log.FATAL, "PCTransport",
 						   "Could not write pid, will not start transport. Leave out --pid-file to start anyway");
-				System.exit(1);
+				System.exit(Log.FATAL);
 			}
 		}
 		

@@ -133,12 +133,16 @@ public class Log {
 
 		// Write to the log file
 		if (Log.STDLOG_FILE != null) {
-			try (BufferedWriter writer = Files.newBufferedWriter(Paths.get(Log.STDLOG_FILE),
-																 StandardCharsets.UTF_8,
-																 StandardOpenOption.APPEND,
-																 StandardOpenOption.CREATE)) {
+			BufferedWriter writer;
+			try {
+				writer = Files.newBufferedWriter(Paths.get(Log.STDLOG_FILE),
+												 StandardCharsets.UTF_8,
+												 StandardOpenOption.APPEND,
+												 StandardOpenOption.CREATE);
 				writer.write(Log.format(level, location, message) + "\n");
-			} catch (IOException e) {
+				writer.close();
+			}
+			catch (IOException e) {
 				e.printStackTrace();
 			}
 		}

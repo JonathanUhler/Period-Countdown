@@ -471,8 +471,9 @@ public class UserAPI {
 	// caught by this method, and the method will return without mutating the jar's User.json file
 	//
 	private void updateJsonFile() {
+		FileWriter writer;
 		try {
-			FileWriter writer = new FileWriter(this.jsonPath);
+			writer = new FileWriter(this.jsonPath);
 			Gson gson = new GsonBuilder().setPrettyPrinting().create();
 			gson.toJson(this.json, writer);
 			writer.flush();

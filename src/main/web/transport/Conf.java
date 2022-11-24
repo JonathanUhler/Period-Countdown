@@ -109,6 +109,7 @@ public class Conf {
 				File file = new File(tail);
 				file.getParentFile().mkdirs();
 				file.createNewFile();
+				
 				return tail; // File successfully check for existance
 			}
 			catch (IOException e) {
