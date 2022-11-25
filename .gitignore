@@ -3,6 +3,7 @@
 *~
 obj/
 bin/*
+# Old deprecated web build format
 release/PeriodCountdown-*-web/
 release/PeriodCountdown-*-web/**
 
@@ -13,3 +14,4 @@ documentation/AWS-Setup.txt
 *.jks
 install_web.sh
 sensitive/*
+src/assets/json/Amherst_School.json

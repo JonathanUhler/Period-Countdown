@@ -280,7 +280,7 @@ def login():
     request_uri = oauth_client.prepare_request_uri(
         authorization_endpoint,
         redirect_uri=request.base_url + "/callback", # Redirect to ".../login" (current) + "/callback"
-        scope=["openid"], # Request only the user's UID
+        scope=["openid", "email"], # Request only the user's UID
         prompt="consent"
     )
 
