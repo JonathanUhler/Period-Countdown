@@ -8,6 +8,12 @@ All notable changes to Period-Countdown should be documented in this file.
 ### Fixed
 ### Changed
 
+## [6.0.1] - 1/8/23
+### Added
+### Fixed
+### Changed
+* Update JSON information for MVHS
+
 ## [6.0.0] - 11/22/22
 ### Added
 * Implemented support for google login

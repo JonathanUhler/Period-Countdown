@@ -8,7 +8,7 @@
     },
     "Days": {
         "A": [
-            {"Type": "Nothing", "Name": "Before School",  "Start": "00:00", "End": "08:40"},
+            {"Type": "Nothing", "Name": "Before School", "Start": "00:00", "End": "08:40"},
             {"Type": "1", "Name": "Per 1", "Start": "08:40", "End": "09:25"},
             {"Type": "Nothing", "Name": "Passing", "Start": "09:25", "End": "09:32"},
             {"Type": "2", "Name": "Per 2", "Start": "09:32", "End": "10:22"},
@@ -40,7 +40,7 @@
             {"Type": "Nothing", "Name": "After School","Start": "15:41", "End": "23:59"}
         ],
         "C": [
-            {"Type": "Nothing", "Name": "Before School",  "Start": "00:00", "End": "08:40"},
+            {"Type": "Nothing", "Name": "Before School", "Start": "00:00", "End": "08:40"},
             {"Type": "2", "Name": "Per 2", "Start": "08:40", "End": "10:10"},
             {"Type": "Special", "Name": "Tutorial", "Start": "10:10", "End": "11:00"},
             {"Type": "Special", "Name": "Brunch", "Start": "11:00", "End": "11:10"},
@@ -64,7 +64,7 @@
             {"Type": "Nothing", "Name": "After School","Start": "15:36", "End": "23:59"}
         ],
         "E": [
-            {"Type": "Nothing", "Name": "Before School",  "Start": "00:00", "End": "10:30"},
+            {"Type": "Nothing", "Name": "Before School", "Start": "00:00", "End": "10:30"},
             {"Type": "2", "Name": "Per 2", "Start": "10:30", "End": "11:30"},
             {"Type": "Special", "Name": "Lunch", "Start": "11:30", "End": "12:15"},
             {"Type": "Nothing", "Name": "Passing", "Start": "12:15", "End": "12:22"},
@@ -76,7 +76,7 @@
             {"Type": "Nothing", "Name": "After School", "Start": "15:06", "End": "23:59"}
         ],
         "F": [
-            {"Type": "Nothing", "Name": "Before School",  "Start": "00:00", "End": "08:40"},
+            {"Type": "Nothing", "Name": "Before School", "Start": "00:00", "End": "08:40"},
             {"Type": "1", "Name": "Per 1", "Start": "08:40", "End": "09:08"},
             {"Type": "Nothing", "Name": "Passing", "Start": "09:08", "End": "09:15"},
             {"Type": "2", "Name": "Per 2", "Start": "09:15", "End": "09:43"},
@@ -94,7 +94,7 @@
             {"Type": "Nothing", "Name": "After School", "Start": "12:48", "End": "23:59"}
         ],
         "G": [
-            {"Type": "Nothing", "Name": "Before School",  "Start": "00:00", "End": "08:40"},
+            {"Type": "Nothing", "Name": "Before School", "Start": "00:00", "End": "08:40"},
             {"Type": "1", "Name": "Per 1", "Start": "08:40", "End": "09:20"},
             {"Type": "Nothing", "Name": "Passing", "Start": "09:20", "End": "09:27"},
             {"Type": "Special", "Name": "Rally A", "Start": "09:27", "End": "10:07"},
@@ -113,17 +113,66 @@
             {"Type": "7", "Name": "Per 7", "Start": "14:57", "End": "15:37"},
             {"Type": "Nothing", "Name": "After School", "Start": "15:37", "End": "23:59"}
         ],
+		"H": [
+			{"Type": "Nothing", "Name": "Before School", "Start": "00:00", "End": "08:40"},
+			{"Type": "1", "Name": "Per 1", "Start": "08:40", "End": "09:40"},
+			{"Type": "Nothing", "Name": "Passing", "Start": "09:40", "End": "09:47"},
+			{"Type": "3", "Name": "Per 3", "Start": "09:47", "End": "10:47"},
+			{"Type": "Special", "Name": "Brunch", "Start": "10:47", "End": "10:57"},
+			{"Type": "Nothing", "Name": "Passing", "Start": "10:57", "End": "11:04"},
+			{"Type": "5", "Name": "Per 5", "Start": "11:04", "End": "12:04"},
+			{"Type": "Nothing", "Name": "Passing", "Start": "12:04", "End": "12:11"},
+			{"Type": "7", "Name": "Per 7", "Start": "12:11", "End": "13:11"},
+			{"Type": "Nothing", "Name": "After School", "Start": "13:11", "End": "23:59"}
+		],
+		"I": [
+			{"Type": "Nothing", "Name": "Before School", "Start": "00:00", "End": "08:40"},
+			{"Type": "2", "Name": "Per 2", "Start": "08:40", "End": "09:40"},
+			{"Type": "Special", "Name": "Tutorial", "Start": "09:40", "End": "10:30"},
+			{"Type": "Nothing", "Name": "Passing", "Start": "10:30", "End": "10:37"},
+			{"Type": "4", "Name": "Per 4", "Start": "10:37", "End": "11:37"},
+			{"Type": "Special", "Name": "Brunch", "Start": "11:37", "End": "11:47"},
+			{"Type": "Nothing", "Name": "Passing", "Start": "11:47", "End": "11:54"},
+			{"Type": "6", "Name": "Per 6", "Start": "11:54", "End": "12:54"},
+			{"Type": "Nothing", "Name": "After School", "Start": "12:54", "End": "23:59"}
+		],
 		"SAT": [
-			{"Type": "Nothing", "Name": "Before School",  "Start": "00:00", "End": "08:15"},
+			{"Type": "Nothing", "Name": "Before School", "Start": "00:00", "End": "08:15"},
 			{"Type": "Special", "Name": "PSAT/SAT", "Start": "08:15", "End": "12:15"},
 			{"Type": "Nothing", "Name": "After School", "Start": "12:15", "End": "23:59"}
 		],
+		"SBAC_B": [
+			{"Type": "Nothing", "Name": "Before School", "Start": "00:00", "End": "08:40"},
+			{"Type": "Special", "Name": "SBAC Testing", "Start": "08:40", "End": "10:40"},
+			{"Type": "Nothing", "Name": "Passing", "Start": "10:40", "End": "10:55"},
+			{"Type": "1", "Name": "Per 1", "Start": "10:55", "End": "11:45"},
+			{"Type": "Special", "Name": "Lunch", "Start": "11:45", "End": "12:25"},
+			{"Type": "Nothing", "Name": "Passing", "Start": "12:25", "End": "12:32"},
+			{"Type": "3", "Name": "Per 3", "Start": "12:32", "End": "13:22"},
+			{"Type": "Nothing", "Name": "Passing", "Start": "13:22", "End": "13:29"},
+			{"Type": "5", "Name": "Per 5", "Start": "13:29", "End": "14:19"},
+			{"Type": "Nothing", "Name": "Passing", "Start": "14:19", "End": "14:26"},
+			{"Type": "7", "Name": "Per 7", "Start": "14:26", "End": "15:16"},
+			{"Type": "Nothing", "Name": "After School", "Start": "15:16", "End": "23:59"}
+		],
+		"SBAC_C": [
+			{"Type": "Nothing", "Name": "Before School", "Start": "00:00", "End": "08:40"},
+			{"Type": "Special", "Name": "SBAC Testing", "Start": "08:40", "End": "10:40"},
+			{"Type": "Nothing", "Name": "Passing", "Start": "10:40", "End": "10:55"},
+			{"Type": "2", "Name": "Per 2", "Start": "10:55", "End": "11:45"},
+			{"Type": "Special", "Name": "Lunch", "Start": "11:45", "End": "12:25"},
+			{"Type": "Nothing", "Name": "Passing", "Start": "12:25", "End": "12:32"},
+			{"Type": "4", "Name": "Per 4", "Start": "12:32", "End": "13:22"},
+			{"Type": "Nothing", "Name": "Passing", "Start": "13:22", "End": "13:29"},
+			{"Type": "6", "Name": "Per 6", "Start": "13:29", "End": "14:19"},
+			{"Type": "Nothing", "Name": "After School", "Start": "14:19", "End": "23:59"}
+		],
         "Finals_1": [
             {"Type": "Nothing", "Name": "Before School", "Start": "00:00", "End": "08:40"},
-            {"Type": "1", "Name": "Per 1 Final", "Start": "08:40", "End": "10:25"},
+            {"Type": "3", "Name": "Per 3 Final", "Start": "08:40", "End": "10:25"},
             {"Type": "Special", "Name": "Brunch", "Start": "10:25", "End": "10:55"},
             {"Type": "Nothing", "Name": "Break", "Start": "10:55", "End": "11:02"},
-            {"Type": "6", "Name": "Per 6 Final", "Start": "11:02", "End": "12:47"},
+            {"Type": "5", "Name": "Per 5 Final", "Start": "11:02", "End": "12:47"},
             {"Type": "Nothing", "Name": "After School", "Start": "12:47", "End": "23:59"}
         ],
         "Finals_2": [
@@ -131,15 +180,15 @@
             {"Type": "2", "Name": "Per 2 Final", "Start": "08:40", "End": "10:25"},
             {"Type": "Special", "Name": "Brunch", "Start": "10:25", "End": "10:55"},
             {"Type": "Nothing", "Name": "Break", "Start": "10:55", "End": "11:02"},
-            {"Type": "5", "Name": "Per 5 Final", "Start": "11:02", "End": "12:47"},
+            {"Type": "7", "Name": "Per 7 Final", "Start": "11:02", "End": "12:47"},
             {"Type": "Nothing", "Name": "After School", "Start": "12:47", "End": "23:59"}
         ],
         "Finals_3": [
             {"Type": "Nothing", "Name": "Before School", "Start": "00:00", "End": "08:40"},
-            {"Type": "3", "Name": "Per 3 Final", "Start": "08:40", "End": "10:25"},
+            {"Type": "1", "Name": "Per 1 Final", "Start": "08:40", "End": "10:25"},
             {"Type": "Special", "Name": "Brunch", "Start": "10:25", "End": "10:55"},
             {"Type": "Nothing", "Name": "Break", "Start": "10:55", "End": "11:02"},
-            {"Type": "7", "Name": "Per 7 Final", "Start": "11:02", "End": "12:47"},
+            {"Type": "6", "Name": "Per 6 Final", "Start": "11:02", "End": "12:47"},
             {"Type": "Nothing", "Name": "After School", "Start": "12:47", "End": "23:59"}
         ],
         "Finals_4": [
@@ -200,6 +249,24 @@
 			"F",
 			"Weekend"
 		],
+		"GBCBC": [
+			"Weekend",
+			"G",
+			"B",
+			"C",
+			"B",
+			"C",
+			"Weekend"
+		],
+		"GHIBC": [
+			"Weekend",
+			"G",
+			"H",
+			"I",
+			"B",
+			"C",
+			"Weekend"
+		],
 		"ADEBC": [
 			"Weekend",
 			"A",
@@ -236,21 +303,21 @@
 			"Holiday",
 			"Weekend"
         ],
-		"Winter_Finals": [
+		"SBAC_Week": [
 			"Weekend",
 			"A",
-			"A",
-			"A",
-			"A",
-			"Holiday",
+			"SBAC_B",
+			"SBAC_C",
+			"SBAC_B",
+			"SBAC_C",
 			"Weekend"
-        ],
-		"Spring_Finals": [
+		],
+		"Finals": [
 			"Weekend",
-			"A",
-			"A",
-			"A",
-			"A",
+			"Finals_1",
+			"Finals_2",
+			"Finals_3",
+			"Finals_4",
 			"Holiday",
 			"Weekend"
         ]
@@ -263,15 +330,19 @@
 		{"WeekTag": "2022-10-16", "Type": "GBCAF", "Comment": "Homecoming week"},
 		{"WeekTag": "2022-11-06", "Type": "BCBCH", "Comment": "Veterans day"},
 		{"WeekTag": "2022-11-20", "Type": "HHHHH", "Comment": "Thanksgiving break"},
-		{"WeekTag": "2022-12-18", "Type": "Winter_Finals", "Comment": "Winter finals week"},
+		{"WeekTag": "2022-12-18", "Type": "Finals", "Comment": "Winter finals week"},
 		{"WeekTag": "2022-12-25", "Type": "HHHHH", "Comment": "Winter break week 1"},
 		{"WeekTag": "2023-01-01", "Type": "HHHHH", "Comment": "Winter break week 2"},
 		{"WeekTag": "2023-01-08", "Type": "HBCBC", "Comment": "First week of second semester"},
 		{"WeekTag": "2023-01-15", "Type": "HBCBC", "Comment": "Martin Luther King Jr day"},
+		{"WeekTag": "2023-01-22", "Type": "GBCBC", "Comment": "Advisory week"},
+		{"WeekTag": "2023-01-29", "Type": "GHIBC", "Comment": "Cultural assembly and afternoon staff dev"},
 		{"WeekTag": "2023-02-19", "Type": "HHHHH", "Comment": "Winter recess"},
-		{"WeekTag": "2023-03-12", "Type": "HBCBC", "Comment": "Recess day"},
+		{"WeekTag": "2023-03-19", "Type": "HBCBC", "Comment": "Recess day"},
 		{"WeekTag": "2023-04-09", "Type": "HHHHH", "Comment": "Spring recess"},
+		{"WeekTag": "2023-04-16", "Type": "SBAC_Week", "Comment": "SBAC/CAST testing week"},
+		{"WeekTag": "2023-05-21", "Type": "GBCBC", "Comment": "End of year rally"},
 		{"WeekTag": "2023-05-28", "Type": "HBCBC", "Commetn": "Memorial day"},
-		{"WeekTag": "2023-06-04", "Type": "Spring_Finals", "Comment": "Spring finals week"}
+		{"WeekTag": "2023-06-04", "Type": "Finals", "Comment": "Spring finals week"}
     ]
 }
