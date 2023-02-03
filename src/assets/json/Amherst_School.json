@@ -1,0 +1,100 @@
+{
+    "Info": {
+        "FirstPeriod": 1,
+        "LastPeriod": 5,
+        "FirstDayTag": "2022-09-06",
+        "LastDayTag": "2023-05-25",
+		"Timezone": "America/New_York"
+    },
+    "Weeks":  {
+        "DEFAULT": [
+            "Weekend",
+			"Monday",
+			"Tuesday",
+			"Wednesday",
+			"Thursday",
+			"Friday",
+			"Weekend"
+        ],
+        "HHHHH_Week": [
+			"Weekend",
+			"Holiday",
+			"Holiday",
+			"Holiday",
+			"Holiday",
+			"Holiday",
+			"Weekend"
+        ],
+		"HTWThF_Week": [
+			"Weekend",
+			"Holiday",
+			"Tuesday",
+			"Wednesday",
+			"Thursday",
+			"Friday",
+			"Weekend"
+        ],
+		"MTWThH_Week": [
+			"Weekend",
+			"Monday",
+			"Tuesday",
+			"Wednesday",
+			"Thursday",
+			"Holiday",
+			"Weekend"
+        ],
+		"MFHHH_Week": [
+			"Weekend",
+			"Monday",
+			"Friday",
+			"Holiday",
+			"Holiday",
+			"Holiday",
+			"Weekend"
+        ],
+		"MTHHH_Week": [
+			"Weekend",
+			"Monday",
+			"Tuesday",
+			"Holiday",
+			"Holiday",
+			"Holiday",
+			"Weekend"
+        ],
+		"HTMThF_Week": [
+			"Weekend",
+			"Holiday",
+			"Tuesday",
+			"Monday",
+			"Thursday",
+			"Friday",
+			"Weekend"
+        ],
+		"HHWThF_Week": [
+			"Weekend",
+			"Holiday",
+			"Holiday",
+			"Wednesday",
+			"Thursday",
+			"Friday",
+			"Weekend"
+        ]
+    },
+    "Exceptions": [
+		{"WeekTag": "2022-09-04", "Type": "HTWThF_Week", "Comment": "First week of school"},
+		{"WeekTag": "2022-10-09", "Type": "HTWThF_Week", "Comment": "Indigenous Peoples Day"},
+		{"WeekTag": "2022-11-06", "Type": "MTWThH_Week", "Comment": "Veteran's Day"},
+		{"WeekTag": "2022-11-20", "Type": "MFHHH_Week", "Comment": "Thanksgiving Recess"},
+		{"WeekTag": "2022-12-18", "Type": "MTHHH_Week", "Comment": "Last week of first semester"},
+		{"WeekTag": "2022-12-25", "Type": "HHHHH_Week", "Comment": "Week 1 of holiday break"},
+		{"WeekTag": "2023-01-01", "Type": "HHHHH_Week", "Comment": "Week 2 of holiday break"},
+		{"WeekTag": "2023-01-08", "Type": "HHHHH_Week", "Comment": "Week 3 of holiday break"},
+		{"WeekTag": "2023-01-15", "Type": "HHHHH_Week", "Comment": "Week 4 of holiday break"},
+		{"WeekTag": "2023-01-22", "Type": "HHHHH_Week", "Comment": "Week 5 of holiday break"},
+		{"WeekTag": "2023-01-29", "Type": "HHHHH_Week", "Comment": "Week 6 of holiday break"},
+		{"WeekTag": "2023-02-19", "Type": "HTMThF_Week", "Comment": "Presidents' Day"},
+		{"WeekTag": "2023-03-12", "Type": "HHHHH_Week", "Comment": "Spring break week"},
+		{"WeekTag": "2023-04-16", "Type": "HHWThF_Week", "Comment": "Patriot's Day recess"},
+		{"WeekTag": "2023-05-21", "Type": "MTWThH_Week", "Comment": "Last week of second semester"}
+    ]
+}
