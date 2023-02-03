@@ -231,7 +231,8 @@ public class SchoolYear {
 						!(previousEndTime.plus(1, UTCTime.MILLISECONDS)).isEqual(startTime))
 						throw new IllegalArgumentException(Log.format(Log.ERROR, "SchoolYear",
 																	  "previous end + 1ms != next start: " +
-																	  previousEndTime + ", " + startTime));
+																	  previousEndTime + ", " + startTime +
+																	  " dayType=" + dayType));
 					previousEndTime = endTime;
 
 					SchoolPeriod addition = new SchoolPeriod(type, name,

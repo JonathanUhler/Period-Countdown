@@ -8,6 +8,12 @@ All notable changes to Period-Countdown should be documented in this file.
 ### Fixed
 ### Changed
 
+## [6.0.2] - 2/2/23
+### Added
+* Minor debug and error message improvement
+### Fixed
+### Changed
+
 ## [6.0.1] - 1/8/23
 ### Added
 ### Fixed
