@@ -8,6 +8,12 @@ All notable changes to Period-Countdown should be documented in this file.
 ### Fixed
 ### Changed
 
+## [6.0.3] - 2/11/23
+### Added
+### Fixed
+### Changed
+* Font selection menu will now display names in that font
+
 ## [6.0.2] - 2/2/23
 ### Added
 * Minor debug and error message improvement

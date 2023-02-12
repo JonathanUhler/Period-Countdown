@@ -258,6 +258,7 @@ public class Menu extends JMenuBar {
 		// Read list of font names, which can be used to construct a Font object
 		String[] fonts = GraphicsEnvironment.getLocalGraphicsEnvironment().getAvailableFontFamilyNames();
 		JComboBox<String> options = new JComboBox<>(fonts);
+		options.setRenderer(new FontRenderer());
 
 		options.setSelectedItem(this.screen.getUserFont());
 		panel.add(new JLabel("Select font: "));
