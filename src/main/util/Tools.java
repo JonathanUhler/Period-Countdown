@@ -1,11 +1,3 @@
-// +=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
-// Tools.java
-// Period-Countdown
-//
-// Created by Jonathan Uhler
-// +=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
-
-
 package util;
 
 
@@ -14,45 +6,67 @@ import school.SchoolPeriod;
 import user.UserAPI;
 import user.UserPeriod;
 import user.UserJson;
+import java.util.List;
 import java.util.ArrayList;
 
 
-// +=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
-// public class Tools
-//
-// Miscellaneous tools that do not fit into any other util class
-//
+/**
+ * Miscellaneous tools that do not fit into any other util class.
+ *
+ * @author Jonathan Uhler
+ */
 public class Tools {
 
-	// ====================================================================================================
-	// public static String pad
-	//
-	// Pads a string to a given width with a given character. If the string is longer than width, no
-	// change is made
-	//
-	// Arguments--
-	//
-	//  str:       the string to pad. Pads out to the left (e.g. pad("hi", 5, ".") --> "   hi")
-	//
-	//  width:     the width of the final string if padded. If the starting string is longer than width,
-	//             no change is made
-	//
-	//  character: the character to pad with
+	/**
+	 * Pads a string to a given width with a given character. If the string is longer than the 
+	 * specified width, no change is made. If the given string is {@code null}, an empty string
+	 * is returned.
+	 *
+	 * @param str        the string to pad to the left.
+	 * @param width      the minimum final width of the string.
+	 * @param character  the character to pad with.
+	 *
+	 * @return a new string that is at least {@code width} characters long and padded to the left
+	 *         with the specified character.
+	 */
 	public static String pad(String str, int width, char character) {
 		if (str == null)
 			str = "";
 		return String.format("%" + width + "s", str).replace(' ', character);
 	}
-	// end: public static String pad
 
 
-	public static ArrayList<String> getNextUpList(SchoolAPI schoolAPI, UserAPI userAPI, String timezone) {
+	/**
+	 * Returns the list of next class information.
+	 *
+	 * @param schoolAPI  school information to use.
+	 * @param userAPI    user information to use.
+	 * @param timezone   the unix TZ identifier for the school.
+	 *
+	 * @return the list of next class information.
+	 */
+	public static List<String> getNextUpList(SchoolAPI schoolAPI,
+											 UserAPI userAPI,
+											 String timezone)
+	{
 		return Tools.getNextUpList(schoolAPI, userAPI, timezone, UTCTime.now());
 	}
 	
 
-	public static ArrayList<String> getNextUpList(SchoolAPI schoolAPI, UserAPI userAPI,
-												  String timezone, UTCTime now)
+	/**
+	 * Returns the list of next class information.
+	 *
+	 * @param schoolAPI  school information to use.
+	 * @param userAPI    user information to use.
+	 * @param timezone   the unix TZ identifier for the school.
+	 * @param now        the time to get the next up information for.
+	 *
+	 * @return the list of next class information.
+	 */
+	public static List<String> getNextUpList(SchoolAPI schoolAPI,
+											 UserAPI userAPI,
+											 String timezone,
+											 UTCTime now)
 	{
 		if (schoolAPI == null || userAPI == null)
 			return new ArrayList<>();
@@ -65,8 +79,8 @@ public class Tools {
 			if (nextUp.equals(UserJson.NEXT_UP_DISABLED))
 				break;
 
-			// Get the class (with user data like teacher and room) based on the generic period, if that
-			// generic period can have a class
+			// Get the class (with user data like teacher and room) based on the generic period,
+			// if that generic period can have a class
 			UserPeriod nextClass = null;
 			if (nextPeriod.isCounted())
 				nextClass = userAPI.getPeriod(nextPeriod);
@@ -76,7 +90,8 @@ public class Tools {
 			UTCTime periodStart = nextPeriod.getStart();
 			UTCTime periodEnd = nextPeriod.getEnd();
 
-			// Add 1 to the end time ms to make the end time the same as the start time of the next period
+			// Add 1 to the end time ms to make the end time the same as the start time of
+			// the next period
 			periodEnd = periodEnd.plus(1, UTCTime.MILLISECONDS);
 
 			try {
@@ -107,14 +122,16 @@ public class Tools {
 				else if (!room.equals("") && !teacher.equals(""))
 					periodString += " | " + teacher + ", " + room;
 			}
-			// If the period has something during it (a period, lunch, brunch, etc.) add it to the list
+			// If the period has something during it (a period, lunch, brunch, etc.) add it to
+			// the list
 			if (nextPeriod.isCounted())
 				nextUpList.add(periodString);
 
 			// Get next period
 			nextPeriod = schoolAPI.getNextPeriodToday(periodStart);
 
-			// If only the next period should be shown and that period has been found, skip the rest of the search
+			// If only the next period should be shown and that period has been found, skip
+			// the rest of the search
 			if (nextUp.equals(UserJson.NEXT_UP_ONE) && nextUpList.size() == 1)
 				break;
 		}
@@ -123,4 +140,3 @@ public class Tools {
 	}
 
 }
-// end: public class Tools

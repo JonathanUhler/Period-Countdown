@@ -1,21 +1,10 @@
 {
 	"Schools": {
-		"MVHS_School.json": {
-			"Periods": {
-				"1": {"Name": "Period 1", "Teacher": "", "Room": ""},
-				"2": {"Name": "Period 2", "Teacher": "", "Room": ""},
-				"3": {"Name": "Period 3", "Teacher": "", "Room": ""},
-				"4": {"Name": "Period 4", "Teacher": "", "Room": ""},
-				"5": {"Name": "Period 5", "Teacher": "", "Room": ""},
-				"6": {"Name": "Period 6", "Teacher": "", "Room": ""},
-				"7": {"Name": "Period 7", "Teacher": "", "Room": ""}
-			}
-		}
 	},
 	"Settings": {
 		"NextUp": "All Classes",
 		"Theme": "16777215",
 		"Font": "Arial",
-		"SchoolJson": "MVHS_School.json"
+		"SchoolJson": ""
 	}
 }

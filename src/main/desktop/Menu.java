@@ -1,20 +1,13 @@
-// +=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
-// Menu.java
-// Period-Countdown (Desktop)
-//
-// Created by Jonathan Uhler
-// +=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
-
-
 package desktop;
 
 
-import util.Log;
+import jnet.Log;
 import school.SchoolJson;
 import user.UserJson;
 import user.UserPeriod;
 import java.io.IOException;
 import java.io.File;
+import java.util.List;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.HashMap;
@@ -32,24 +25,23 @@ import javax.swing.JOptionPane;
 import javax.swing.JColorChooser;
 
 
-// +=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
-// public class Menu extends JMenuBar
-//
-// Manages the app menu for the desktop version. Takes in a Screen object that is used to access the
-// getters and setters of the created UserAPI
-//
+/**
+ * Manages the application menu bar for the desktop version. Takes in a {@code Screen} object
+ * that is used to access information from the {@code UserAPI} through protected methods.
+ *
+ * @author Jonathan Uhler
+ */
 public class Menu extends JMenuBar {
 
+	/** The manager of this {@code Menu}. */
 	private Screen screen;
 	
 
-	// ----------------------------------------------------------------------------------------------------
-	// public Menu
-	//
-	// Arguments--
-	//
-	// screen: Screen object used to access setters and getters for the User.json file
-	//
+    /**
+	 * Constructs a new {@code Menu} object.
+	 *
+	 * @param screen  the manager of this {@code Menu}.
+	 */
 	public Menu(Screen screen) {
 		this.screen = screen;
 		
@@ -58,44 +50,40 @@ public class Menu extends JMenuBar {
 
 		// Create menu items
 		JMenuItem classInformation = new JMenuItem("Class Information");
-		classInformation.addActionListener(e -> this.classInformation());
+		classInformation.addActionListener(e -> this.classInformationAction());
 		settings.add(classInformation);
 
 		JMenuItem schoolInformation = new JMenuItem("School Information");
-		schoolInformation.addActionListener(e -> this.schoolInformation());
+		schoolInformation.addActionListener(e -> this.schoolInformationAction());
 		settings.add(schoolInformation);
 
 		JMenuItem nextUp = new JMenuItem("Next Up");
-		nextUp.addActionListener(e -> this.nextUp());
+		nextUp.addActionListener(e -> this.nextUpAction());
 		settings.add(nextUp);
 
 		JMenuItem theme = new JMenuItem("Theme");
-		theme.addActionListener(e -> this.theme());
+		theme.addActionListener(e -> this.themeAction());
 		settings.add(theme);
 
 		JMenuItem font = new JMenuItem("Font");
-		font.addActionListener(e -> this.font());
+		font.addActionListener(e -> this.fontAction());
 		settings.add(font);
 	}
-	// end: public Menu
 
 
-	// ====================================================================================================
-	// private void classInformation
-	//
-	// Action method for the Class Information menu item. Displays a name, teacher, and room box
-	// for each valid period throughout the day.
-	//
-	private void classInformation() {
-		ArrayList<String> periodNumbers = this.screen.getUserPeriodKeys();
+	/**
+	 * Action method for the class information panel.
+	 */
+	private void classInformationAction() {
+		List<String> periodNumbers = this.screen.getUserPeriodKeys();
 		if (periodNumbers == null)
 			return;
 		
 		// Create a structure to access the JTextFields later. The first set of keys is the period
 		// numbers. The second set of keys is the field name ("Teacher", "Room", or "Name")
-		HashMap<String, HashMap<String, JTextField>> periodInputFields = new HashMap<>();
+		Map<String, Map<String, JTextField>> periodInputFields = new HashMap<>();
 		// List of JPanels that each hold the information in an entry to periodInputFields
-		ArrayList<JPanel> periodInputPanels = new ArrayList<>();
+		List<JPanel> periodInputPanels = new ArrayList<>();
 
 		// Initialize periodInputFields
 		for (String periodNumber : periodNumbers) {
@@ -107,14 +95,14 @@ public class Menu extends JMenuBar {
 			String teacher = periodInfo.getTeacher();
 			String room = periodInfo.getRoom();
 
-			HashMap<String, JTextField> periodInputField = new HashMap<>();
+			Map<String, JTextField> periodInputField = new HashMap<>();
 			
 			JTextField nameTextField = new JTextField(name);
 			JTextField teacherTextField = new JTextField(teacher);
 			JTextField roomTextField = new JTextField(room);
 
-			// 8 columns is the graphical width, but not the maximum number of characters. That is defined
-			// in UserJson.java
+			// 8 columns is the graphical width, but not the maximum number of characters.
+			// That is defined in UserJson.java
 			nameTextField.setColumns(8);
 			teacherTextField.setColumns(8);
 			roomTextField.setColumns(8);
@@ -151,7 +139,7 @@ public class Menu extends JMenuBar {
 		if (confirm == JOptionPane.OK_OPTION) {
 			// Set all of the information
 			for (String key : periodInputFields.keySet()) {
-				HashMap<String, JTextField> periodInputField = periodInputFields.get(key);
+				Map<String, JTextField> periodInputField = periodInputFields.get(key);
 				String name = periodInputField.get(UserJson.NAME).getText();
 				String teacher = periodInputField.get(UserJson.TEACHER).getText();
 				String room = periodInputField.get(UserJson.ROOM).getText();
@@ -168,17 +156,13 @@ public class Menu extends JMenuBar {
 			}
 		}
 	}
-	// end: private void classInformation
 
 
-	// ====================================================================================================
-	// private void schoolInformation
-	//
-	// Action method for School Information menu item. Lists all the available school json files packaged
-	// with the jar file
-	//
-	private void schoolInformation() {
-		ArrayList<String> schoolJsonNames = this.screen.getAvailableSchools();
+	/**
+	 * Action method for the school json file selector.
+	 */
+	private void schoolInformationAction() {
+		List<String> schoolJsonNames = this.screen.getAvailableSchools();
 
 		// Main panel
 		JPanel panel = new JPanel();
@@ -194,15 +178,12 @@ public class Menu extends JMenuBar {
 			this.screen.setUserSchoolFile((String) options.getSelectedItem());
 		}
 	}
-	// end: private void schoolInformation
 
 
-	// ====================================================================================================
-	// private void nextUp
-	//
-	// Action method for next up feature. Allows choice between verbosity options
-	//
-	private void nextUp() {
+	/**
+	 * Action method for next up verbosity selector.
+	 */
+	private void nextUpAction() {
 		JPanel panel = new JPanel();
 		// List of choices, which are just string constants
 		JComboBox<String> options = new JComboBox<>(new String[]{UserJson.NEXT_UP_DISABLED,
@@ -221,15 +202,12 @@ public class Menu extends JMenuBar {
 			this.screen.setUserNextUp(verbosity);
 		}
 	}
-	// end: private void nextUp
 
 
-	// ====================================================================================================
-	// private void theme
-	//
-	// Action method for theme feature. Displays a JColorChooser that the user can interface with
-	//
-	private void theme() {
+	/**
+	 * Action method for the theme color picker.
+	 */
+	private void themeAction() {
 		JPanel panel = new JPanel();
 		JColorChooser colorChooser = new JColorChooser();
 		colorChooser.setColor(new Color(this.screen.getUserTheme()));
@@ -245,18 +223,17 @@ public class Menu extends JMenuBar {
 			this.screen.setUserTheme(color.getRed(), color.getGreen(), color.getBlue());
 		}
 	}
-	// end: private void theme
 
 
-	// ====================================================================================================
-	// private void font
-	//
-	// Action method for font feature. Reads all the available system fonts and displays a list of them
-	//
-	private void font() {
+	/**
+	 * Action method for the font selector.
+	 */
+	private void fontAction() {
 		JPanel panel = new JPanel();
 		// Read list of font names, which can be used to construct a Font object
-		String[] fonts = GraphicsEnvironment.getLocalGraphicsEnvironment().getAvailableFontFamilyNames();
+		String[] fonts = GraphicsEnvironment
+			.getLocalGraphicsEnvironment()
+			.getAvailableFontFamilyNames();
 		JComboBox<String> options = new JComboBox<>(fonts);
 		options.setRenderer(new FontRenderer());
 
@@ -269,13 +246,12 @@ public class Menu extends JMenuBar {
 													JOptionPane.PLAIN_MESSAGE, null);
 
 		if (confirm == JOptionPane.OK_OPTION) {
-			// Font name is set directly. If the font used in the Font(String) constructor is invalid,
-			// there is no error and the default font is chosen instead, so this operation is safe
+			// Font name is set directly. If the font used in the Font(String) constructor is
+			// invalid, there is no error and the default font is chosen instead, so this
+			// operation is safe
 			String font = (String) options.getSelectedItem();
 			this.screen.setUserFont(font);
 		}
 	}
-	// end: private void font
 
 }
-// end: public class Menu

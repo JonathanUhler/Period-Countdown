@@ -1,78 +1,87 @@
-// +=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
-// SchoolPeriod.java
-// Period-Countdown
-//
-// Created by Jonathan Uhler
-// +=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
-
-
 package school;
 
 
 import util.UTCTime;
 
 
-// +=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
-// public class SchoolPeriod
-//
-// Represents the concept of a block of time during the school year defined by the json file. This can
-// include: scheduled classes, special blocks like lunch or study hall, and filler blocks like
-// passing periods.
-//
-// Each period has a start and end time defined to millisecond precision as util.UTCTime objects. For
-// any period P_(n) that is not the first or last period in the school year:
-//
-//  P_(n).start < P_(n).end
-//  P_(n).end = 1ms + P_(n + 1).start
-//
-// The properties of a SchoolPeriod object are defined by the type field. The options of this field
-// are defined in more detail in the documentation for the constructor.
-//
+/**
+ * Represents the concept of a block of time during the school year defined by the json file. This
+ * "block of time" can include:
+ * <ul>
+ * <li> Scheduled academic classes
+ * <li> Special blocks (e.g. lunch, study hall)
+ * <li> Non-significant, "filler" blocks (e.g. passing period, before classes, after classes)
+ * </ul>
+ * <p>
+ * Each period has a start and end time defined to the nearst millisecond of precision as
+ * {@code UTCTime} objects. For any period {@code P_(n)} that is not the first or last period in the
+ * school year, the following <b>must</b> be true:
+ * <ul>
+ * <li> {@code P_(n).start < P_(n).end}. That is, the minimum length of a period is 1 millisecond.
+ * <li> {@code P_(n).end = P_(n + 1).start + 1 ms}. That is, no point exists in the exclusive
+ *      interval between the start and end of the school year where there is a gap of >= 1 ms.
+ * </ul>
+ * <p>
+ * The properties of a {@code SchoolPeriod} object are defined by the {@code "Type"} filed. The
+ * options of this field are defined in more detail in the documentation for this class's
+ * constructor.
+ */
 public class SchoolPeriod {
 
+	/** The type of the period, either Nothing, Special, or a number. */
 	private String type;
+	/** Programmer defined name, can be anything (e.g. "Biology"). */
 	private String name;
+	/** Start time, inclusive, of the period. */
 	private UTCTime start;
+	/** End time, inclusive (e.g. should end with .999 ms), of the period. */
 	private UTCTime end;
+	/** Whether this period is the last period of the day (e.g. {@code end ?= 23:59:59.999}. */
 	private boolean isLast;
 
 
-	// ----------------------------------------------------------------------------------------------------
-	// public SchoolPeriod
-	//
-	// Arguments--
-	//
-	//  type:   the "type" of the period, not null. Can be one of the following:
-	//            "Nothing": this period is a filler event. It should not be counted by isCounted and
-	//                       does not contain an education class (isFree == true)
-	//            "Special": this period has an important event other than an educational class.
-	//                       It WILL be included by isCounted, but is still "free"
-	//            {N | N > 0, N = Z}: identifies the number of an educational class which should be
-	//                                counted and is NOT free
-	//
-	//  name:   the name of the period, can be anything, not null
-	//
-	//  start:  the start time of the period, not null
-	//
-	//  end:    the end time of the period, not null
-	//
-	//  isLast: whether this period is the last in its containing day (local time)
-	//
+	/**
+	 * Constructs a new {@code SchoolPeriod} object from the information in the school json file.
+	 * <p>
+	 * The "type" of a period is defined by the following:
+	 * <ul>
+	 * <li> {@code "Nothing"}: this period is non-significant filler. It should not be counted
+	 *      by {@code isCounted} and does not contain an educational class ({@code isFree == true}).
+	 * <li> {@code "Special"}: this period has an important event other than an academic class.
+	 * <li> An integer {@code n} such that {@code n >= FirstPeriod && n <= LastPeriod}. This
+	 *      identified the number of an academic class which should be counted and is not free.
+	 * </ul>
+	 *
+	 * @param type    the "type" of the period. See above for more detail.
+	 * @param name    the name of the period.
+	 * @param start   the start time of the period.
+	 * @param end     the end time of the period.
+	 * @param isLast  whether this period is the last in its containing day (local time).
+	 *
+	 * @throws NullPointerException      if any argument is null.
+	 * @throws IllegalArgumentException  if {@code type} is not {@code "Nothing"}, 
+	 *                                   {@code "Special"}, or an integer.
+	 */
 	public SchoolPeriod(String type, String name,
 						UTCTime start, UTCTime end,
-						boolean isLast) throws IllegalArgumentException
+						boolean isLast)
 	{
-		if (type == null || name == null || start == null || end == null)
-			throw new IllegalArgumentException("SchoolPeriod constructed with null argument(s)\ntype: " + type +
-											   "\nname: " + name + "\nstart: " + start + "\nend: " + end);
+		if (type == null)
+			throw new NullPointerException("type is null");
+		if (name == null)
+			throw new NullPointerException("name is null");
+		if (start == null)
+			throw new NullPointerException("start is null");
+		if (end == null)
+			throw new NullPointerException("end is null");
 
-		try {
-			Integer.parseInt(type);
-		}
-		catch (NumberFormatException e) {
-			// If the type is not a number, not "NOTHING" and not "SPECIAL", then it is an error
-			if (!type.equals(SchoolJson.NOTHING) && !type.equals(SchoolJson.SPECIAL))
-				throw new IllegalArgumentException("SchoolPeriod constructed with invalid type\ntype: " + type);
+		if (!type.equals(SchoolJson.NOTHING) && !type.equals(SchoolJson.SPECIAL)) {
+			try {
+				Integer.parseInt(type);
+			}
+			catch (NumberFormatException e) {
+				throw new IllegalArgumentException("invalid type for SchoolPeriod: " + type);
+			}
 		}
 		
 		this.type = type;
@@ -83,46 +92,86 @@ public class SchoolPeriod {
 	}
 
 
+	/**
+	 * Returns the name of the period.
+	 *
+	 * @return the name of the period.
+	 */
 	public String getName() {
 		return this.name;
 	}
 
-
+	
+	/**
+	 * Returns the type of the period.
+	 *
+	 * @return the type of the period.
+	 */
 	public String getType() {
 		return this.type;
 	}
 
 
+	/**
+	 * Returns the start of the period.
+	 *
+	 * @return the start of the period.
+	 */
 	public UTCTime getStart() {
 		return this.start;
 	}
 
 
+	/**
+	 * Returns the end of the period.
+	 *
+	 * @return the end of the period.
+	 */
 	public UTCTime getEnd() {
 		return this.end;
 	}
 
-
+	
+	/**
+	 * Returns whether this period is the last in its day (local time).
+	 *
+	 * @return whether this period is the last in its day (local time).
+	 */
 	public boolean isLast() {
 		return this.isLast;
 	}
 
-	
+
+	/**
+	 * Returns whether this period is counted. A "counted" period is one whose type is not
+	 * {@code "Nothing"}.
+	 *
+	 * @return whether this period is counted.
+	 */
 	public boolean isCounted() {
 		return !this.type.equals(SchoolJson.NOTHING);
 	}
 
 
+	/**
+	 * Returns whether this period is free. A "free" period is one whose type is not an integer.
+	 *
+	 * @return whether this period is free.
+	 */
 	public boolean isFree() {
 		return (this.type.equals(SchoolJson.NOTHING) ||
 				this.type.equals(SchoolJson.SPECIAL));
 	}
 
 
+	/**
+	 * Returns a string representation of this {@code SchoolPeriod}.
+	 *
+	 * @return a string representation of this {@code SchoolPeriod}.
+	 */
 	@Override
 	public String toString() {
 		return this.start + " - " + this.end + "\tType=" + this.type + ", Name=" + this.name;
 	}
 
 }
-// end: public class SchoolPeriod

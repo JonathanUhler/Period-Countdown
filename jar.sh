@@ -35,6 +35,7 @@ echo "[jar.sh] Copying lib dependencies for target \"$target\""
 if [ "$target" = "desktop" ]; then
 	mkdir bin/lib
 	cp src/lib/gson-2.2.2.jar bin/lib
+	cp src/lib/jnet.jar bin/lib
 elif [ "$target" = "web" ]; then
 	cp -a src/lib bin/lib
 	echo "[jar.sh] Copying python files to bin/ for web build"

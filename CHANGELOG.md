@@ -8,21 +8,21 @@ All notable changes to Period-Countdown should be documented in this file.
 ### Fixed
 ### Changed
 
-## [6.0.3] - 2/11/23
-### Added
+## [6.1.0] - 7/10/23
 ### Fixed
+* Fix integer overflow bug with the Duration class
+### Changed
+* Improved documentation
+
+## [6.0.3] - 2/11/23
 ### Changed
 * Font selection menu will now display names in that font
 
 ## [6.0.2] - 2/2/23
 ### Added
 * Minor debug and error message improvement
-### Fixed
-### Changed
 
 ## [6.0.1] - 1/8/23
-### Added
-### Fixed
 ### Changed
 * Update JSON information for MVHS
 
@@ -31,7 +31,6 @@ All notable changes to Period-Countdown should be documented in this file.
 * Implemented support for google login
 * Added a whitelist for the login feature
 * Added a settings page and associated style/template files
-### Fixed
 ### Changed
 * Moved website configuration information to a single file and system (Conf.java and conf.py respectively)
 * Miscellaneous minor security improvements
@@ -40,48 +39,30 @@ All notable changes to Period-Countdown should be documented in this file.
 * Minor style and template changes
 
 ## [5.1.3] - 11/10/22
-### Added
 ### Fixed
 * Fixed a DST issue
 ### Changed
 * The previousEndTime variable is now persisted throughout the entire creation of a SchoolYear, rather than just inside of each day definition. This will help catch discontinuities across days or weeks
 
 ## [5.1.2] - 10/17/22
-### Added
 ### Fixed
 * Change "Brunch" for G schedule from "Nothing" to "Special"
-### Changed
 
 ## [5.1.1] - 10/17/22
-### Added
-### Fixed
 ### Changed
 * Enable "Next Up" by default (allow viewing on the generic website)
 
 ## [5.1.0] - 10/16/22
-
-## [5.1.1] - 10/17/22
-### Added
-### Fixed
-### Changed
-* Enable "Next Up" by default (allow viewing on the generic website)
-
-## [5.1.0] - 10/16/22
-### Added
-### Fixed
 ### Changed
 * Moved log and pid files to command line options instead of hard-coded paths
 
 ## [5.0.0] - 10/15/22
 ### Added
 * Minor documentation changes and additions
-### Fixed
 ### Changed
 * Change the structure of the User.json file to include a "Schools" table that can contain period info for many schools
 
 ## [4.0.2] - 10/13/22
-### Added
-### Fixed
 ### Changed
 * Web build now comes as a tar.gz archive
 
@@ -101,7 +82,6 @@ All notable changes to Period-Countdown should be documented in this file.
 * Add a favicon
 * Transport will now write to a pid file
 * Add upcoming special schedules
-### Fixed
 ### Changed
 * Change the abilities of the gen_keys.sh script (now only generates for the transport)
 * Remove the "meta refresh" test line from index.html -- this was purly for testing and a better solution will be implemented
@@ -122,13 +102,11 @@ All notable changes to Period-Countdown should be documented in this file.
 * Fix a problem with the last class of the day not displaying in "Next Class" mode for the Next Up feature
 * Fix the day index check in SchoolWeek.getDay() to correctly be [0, 6] instead of [1, 6]
 * Fix a minor issue with the Next Up display. If name, room, or both are missing and Next Up is enabled, the displayed format will be adjusted
-### Changed
 
 ## [3.0.3] - 8/8/22
 ### Added
 * Add in-line documentation
 * Add miscellaneous precondition checks
-### Fixed
 ### Changed
 * Prefer the term "desktop" over "native" because "native" is a reserved keyword in java
   * Change package names, scripts, and manifests to follow this convention
@@ -145,7 +123,6 @@ All notable changes to Period-Countdown should be documented in this file.
 * Duration toString now only removes hours if they are 0. Thus the shortest format is "00:01" not "01"
 
 ## [3.0.1] - 8/6/22
-### Added
 ### Fixed
 * Resolved issue #18
 * Resolved issue #19
@@ -155,7 +132,6 @@ All notable changes to Period-Countdown should be documented in this file.
 ## [3.0.0] - 8/6/22
 ### Added
 * Text will now scale with increasing window size
-### Fixed
 ### Changed
 * Rewrote the Java codebase for Period-Countdown
 * Improved code readability and quality
@@ -167,25 +143,18 @@ All notable changes to Period-Countdown should be documented in this file.
 ## [2.0.4] - 7/17/22
 ### Added
 * Created new MVHS JSON file for 2022-2023 school year
-### Fixed
 ### Changed
 * Minor changes to .gitignore and general file cleanup
 
 ## [2.0.3.1] - 11/17/21
-### Added
 ### Fixed
 * PATCH FOR CRASH IN 2.0.3 IF YOU INSTALLED 2.0.3 UPDATE TO 2.0.3.1
-### Changed
 
 ## [2.0.3] - 11/17/21
-### Added
-### Fixed
 ### Changed
 * Updated JSON data for year, fixed finals schedule
 
 ## [2.0.2] - 10/9/21
-### Added
-### Fixed
 ### Changed
 * Fixed minor issue in timer skipping -2 (free) periods
 
@@ -193,7 +162,6 @@ All notable changes to Period-Countdown should be documented in this file.
 ### Added
 * Added error popup when the "Support > Update" routine fails
 * Added SAT/PSAT testing week schedule
-### Fixed
 ### Changed
 * Updated in-file documentation
 
@@ -210,27 +178,21 @@ All notable changes to Period-Countdown should be documented in this file.
 ## [1.3.1] - 9/26/21
 ### Added
 * Added the ability to mark periods as free using the keywords "Free", "None", or "N/A"
-### Fixed
-### Changed
 
 ## [1.3.0] - 9/26/21
 ### Added
 * Added the "School..." option to allow changing school *.json file
 * Added a better error handling routine for when json data is missing
-### Fixed
 ### Changed
 * Changed text displayed in "Period Name" and info popups to be the period name from the json data
 
 ## [1.2.0] - 9/25/21
-### Added
 ### Fixed
 * Fixed a possible security issue with Period-Countdown writing to files within itself
 ### Changed
 * Moved all JSON data to ~/.periodcountdown/json/
 
 ## [1.1.1] - 9/25/21
-### Added
-### Fixed
 ### Changed
 * Minor file restructure
 * Changed method ofr Mac build to use jpackage over jpackager
@@ -238,7 +200,6 @@ All notable changes to Period-Countdown should be documented in this file.
 ## [1.1.0] - 9/25/21
 ### Added
 * Created compile.sh and jar.sh to automate building a jarfile from the project
-### Fixed
 ### Changed
 * Minor code improvements
 * Changed method in which SchoolDisplay finds the json data
@@ -247,5 +208,3 @@ All notable changes to Period-Countdown should be documented in this file.
 ## [1.0.0] - 9/16/21
 ### Added
 * First working version of Period-Countdown in Java
-### Fixed
-### Changed

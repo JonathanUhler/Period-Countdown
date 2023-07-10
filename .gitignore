@@ -3,6 +3,7 @@
 *~
 obj/
 bin/*
+*.log
 # Old deprecated web build format
 release/PeriodCountdown-*-web/
 release/PeriodCountdown-*-web/**
