@@ -14,13 +14,24 @@ import javax.swing.JSpinner;
 import javax.swing.SpinnerDateModel;
 
 
+/**
+ * Graphical editor for the school start date, end date, and timezone.
+ *
+ * @author Jonathan Uhler
+ */
 public class InfoEditor extends JPanel {
 
+	/** Data entry form for the first date of school. */
 	private JSpinner firstDayTagSpinner;
+	/** Data entry form for the last date of school. */
 	private JSpinner lastDayTagSpinner;
+	/** Data entry form for the timezone. */
 	private JTextField timezoneTextField;
 	
 
+	/**
+	 * Constructs a new {@code InfoEditor}.
+	 */
 	public InfoEditor() {
 		this.setLayout(new GridBagLayout());
 
@@ -59,18 +70,33 @@ public class InfoEditor extends JPanel {
 	}
 
 
+	/**
+	 * Returns the first date of school in {@code yyyy-MM-dd} format.
+	 *
+	 * @return the first day of school.
+	 */
 	public String getFirstDayTag() {
 		DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
 		return df.format((Date) this.firstDayTagSpinner.getValue());
 	}
 
 
+	/**
+	 * Returns the last date of school in {@code yyyy-MM-dd} format.
+	 *
+	 * @return the last day of school.
+	 */
 	public String getLastDayTag() {
 		DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
 		return df.format((Date) this.lastDayTagSpinner.getValue());
 	}
 
 
+	/**
+	 * Returns the unix TZ identifier.
+	 *
+	 * @return the unix TZ identifier.
+	 */
 	public String getTimezone() {
 		return this.timezoneTextField.getText();
 	}

@@ -8,11 +8,20 @@ import javax.swing.JTextArea;
 import javax.swing.JScrollPane;
 
 
+/**
+ * Graphical viewer for the final JSON output.
+ *
+ * @author Jonathan Uhler
+ */
 public class JSONViewer extends JPanel {
 
+	/** Data view form for the JSON output or any error messages. */
 	private JTextArea jsonTextArea;
 
 
+	/**
+	 * Constructs a new {@code JSONViewer} object.
+	 */
 	public JSONViewer() {
 		this.setLayout(new GridBagLayout());
 
@@ -29,6 +38,11 @@ public class JSONViewer extends JPanel {
 	}
 
 
+	/**
+	 * Updates the contents of the JSON viewer.
+	 *
+	 * @param json  the new contents to display in the viewer.
+	 */
 	public void setJson(String json) {
 		this.jsonTextArea.setText(json);
 	}

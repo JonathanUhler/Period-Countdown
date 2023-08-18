@@ -15,20 +15,39 @@ import javax.swing.Scrollable;
 import javax.swing.SwingConstants;
 
 
+/**
+ * Stores a list of {@code EditorEntry}s that can be edited by the user.
+ * <p>
+ * The list should be added to a {@code JScrollPane} to allow an unknown number of entries to be
+ * added while preserving the graphical integrity of the component.
+ * <p>
+ * The list adapts to the width of the widest entry added, and is fixed at 500 pixels in height.
+ *
+ * @author Jonathan Uhler
+ */
 public class EditorList<E extends EditorEntry>
 	extends JPanel
 	implements ActionListener, Scrollable
 {
 
+	/** The list of {@code EditorEntry}s. */
 	private List<EditorEntry> entries;
 	
 
+	/**
+	 * Constructs a new {@code EditorList} object.
+	 */
 	public EditorList() {
 		this.entries = new ArrayList<>();
 		this.setLayout(new BoxLayout(this, BoxLayout.PAGE_AXIS));
 	}
 
 
+	/**
+	 * Adds a new entry to this list.
+	 *
+	 * @param entry  the entry to add.
+	 */
 	public void addEntry(EditorEntry entry) {
 		entry.addActionListener(this);
 
@@ -40,11 +59,20 @@ public class EditorList<E extends EditorEntry>
 	}
 
 
+	/**
+	 * Returns all the entries in this list.
+	 *
+	 * @return all the entries in this list.
+	 */
 	public List<EditorEntry> getEntries() {
 		return this.entries;
 	}
 
 
+	/**
+	 * Readds all the entries in the internal {@code List} to the graphical context after
+	 * the position of one of the entries changes.
+	 */
 	private void orderChanged() {
 		this.removeAll();
 
@@ -53,6 +81,13 @@ public class EditorList<E extends EditorEntry>
 	}
 
 
+	/**
+	 * Performs an {@code EditorEntry} action by either repositioning or removing an entry from
+	 * this list.
+	 *
+	 * @param e  the event describing the action that was performed. The command string of the
+	 *           event should be one of the string opcodes of the {@code EditorEntry} class.
+	 */
 	@Override
 	@SuppressWarnings("unchecked")
 	public void actionPerformed(ActionEvent e) {
@@ -82,12 +117,33 @@ public class EditorList<E extends EditorEntry>
 	}
 
 
+	/**
+	 * Returns the preferred size of this list when in a scrollable viewport.
+	 * <p>
+	 * The width is set to the preferred width of the list (e.g. the width of the widest entry
+	 * added to the list), and the height is set to 500 pixels.
+	 *
+	 * @return the preferred size of this list when in a scrollable viewport.
+	 */
 	@Override
 	public Dimension getPreferredScrollableViewportSize() {
 		return new Dimension(this.getPreferredSize().width, 500);
 	}
 
 
+	/**
+	 * Returns the pixel increment for scrolling.
+	 * <p>
+	 * Only vertical scrolling is allowed by an editor list. The value {@code 1} is always
+	 * returned if {@code orientation == SwingConstants.HORIZONTAL}.
+	 *
+	 * @param visibleRect  the view area visible within the viewport.
+	 * @param orientation  either SwingConstants.VERTICAL or SwingConstants.HORIZONTAL.
+	 * @param direction    less than zero to scroll up/left, greater than zero for down/right.
+	 *
+	 * @return the "unit" increment for scrolling in the specified direction. This value will
+	 *         always be positive.
+	 */
 	@Override
 	public int getScrollableUnitIncrement(Rectangle visibleRect,
 										  int orientation,
@@ -107,7 +163,18 @@ public class EditorList<E extends EditorEntry>
 		return height / 4;
 	}
 
-	
+	/**
+	 * Returns the value of {@code getScrollableUnitIncrement(visibleRect, orientation, direction)}.
+	 *
+	 * @param visibleRect  the view area visible within the viewport.
+	 * @param orientation  either SwingConstants.VERTICAL or SwingConstants.HORIZONTAL.
+	 * @param direction    less than zero to scroll up/left, greater than zero for down/right.
+	 *
+	 * @return the "unit" increment for scrolling in the specified direction. This value will
+	 *         always be positive.
+	 *
+	 * @see getScrollableUnitIncrement
+	 */
 	@Override
 	public int getScrollableBlockIncrement(Rectangle visibleRect,
 										   int orientation,
@@ -117,122 +184,27 @@ public class EditorList<E extends EditorEntry>
 	}
 
 
+	/**
+	 * Returns {@code true} to request that the editor list matches the width of the parent
+	 * viewport, thus disabling horizontal scrolling.
+	 *
+	 * @return {@code true}.
+	 */
 	@Override
 	public boolean getScrollableTracksViewportWidth() {
 		return true; // Disable horizontal scrolling functionality for JScrollPane
 	}
 
 
+	/**
+	 * Returns {@code false} to indicate no preference for matching height with the parent
+	 * viewport, thus allowing vertical scrolling.
+	 *
+	 * @return {@code false}.
+	 */
 	@Override
 	public boolean getScrollableTracksViewportHeight() {
 		return false; // Force vertical scrolling functionality for JScrollPane
 	}
 
 }
-
-
-/*
-package wizard;
-
-
-import java.util.List;
-import java.util.ArrayList;
-import java.awt.event.ActionListener;
-import java.awt.event.ActionEvent;
-import java.awt.Dimension;
-import java.awt.GridBagLayout;
-import java.awt.GridBagConstraints;
-import java.awt.Component;
-import javax.swing.BoxLayout;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JButton;
-
-
-public abstract class Editor<E extends EditorEntry> extends JPanel implements ActionListener {
-
-	private boolean mutable;
-	private List<EditorEntry> elements;
-	private List<EditorEntry> populateData;
-
-	private JPanel panel;
-	private JButton addButton;
-	
-
-	public Editor(int height) {
-		this.setLayout(new GridBagLayout());
-
-		GridBagConstraints gbc = new GridBagConstraints();
-		gbc.gridx = 0;
-		gbc.gridy = 0;
-
-		this.mutable = true;
-		this.elements = new ArrayList<>();
-		this.populateData = new ArrayList<>();
-		this.panel = new JPanel();
-		this.addButton = new JButton("New Entry");
-
-		this.panel.setLayout(new BoxLayout(this.panel, BoxLayout.Y_AXIS));
-		this.addButton.addActionListener(e -> this.addAction());
-
-		JScrollPane scrollPane = new JScrollPane(this.panel,
-												 JScrollPane.VERTICAL_SCROLLBAR_ALWAYS,
-												 JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
-		scrollPane.setPreferredSize(new Dimension(Wizard.WIDTH - 25, height));
-		this.add(scrollPane, gbc);
-		gbc.gridy++;
-		this.add(addButton, gbc);
-	}
-
-
-	public abstract E newEntry(boolean mutable);
-
-
-	private void addAction() {
-		E element = this.newEntry(this.mutable);
-		element.addActionListener(this);
-		element.populate(this.populateData);
-		
-		this.elements.add(element);
-		this.panel.add(element);
-		
-		this.revalidate();
-		this.repaint();
-	}
-
-
-	public List<EditorEntry> collect() {
-		return this.elements;
-	}
-
-
-	public void populate(List<EditorEntry> l) {
-		this.populateData = l;
-		for (EditorEntry element : this.elements)
-			element.populate(l);
-	}
-
-
-	public void setMutable(boolean mutable) {
-		this.mutable = mutable;
-	}
-
-
-	@Override
-	@SuppressWarnings("unchecked")
-	public void actionPerformed(ActionEvent e) {
-		E source = (E) e.getSource();
-		this.elements.remove(source);
-		this.panel.remove(source);
-		this.revalidate();
-		this.repaint();
-	}
-
-
-	@Override
-	public Dimension getPreferredSize() {
-		return new Dimension(Wizard.WIDTH, Wizard.HEIGHT);
-	}
-
-}
-*/
