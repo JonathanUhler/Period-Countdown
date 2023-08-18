@@ -5,8 +5,11 @@ import jnet.Log;
 import school.SchoolJson;
 import user.UserJson;
 import user.UserPeriod;
+import wizard.Wizard;
 import java.io.IOException;
 import java.io.File;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Map;
@@ -14,6 +17,8 @@ import java.util.HashMap;
 import java.awt.Dimension;
 import java.awt.Color;
 import java.awt.GraphicsEnvironment;
+import java.awt.Desktop;
+import javax.swing.JComponent;
 import javax.swing.JMenuItem;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
@@ -44,11 +49,11 @@ public class Menu extends JMenuBar {
 	 */
 	public Menu(Screen screen) {
 		this.screen = screen;
-		
+
+		// App settings menu
 		JMenu settings = new JMenu("Settings");
 		this.add(settings);
 
-		// Create menu items
 		JMenuItem classInformation = new JMenuItem("Class Information");
 		classInformation.addActionListener(e -> this.classInformationAction());
 		settings.add(classInformation);
@@ -68,6 +73,18 @@ public class Menu extends JMenuBar {
 		JMenuItem font = new JMenuItem("Font");
 		font.addActionListener(e -> this.fontAction());
 		settings.add(font);
+
+		// Help menu
+		JMenu help = new JMenu("Help");
+		this.add(help);
+
+		JMenuItem dataWizard = new JMenuItem("School Data Wizard");
+		dataWizard.addActionListener(e -> this.dataWizardAction());
+		help.add(dataWizard);
+
+		JMenuItem submitIssue = new JMenuItem("Submit An Issue");
+		submitIssue.addActionListener(e -> this.submitIssueAction());
+		help.add(submitIssue);
 	}
 
 
@@ -136,6 +153,7 @@ public class Menu extends JMenuBar {
 		int confirm = JOptionPane.showConfirmDialog(null, panel, "Class Information",
 													JOptionPane.OK_CANCEL_OPTION,
 													JOptionPane.PLAIN_MESSAGE, null);
+		
 		if (confirm == JOptionPane.OK_OPTION) {
 			// Set all of the information
 			for (String key : periodInputFields.keySet()) {
@@ -163,20 +181,15 @@ public class Menu extends JMenuBar {
 	 */
 	private void schoolInformationAction() {
 		List<String> schoolJsonNames = this.screen.getAvailableSchools();
-
-		// Main panel
-		JPanel panel = new JPanel();
 		JComboBox<String> options = new JComboBox<>(schoolJsonNames.toArray(new String[0]));
 		options.setSelectedItem(this.screen.getUserSchoolFile());
-		panel.add(new JLabel("Select data file:"));
-		panel.add(options);
+		JComponent[] components = new JComponent[] {new JLabel("Select data file:"), options};
+		
+		int confirm = PCDesktopApp.displayDialog("School Information", components);
+		if (confirm != JOptionPane.OK_OPTION)
+			return;
 
-		int confirm = JOptionPane.showConfirmDialog(null, panel, "School Information",
-													JOptionPane.OK_CANCEL_OPTION,
-													JOptionPane.PLAIN_MESSAGE, null);
-		if (confirm == JOptionPane.OK_OPTION) {
-			this.screen.setUserSchoolFile((String) options.getSelectedItem());
-		}
+		this.screen.setUserSchoolFile((String) options.getSelectedItem());
 	}
 
 
@@ -184,23 +197,18 @@ public class Menu extends JMenuBar {
 	 * Action method for next up verbosity selector.
 	 */
 	private void nextUpAction() {
-		JPanel panel = new JPanel();
-		// List of choices, which are just string constants
 		JComboBox<String> options = new JComboBox<>(new String[]{UserJson.NEXT_UP_DISABLED,
 																 UserJson.NEXT_UP_ONE,
 																 UserJson.NEXT_UP_ALL});
 		options.setSelectedItem(this.screen.getUserNextUp());
-		panel.add(new JLabel("Select verbosity:"));
-		panel.add(options);
+		JComponent[] components = new JComponent[] {new JLabel("Select verbosity:"), options};
 		
-		int confirm = JOptionPane.showConfirmDialog(null, panel, "Next Up",
-													JOptionPane.OK_CANCEL_OPTION,
-													JOptionPane.PLAIN_MESSAGE, null);
+		int confirm = PCDesktopApp.displayDialog("Next Up", components);
+		if (confirm != JOptionPane.OK_OPTION)
+			return;
 
-		if (confirm == JOptionPane.OK_OPTION) {
-			String verbosity = (String) options.getSelectedItem();
-			this.screen.setUserNextUp(verbosity);
-		}
+		String verbosity = (String) options.getSelectedItem();
+		this.screen.setUserNextUp(verbosity);
 	}
 
 
@@ -208,20 +216,16 @@ public class Menu extends JMenuBar {
 	 * Action method for the theme color picker.
 	 */
 	private void themeAction() {
-		JPanel panel = new JPanel();
 		JColorChooser colorChooser = new JColorChooser();
 		colorChooser.setColor(new Color(this.screen.getUserTheme()));
+		JComponent[] components = new JComponent[] {colorChooser};
 
-		panel.add(colorChooser);
+		int confirm = PCDesktopApp.displayDialog("Theme", components);
+		if (confirm != JOptionPane.OK_OPTION)
+			return;
 
-		int confirm = JOptionPane.showConfirmDialog(null, panel, "Theme",
-													JOptionPane.OK_CANCEL_OPTION,
-													JOptionPane.PLAIN_MESSAGE, null);
-
-		if (confirm == JOptionPane.OK_OPTION) {
-			Color color = colorChooser.getColor();
-			this.screen.setUserTheme(color.getRed(), color.getGreen(), color.getBlue());
-		}
+		Color color = colorChooser.getColor();
+		this.screen.setUserTheme(color.getRed(), color.getGreen(), color.getBlue());
 	}
 
 
@@ -229,29 +233,49 @@ public class Menu extends JMenuBar {
 	 * Action method for the font selector.
 	 */
 	private void fontAction() {
-		JPanel panel = new JPanel();
-		// Read list of font names, which can be used to construct a Font object
 		String[] fonts = GraphicsEnvironment
 			.getLocalGraphicsEnvironment()
 			.getAvailableFontFamilyNames();
 		JComboBox<String> options = new JComboBox<>(fonts);
 		options.setRenderer(new FontRenderer());
-
 		options.setSelectedItem(this.screen.getUserFont());
-		panel.add(new JLabel("Select font: "));
-		panel.add(options);
+		JComponent[] components = new JComponent[] {new JLabel("Select font: "), options};
+		
+		int confirm = PCDesktopApp.displayDialog("Font", components);
+		if (confirm != JOptionPane.OK_OPTION)
+			return;
 
-		int confirm = JOptionPane.showConfirmDialog(null, panel, "Font",
-													JOptionPane.OK_CANCEL_OPTION,
-													JOptionPane.PLAIN_MESSAGE, null);
+		// Font name is set directly. If the font used in the Font(String) constructor is
+		// invalid, there is no error and the default font is chosen instead, so this
+		// operation is safe
+		String font = (String) options.getSelectedItem();
+		this.screen.setUserFont(font);
+	}
 
-		if (confirm == JOptionPane.OK_OPTION) {
-			// Font name is set directly. If the font used in the Font(String) constructor is
-			// invalid, there is no error and the default font is chosen instead, so this
-			// operation is safe
-			String font = (String) options.getSelectedItem();
-			this.screen.setUserFont(font);
+
+	private void dataWizardAction() {
+		Wizard.main(null);
+	}
+
+
+	private void submitIssueAction() {
+		JComponent[] components = new JComponent[] {new JLabel("Continue to github.com?")};
+		int confirm = PCDesktopApp.displayDialog("Submit An Issue", components);
+		if (confirm != JOptionPane.OK_OPTION)
+			return;
+
+		String url = "https://github.com/JonathanUhler/Period-Countdown/issues/new/choose";
+	    Desktop desktop = Desktop.isDesktopSupported() ? Desktop.getDesktop() : null;
+		if (desktop != null) {
+			try {
+				desktop.browse(new URI(url));
+			}
+			catch (IOException | URISyntaxException e) {
+				PCDesktopApp.displayMessage("Browser Error", "Unabled to open link: " + e);
+			}
 		}
+		else
+			PCDesktopApp.displayMessage("Browser Error", "Unabled to open link:\n" + url);
 	}
 
 }

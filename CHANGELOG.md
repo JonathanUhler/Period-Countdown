@@ -1,5 +1,7 @@
 # Period-Countdown Changelog
-**NOTE TO CONTRIBUTORS:** When creating a new version of this software, make sure to update the VERSION file at ```Period-Countdown/src/assets/VERSION```. Please see CONTRIBUTING.md for more information and style guidelines. \
+**NOTE TO CONTRIBUTORS:** When creating a new version of this software, make sure to update the
+VERSION file at `Period-Countdown/src/assets/VERSION`. Please see CONTRIBUTING.md for more
+information and style guidelines. \
 \
 All notable changes to Period-Countdown should be documented in this file.
 
@@ -7,6 +9,17 @@ All notable changes to Period-Countdown should be documented in this file.
 ### Added
 ### Fixed
 ### Changed
+
+## [6.2.0] - 8/17/23
+### Added
+* Add a "Help" menu to the desktop application
+* Add the school data creation wizard proposed by issue #25
+### Fixed
+* Fix documentation inconsistencies as described by issue #24
+### Changed
+* Update and rebuild in-file javadoc documentation
+* Minor markdown formatting changes
+* Update license year
 
 ## [6.1.0] - 7/10/23
 ### Fixed
@@ -32,9 +45,11 @@ All notable changes to Period-Countdown should be documented in this file.
 * Added a whitelist for the login feature
 * Added a settings page and associated style/template files
 ### Changed
-* Moved website configuration information to a single file and system (Conf.java and conf.py respectively)
+* Moved website configuration information to a single file and system (Conf.java and conf.py
+  respectively)
 * Miscellaneous minor security improvements
-* Changed the constructor format for UserAPI. No arguments now indicates loading from jar, and the path argument must be absolute if used
+* Changed the constructor format for UserAPI. No arguments now indicates loading from jar, and the
+  path argument must be absolute if used
 * Removed the deprecated LoginUser command
 * Minor style and template changes
 
@@ -42,7 +57,9 @@ All notable changes to Period-Countdown should be documented in this file.
 ### Fixed
 * Fixed a DST issue
 ### Changed
-* The previousEndTime variable is now persisted throughout the entire creation of a SchoolYear, rather than just inside of each day definition. This will help catch discontinuities across days or weeks
+* The previousEndTime variable is now persisted throughout the entire creation of a SchoolYear,
+  rather than just inside of each day definition. This will help catch discontinuities across days
+  or weeks
 
 ## [5.1.2] - 10/17/22
 ### Fixed
@@ -60,7 +77,8 @@ All notable changes to Period-Countdown should be documented in this file.
 ### Added
 * Minor documentation changes and additions
 ### Changed
-* Change the structure of the User.json file to include a "Schools" table that can contain period info for many schools
+* Change the structure of the User.json file to include a "Schools" table that can contain period
+  info for many schools
 
 ## [4.0.2] - 10/13/22
 ### Changed
@@ -68,7 +86,8 @@ All notable changes to Period-Countdown should be documented in this file.
 
 ## [4.0.1] - 10/13/22
 ### Added
-* Add a "ExpireTime" field to GetTimeRemaining, indicating the end of the current period (which may be the same as "EndTime")
+* Add a "ExpireTime" field to GetTimeRemaining, indicating the end of the current period (which may
+  be the same as "EndTime")
 ### Fixed
 * Fix an issue with merging periods to calculate time remaining on the web build
 ### Changed
@@ -84,24 +103,32 @@ All notable changes to Period-Countdown should be documented in this file.
 * Add upcoming special schedules
 ### Changed
 * Change the abilities of the gen_keys.sh script (now only generates for the transport)
-* Remove the "meta refresh" test line from index.html -- this was purly for testing and a better solution will be implemented
+* Remove the "meta refresh" test line from index.html -- this was purly for testing and a better
+  solution will be implemented
 * Move server configuration files to src/assets/web
 * Add a required timezone code tag to the school (or user) json files
-* All internal operations are now done in UTC, before being converted to the client's timezone as needed
+* All internal operations are now done in UTC, before being converted to the client's timezone as
+  needed
 * Logging operations simplified slightly, log files for transport and server added
 
 ## [3.1.0] - 9/4/22
 ### Added
 * Add general framework for web-server
   * Add specification for web communcation to documents/
-  * Create a separate "main" package for the web build (web.transport instead of desktop) and a Java transport system
-  * Create a Python web server to display generic data (from default User.json and MVHS_School.json) for now
-    * Future releases will likely include database functionality, allowing the same features as the native app
-* Add a constructor flag to UserAPI that allows loading from the local User.json packaged with the jar file
+  * Create a separate "main" package for the web build (web.transport instead of desktop) and a
+    Java transport system
+  * Create a Python web server to display generic data (from default User.json and MVHS_School.json)
+    for now
+    * Future releases will likely include database functionality, allowing the same features as
+	  the native app
+* Add a constructor flag to UserAPI that allows loading from the local User.json packaged with the
+  jar file
 ### Fixed
-* Fix a problem with the last class of the day not displaying in "Next Class" mode for the Next Up feature
+* Fix a problem with the last class of the day not displaying in "Next Class" mode for the Next Up
+  feature
 * Fix the day index check in SchoolWeek.getDay() to correctly be [0, 6] instead of [1, 6]
-* Fix a minor issue with the Next Up display. If name, room, or both are missing and Next Up is enabled, the displayed format will be adjusted
+* Fix a minor issue with the Next Up display. If name, room, or both are missing and Next Up is
+  enabled, the displayed format will be adjusted
 
 ## [3.0.3] - 8/8/22
 ### Added
@@ -110,7 +137,8 @@ All notable changes to Period-Countdown should be documented in this file.
 ### Changed
 * Prefer the term "desktop" over "native" because "native" is a reserved keyword in java
   * Change package names, scripts, and manifests to follow this convention
-* Week exceptions in the school json files can now be day tags within some week, although week tags are still preferred
+* Week exceptions in the school json files can now be day tags within some week, although week
+  tags are still preferred
 
 ## [3.0.2] - 8/7/22
 ### Added
@@ -119,8 +147,10 @@ All notable changes to Period-Countdown should be documented in this file.
 * Fixed minor issue with "Next Up" feature not properly displaying classes
 * Windows icon file now works
 ### Changed
-* SchoolPeriod getStartTime and getEndTime are now public, and their behavior (reason for DateTime arg) is documented
-* Duration toString now only removes hours if they are 0. Thus the shortest format is "00:01" not "01"
+* SchoolPeriod getStartTime and getEndTime are now public, and their behavior (reason for DateTime
+  arg) is documented
+* Duration toString now only removes hours if they are 0. Thus the shortest format is "00:01" not
+  "01"
 
 ## [3.0.1] - 8/6/22
 ### Fixed
