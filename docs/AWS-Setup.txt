@@ -1,0 +1,66 @@
+# PRICE ESTIMATE BREAKDOWN
+
+Item                  Cost/Month
+
+Route 53 domain       $0.9167
+Route 53 hosted zone  $0.5000
+EC2 t2.micro instance $9.5000
+EBS gp2 volume        $1.9200
+Elastic IP            $0.0000 (as long as it is bound to an EC2)
+
+Total (MONTH)         $12.84
+Total (YEAR)          $154.04
+
+
+# CREATING THE INSTANCE
+
+Buy a domain and create a hosted zone
+
+Launch an EC2 instance
+
+Allocate an Elastic IP to the EC2 instance
+
+Create an A record pointing at the Elastic IP
+
+Create a inbound rule under Security Groups for HTTP and HTTPS
+
+
+
+# ACCESSING THE SERVER
+
+ssh -i <key> ubuntu@<DNS-server>
+
+
+
+# SETUP (FROM COLD INSTANCE)
+
+sudo apt update
+
+sudo apt install apache2
+sudo apt install libapache2-mod-wsgi-py3
+sudo apt install python3-certbot-apache
+sudo apt install certbot
+
+sudo apt install python3-pip
+
+sudo pip3 install flask
+sudo pip3 install flask_cors
+sudo pip3 install click
+
+sudo apt install openjdk-17-jdk-headless
+
+mkdir Documents
+cd Documents
+git clone https://github.com/JonathanUhler/Period-Countdown.git
+
+sudo certbot --apache
+
+
+# UPDATING
+
+sudo /etc/init.d/percountdown reload
+
+
+
+
+

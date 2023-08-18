@@ -1,0 +1,1 @@
+packageSearchIndex = [{"l":"All Packages","u":"allpackages-index.html"},{"l":"desktop"},{"l":"school"},{"l":"user"},{"l":"util"},{"l":"web.transport"},{"l":"web.transport.commands"},{"l":"wizard"},{"l":"wizard.editor"},{"l":"wizard.entry"},{"l":"wizard.interfaces"}];updateSearchResults();

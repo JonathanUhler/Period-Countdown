@@ -14,24 +14,46 @@ import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
 
 
+/**
+ * Static manager for all the data entered by the user. The protected {@code setup} method must be
+ * called before operations can be performed.
+ *
+ * @author Jonathan Uhler
+ */
 public class WizardManager {
 
+	/** A list of all editor entries of every type, used to reinit when tabs are switched. */
 	private static List<EditorEntry> entries;
 
+	/** Whether the info tab has been visited and errors should be displayed. */
 	private static boolean visitedInfo;
+	/** Whether the periods tab has been visited and errors should be displayed. */
 	private static boolean visitedPeriods;
+	/** Whether the days tab has been visited and errors should be displayed. */
 	private static boolean visitedDays;
+	/** Whether the weeks tab has been visited and errors should be displayed. */
 	private static boolean visitedWeeks;
+	/** Whether the week exceptions tab has been visited and errors should be displayed. */
 	private static boolean visitedWeekExceptions;
-	
+
+	/** The data editor for basic info. */
 	private static InfoEditor infoEditor;
+	/** The data editor for periods. */
 	private static PeriodEditor periodEditor;
+	/** The data editor for days. */
 	private static DayEditor dayEditor;
+	/** The data editor for weeks. */
 	private static WeekEditor weekEditor;
+	/** The data editor for week exceptions. */
 	private static WeekExceptionEditor weekExceptionEditor;
+	/** The viewer for the final json output. */
 	private static JSONViewer jsonViewer;
 
 
+	/**
+	 * Initializes the members of the {@code WizardManager} class. This method must be called
+	 * by a package class before other methods can be used.
+	 */
 	protected static void setup() {
 		WizardManager.entries = new ArrayList<>();
 
@@ -54,11 +76,24 @@ public class WizardManager {
 	}
 
 
+	/**
+	 * Remembers an editor entry, whose {@code reinitComponent} method is called when data tabs
+	 * are switched.
+	 *
+	 * @param entry  the editor entry to register for reinitialization.
+	 */
 	public static void registerEditorEntry(EditorEntry entry) {
 		WizardManager.entries.add(entry);
 	}
 
 
+	/**
+	 * Notifies all registered editor entries of a change in data tab. This method also performs
+	 * validation on all existing data and generates the final json output, if no errors are
+	 * present.
+	 *
+	 * @param switchedToIndex  the index of the data tab that the user is now viewing.
+	 */
 	protected static void notifyEditorEntries(int switchedToIndex) {
 		for (EditorEntry entry : WizardManager.entries)
 			entry.reinitComponent();
@@ -125,31 +160,61 @@ public class WizardManager {
 	}
 
 
+	/**
+	 * Returns the info editor.
+	 *
+	 * @return the info editor.
+	 */
 	public static InfoEditor getInfoEditor() {
 		return WizardManager.infoEditor;
 	}
 
 
+	/**
+	 * Returns the period editor.
+	 *
+	 * @return the period editor.
+	 */
 	public static PeriodEditor getPeriodEditor() {
 		return WizardManager.periodEditor;
 	}
 
 
+	/**
+	 * Returns the day editor.
+	 *
+	 * @return the day editor.
+	 */
 	public static DayEditor getDayEditor() {
 		return WizardManager.dayEditor;
 	}
 
 
+	/**
+	 * Returns the week editor.
+	 *
+	 * @return the week editor.
+	 */
 	public static WeekEditor getWeekEditor() {
 		return WizardManager.weekEditor;
 	}
 
 
+	/**
+	 * Returns the week exception editor.
+	 *
+	 * @return the week exception editor.
+	 */
 	public static WeekExceptionEditor getWeekExceptionEditor() {
 		return WizardManager.weekExceptionEditor;
 	}
 
 
+	/**
+	 * Returns the json viewer.
+	 *
+	 * @return the json viewer.
+	 */
 	public static JSONViewer getJsonViewer() {
 		return WizardManager.jsonViewer;
 	}
