@@ -7,6 +7,12 @@ import javax.swing.JTabbedPane;
 import javax.swing.JOptionPane;
 
 
+/**
+ * Main class for the Period-Countdown school data JSON generator. Responsible for creating and
+ * displaying a frame with tabs for data entry.
+ *
+ * @author Jonathan Uhler
+ */
 public class Wizard {
 
 	/**
@@ -20,9 +26,14 @@ public class Wizard {
 									  JOptionPane.PLAIN_MESSAGE);
 	}
 	
-	
+
+	/**
+	 * Main entry point to the data generator.
+	 *
+	 * @param args  command line arguments.
+	 */
 	public static void main(String[] args) {
-		WizardManager.setup();
+		WizardManager.setup(); // This must be called to set up the static manager class
 		InfoEditor infoEditor = WizardManager.getInfoEditor();
 		PeriodEditor periodEditor = WizardManager.getPeriodEditor();
 		DayEditor dayEditor = WizardManager.getDayEditor();
