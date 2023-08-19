@@ -156,5 +156,6 @@ documentation. This includes:
 	they introduce
 * Update the VERSION file under `Period-Countdown/src/assets/VERSION` with the version number
   from CHANGELOG.md
-* Run the project locally with
-  `./compile.sh && ./jar.sh && java -jar bin/PeriodCountdown-dekstop.jar`
+* Run the project with `./compile.sh && ./jar.sh && java -jar bin/PeriodCountdown-dekstop.jar` for
+  any local testing that is required
+* Build javadoc comments with `./docs.sh`
