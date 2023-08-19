@@ -1,6 +1,8 @@
 # Period-Countdown Contributing Guidelines
 Contributions to Period-Countdown are highly appreciated. \
-The following are a set of general guidelines and important information about contributing to the project. Generally, when making contributions, use your best judgement on what should be changed and how. \
+The following are a set of general guidelines and important information about contributing to the
+project. Generally, when making contributions, use your best judgement on what should be changed
+and how. \
 We appreciate you taking the time to contribute. \
 \
 **Table of Contents** \
@@ -10,40 +12,40 @@ We appreciate you taking the time to contribute. \
 * [Pull Requests](#pull-requests)
 
 
-## How You Can Contribute
+# How You Can Contribute
 
-### Reporting Bugs and Issues
-When submitting bug and issue reports, please be as descriptive as possible. Include as much information as you can following the [bug report template](https://github.com/JonathanUhler/Period-Countdown/issues/new?assignees=&labels=bug&template=bug-report.md&title=%5BBug%5D+). \
+## Reporting Bugs and Issues
+When submitting bug and issue reports, please be as descriptive as possible. Include as much
+information as you can following the [bug report template](https://github.com/JonathanUhler/Period-Countdown/issues/new?assignees=&labels=bug&template=bug-report.md&title=%5BBug%5D+). \
 Try to include:
 * A clear title
-* A detailed description of the bug (observed behavior) and what you expect the behavior should have been
+* A detailed description of the bug (observed behavior) and what you expect the behavior should
+  have been
 * A list of steps to reproduce the issue
-* The version of Period-Countdown you are using and the system you are running on (e.g. "3.0.1 on Mac OS 10.3 with Java 17")
+* The version of Period-Countdown you are using and the system you are running on (e.g. "3.0.1 on 
+  Mac OS 10.3 with Java 17")
 * Any screenshots or further context to help describe the issue
 
-### Suggesting Features
-To suggest new features, please create a [blank issue](https://github.com/JonathanUhler/Period-Countdown/issues/new) describing the feature you want added. \
+## Suggesting Features
+To suggest new features, please create a
+[blank issue](https://github.com/JonathanUhler/Period-Countdown/issues/new) describing the feature
+you want added. \
 Try to include:
 * A clear title
 * A detailed description of the feature you want added and its behaviors
-* Any resources that might be useful in implementing the feature, such as a link to a school's calendar for adding new school data
+* Any resources that might be useful in implementing the feature, such as a link to a school's
+  calendar for adding new school data
 
-### Pull Requests
-#### School Data
-Create your new school JSON file at ```Period-Countdown/src/assets/json```. Here is an example with with descriptions (note that JSON does not actually support comments):
+## Pull Requests
+### School Data
+Create your new school JSON file at `Period-Countdown/src/assets/json`. JSON files can be created
+semi-automatically by using the data generator build in to the desktop application (accessible
+through Help > School Data Wizard). Alternatively, JSON files can be written by hand with some
+basic knowledge of the formatting. \
+\
+Below is a full example of a school JSON file with descriptions of its components:
 ```json
 {
-    /*
-    Info
-    ----
-    Required keys:
-     - FirstPeriod: the first valid period/class, as an integer >= 0
-     - LastPeriod: the last valid period/class, as an integer >= FirstPeriod
-     - FirstDayTag: the day tag in format YYYY-MM-DD of the first day of school
-     - LastDayTag: the day tag in format YYYY-MM-DD of the last day of school
-     - Timezone: the unix timezone ID for which this json data was created. A good list can be found
-       at: https://manpages.ubuntu.com/manpages/focal/man3/DateTime::TimeZone::Catalog.3pm.html
-    */
     "Info": {
         "FirstPeriod": "1",
         "LastPeriod": "7",
@@ -51,30 +53,6 @@ Create your new school JSON file at ```Period-Countdown/src/assets/json```. Here
         "LastDayTag": "2023-06-08",
         "Timezone": "America/Los_Angeles"
     },
-    /*
-    Days
-    ----
-    Required keys:
-    - None, the keys are chosen by the programmer. These are the names of day type
-      (e.g. "C Schedule", "Holiday", etc.)
-
-    Hashmap definitions within a day definition
-    ----
-    Required keys:
-    - Type: the type of the event/class. Valid values are "Nothing" for an event that should be
-      skipped and merged with adjacent "Nothing"s when calculating time remaining, "Special" for
-      an event without a class that should NOT be merged, and an integer "N" where
-      FirstPeriod <= N <= LastPeriod
-	- Name: the programmer-defined name for the event, can be anything
-	- Start: the start time tag in format HH:MM in 24-hour time of the event
-	- End: the end time tag in format HH:MM in 24-hour time of the event
-
-    Notes:
-    - The first event of a day definition should always have the "Start" value of "00:00"
-    - The last event of a day definition should always have the "End" value of "23:59"
-    - Any event that is not the first should have the "Start" value equal to the previous
-      event's "End" value
-    */
     "Days": {
     	"SchoolDay": [
     		{"Type": "Nothing", "Name": "Before School", "Start": "00:00", "End": "08:40"},
@@ -87,17 +65,6 @@ Create your new school JSON file at ```Period-Countdown/src/assets/json```. Here
             {"Type": "Nothing", "Name": "Weekend", "Start": "00:00", "End": "23:59"}
         ]
     },
-    /*
-    Weeks
-    -----
-    Required keys:
-    - DEFAULT: the default week to use, built from the day types defined in Days
-	- Additional keys can also be added with special week definitions
-
-    Notes:
-	- Each of the arrays in this map should contain exactly 7 strings with values equal to
-      (case SENSITIVE) one of the day definition names defined above
-	*/
     "Weeks":  {
         "DEFAULT": [
 			"Weekend",
@@ -118,21 +85,58 @@ Create your new school JSON file at ```Period-Countdown/src/assets/json```. Here
 			"Weekend"
 		]
     },
-	/*
-	Exceptions: Hashmap definitions with the Exceptions list
-	-----
-	Required keys:
-	- WeekTag: the week tag in format YYYY-MM-DD of the SUNDAY of the week in question
-	- Type: the type of week to substitute for DEFAULT in the given week, must be on the names
-	  define in the Weeks map above
-	*/
     "Exceptions": [
         {"WeekTag": "2022-11-20", "Type": "Break"}
     ]
 }
 ```
 
-#### Updaing Documentation
+#### Info
+Required fields:
+* `FirstPeriod`: the first valid period/class number, inclusive, must be an integer >= 0
+* `LastPeriod`: the last valid period/class number, inclusive, must be an integer >= `FirstPeriod`
+* `FirstDayTag`: the first date of school in yyyy-MM-dd format, inclusive
+* `LastDayTag`: the last date of school in yyyy-MM-dd format, inclusive
+* `Timezone`: the unix timezone identifier which the json was created for. A good list can be found
+  at: https://manpages.ubuntu.com/manpages/focal/man3/DateTime::TimeZone::Catalog.3pm.html
+
+#### Days
+Any key can be included in the Days section, as defined by the programmer. Each value in the Days
+section must be a list with map-like elements that have the following keys:
+* `Type`: the type of the event or class. Valid values are "Nothing" (for an event that should be
+  skipped and merged with adjacent "Nothing"s when calculating time remaining), "Special (for an
+  event without a class that should NOT be merged), and an integer "N" where
+  FirstPeriod <= N <= LastPeriod
+* `Name`: a programmer-defined name for the event or class, can be anything
+* `Start`: the start time of the event or class in HH:mm format (24-hour time)
+* `End`: the end time of the event or class in HH:mm format, such that End > Start
+
+Note that the first event of a day definition must have the `Start` value of `"00:00"` and the
+last event must have the `End` value of `"23:59"`. Additionally, the end time of any period p[n]
+should be the same value as the start time of the next period p[n+1] (with the obvious exception
+of the last period in the day).
+
+#### Weeks
+Required keys:
+* `DEFAULT`: the default week to use
+* Additional week types can be defined as required by the programmer
+
+Each entry in the Weeks section should be a list of exactly seven strings, where each string is
+the exact, case-sensitive name of a day defined in the Days section.
+
+#### Exceptions
+This is the section to define any use of a non-DEFAULT week in the yearly calendar. Each
+entry is a map with the required keys:
+* `WeekTag`: a date in yyyy-MM-dd format that occurs sometime in the week in which the specified
+  week type should be substituted for DEFAULT. This application considers sunday to be the first
+  day of the week and saturday to be the last day. Older versions required this field to be
+  the sunday of the week during which the exception occured, but the latest releases will be able
+  to convert any day during a week to the closest sunday (rounded back in time) to find the
+  correct position for the exception
+* `Type`: the type of week to substitute for DEFAULT during the specified week tag. This must be
+  the case-sensitive name of one of the weeks defined in the Weeks seciton
+
+### Updaing Documentation
 Once you have made changes to Period-Countdown, please remember to update any relavent
 documentation. This includes:
 * Update the CHANGELOG.md file
