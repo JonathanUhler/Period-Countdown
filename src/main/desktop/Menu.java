@@ -253,11 +253,18 @@ public class Menu extends JMenuBar {
 	}
 
 
+	/**
+	 * Opens the data generator.
+	 */
 	private void dataWizardAction() {
 		Wizard.main(null);
 	}
 
 
+	/**
+	 * Opens the "new issue" page on github after allowing the user to confirm they want
+	 * to proceed to an external website.
+	 */
 	private void submitIssueAction() {
 		JComponent[] components = new JComponent[] {new JLabel("Continue to github.com?")};
 		int confirm = PCDesktopApp.displayDialog("Submit An Issue", components);

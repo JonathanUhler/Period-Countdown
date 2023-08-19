@@ -13,24 +13,51 @@ import javax.swing.JTextField;
 import javax.swing.JComboBox;
 
 
+/**
+ * Graphical entry point for information that defines a single day.
+ *
+ * @author Jonathan Uhler
+ */
 public class Day extends EditorEntry {
 
+	/** An editor to enter all periods of this day. */
 	private PeriodEditor editor;
+	/** A data entry field to enter the name of this day. */
 	private JTextField nameTextField;
+	/** A selector to choose a pre-defined day type for if this entry is immutable. */
 	private JComboBox<EditorEntry> immutableSelectorComboBox;
+	/**
+	 * Whether the immutableSelectorComboBox can be used. This is a distinct value from whether 
+	 * this entry is mutable, and can be overriden by the constructing class if desided. If set to 
+	 * {@code false} and the entry is immutable, a label is displayed with the combo box's selected
+	 * value instead of the combo box itself.
+	 */
 	private boolean immutableComboBoxUsable;
 
 
+	/**
+	 * Constructs a new mutable {@code Day} object.
+	 */
 	public Day() {
 		super();
 	}
 
 
+	/**
+	 * Constructs a new {@code Day} object with the specified mutability.
+	 *
+	 * @param mutable  whether this entry is mutable.
+	 */
 	public Day(boolean mutable) {
 		super(mutable);
 	}
 
 
+	/**
+	 * Creates an immutable day with the name of "Weekend" and a single, day-long free period.
+	 *
+	 * @return an immutable day with the name of "Weekend" and a single, day-long free period.
+	 */
 	public static Day getWeekend() {
 		Day d = new Day(false);
 		d.nameTextField.setText("Weekend");
@@ -40,6 +67,11 @@ public class Day extends EditorEntry {
 	}
 
 
+	/**
+	 * Creates an immutable day with the name of "Holiday" and a single, day-long free period.
+	 *
+	 * @return an immutable day with the name of "Holiday" and a single, day-long free period.
+	 */
 	public static Day getHoliday() {
 		Day d = new Day(false);
 		d.nameTextField.setText("Holiday");
@@ -49,6 +81,14 @@ public class Day extends EditorEntry {
 	}
 
 
+	/**
+	 * Sets whether the immutableSelectorComboBox can be used. This is a distinct value from 
+	 * whether this entry is mutable, and can be overriden by the constructing class if desided. 
+	 * If set to {@code false} and the entry is immutable, a label is displayed with the combobox's
+	 * selected value instead of the combobox itself.
+	 *
+	 * @param usable  whether the combobox selector is usable if this component is immutable.
+	 */
 	public void setImmutableComboBoxUsable(boolean usable) {
 		this.immutableComboBoxUsable = usable;
 	}
@@ -108,6 +148,9 @@ public class Day extends EditorEntry {
 	}
 
 
+	/**
+	 * Acts on an entry change of the immutable selector combobox.
+	 */
 	private void immutableSelectorAction() {
 		EditorEntry entry = (EditorEntry) this.immutableSelectorComboBox.getSelectedItem();
 		if (entry == null)

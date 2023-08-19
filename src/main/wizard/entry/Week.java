@@ -11,22 +11,42 @@ import javax.swing.JLabel;
 import javax.swing.JTextField;
 
 
+/**
+ * Graphical entry point for information that defines a single week.
+ *
+ * @author Jonathan Uhler
+ */
 public class Week extends EditorEntry {
 
+	/** An editor to enter all days of this week. */
 	private DayEditor editor;
+	/** A data entry field to enter the name of this week. */
 	private JTextField nameTextField;
 
 
+	/**
+	 * Constructs a new mutable {@code Week} object.
+	 */
 	public Week() {
 		super();
 	}
 
 
+	/**
+	 * Constructs a new {@code Week} object with the specified mutability.
+	 *
+	 * @param mutable  whether this entry is mutable.
+	 */
 	public Week(boolean mutable) {
 		super(mutable);
 	}
 
 
+	/**
+	 * Creates a mutable week with the preset name of "DEFAULT".
+	 *
+	 * @return a mutable week with the preset name of "DEFAULT".
+	 */
 	public static Week getDefaultWeek() {
 		Week w = new Week();
 		w.nameTextField.setText("DEFAULT");

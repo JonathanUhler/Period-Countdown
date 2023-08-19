@@ -23,7 +23,7 @@ public class PeriodEditor extends EditorViewport<Period> {
 	/**
 	 * Constructs a new {@code PeriodEditor} with the specified mutability.
 	 *
-	 * @param mutable  whether entries of this editor allow writes.
+	 * @param mutable  whether entries of this editor are mutable.
 	 */
 	public PeriodEditor(boolean mutable) {
 		super(mutable);
@@ -33,7 +33,7 @@ public class PeriodEditor extends EditorViewport<Period> {
 	/**
 	 * Creates and returns a new {@code Period} object with the specified mutability.
 	 *
-	 * @param mutable  whether the entry allows writes.
+	 * @param mutable  whether the entry is mutable.
 	 */
 	@Override
 	public Period entryFactory(boolean mutable) {

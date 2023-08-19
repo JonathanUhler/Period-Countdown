@@ -309,6 +309,21 @@ public class UTCTime implements Comparable<UTCTime> {
 	}
 
 
+	/**
+	 * Returns a new {@code UTCTime} object representing midnight in the specified timezone.
+	 * <p>
+	 * The returned {@code UTCTime} object is still in UTC time. The operation is order is:
+	 * <ul>
+	 * <li> Convert this object to the specified timezone.
+	 * <li> Convert the new object (in the specified local timezone) to midnight in that tz.
+	 * <li> Convert the local-midnight object back to UTC time. The result may or may not have a
+	 *      final time of {@code 00:00:00.000}.
+	 * </ul>
+	 *
+	 * @param timezone  the unix TZ identifier to get a UTC-aligned midnight time for.
+	 *
+	 * @return a new {@code UTCTime} object representing midnight in the specified timezone.
+	 */
 	public UTCTime toMidnight(String timezone) {
 		UTCTime localTime = this.to(timezone);
 		localTime = localTime.toMidnight();

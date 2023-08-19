@@ -16,7 +16,7 @@ import javax.swing.JButton;
  */
 public abstract class EditorViewport<E extends EditorEntry> extends JPanel {
 
-	/** Whether entries in this viewport allow writes. */
+	/** Whether entries in this viewport are mutable. */
 	private boolean mutable;
 	/** The list of editor entries associated with this viewport. */
 	private EditorList<E> list;
@@ -39,7 +39,7 @@ public abstract class EditorViewport<E extends EditorEntry> extends JPanel {
 	 * Constructs a new {@code EditorViewport} with the specified mutability. For more information
 	 * on mutability, see {@code EditorEntry}.
 	 *
-	 * @param mutable  wehther entries of this viewport allow writes.
+	 * @param mutable  wehther entries of this viewport are mutable.
 	 *
 	 * @see EditorEntry
 	 */
@@ -94,6 +94,8 @@ public abstract class EditorViewport<E extends EditorEntry> extends JPanel {
 	 * viewport. The entry should have the same mutability as specified by the argument.
 	 *
 	 * @param mutable  whether the returned entry is mutable.
+	 *
+	 * @return a new, non-{@code null} editor entry of the type supported by this viewport.
 	 */
 	public abstract E entryFactory(boolean mutable);
 

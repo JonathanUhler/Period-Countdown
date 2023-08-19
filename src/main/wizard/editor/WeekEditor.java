@@ -23,7 +23,7 @@ public class WeekEditor extends EditorViewport<Week> {
 	/**
 	 * Constructs a new {@code WeekEditor} with the specified mutability and a "DEFAULT" week.
 	 *
-	 * @param mutable  whether entries of this editor allow writes.
+	 * @param mutable  whether entries of this editor are mutable.
 	 */
 	public WeekEditor(boolean mutable) {
 		super(mutable);
@@ -35,7 +35,7 @@ public class WeekEditor extends EditorViewport<Week> {
 	/**
 	 * Creates and returns a new {@code Week} object with the specified mutability.
 	 *
-	 * @param mutable  whether the entry allows writes.
+	 * @param mutable  whether the entry is mutable.
 	 */
 	@Override
 	public Week entryFactory(boolean mutable) {

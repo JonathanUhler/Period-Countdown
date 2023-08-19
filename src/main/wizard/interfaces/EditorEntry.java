@@ -282,6 +282,8 @@ public abstract class EditorEntry extends JPanel {
 	 * This method should <b>not</b> return {@code null}. If the specific {@code EditorEntry}
 	 * class does not have any data associated with it, return an empty map (e.g.
 	 * {@code return new HashMap<>();}).
+	 *
+	 * @return a map of all relevant data associated with a specific {@code EditorEntry} class.
 	 */
 	public abstract Map<String, Object> collectFromMutableComponent();
 

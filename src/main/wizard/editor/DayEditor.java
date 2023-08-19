@@ -23,7 +23,7 @@ public class DayEditor extends EditorViewport<Day> {
 	/**
 	 * Constructs a new {@code DayEditor} with the specified mutability.
 	 *
-	 * @param mutable  whether entries of this editor allow writes.
+	 * @param mutable  whether entries of this editor are mutable.
 	 */
 	public DayEditor(boolean mutable) {
 		super(mutable);
@@ -33,7 +33,7 @@ public class DayEditor extends EditorViewport<Day> {
 	/**
 	 * Creates and returns a new {@code Day} object with the specified mutability.
 	 *
-	 * @param mutable  whether the entry allows writes.
+	 * @param mutable  whether the entry is mutable.
 	 */
 	@Override
 	public Day entryFactory(boolean mutable) {

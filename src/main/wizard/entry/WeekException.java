@@ -17,17 +17,32 @@ import javax.swing.SpinnerDateModel;
 import javax.swing.JLabel;
 
 
+/**
+ * Graphical entry point for information that defines a single week exception.
+ *
+ * @author Jonathan Uhler
+ */
 public class WeekException extends EditorEntry {
 
+	/** A data entry field for the date of the exception. */
 	private JSpinner dateSpinner;
+	/** A data entry field to select the type of week exception. */
 	private JComboBox<EditorEntry> weekTypeComboBox;
 
 
+	/**
+	 * Constructs a new mutable {@code WeekException} object.
+	 */
 	public WeekException() {
 		super();
 	}
 
 
+	/**
+	 * Constructs a new {@code WeekException} object with the specified mutability.
+	 *
+	 * @param mutable  whether this entry is mutable.
+	 */
 	public WeekException(boolean mutable) {
 		super(mutable);
 	}
