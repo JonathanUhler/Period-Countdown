@@ -54,36 +54,36 @@ Below is a full example of a school JSON file with descriptions of its component
         "Timezone": "America/Los_Angeles"
     },
     "Days": {
-    	"SchoolDay": [
-    		{"Type": "Nothing", "Name": "Before School", "Start": "00:00", "End": "08:40"},
-    		{"Type": "1", "Name": "Class 1", "Start": "08:40", "End": "10:00"},
-    		{"Type": "Special", "Name": "Lunch", "Start": "10:00", "End": "12:00"},
-    		{"Type": "2", "Name": "Class 2", "Start": "12:00", "End": "15:00"},
-    		{"Type": "Nothing", "Name": "After School", "Start": "15:00", "End": "23:59"}
-    	],
-    	"Weekend": [
+        "SchoolDay": [
+            {"Type": "Nothing", "Name": "Before School", "Start": "00:00", "End": "08:40"},
+            {"Type": "1", "Name": "Class 1", "Start": "08:40", "End": "10:00"},
+            {"Type": "Special", "Name": "Lunch", "Start": "10:00", "End": "12:00"},
+            {"Type": "2", "Name": "Class 2", "Start": "12:00", "End": "15:00"},
+            {"Type": "Nothing", "Name": "After School", "Start": "15:00", "End": "23:59"}
+        ],
+        "Weekend": [
             {"Type": "Nothing", "Name": "Weekend", "Start": "00:00", "End": "23:59"}
         ]
     },
     "Weeks":  {
         "DEFAULT": [
-			"Weekend",
-			"SchoolDay",
-			"SchoolDay",
-			"SchoolDay",
-			"SchoolDay",
-			"SchoolDay",
-			"Weekend"
+            "Weekend",
+            "SchoolDay",
+            "SchoolDay",
+            "SchoolDay",
+            "SchoolDay",
+            "SchoolDay",
+            "Weekend"
         ],
-		"Break": [
-			"Weekend",
-			"Weekend",
-			"Weekend",
-			"Weekend",
-			"Weekend",
-			"Weekend",
-			"Weekend"
-		]
+        "Break": [
+            "Weekend",
+            "Weekend",
+            "Weekend",
+            "Weekend",
+            "Weekend",
+            "Weekend",
+            "Weekend"
+        ]
     },
     "Exceptions": [
         {"WeekTag": "2022-11-20", "Type": "Break"}
