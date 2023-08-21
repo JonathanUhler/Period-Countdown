@@ -17,32 +17,6 @@ public class UserJson {
 	public static final int MAX_FIELD_LEN = 15;
 	/** The last timestamp of the day that can be defined in the user json file. */
 	public static final String LAST_TIME = "23:59";
-
-	/** The user's home directory. */
-	private static final String HOME = System.getProperty("user.home");
-	/** The user's operating system. */
-	private static final String OPERATING_SYSTEM = System.getProperty("os.name");
-	/** Whether the OS is windows. */
-	private static final boolean IS_WIN = OPERATING_SYSTEM.startsWith("Windows");
-	/** Whether the OS is a linux distro. */
-	private static final boolean IS_LIN = OPERATING_SYSTEM.startsWith("Linux");
-	/** Whether the OS is mac OSX. */
-	private static final boolean IS_MAC = OPERATING_SYSTEM.startsWith("Mac");
-	/** Whether the OS is unix-based. */
-	private static final boolean IS_UNIX = IS_LIN || IS_MAC;
-	
-	/** The expected path to the Period Countdown directory. */
-	public static final String EXPECTED_PATH =
-		(IS_WIN) ? (HOME + "\\AppData\\PeriodCountdown\\") : // Windows
-		((IS_UNIX) ? ((IS_MAC) ? (HOME + "/Library/Application Support/PeriodCountdown/") : // Mac
-					  (HOME + "/.PeriodCountdown/")) : // Linux
-		 (".PeriodCountdown/")); // Unknown
-	/** The path to the default user json file as a jar artifact. */
-	public static final String INTERNAL_PATH = "assets/json/";
-	/** The name of the user json file. */
-	public static final String DEFAULT_FILE = "User.json";
-	/** Regex for a valid json file. */
-	public static final String FILE_NAME_REGEX = "[a-zA-Z0-9_/\\\\]+\\.json";
 	
 	/** Json key for the list of schools. */
 	public static final String SCHOOLS = "Schools";

@@ -5,6 +5,7 @@ import jnet.Log;
 import util.Interval;
 import util.UTCTime;
 import util.Duration;
+import util.OSPath;
 import user.UserJson;
 import java.util.List;
 import java.util.ArrayList;
@@ -12,7 +13,9 @@ import java.util.Map;
 import java.util.HashMap;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.nio.file.Path;
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
 
@@ -46,29 +49,36 @@ public class SchoolYear {
 	/**
 	 * Constructs a new {@code SchoolYear} object.
 	 *
-	 * @param jsonPath  the path to the school json file within the jar file.
-	 * @param days      an optional definition of the {@code "Days"} field in the school json file.
-	 *                  If this argument is {@code null}, the {@code Days} field <b>must</b> be
-	 *                  defined in the json file, otherwise the argument will be used and must be
-	 *                  valid.
+	 * @param path  a {@code Path} object that points to the school json file. If the path
+	 *              starts with {@code OSPath.getSchoolJsonJarPath}, the path is assumed to
+	 *              reference a json file packaged with the Period Countdown jar file, otherwise
+	 *              it is assumed to be a path on the disk (absolute paths are preferred for
+	 *              disk operations).
 	 *
 	 * @throws FileNotFoundException     if the json file does not exist.
 	 * @throws IllegalArgumentException  if any parse error occurs.
 	 */
-	public SchoolYear(String jsonPath,
-					  Map<String, List<Map<String, String>>> days) throws FileNotFoundException
-	{
+	public SchoolYear(Path path) throws FileNotFoundException {
 		// Init instance variables
 		this.year = new ArrayList<>();
-		
-		// Read the json file as a jar resource stream
-		InputStream schoolStream = Thread.currentThread()
-			.getContextClassLoader()
-			.getResourceAsStream(jsonPath);
-		if (schoolStream == null)
-			throw new FileNotFoundException(Log.format(Log.ERROR, "SchoolYear",
-													   "resource \"" + jsonPath + "\" is null"));
-		InputStreamReader schoolReader = new InputStreamReader(schoolStream);
+
+		InputStreamReader schoolReader;
+		if (OSPath.isInJar(path)) {
+			// Read the json file as a jar resource stream
+			InputStream schoolStream = Thread.currentThread()
+				.getContextClassLoader()
+				.getResourceAsStream(path.toString());
+			if (schoolStream == null)
+				throw new FileNotFoundException(Log.format(Log.ERROR, "SchoolYear",
+														   "resource \"" + path + "\" is null"));
+			schoolReader = new InputStreamReader(schoolStream);
+		}
+		else {
+			if (path.toString().length() == 0)
+				throw new FileNotFoundException("no school data file set. " +
+												"select a file in Settings > School Information");
+			schoolReader = new InputStreamReader(new FileInputStream(path.toString()));
+		}
 
 		// Load json file with GSON as a SchoolJson object
 		Gson gson = new Gson();
@@ -84,18 +94,6 @@ public class SchoolYear {
 		if (this.schoolJson == null) {
 			this.isInitialized = false;
 			return;
-		}
-
-		// Determine if the days argument should be used
-		if (this.schoolJson.days == null) {
-			if (days != null)
-				this.schoolJson.days = days;
-			else {
-				throw new IllegalArgumentException(Log.format(Log.ERROR, "SchoolYear",
-															  "\"Days\" was not specified in " +
-															  "school file and \"days\" argument " +
-															  "is null"));
-			}
 		}
 
 		// Initialize class information
@@ -163,6 +161,9 @@ public class SchoolYear {
 	 * @throws IllegalArgumentException  if any check fails.
 	 */
     private void initYear() {
+		if (this.schoolJson.days == null)
+			throw new IllegalArgumentException(Log.format(Log.ERROR, "SchoolYear", "missing Days"));
+		
 		UTCTime firstDay = UTCTime.of(this.firstDayTag, this.timezone);
 		UTCTime lastDay = UTCTime.of(this.lastDayTag, this.timezone);
 

@@ -13,9 +13,6 @@ import com.google.gson.annotations.SerializedName;
  */
 public class SchoolJson {
 
-	/** The path of the school json relative to the jar file (as a jar artifact). */
-	public static final String EXPECTED_PATH = "assets/json/";
-
 	/** Json tag for the number of the first period possible. */
 	public static final String FIRST_PERIOD = "FirstPeriod";
 	/** Json tag for the number of the last period possible. */
@@ -31,8 +28,10 @@ public class SchoolJson {
 	public static final String TYPE = "Type";
 	/** Json value for a period with no significance. */
 	public static final String NOTHING = "Nothing";
-	/** Json value for a period with no academic class, but that is "significant" (e.g. should be 
-        counted, such as lunch, brunch, or tutorial). */
+	/**
+	 * Json value for a period with no academic class, but that is "significant" (e.g. should be 
+	 * counted, such as lunch, brunch, or tutorial).
+	 */
 	public static final String SPECIAL = "Special";
 	/** Json tag for the programmer-defined name of a period. */
 	public static final String NAME = "Name";

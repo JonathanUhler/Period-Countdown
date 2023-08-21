@@ -6,6 +6,7 @@ import util.Duration;
 import java.util.Map;
 import java.util.List;
 import java.io.FileNotFoundException;
+import java.nio.file.Path;
 
 
 /**
@@ -25,39 +26,19 @@ public class SchoolAPI {
 	/**
 	 * Constructs a new {@code SchoolAPI} object with a specified json file name.
 	 *
-	 * @param jsonName  the name of the json file. No path should be specified. All json files
-	 *                  are expected to be at the location described by 
-     *                  {@code SchoolJson.EXPECTED_PATH} as an artifact in the jar file.
+	 * @param path  a {@code Path} object that points to the school json file. If the path
+	 *              starts with {@code OSPath.getSchoolJsonJarPath}, the path is assumed to
+	 *              reference a json file packaged with the Period Countdown jar file, otherwise
+	 *              it is assumed to be a path on the disk (absolute paths are preferred for
+	 *              disk operations).
 	 *
 	 * @throws FileNotFoundException     if the json file does not exist.
 	 * @throws IllegalArgumentException  if any json parse error occurs.
 	 *
 	 * @see SchoolYear
 	 */
-	public SchoolAPI(String jsonName) throws FileNotFoundException {
-		this(jsonName, null);
-	}
-
-
-	/**
-	 * Constructs a new {@code SchoolAPI} object with a specified json file name.
-	 *
-	 * @param jsonName  the name of the json file. No path should be specified. All json files
-	 *                  are expected to be at the location described by 
-     *                  {@code SchoolJson.EXPECTED_PATH} as an artifact in the jar file.
-	 * @param days      an optional parameter to manually specify the definition of each day type
-	 *                  for the given school (e.g. for the college/university format). If this
-	 *                  argument is not {@code null}, it will be used in place of any {@code "Days"}
-	 *                  definition in the json file.
-	 *
-	 * @throws FileNotFoundException     if the json file does not exist.
-	 * @throws IllegalArgumentException  if any json parse error occurs.
-	 *
-	 * @see SchoolYear
-	 */
-	public SchoolAPI(String jsonName,
-					 Map<String, List<Map<String, String>>> days) throws FileNotFoundException {
-		this.year = new SchoolYear(SchoolJson.EXPECTED_PATH + jsonName, days);
+	public SchoolAPI(Path path) throws FileNotFoundException {
+		this.year = new SchoolYear(path);
 	}
 
 
@@ -159,7 +140,7 @@ public class SchoolAPI {
 					return nextPeriod;
 				// If some period was found today, but wasn't "counted", then loop through
 				// the rest of the periods in the current day to check for another
-				// counter period
+				// counted period
 				else {
 					while (nextPeriod != null && !nextPeriod.isLast()) {
 						walk = nextPeriod.getEnd().plus(1, UTCTime.MILLISECONDS);

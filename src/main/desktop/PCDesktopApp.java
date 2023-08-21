@@ -44,7 +44,6 @@ public class PCDesktopApp {
 	 */
 	public static int displayDialog(String title, JComponent[] components) {
 		JPanel panel = new JPanel();
-		panel.setPreferredSize(new Dimension(200, components.length * 30));
 		panel.setFocusable(true);
 		panel.setLayout(new GridBagLayout());
 		GridBagConstraints g = new GridBagConstraints();

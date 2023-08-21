@@ -2,6 +2,7 @@ package user;
 
 
 import jnet.Log;
+import util.OSPath;
 import school.SchoolPeriod;
 import school.SchoolJson;
 import school.SchoolYear;
@@ -18,6 +19,8 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.jar.JarFile;
 import java.util.jar.JarEntry;
 import com.google.gson.Gson;
@@ -36,7 +39,7 @@ import com.google.gson.JsonSyntaxException;
 public class UserAPI {
 
 	/** The full path to the user json file on the disk. */
-	private String jsonPath;
+	private Path path;
 	/** An object which holds all information in the user json file. */
 	private UserJson json;
 	/** An object for the information in an entry to the {@code "Schools"} field. */
@@ -58,13 +61,20 @@ public class UserAPI {
 	/**
 	 * Constructs a new {@code UserAPI} object from a file on the disk.
 	 *
-	 * @param jsonPath  the full path to the json file on the disk.
+	 * @param path  a {@code Path} object that points to the user json file on the disk.
 	 *
+	 * @throws NullPointerException      if {@code path == null}.
 	 * @throws FileNotFoundException     if the user json file does not exist.
 	 * @throws IllegalArgumentException  upon any parse error.
+	 * @throws IllegalArgumentException  if {@code OSPath.isInJar(path)} is {@code true}.
 	 */
-	public UserAPI(String jsonPath) throws FileNotFoundException {
-		this.loadFromDisk(jsonPath);
+	public UserAPI(Path path) throws FileNotFoundException {
+		if (path == null)
+			throw new NullPointerException("path was null");
+		if (OSPath.isInJar(path))
+			throw new IllegalArgumentException("expected disk path, found pointer to jar: " + path);
+		
+		this.loadFromDisk(path);
 		this.validate();
 	}
 
@@ -89,20 +99,20 @@ public class UserAPI {
 
 	/**
 	 * Loads a {@code User.json} file stored somewhere on the current machine from a file path.
-	 * If the load is sucessful, the instance variables {@code json} and {@code jsonPath} are set.
+	 * If the load is sucessful, the instance variables {@code json} and {@code path} are set.
 	 *
-	 * @param jsonPath  the full path to the json file on the disk.
+	 * @param path  the path of the user json file on the disk.
 	 *
 	 * @throws FileNotFoundException     if the user json file does not exist.
 	 * @throws IllegalArgumentException  upon any parse error.
 	 */
-	private void loadFromDisk(String jsonPath) throws FileNotFoundException {
+	private void loadFromDisk(Path path) throws FileNotFoundException {
 		Gson gson = new Gson();
-		this.jsonPath = jsonPath;
+		this.path = path;
 
 		FileReader userReader = null;
 		try {
-			userReader = new FileReader(this.jsonPath);
+			userReader = new FileReader(this.path.toString());
 		}
 		catch (FileNotFoundException fnfe) {
 			// Load from jar to get the local version of the file that can be written to the
@@ -111,12 +121,12 @@ public class UserAPI {
 
 			// Write the template User.json file to the expected path
 			try {
-				this.jsonPath = jsonPath; // Override jsonPath from the loadFromJar() call
-				File userDirectory = new File(this.jsonPath);
+				this.path = path; // Override path from the loadFromJar() call
+				File userDirectory = new File(this.path.toString());
 				if (!userDirectory.getParentFile().exists())
 					userDirectory.getParentFile().mkdirs();
 				
-				FileWriter userWriter = new FileWriter(this.jsonPath);
+				FileWriter userWriter = new FileWriter(this.path.toString());
 				gson.toJson(this.json, userWriter); // json is set from the loadFromJar call above
 				userWriter.flush();
 				userWriter.close();
@@ -124,7 +134,7 @@ public class UserAPI {
 			catch (IOException | JsonSyntaxException e) {
 				throw new IllegalArgumentException(Log.format(Log.ERROR, "UserAPI",
 															  "while attempting to create the " +
-															  "resource \"" + this.jsonPath +
+															  "resource \"" + this.path +
 															  "\" an exception was thrown:\n" + e));
 			}
 		}
@@ -132,7 +142,7 @@ public class UserAPI {
 
 		// Read the user json file once it is certain the local file structure has been created
 		try {
-			userReader = new FileReader(this.jsonPath);
+			userReader = new FileReader(this.path.toString());
 			this.json = gson.fromJson(userReader, UserJson.class);
 		}
 		catch (FileNotFoundException | JsonSyntaxException e) {
@@ -144,7 +154,7 @@ public class UserAPI {
 
 	/**
 	 * Loads the default {@code User.json} file from the list of jar artifacts. If the load is 
-	 * sucessful, the instance variables {@code json} and {@code jsonPath} are set. This method
+	 * sucessful, the instance variables {@code json} and {@code path} are set. This method
 	 * does not write any files to the disk.
 	 *
 	 * @throws FileNotFoundException     if the user json file does not exist as a jar artifact.
@@ -152,15 +162,15 @@ public class UserAPI {
 	 */
 	private void loadFromJar() throws FileNotFoundException {
 		Gson gson = new Gson();
-		this.jsonPath = UserJson.INTERNAL_PATH + UserJson.DEFAULT_FILE;
+		this.path = OSPath.join(OSPath.getUserJsonJarPath(), OSPath.getUserJsonFile());
 
 		// Get the file as a stream
 		InputStream jsonStream = Thread.currentThread()
 			.getContextClassLoader()
-			.getResourceAsStream(this.jsonPath);
+			.getResourceAsStream(this.path.toString());
 		if (jsonStream == null)
 			throw new FileNotFoundException(Log.format(Log.ERROR, "UserAPI", "json resource \"" +
-													   this.jsonPath + "\" was null"));
+													   this.path + "\" was null"));
 
 		// Read the stream with a reader and load with GSON
 		InputStreamReader jsonReader = new InputStreamReader(jsonStream);
@@ -230,10 +240,10 @@ public class UserAPI {
 
 		// Set the schoolDef instance variable, creating that definition in the json file if
 		// it does not exist
-		String schoolJsonFile = this.json.settings.get(UserJson.SCHOOL_JSON);
-		if (!this.json.schools.keySet().contains(schoolJsonFile))
-			this.addSchool(schoolJsonFile);
-		this.schoolDef = this.json.schools.get(schoolJsonFile);
+		Path schoolPath = Paths.get(this.json.settings.get(UserJson.SCHOOL_JSON));
+		if (!this.json.schools.keySet().contains(schoolPath.getFileName().toString()))
+			this.addSchool(schoolPath);
+		this.schoolDef = this.json.schools.get(schoolPath.getFileName().toString());
 	}
 
 
@@ -241,14 +251,14 @@ public class UserAPI {
 	 * Adds user information for a school to the user's json file. If the school json file cannot
 	 * be loaded and validated by {@code SchoolAPI}, no change is made.
 	 *
-	 * @param schoolJsonFile  the name of the school json file.
+	 * @param schoolPath  the path to the school JSON file.
 	 *
 	 * @see SchoolAPI
 	 */
-	private void addSchool(String schoolJsonFile) {
+	private void addSchool(Path schoolPath) {
 		SchoolAPI schoolAPI;
 		try {
-			schoolAPI = new SchoolAPI(schoolJsonFile);
+			schoolAPI = new SchoolAPI(schoolPath);
 		}
 		catch(FileNotFoundException e) {
 			return;
@@ -269,33 +279,18 @@ public class UserAPI {
 
 		UserJsonSchoolDef schoolInfo = new UserJsonSchoolDef();
 		schoolInfo.periods = schoolPeriods;
-		this.json.schools.put(schoolJsonFile, schoolInfo);
+		this.json.schools.put(schoolPath.getFileName().toString(), schoolInfo);
 		this.updateJsonFile();
 	}
-	
-
-	/**
-	 * Attempts to get the definition for the {@code "Days"} structure present in the school json
-	 * file from the user file instead. This is useful for institutions where a generic school file
-	 * will not work (like universities where each student has a different class schdule). The
-	 * structure returned is the raw structure of the {@code "Days"} definition.
-	 *
-	 * @return the {@code "Days"} field of the user json file, if one exists. Note that no
-	 *         validation is done by this method. These checks are expected to be performed by
-	 *         the caller.
-	 */
-	public Map<String, List<Map<String, String>>> attemptGetDays() {
-		return this.schoolDef.days;
-	}
 
 
 	/**
-	 * Returns the name of the current school json file.
+	 * Returns the path to the current school json file.
 	 *
-	 * @return the name of the current school json file.
+	 * @return the path to the current school json file.
 	 */
-	public String getSchoolFile() {
-		return this.json.settings.get(UserJson.SCHOOL_JSON);
+	public Path getSchoolFile() {
+		return Paths.get(this.json.settings.get(UserJson.SCHOOL_JSON));
 	}
 
 
@@ -305,6 +300,9 @@ public class UserAPI {
 	 * @return a list of known school json file names.
 	 */
 	public List<String> getAvailableSchools() {
+		List<String> schoolJsonNames = new ArrayList<>();
+
+		// ** Detect any school files that are part of the application itself (native support) **
 		// Get and load the path to the running jar file, independent of the working directory
 		String jarPath = UserAPI.class.getProtectionDomain()
 			.getCodeSource()
@@ -319,25 +317,28 @@ public class UserAPI {
 			return new ArrayList<>();
 		}
 		
-		List<String> schoolJsonNames = new ArrayList<>();
 		// Read all of the resource entries in the jar file
 		Enumeration<JarEntry> jarResources = jarFile.entries();
 		while (jarResources.hasMoreElements()) {
 			JarEntry jarResource = jarResources.nextElement();
 			String resourceName = jarResource.getName();
-			// If the resource is not the User.json file and otherwise matches the json file regex,
-			// then add just the file name (SchoolJson.EXPECTED_PATH == "/assets/json", which is
-			// removed to just get the name of the file).
-			if (!resourceName.endsWith(UserJson.DEFAULT_FILE) &&
-				resourceName.matches(UserJson.FILE_NAME_REGEX))
-			{
-				if (resourceName.startsWith(SchoolJson.EXPECTED_PATH))
-					schoolJsonNames.add(resourceName.substring(SchoolJson.EXPECTED_PATH.length()));
-				else
-					schoolJsonNames.add(resourceName);
+			Path resourcePath = Paths.get(resourceName);
+			if (OSPath.isSchoolInJar(resourcePath) && OSPath.isJsonFile(resourcePath))
+				schoolJsonNames.add(resourcePath.toString());
+		}
+
+		// ** Detect any school files on the disk (local) **
+		File schoolFolder = new File(OSPath.getSchoolJsonDiskPath().toString());
+		File[] schoolFiles = schoolFolder.listFiles();
+		if (schoolFiles != null) {
+			for (File schoolFile : schoolFiles) {
+				Path schoolPath = schoolFile.toPath();
+				if (OSPath.isJsonFile(schoolPath))
+					schoolJsonNames.add(schoolPath.toString());
 			}
 		}
 
+		// ** Return list of school names **
 		return schoolJsonNames;
 	}
 	
@@ -444,12 +445,12 @@ public class UserAPI {
 	 * Updates the school file being viewed by the user. No change is made if the file is not
 	 * a valid json file, or is null.
 	 *
-	 * @param file  the name of the school file.
+	 * @param path  the path to the school file.
 	 */
-	public void setSchoolFile(String file) {
-		if (!file.matches(UserJson.FILE_NAME_REGEX) || file == null)
+	public void setSchoolFile(Path path) {
+		if (path == null || !OSPath.isJsonFile(path))
 			return;
-		this.json.settings.put(UserJson.SCHOOL_JSON, file);
+		this.json.settings.put(UserJson.SCHOOL_JSON, path.toString());
 		this.updateJsonFile();
 	}
 
@@ -526,7 +527,7 @@ public class UserAPI {
 	private void updateJsonFile() {
 		FileWriter writer;
 		try {
-			writer = new FileWriter(this.jsonPath);
+			writer = new FileWriter(this.path.toString());
 			Gson gson = new GsonBuilder().setPrettyPrinting().create();
 			gson.toJson(this.json, writer);
 			writer.flush();

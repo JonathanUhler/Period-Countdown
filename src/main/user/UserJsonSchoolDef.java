@@ -18,8 +18,5 @@ public class UserJsonSchoolDef {
 	/** Information about periods for the given school. */
 	@SerializedName("Periods")
 	public Map<String, Map<String, String>> periods;
-	/** Replacement information for the {@code "Days"} field in the school data file. */
-	@SerializedName("Days")
-	public Map<String, List<Map<String, String>>> days;
 	
 }

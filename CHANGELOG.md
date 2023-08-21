@@ -10,6 +10,20 @@ All notable changes to Period-Countdown should be documented in this file.
 ### Fixed
 ### Changed
 
+## [7.0.0] - 8/21/23
+### Added
+* Add support for reading school JSON files from PeriodCountdown/schools/*.json
+* Add the OSPath class to handle OS-specific file operations
+### Fixed
+* Caught a new error in constructing a SchoolYear class if the Days field is missing
+### Changed
+* Move the User.json file to PeriodCountdown/user/User.json
+* Remove the ability to specify the Days field in the User.json file per school
+* Increase verbosity of the User.json Settings/SchoolJson field (which now specifies a full path)
+* Move all file operation related variables to OSPath.java
+* Remove deprecated JSON school files (native support summary: removed 2, retained 0)
+* Update documentation
+
 ## [6.2.0] - 8/17/23
 ### Added
 * Add a "Help" menu to the desktop application

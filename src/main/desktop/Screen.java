@@ -5,6 +5,7 @@ import jnet.Log;
 import util.UTCTime;
 import util.Duration;
 import util.Tools;
+import util.OSPath;
 import school.SchoolAPI;
 import school.SchoolPeriod;
 import school.SchoolJson;
@@ -16,6 +17,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.ArrayList;
 import java.io.FileNotFoundException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Color;
@@ -58,7 +61,8 @@ public class Screen extends JPanel {
 	public Screen() {
 		// userAPI must be defined first, since data within it is needed to define schoolAPI
 		try {
-			this.userAPI = new UserAPI(UserJson.EXPECTED_PATH + UserJson.DEFAULT_FILE);
+			this.userAPI = new UserAPI(OSPath.join(OSPath.getUserJsonDiskPath(),
+												   OSPath.getUserJsonFile()));
 			Screen.FONT_NAME = this.userAPI.getFont(); // Set user's preferred font
 		}
 		catch (FileNotFoundException | IllegalArgumentException e) {
@@ -72,10 +76,10 @@ public class Screen extends JPanel {
 			// institutions (like colleges) have "Days" data that is specific to each user rather
 			// than a consistent bell schedule, there is an option to store that data in User.json
 			// instead of the school file
-			this.schoolAPI = new SchoolAPI(this.userAPI.getSchoolFile(),
-										   this.userAPI.attemptGetDays());
+			this.schoolAPI = new SchoolAPI(this.userAPI.getSchoolFile());
 		}
 		catch (FileNotFoundException | IllegalArgumentException e) {
+			e.printStackTrace();
 			Log.gfxmsg("Error", "Screen: Exception when creating SchoolAPI\n\n" + e);
 		}
 	}
@@ -110,11 +114,11 @@ public class Screen extends JPanel {
 
 
 	/**
-	 * Returns the current school json file name.
+	 * Returns the current school json file path.
 	 *
-	 * @return the current school json file name.
+	 * @return the current school json file path.
 	 */
-	protected String getUserSchoolFile() {
+	protected Path getUserSchoolFile() {
 		if (this.userAPI == null)
 			return null;
 		return this.userAPI.getSchoolFile();
@@ -196,15 +200,14 @@ public class Screen extends JPanel {
 	protected void setUserSchoolFile(String file) {
 		if (this.userAPI == null)
 			return;
-		
-		this.userAPI.setSchoolFile(file);
+
+		this.userAPI.setSchoolFile(Paths.get(file));
 		// School file was changed, so use the same routine as the constructor to reload the
 		// information
 		try {
 			if (this.userAPI == null)
 				throw new IllegalArgumentException("userAPI is null, cannot get school file name");
-			this.schoolAPI = new SchoolAPI(this.userAPI.getSchoolFile(),
-										   this.userAPI.attemptGetDays());
+			this.schoolAPI = new SchoolAPI(this.userAPI.getSchoolFile());
 		}
 		catch (FileNotFoundException | IllegalArgumentException e) {
 			Log.gfxmsg("Error", "Screen: Exception when creating SchoolAPI\n\n" + e);
