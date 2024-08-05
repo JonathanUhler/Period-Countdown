@@ -1,16 +1,24 @@
 # Period-Countdown Changelog
-**NOTE TO CONTRIBUTORS:** When creating a new version of this software, make sure to update the
-VERSION file at `Period-Countdown/src/assets/VERSION`. Please see CONTRIBUTING.md for more
-information and style guidelines. \
-\
 All notable changes to Period-Countdown should be documented in this file.
 
-## [M.m.p] - M/D/YY
-### Added
-### Fixed
-### Changed
+## Versioning Conventions
+Versions are assigned with the `MAJOR.Minor.patch` syntax, where the components of the version
+string generally refer to the following scopes of changes:
+* `MAJOR`: A breaking change that guarantees a **lack** of support with previous versions.
+  That is, version 2.0.0 does **not** guarantee support of all the features of version 1.0.0, and
+  the reverse case also does **not** guarantee support.
+* `Minor`: A non-breaking but significant change. Compatibility of this version with an older
+  version is guaranteed, but the reverse may not be true. That is, version 1.1.0 must support all
+  the features of version 1.0.0, but the reverse may or may not be true.
+* `patch`: A non-breaking change without any major significance (e.g. fixing typos, updating
+  comments or documentation, algorithm optimization). That is, version 1.0.1 must support all the
+  features of version 1.0.0, and version 1.0.0 must support all the features of version 1.0.1.
 
-## [7.0.0] - 8/21/23
+## [7.0.1] - 2023-09-24
+### Changed
+* School data wizard now names day-long free periods based on the parent day
+
+## [7.0.0] - 2023-08-21
 ### Added
 * Add support for reading school JSON files from PeriodCountdown/schools/*.json
 * Add the OSPath class to handle OS-specific file operations
@@ -24,7 +32,7 @@ All notable changes to Period-Countdown should be documented in this file.
 * Remove deprecated JSON school files (native support summary: removed 2, retained 0)
 * Update documentation
 
-## [6.2.0] - 8/17/23
+## [6.2.0] - 2023-08-17
 ### Added
 * Add a "Help" menu to the desktop application
 * Add the school data creation wizard proposed by issue #25
@@ -35,25 +43,25 @@ All notable changes to Period-Countdown should be documented in this file.
 * Minor markdown formatting changes
 * Update license year
 
-## [6.1.0] - 7/10/23
+## [6.1.0] - 2023-07-10
 ### Fixed
 * Fix integer overflow bug with the Duration class
 ### Changed
 * Improved documentation
 
-## [6.0.3] - 2/11/23
+## [6.0.3] - 2023-02-11
 ### Changed
 * Font selection menu will now display names in that font
 
-## [6.0.2] - 2/2/23
+## [6.0.2] - 2023-02-02
 ### Added
 * Minor debug and error message improvement
 
-## [6.0.1] - 1/8/23
+## [6.0.1] - 2023-01-08
 ### Changed
 * Update JSON information for MVHS
 
-## [6.0.0] - 11/22/22
+## [6.0.0] - 2022-11-22
 ### Added
 * Implemented support for google login
 * Added a whitelist for the login feature
@@ -67,7 +75,7 @@ All notable changes to Period-Countdown should be documented in this file.
 * Removed the deprecated LoginUser command
 * Minor style and template changes
 
-## [5.1.3] - 11/10/22
+## [5.1.3] - 2022-11-10
 ### Fixed
 * Fixed a DST issue
 ### Changed
@@ -75,30 +83,30 @@ All notable changes to Period-Countdown should be documented in this file.
   rather than just inside of each day definition. This will help catch discontinuities across days
   or weeks
 
-## [5.1.2] - 10/17/22
+## [5.1.2] - 2022-10-17
 ### Fixed
 * Change "Brunch" for G schedule from "Nothing" to "Special"
 
-## [5.1.1] - 10/17/22
+## [5.1.1] - 2022-10-17
 ### Changed
 * Enable "Next Up" by default (allow viewing on the generic website)
 
-## [5.1.0] - 10/16/22
+## [5.1.0] - 2022-10-16
 ### Changed
 * Moved log and pid files to command line options instead of hard-coded paths
 
-## [5.0.0] - 10/15/22
+## [5.0.0] - 2022-10-15
 ### Added
 * Minor documentation changes and additions
 ### Changed
 * Change the structure of the User.json file to include a "Schools" table that can contain period
   info for many schools
 
-## [4.0.2] - 10/13/22
+## [4.0.2] - 2022-10-13
 ### Changed
 * Web build now comes as a tar.gz archive
 
-## [4.0.1] - 10/13/22
+## [4.0.1] - 2022-10-13
 ### Added
 * Add a "ExpireTime" field to GetTimeRemaining, indicating the end of the current period (which may
   be the same as "EndTime")
@@ -107,7 +115,7 @@ All notable changes to Period-Countdown should be documented in this file.
 ### Changed
 * Minor syntax changes to GetTimeRemaining
 
-## [4.0.0] - 10/2/22
+## [4.0.0] - 2022-10-02
 ### Added
 * Add a .wsgi file to load the web server from
 * Add a logs folder and blank log files to the web build
@@ -125,7 +133,7 @@ All notable changes to Period-Countdown should be documented in this file.
   needed
 * Logging operations simplified slightly, log files for transport and server added
 
-## [3.1.0] - 9/4/22
+## [3.1.0] - 2022-09-04
 ### Added
 * Add general framework for web-server
   * Add specification for web communcation to documents/
@@ -144,7 +152,7 @@ All notable changes to Period-Countdown should be documented in this file.
 * Fix a minor issue with the Next Up display. If name, room, or both are missing and Next Up is
   enabled, the displayed format will be adjusted
 
-## [3.0.3] - 8/8/22
+## [3.0.3] - 2022-08-08
 ### Added
 * Add in-line documentation
 * Add miscellaneous precondition checks
@@ -154,7 +162,7 @@ All notable changes to Period-Countdown should be documented in this file.
 * Week exceptions in the school json files can now be day tags within some week, although week
   tags are still preferred
 
-## [3.0.2] - 8/7/22
+## [3.0.2] - 2022-08-07
 ### Added
 * Added option to change font based on available fonts in the system
 ### Fixed
@@ -166,14 +174,14 @@ All notable changes to Period-Countdown should be documented in this file.
 * Duration toString now only removes hours if they are 0. Thus the shortest format is "00:01" not
   "01"
 
-## [3.0.1] - 8/6/22
+## [3.0.1] - 2022-08-06
 ### Fixed
 * Resolved issue #18
 * Resolved issue #19
 ### Changed
 * Added CONTRIBUTING.md
 
-## [3.0.0] - 8/6/22
+## [3.0.0] - 2022-08-06
 ### Added
 * Text will now scale with increasing window size
 ### Changed
@@ -184,32 +192,32 @@ All notable changes to Period-Countdown should be documented in this file.
 * Replaced school file chooser with a JComboBox that scans for valid json files
 * Version number bundled with the package, leaving the operating system to display it
 
-## [2.0.4] - 7/17/22
+## [2.0.4] - 2022-07-17
 ### Added
 * Created new MVHS JSON file for 2022-2023 school year
 ### Changed
 * Minor changes to .gitignore and general file cleanup
 
-## [2.0.3.1] - 11/17/21
+## [2.0.3.1] - 2021-11-17
 ### Fixed
 * PATCH FOR CRASH IN 2.0.3 IF YOU INSTALLED 2.0.3 UPDATE TO 2.0.3.1
 
-## [2.0.3] - 11/17/21
+## [2.0.3] - 2021-11-17
 ### Changed
 * Updated JSON data for year, fixed finals schedule
 
-## [2.0.2] - 10/9/21
+## [2.0.2] - 2021-10-09
 ### Changed
 * Fixed minor issue in timer skipping -2 (free) periods
 
-## [2.0.1] - 10/8/21
+## [2.0.1] - 2021-10-08
 ### Added
 * Added error popup when the "Support > Update" routine fails
 * Added SAT/PSAT testing week schedule
 ### Changed
 * Updated in-file documentation
 
-## [2.0.0] - 10/3/21
+## [2.0.0] - 2021-10-03
 ### Added
 * Added "Support" menu item to menu bar
 * Added update routine requested in issue #15
@@ -219,29 +227,29 @@ All notable changes to Period-Countdown should be documented in this file.
 ### Changed
 * Updated MVHS_School.json with 10/4/21 rally week schedule
 
-## [1.3.1] - 9/26/21
+## [1.3.1] - 2021-09-26
 ### Added
 * Added the ability to mark periods as free using the keywords "Free", "None", or "N/A"
 
-## [1.3.0] - 9/26/21
+## [1.3.0] - 2021-09-26
 ### Added
 * Added the "School..." option to allow changing school *.json file
 * Added a better error handling routine for when json data is missing
 ### Changed
 * Changed text displayed in "Period Name" and info popups to be the period name from the json data
 
-## [1.2.0] - 9/25/21
+## [1.2.0] - 2021-09-25
 ### Fixed
 * Fixed a possible security issue with Period-Countdown writing to files within itself
 ### Changed
 * Moved all JSON data to ~/.periodcountdown/json/
 
-## [1.1.1] - 9/25/21
+## [1.1.1] - 2021-09-25
 ### Changed
 * Minor file restructure
 * Changed method ofr Mac build to use jpackage over jpackager
 
-## [1.1.0] - 9/25/21
+## [1.1.0] - 2021-09-25
 ### Added
 * Created compile.sh and jar.sh to automate building a jarfile from the project
 ### Changed
@@ -249,6 +257,6 @@ All notable changes to Period-Countdown should be documented in this file.
 * Changed method in which SchoolDisplay finds the json data
 * Finished build-mac.sh and Mac .app package creation
 
-## [1.0.0] - 9/16/21
+## [1.0.0] - 2021-09-16
 ### Added
 * First working version of Period-Countdown in Java

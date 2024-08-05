@@ -1,12 +1,15 @@
 # Period-Countdown Contributing Guidelines
-Contributions to Period-Countdown are highly appreciated. \
+Contributions to Period-Countdown are highly appreciated.
+
 The following are a set of general guidelines and important information about contributing to the
 project. Generally, when making contributions, use your best judgement on what should be changed
-and how. \
-We appreciate you taking the time to contribute. \
-\
-**Table of Contents** \
+and how.
+
+We appreciate you taking the time to contribute.
+
+## Table of Contents
 [How You Can Contribute](#how-you-can-contribute)
+
 * [Reporting Bugs and Issues](#reporting-bugs-and-issues)
 * [Suggesting Features](#suggesting-features)
 * [Pull Requests](#pull-requests)
@@ -16,8 +19,10 @@ We appreciate you taking the time to contribute. \
 
 ## Reporting Bugs and Issues
 When submitting bug and issue reports, please be as descriptive as possible. Include as much
-information as you can following the [bug report template](https://github.com/JonathanUhler/Period-Countdown/issues/new?assignees=&labels=bug&template=bug-report.md&title=%5BBug%5D+). \
+information as you can following the [bug report template](https://github.com/JonathanUhler/Period-Countdown/issues/new?assignees=&labels=bug&template=bug-report.md&title=%5BBug%5D+).
+
 Try to include:
+
 * A clear title
 * A detailed description of the bug (observed behavior) and what you expect the behavior should
   have been
@@ -29,8 +34,10 @@ Try to include:
 ## Suggesting Features
 To suggest new features, please create a
 [blank issue](https://github.com/JonathanUhler/Period-Countdown/issues/new) describing the feature
-you want added. \
+you want added.
+
 Try to include:
+
 * A clear title
 * A detailed description of the feature you want added and its behaviors
 * Any resources that might be useful in implementing the feature, such as a link to a school's
@@ -41,9 +48,9 @@ Try to include:
 Create your new school JSON file at `Period-Countdown/src/assets/json`. JSON files can be created
 semi-automatically by using the data generator build in to the desktop application (accessible
 through Help > School Data Wizard). Alternatively, JSON files can be written by hand with some
-basic knowledge of the formatting. \
-\
-Below is a full example of a school JSON file with descriptions of its components:
+basic knowledge of the formatting.
+
+Below is a full example of a school JSON file with simple descriptions of its components:
 ```json
 {
     "Info": {
@@ -93,6 +100,7 @@ Below is a full example of a school JSON file with descriptions of its component
 
 #### Info
 Required fields:
+
 * `FirstPeriod`: the first valid period/class number, inclusive, must be an integer >= 0
 * `LastPeriod`: the last valid period/class number, inclusive, must be an integer >= `FirstPeriod`
 * `FirstDayTag`: the first date of school in yyyy-MM-dd format, inclusive
@@ -103,6 +111,7 @@ Required fields:
 #### Days
 Any key can be included in the Days section, as defined by the programmer. Each value in the Days
 section must be a list with map-like elements that have the following keys:
+
 * `Type`: the type of the event or class. Valid values are "Nothing" (for an event that should be
   skipped and merged with adjacent "Nothing"s when calculating time remaining), "Special (for an
   event without a class that should NOT be merged), and an integer "N" where
@@ -118,6 +127,7 @@ of the last period in the day).
 
 #### Weeks
 Required keys:
+
 * `DEFAULT`: the default week to use
 * Additional week types can be defined as required by the programmer
 
@@ -127,6 +137,7 @@ the exact, case-sensitive name of a day defined in the Days section.
 #### Exceptions
 This is the section to define any use of a non-DEFAULT week in the yearly calendar. Each
 entry is a map with the required keys:
+
 * `WeekTag`: a date in yyyy-MM-dd format that occurs sometime in the week in which the specified
   week type should be substituted for DEFAULT. This application considers sunday to be the first
   day of the week and saturday to be the last day. Older versions required this field to be
@@ -139,10 +150,11 @@ entry is a map with the required keys:
 ### Updaing Documentation
 Once you have made changes to Period-Countdown, please remember to update any relavent
 documentation. This includes:
+
 * Update the CHANGELOG.md file
   * Refer to the following template (unused fields can be removed):
 ```
-## [M.m.p] - M/D/YY
+## [M.m.p] - YYYY-MM-DD
 ### Added
 ### Fixed
 ### Changed
