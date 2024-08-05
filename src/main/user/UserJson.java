@@ -12,12 +12,12 @@ import com.google.gson.annotations.SerializedName;
  * @author Jonathan Uhler
  */
 public class UserJson {
-
+    
     /** The maximum size of a value entered by the user. */
     public static final int MAX_FIELD_LEN = 15;
     /** The last timestamp of the day that can be defined in the user json file. */
     public static final String LAST_TIME = "23:59";
-	
+    
     /** Json key for the list of schools. */
     public static final String SCHOOLS = "Schools";
     /** Json key for the list of periods for a school. */
@@ -30,7 +30,7 @@ public class UserJson {
     public static final String TEACHER = "Teacher";
     /** Json key for the room number of a period. */
     public static final String ROOM = "Room";
-
+    
     /** Json key for the user settings. */
     public static final String SETTINGS = "Settings";
     /** Json key for the next up verbosity. */
@@ -47,14 +47,14 @@ public class UserJson {
     public static final String FONT = "Font";
     /** Json key for the name of the school data file. */
     public static final String SCHOOL_JSON = "SchoolJson";
-	
-
+    
+    
     /** Information for all school files the user has ever used. */
     @SerializedName("Schools")
     public Map<String, UserJsonSchoolDef> schools;
-
+    
     /** User settings. */
     @SerializedName("Settings")
     public Map<String, String> settings;
-
+    
 }

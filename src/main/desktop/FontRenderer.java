@@ -16,7 +16,7 @@ import javax.swing.UIManager;
  * @author Jonathan Uhler.
  */
 public class FontRenderer extends DefaultListCellRenderer {
-
+    
     @Override
     public Component getListCellRendererComponent(JList list,
                                                   Object value,
@@ -25,7 +25,7 @@ public class FontRenderer extends DefaultListCellRenderer {
                                                   boolean cellHasFocus)
     {
         super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
-
+        
         // Create JLabel that renders the font, if applicable
         float fontSize = 14;
         JLabel label = new JLabel();
@@ -44,21 +44,21 @@ public class FontRenderer extends DefaultListCellRenderer {
             String valueString = (value != null) ? value.toString() : "null";
             label.setText(valueString);
         }
-
+        
         // Set cell focus properties
         label.setOpaque(true);
         if (isSelected) {
             Color selectionBackground = UIManager.getColor("ComboBox.selectionBackground");
             if (selectionBackground != null)
                 label.setBackground(selectionBackground);
-
+            
             Color selectionForeground = UIManager.getColor("ComboBox.selectionForeground");
             if (selectionForeground != null)
                 label.setForeground(selectionForeground);
         }
-
+        
         // Return label
         return label;
     }
-
+    
 }

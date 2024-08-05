@@ -1,7 +1,6 @@
 package wizard.interfaces;
 
 
-import wizard.WizardManager;
 import java.util.Map;
 import java.util.List;
 import java.util.ArrayList;
@@ -14,6 +13,7 @@ import java.awt.Color;
 import javax.swing.JPanel;
 import javax.swing.JButton;
 import javax.swing.border.EmptyBorder;
+import wizard.WizardManager;
 
 
 /**
@@ -23,20 +23,20 @@ import javax.swing.border.EmptyBorder;
  * @author Jonathan Uhler
  */
 public abstract class EditorEntry extends JPanel {
-
+    
     /** Command opcode for an {@code EditorEntry} to be deleted by its parent list. */
     public static final String DELETE = "DELETE";
     /** Command opcode for an {@code EditorEntry} to be moved up in its parent list. */
     public static final String MOVE_UP = "MOVE_UP";
     /** Command opcode for an {@code EditorEntry} to be moved down in its parent list. */
     public static final String MOVE_DN = "MOVE_DN";
-
-
+    
+    
     /** Whether this entry is mutable. */
     private boolean mutable;
     /** Listeners of this entry that are notified when a movement/delete command is created. */
     private List<ActionListener> actionListeners;
-
+    
     /** Layout constraints used by this entry. */
     private GridBagConstraints gbc;
     /** A button to request that this entry be moved up in its parent list. */
@@ -45,8 +45,8 @@ public abstract class EditorEntry extends JPanel {
     private JButton downButton;
     /** A button to request that this entry be removed from its parent list. */
     private JButton delButton;
-
-
+    
+    
     /**
      * Constructs a new mutable {@code EditorEntry}.
      * <p>
@@ -60,8 +60,8 @@ public abstract class EditorEntry extends JPanel {
     public EditorEntry() {
         this(true);
     }
-
-
+    
+    
     /**
      * Constructs a new {@code EditorEntry} with the specified mutability.
      * <p>
@@ -77,15 +77,15 @@ public abstract class EditorEntry extends JPanel {
     public EditorEntry(boolean mutable) {
         this.mutable = mutable;
         this.actionListeners = new ArrayList<>();
-
+        
         this.setBorder(new EmptyBorder(10, 5, 10, 5));
-
+        
         this.setLayout(new GridBagLayout());
         this.gbc = new GridBagConstraints();
         this.upButton = new JButton("[/\\] ");
         this.delButton = new JButton("[-] ");
         this.downButton = new JButton("[\\/] ");
-
+        
         this.upButton.setToolTipText("Move entry up");
         this.downButton.setToolTipText("Move entry down");
         this.delButton.setToolTipText("Delete entry");
@@ -95,9 +95,9 @@ public abstract class EditorEntry extends JPanel {
         this.upButton.addActionListener(e -> this.notifyActionListeners(EditorEntry.MOVE_UP));
         this.downButton.addActionListener(e -> this.notifyActionListeners(EditorEntry.MOVE_DN));
         this.delButton.addActionListener(e -> this.notifyActionListeners(EditorEntry.DELETE));
-
+        
         WizardManager.registerEditorEntry(this);
-
+        
         this.initComponentControls();
         this.preinitComponent();
         if (this.mutable)
@@ -105,8 +105,8 @@ public abstract class EditorEntry extends JPanel {
         else
             this.initImmutableComponent();
     }
-
-
+    
+    
     /**
      * Returns the layout constraints used by this entry. Upon being returned, the constraints
      * point to the vertical center of the entry to the right of the control panel.
@@ -120,8 +120,8 @@ public abstract class EditorEntry extends JPanel {
         this.gbc.gridheight = 1;
         return this.gbc;
     }
-
-
+    
+    
     /**
      * Adds an action listener to this entry. Action listeners are notified when a button on
      * the control panel is pressed. The only required action listener is the parent
@@ -132,8 +132,8 @@ public abstract class EditorEntry extends JPanel {
     public void addActionListener(ActionListener l) {
         this.actionListeners.add(l);
     }
-
-
+    
+    
     /**
      * Removes an action listener to this entry.
      *
@@ -142,8 +142,8 @@ public abstract class EditorEntry extends JPanel {
     public void removeActionListener(ActionListener l) {
         this.actionListeners.remove(l);
     }
-
-
+    
+    
     /**
      * Notifies all action listeners of a control panel action.
      *
@@ -155,8 +155,8 @@ public abstract class EditorEntry extends JPanel {
         for (ActionListener l : this.actionListeners)
             l.actionPerformed(e);
     }
-
-
+    
+    
     /**
      * Paints the graphical context of this entry. This method is responsible for painting
      * a black border around the child components of the entry.
@@ -166,14 +166,14 @@ public abstract class EditorEntry extends JPanel {
     @Override
     public void paintComponent(Graphics g) {
         super.paintComponent(g);
-
+        
         int w = this.getSize().width;
         int h = this.getSize().height;
         g.setColor(new Color(0, 0, 0));
         g.drawRect(0, 0, w, h);
     }
-
-
+    
+    
     /**
      * Reinitializes this entry.
      * <p>
@@ -192,8 +192,8 @@ public abstract class EditorEntry extends JPanel {
         this.revalidate();
         this.repaint();
     }
-
-
+    
+    
     /**
      * Displays the control panel for this entry.
      * <p>
@@ -207,21 +207,21 @@ public abstract class EditorEntry extends JPanel {
         this.gbc = this.getLayoutConstraints(); // This method does some normaliziation of gbc
         this.gbc.gridx = 0;
         this.add(this.upButton, this.gbc);
-
+        
         this.gbc.gridy++;
         this.add(this.delButton, this.gbc);
-
+        
         this.gbc.gridy++;
         this.add(this.downButton, this.gbc);
-
+        
         this.gbc.gridx++;
         this.gbc.gridy = 0;
-		
+	
         this.revalidate();
         this.repaint();
     }
-
-
+    
+    
     /**
      * Performs final steps of the construction of a specific {@code EditorEntry} class.
      * <p>
@@ -240,7 +240,7 @@ public abstract class EditorEntry extends JPanel {
      * {@code EditorEntry} constructor or {@code reinitComponent} method.
      */
     public abstract void preinitComponent();
-
+    
     /**
      * Initializes the graphical context of a mutable instance of a specific {@code EditorEntry}
      * class.
@@ -255,7 +255,7 @@ public abstract class EditorEntry extends JPanel {
      * can be left with no logic in its body.
      */
     public abstract void initMutableComponent();
-
+    
     /**
      * Initializes the graphical context of an immutable instance of a specific {@code EditorEntry}
      * class.
@@ -270,7 +270,7 @@ public abstract class EditorEntry extends JPanel {
      * can be left with no logic in its body.
      */
     public abstract void initImmutableComponent();
-
+    
     /**
      * Collects and returns all relevant data associated with a specific {@code EditorEntry}
      * class.
@@ -286,5 +286,5 @@ public abstract class EditorEntry extends JPanel {
      * @return a map of all relevant data associated with a specific {@code EditorEntry} class.
      */
     public abstract Map<String, Object> collectFromMutableComponent();
-
+    
 }

@@ -29,11 +29,11 @@ public class EditorList<E extends EditorEntry>
     extends JPanel
     implements ActionListener, Scrollable
 {
-
+    
     /** The list of {@code EditorEntry}s. */
     private List<EditorEntry> entries;
-	
-
+    
+    
     /**
      * Constructs a new {@code EditorList} object.
      */
@@ -41,8 +41,8 @@ public class EditorList<E extends EditorEntry>
         this.entries = new ArrayList<>();
         this.setLayout(new BoxLayout(this, BoxLayout.PAGE_AXIS));
     }
-
-
+    
+    
     /**
      * Adds a new entry to this list.
      *
@@ -50,15 +50,15 @@ public class EditorList<E extends EditorEntry>
      */
     public void addEntry(EditorEntry entry) {
         entry.addActionListener(this);
-
+        
         this.entries.add(entry);
         this.add(entry);
-		
+	
         this.revalidate();
         this.repaint();
     }
-
-
+    
+    
     /**
      * Returns all the entries in this list.
      *
@@ -67,20 +67,20 @@ public class EditorList<E extends EditorEntry>
     public List<EditorEntry> getEntries() {
         return this.entries;
     }
-
-
+    
+    
     /**
      * Readds all the entries in the internal {@code List} to the graphical context after
      * the position of one of the entries changes.
      */
     private void orderChanged() {
         this.removeAll();
-
+        
         for (EditorEntry entry : this.entries)
             this.add(entry);
     }
-
-
+    
+    
     /**
      * Performs an {@code EditorEntry} action by either repositioning or removing an entry from
      * this list.
@@ -111,12 +111,12 @@ public class EditorList<E extends EditorEntry>
             this.orderChanged();
         }
         }
-		
+	
         this.revalidate();
         this.repaint();
     }
-
-
+    
+    
     /**
      * Returns the preferred size of this list when in a scrollable viewport.
      * <p>
@@ -129,8 +129,8 @@ public class EditorList<E extends EditorEntry>
     public Dimension getPreferredScrollableViewportSize() {
         return new Dimension(this.getPreferredSize().width, 500);
     }
-
-
+    
+    
     /**
      * Returns the pixel increment for scrolling.
      * <p>
@@ -151,18 +151,18 @@ public class EditorList<E extends EditorEntry>
     {
         if (orientation == SwingConstants.HORIZONTAL)
             return 1;
-
+        
         int height = Integer.MAX_VALUE;
-
+        
         for (EditorEntry entry : this.entries) {
             Dimension entrySize = entry.getSize();
             if (entrySize.height < height)
                 height = entrySize.height;
         }
-
+        
         return height / 4;
     }
-
+    
     /**
      * Returns the value of {@code getScrollableUnitIncrement(visibleRect, orientation, direction)}.
      *
@@ -182,8 +182,8 @@ public class EditorList<E extends EditorEntry>
     {
         return this.getScrollableUnitIncrement(visibleRect, orientation, direction);
     }
-
-
+    
+    
     /**
      * Returns {@code true} to request that the editor list matches the width of the parent
      * viewport, thus disabling horizontal scrolling.
@@ -194,8 +194,8 @@ public class EditorList<E extends EditorEntry>
     public boolean getScrollableTracksViewportWidth() {
         return true; // Disable horizontal scrolling functionality for JScrollPane
     }
-
-
+    
+    
     /**
      * Returns {@code false} to indicate no preference for matching height with the parent
      * viewport, thus allowing vertical scrolling.
@@ -206,5 +206,5 @@ public class EditorList<E extends EditorEntry>
     public boolean getScrollableTracksViewportHeight() {
         return false; // Force vertical scrolling functionality for JScrollPane
     }
-
+    
 }

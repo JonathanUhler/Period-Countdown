@@ -1,10 +1,10 @@
 package wizard;
 
 
-import wizard.editor.*;
 import javax.swing.JFrame;
 import javax.swing.JTabbedPane;
 import javax.swing.JOptionPane;
+import wizard.editor.*;
 
 
 /**
@@ -14,7 +14,7 @@ import javax.swing.JOptionPane;
  * @author Jonathan Uhler
  */
 public class Wizard {
-
+    
     /**
      * Displays a graphical message.
      *
@@ -25,8 +25,8 @@ public class Wizard {
         JOptionPane.showMessageDialog(null, message, title,
                                       JOptionPane.PLAIN_MESSAGE);
     }
-	
-
+    
+    
     /**
      * Main entry point to the data generator.
      *
@@ -40,10 +40,10 @@ public class Wizard {
         WeekEditor weekEditor = WizardManager.getWeekEditor();
         WeekExceptionEditor weekExceptionEditor = WizardManager.getWeekExceptionEditor();
         JSONViewer jsonViewer = WizardManager.getJsonViewer();
-		
+	
         JFrame frame = new JFrame("School Data Wizard");
         JTabbedPane wizard = new JTabbedPane();
-
+        
         wizard.addTab("Info", infoEditor);
         wizard.addTab("Periods", periodEditor);
         wizard.addTab("Days", dayEditor);
@@ -51,10 +51,10 @@ public class Wizard {
         wizard.addTab("Exceptions", weekExceptionEditor);
         wizard.addTab("Final JSON", jsonViewer);
         wizard.addChangeListener(e -> WizardManager.notifyEditorEntries(wizard.getSelectedIndex()));
-
+        
         frame.setContentPane(wizard);
         frame.pack();
         frame.setVisible(true);
     }
-
+    
 }

@@ -1,7 +1,6 @@
 package desktop;
 
 
-import jnet.Log;
 import javax.swing.JFrame;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
@@ -9,6 +8,7 @@ import javax.swing.JOptionPane;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Dimension;
+import jnet.Log;
 
 
 /**
@@ -21,7 +21,7 @@ import java.awt.Dimension;
  * @see Menu
  */
 public class PCDesktopApp {
-
+    
     /**
      * Displays a graphical message.
      *
@@ -32,8 +32,8 @@ public class PCDesktopApp {
         JOptionPane.showMessageDialog(null, message, title,
                                       JOptionPane.PLAIN_MESSAGE);
     }
-
-
+    
+    
     /**
      * Displays a graphical message with arbitrary components.
      *
@@ -48,16 +48,16 @@ public class PCDesktopApp {
         panel.setLayout(new GridBagLayout());
         GridBagConstraints g = new GridBagConstraints();
         g.gridwidth = GridBagConstraints.REMAINDER;
-
+        
         for (int i = 0; i < components.length; i++)
             panel.add(components[i], g);
-
+        
         return JOptionPane.showConfirmDialog(null, panel, title,
                                              JOptionPane.OK_CANCEL_OPTION,
                                              JOptionPane.PLAIN_MESSAGE, null);
     }
-	
-
+    
+    
     /**
      * Main entry point to the desktop application.
      *
@@ -70,11 +70,11 @@ public class PCDesktopApp {
             Menu menu = new Menu(screen);
             frame.add(screen);
             frame.setJMenuBar(menu);
-			
+            
             frame.setDefaultCloseOperation(frame.EXIT_ON_CLOSE);
             frame.pack();
             frame.setVisible(true);
-
+            
             // This starts a while(true) loop, so nothing should be after it in this method
             screen.start();
         }
@@ -84,5 +84,5 @@ public class PCDesktopApp {
             Log.gfxmsg("Error", "Unchecked exception thrown: " + e);
         }
     }
-
+    
 }

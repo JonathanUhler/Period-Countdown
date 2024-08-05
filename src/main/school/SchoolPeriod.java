@@ -1,7 +1,7 @@
 package school;
 
 
-import util.UTCTime;
+import time.UTCTime;
 
 
 /**
@@ -27,7 +27,7 @@ import util.UTCTime;
  * constructor.
  */
 public class SchoolPeriod {
-
+    
     /** The type of the period, either Nothing, Special, or a number. */
     private String type;
     /** Programmer defined name, can be anything (e.g. "Biology"). */
@@ -38,8 +38,8 @@ public class SchoolPeriod {
     private UTCTime end;
     /** Whether this period is the last period of the day (e.g. {@code end ?= 23:59:59.999}. */
     private boolean isLast;
-
-
+    
+    
     /**
      * Constructs a new {@code SchoolPeriod} object from the information in the school json file.
      * <p>
@@ -74,7 +74,7 @@ public class SchoolPeriod {
             throw new NullPointerException("start is null");
         if (end == null)
             throw new NullPointerException("end is null");
-
+        
         if (!type.equals(SchoolJson.NOTHING) && !type.equals(SchoolJson.SPECIAL)) {
             try {
                 Integer.parseInt(type);
@@ -83,15 +83,15 @@ public class SchoolPeriod {
                 throw new IllegalArgumentException("invalid type for SchoolPeriod: " + type);
             }
         }
-		
+	
         this.type = type;
         this.name = name;
         this.start = start;
         this.end = end;
         this.isLast = isLast;
     }
-
-
+    
+    
     /**
      * Returns the name of the period.
      *
@@ -100,8 +100,8 @@ public class SchoolPeriod {
     public String getName() {
         return this.name;
     }
-
-	
+    
+    
     /**
      * Returns the type of the period.
      *
@@ -110,8 +110,8 @@ public class SchoolPeriod {
     public String getType() {
         return this.type;
     }
-
-
+    
+    
     /**
      * Returns the start of the period.
      *
@@ -120,8 +120,8 @@ public class SchoolPeriod {
     public UTCTime getStart() {
         return this.start;
     }
-
-
+    
+    
     /**
      * Returns the end of the period.
      *
@@ -130,8 +130,8 @@ public class SchoolPeriod {
     public UTCTime getEnd() {
         return this.end;
     }
-
-	
+    
+    
     /**
      * Returns whether this period is the last in its day (local time).
      *
@@ -140,8 +140,8 @@ public class SchoolPeriod {
     public boolean isLast() {
         return this.isLast;
     }
-
-
+    
+    
     /**
      * Returns whether this period is counted. A "counted" period is one whose type is not
      * {@code "Nothing"}.
@@ -151,8 +151,8 @@ public class SchoolPeriod {
     public boolean isCounted() {
         return !this.type.equals(SchoolJson.NOTHING);
     }
-
-
+    
+    
     /**
      * Returns whether this period is free. A "free" period is one whose type is not an integer.
      *
@@ -162,8 +162,8 @@ public class SchoolPeriod {
         return (this.type.equals(SchoolJson.NOTHING) ||
                 this.type.equals(SchoolJson.SPECIAL));
     }
-
-
+    
+    
     /**
      * Returns a string representation of this {@code SchoolPeriod}.
      *
@@ -173,5 +173,5 @@ public class SchoolPeriod {
     public String toString() {
         return this.start + " - " + this.end + "\tType=" + this.type + ", Name=" + this.name;
     }
-
+    
 }

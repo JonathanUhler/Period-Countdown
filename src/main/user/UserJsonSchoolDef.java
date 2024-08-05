@@ -14,9 +14,9 @@ import com.google.gson.annotations.SerializedName;
  * @author Jonathan Uhler
  */
 public class UserJsonSchoolDef {
-
+    
     /** Information about periods for the given school. */
     @SerializedName("Periods")
     public Map<String, Map<String, String>> periods;
-	
+    
 }

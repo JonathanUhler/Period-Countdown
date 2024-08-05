@@ -9,7 +9,7 @@ package user;
  * @author Jonathan Uhler
  */
 public class UserPeriod {
-
+    
     /** The user-defined name of the period. */
     private String name;
     /** The period status (e.g. {@code "Free"} or the name of the corresponding SchoolPeriod. */
@@ -18,8 +18,8 @@ public class UserPeriod {
     private String teacher;
     /** The room number for this class. */
     private String room;
-
-
+    
+    
     /**
      * Constructs a new {@code UserPeriod} object without a teacher or room.
      *
@@ -31,8 +31,8 @@ public class UserPeriod {
     public UserPeriod(String name, String status) {
         this(name, status, null, null);
     }
-
-
+    
+    
     /**
      * Constructs a new {@code UserPeriod} object
      *
@@ -49,8 +49,8 @@ public class UserPeriod {
         this.teacher = teacher;
         this.room = room;
     }
-
-
+    
+    
     /**
      * Returns the user-defined name of this period.
      *
@@ -59,8 +59,8 @@ public class UserPeriod {
     public String getName() {
         return this.name;
     }
-
-
+    
+    
     /**
      * Returns the status of this period.
      *
@@ -69,8 +69,8 @@ public class UserPeriod {
     public String getStatus() {
         return this.status;
     }
-
-
+    
+    
     /**
      * Returns the name of this period's teacher.
      *
@@ -79,8 +79,8 @@ public class UserPeriod {
     public String getTeacher() {
         return this.teacher;
     }
-
-
+    
+    
     /**
      * Returns the room number/name for this period.
      *
@@ -89,8 +89,8 @@ public class UserPeriod {
     public String getRoom() {
         return this.room;
     }
-
-
+    
+    
     /**
      * Returns whether this period is free. Being "free" is determined by the user-defined name. In
      * this case, if the name is {@code "free"}, {@code "none"}, or {@code "n/a"} (case 
@@ -103,5 +103,5 @@ public class UserPeriod {
             this.status.toLowerCase().equals("none") ||
             this.status.toLowerCase().equals("n/a");
     }
-
+    
 }

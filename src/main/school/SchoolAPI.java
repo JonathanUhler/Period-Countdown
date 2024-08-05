@@ -1,12 +1,12 @@
 package school;
 
 
-import util.UTCTime;
-import util.Duration;
 import java.util.Map;
 import java.util.List;
 import java.io.FileNotFoundException;
 import java.nio.file.Path;
+import time.UTCTime;
+import time.Duration;
 
 
 /**
@@ -17,12 +17,12 @@ import java.nio.file.Path;
  * @author Jonathan Uhler
  */
 public class SchoolAPI {
-
+    
     /** Definition for the school year. This is an object-form of the school json file, making the
         data more accessible and providing some simple API methods. */
     private SchoolYear year;
-
-	
+    
+    
     /**
      * Constructs a new {@code SchoolAPI} object with a specified json file name.
      *
@@ -40,8 +40,8 @@ public class SchoolAPI {
     public SchoolAPI(Path path) throws FileNotFoundException {
         this.year = new SchoolYear(path);
     }
-
-
+    
+    
     /**
      * Returns the timezone of the loaded school json file as a Unix timezone identifier (e.g. 
      * {@code "America/Los_Angeles"} for much of the west coast of the United States).
@@ -53,8 +53,8 @@ public class SchoolAPI {
     public String getTimezone() {
         return this.year.getTimezone();
     }
-
-
+    
+    
     /**
      * Returns the first possible period number.
      * <p>
@@ -65,8 +65,8 @@ public class SchoolAPI {
     public int getFirstPeriod() {
         return this.year.getFirstPeriod();
     }
-
-
+    
+    
     /**
      * Returns the last possible period number.
      * <p>
@@ -77,8 +77,8 @@ public class SchoolAPI {
     public int getLastPeriod() {
         return this.year.getLastPeriod();
     }
-
-
+    
+    
     /**
      * Returns the {@code SchoolPeriod} object such that {@code start <= now <= end}. Note that
      * the definition of a period runs from the start to the end, inclusive on both sides. This is
@@ -87,7 +87,7 @@ public class SchoolAPI {
      *
      * @param now  the time to get the current period for.
      *
-     * @return the current period object, if one exists. If {@code now == null} or no period exists
+     * @return the current period object, if one exists. If {@code now == null} or period exists
      *         as specified by {@code now}, then {@code null} is returned.
      */
     public SchoolPeriod getCurrentPeriod(UTCTime now) {
@@ -95,8 +95,8 @@ public class SchoolAPI {
             return null;
         return this.year.getPeriod(now);
     }
-
-
+    
+    
     /**
      * Gets the period immediately after the period returned by {@code getCurrentPeriod}. This is
      * achieved by taking the end time of the current period and adding 1 millisecond, thus causing
@@ -111,21 +111,21 @@ public class SchoolAPI {
      */
     public SchoolPeriod getNextPeriod(UTCTime now) {
         SchoolPeriod currentPeriod = this.getCurrentPeriod(now);
-
+        
         if (currentPeriod != null) {
             UTCTime currentPeriodEnd = currentPeriod.getEnd();
             // Go from AA:BB:59.999 -> CC:DD:00.000. Periods should be defined in the json file to
             // the second precision, and milliseconds are added as either 000 or 999 depending on
             // if the time is the start or the end of the period
             UTCTime nextPeriodStart = currentPeriodEnd.plus(1, UTCTime.MILLISECONDS);
-
+            
             return this.getCurrentPeriod(nextPeriodStart);
         }
         else {
             // If the current period is null, then "walk" the time pointer for the next calendar
             // year from the time specified by {@code now} to search for a period.
             UTCTime walk = now;
-
+            
             for (int i = 0; i < Duration.DAYS_PER_YEAR; i++) {
                 SchoolPeriod nextPeriod = this.getNextPeriodToday(walk);
                 // If no next period was found today, then continue to the next day
@@ -134,7 +134,7 @@ public class SchoolAPI {
                     walk = walk.toMidnight(this.year.getTimezone());
                     continue;
                 }
-
+                
                 // If the period was found, return that
                 if (nextPeriod != null && nextPeriod.isCounted())
                     return nextPeriod;
@@ -150,12 +150,12 @@ public class SchoolAPI {
                     }
                 }
             }
-
+            
             return null;
         }
     }
-
-
+    
+    
     /**
      * Returns the period immediately after the period returned by {@code getCurrentPeriod} if the
      * current period is not the last period.
@@ -170,13 +170,13 @@ public class SchoolAPI {
         SchoolPeriod currentPeriod = this.getCurrentPeriod(now);
         if (currentPeriod == null || currentPeriod.isLast())
             return null;
-
+        
         UTCTime currentPeriodEnd = currentPeriod.getEnd();
         UTCTime nextPeriodStart = currentPeriodEnd.plus(1, UTCTime.MILLISECONDS);
         return this.getCurrentPeriod(nextPeriodStart);
     }
-
-
+    
+    
     /**
      * Gets the time remaining. The range of the "remaining time" is started by the argument
      * {@code now} and terminated by the end of the current period if 
@@ -192,32 +192,32 @@ public class SchoolAPI {
      */
     public Duration getTimeRemaining(UTCTime now) {
         UTCTime walk = now;
-		
+	
         for (int i = 0; i < Duration.DAYS_PER_YEAR; i++) {
             SchoolPeriod currentPeriod = this.getCurrentPeriod(walk);
             SchoolPeriod nextPeriod = this.getNextPeriod(walk);
-
+            
             if (currentPeriod != null &&
                 currentPeriod.isCounted() &&
                 !nextPeriod.isCounted())
                 return new Duration(now, currentPeriod.getEnd().plus(1, UTCTime.MILLISECONDS));
-
+            
             // If the current period is not counted, then go through all other periods in
             // this day to check for a counted period
             while (nextPeriod != null && !nextPeriod.isLast()) {
                 if (nextPeriod.isCounted())
                     return new Duration(now, nextPeriod.getStart());
-
+                
                 walk = nextPeriod.getEnd().plus(1, UTCTime.MILLISECONDS);
                 nextPeriod = this.getCurrentPeriod(walk);
             }
-
+            
             // If no match found today, go to the next day and continue the search
             walk = walk.plus(1, UTCTime.DAYS);
             walk = walk.toMidnight(this.year.getTimezone());
         }
-		
+	
         return null;
     }
-
+    
 }

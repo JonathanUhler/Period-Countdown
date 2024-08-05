@@ -1,4 +1,4 @@
-package util;
+package os;
 
 
 import java.nio.file.Path;
@@ -12,7 +12,7 @@ import java.nio.file.Paths;
  * @author Jonathan Uhler
  */
 public class OSPath {
-
+    
     /** The user's home on the disk. This is {@code ~} or {@code $HOME} on unix systems. */
     public static final Path HOME = Paths.get(System.getProperty("user.home"));
     /** The name of the operating system the application is running on. */
@@ -25,8 +25,8 @@ public class OSPath {
     public static final boolean IS_MAC = OSPath.OS.startsWith("Mac");
     /** Whether the user's operating system is unix based (e.g. Mac OS X or a Linux distro). */
     public static final boolean IS_UNIX = OSPath.IS_LIN || OSPath.IS_MAC;
-
-
+    
+    
     /**
      * Returns a {@code Path} object that points to the PeriodCountdown directory used by 
      * the application for local data storage.
@@ -52,8 +52,8 @@ public class OSPath {
         else
             return null;
     }
-
-
+    
+    
     /**
      * Returns a {@code Path} object that points to {@code assets/json/schools}.
      *
@@ -62,8 +62,8 @@ public class OSPath {
     public static Path getSchoolJsonJarPath() {
         return Paths.get("assets/json/schools");
     }
-
-
+    
+    
     /**
      * Returns a {@code Path} object that points to the {@code schools} folder concatenated
      * to the value of {@code OSPath.getAppSupportPath()}.
@@ -74,8 +74,8 @@ public class OSPath {
     public static Path getSchoolJsonDiskPath() {
         return OSPath.join(OSPath.getAppSupportPath(), Paths.get("schools"));
     }
-
-
+    
+    
     /**
      * Returns a {@code Path} object that points to {@code assets/jons/user}.
      *
@@ -84,8 +84,8 @@ public class OSPath {
     public static Path getUserJsonJarPath() {
         return Paths.get("assets/json/user");
     }
-
-
+    
+    
     /**
      * Returns a {@code Path} object that points to the {@code user} folder concatenated to the
      * value of {@code OSPath.getAppSupportPath()}.
@@ -96,8 +96,8 @@ public class OSPath {
     public static Path getUserJsonDiskPath() {
         return OSPath.join(OSPath.getAppSupportPath(), Paths.get("user"));
     }
-
-
+    
+    
     /**
      * Returns a {@code Path} object that points to {@code User.json}.
      *
@@ -106,8 +106,8 @@ public class OSPath {
     public static Path getUserJsonFile() {
         return Paths.get("User.json");
     }
-	
-
+    
+    
     /**
      * Joins two paths represented by string literals. The returned result is a string.
      *
@@ -121,8 +121,8 @@ public class OSPath {
         Path pb = Paths.get(b);
         return OSPath.join(pa, pb).toString();
     }
-	
-
+    
+    
     /**
      * Joins two {@code Path}s. If either path component is {@code null}, then {@code null}
      * is returned.
@@ -137,8 +137,8 @@ public class OSPath {
             return null;
         return Paths.get(a.toString(), b.toString());
     }
-
-
+    
+    
     /**
      * Determines whether the specified path is a file in {@code OSPath.getSchoolJsonJarPath()}.
      *
@@ -151,8 +151,8 @@ public class OSPath {
             return false;
         return path.startsWith(OSPath.getSchoolJsonJarPath());
     }
-
-
+    
+    
     /**
      * Determines whether the specified path is in the jar file.
      *
@@ -163,12 +163,12 @@ public class OSPath {
     public static boolean isInJar(Path path) {
         if (path == null)
             return false;
-
+        
         return path.startsWith(OSPath.getSchoolJsonJarPath()) ||
             path.startsWith(OSPath.getUserJsonJarPath());
     }
-
-
+    
+    
     /**
      * Determines whether the specified path is has the name of a valid json file.
      *
@@ -181,5 +181,5 @@ public class OSPath {
             return false;
         return path.getFileName().toString().matches("^[\\w\\-. ]+\\.json$");
     }
-
+    
 }

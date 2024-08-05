@@ -11,15 +11,15 @@ import wizard.interfaces.EditorViewport;
  * @author Jonathan Uhler
  */
 public class PeriodEditor extends EditorViewport<Period> {
-
+    
     /**
      * Constructs a new mutable {@code PeriodEditor}.
      */
     public PeriodEditor() {
         this(true);
     }
-	
-
+    
+    
     /**
      * Constructs a new {@code PeriodEditor} with the specified mutability.
      *
@@ -28,8 +28,8 @@ public class PeriodEditor extends EditorViewport<Period> {
     public PeriodEditor(boolean mutable) {
         super(mutable);
     }
-	
-
+    
+    
     /**
      * Creates and returns a new {@code Period} object with the specified mutability.
      *
@@ -39,5 +39,5 @@ public class PeriodEditor extends EditorViewport<Period> {
     public Period entryFactory(boolean mutable) {
         return new Period(mutable);
     }
-
+    
 }

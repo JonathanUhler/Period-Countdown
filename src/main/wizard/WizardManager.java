@@ -1,17 +1,17 @@
 package wizard;
 
 
-import wizard.interfaces.EditorEntry;
-import wizard.entry.Period;
-import wizard.entry.Day;
-import wizard.editor.*;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import java.util.List;
 import java.util.Map;
 import java.util.ArrayList;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import wizard.interfaces.EditorEntry;
+import wizard.entry.Period;
+import wizard.entry.Day;
+import wizard.editor.*;
 
 
 /**
@@ -21,10 +21,10 @@ import java.awt.event.ActionEvent;
  * @author Jonathan Uhler
  */
 public class WizardManager {
-
+    
     /** A list of all editor entries of every type, used to reinit when tabs are switched. */
     private static List<EditorEntry> entries;
-
+    
     /** Whether the info tab has been visited and errors should be displayed. */
     private static boolean visitedInfo;
     /** Whether the periods tab has been visited and errors should be displayed. */
@@ -35,7 +35,7 @@ public class WizardManager {
     private static boolean visitedWeeks;
     /** Whether the week exceptions tab has been visited and errors should be displayed. */
     private static boolean visitedWeekExceptions;
-
+    
     /** The data editor for basic info. */
     private static InfoEditor infoEditor;
     /** The data editor for periods. */
@@ -48,34 +48,34 @@ public class WizardManager {
     private static WeekExceptionEditor weekExceptionEditor;
     /** The viewer for the final json output. */
     private static JSONViewer jsonViewer;
-
-
+    
+    
     /**
      * Initializes the members of the {@code WizardManager} class. This method must be called
      * by a package class before other methods can be used.
      */
     protected static void setup() {
         WizardManager.entries = new ArrayList<>();
-
+        
         WizardManager.visitedInfo = false;
         WizardManager.visitedPeriods = false;
         WizardManager.visitedDays = false;
         WizardManager.visitedWeeks = false;
         WizardManager.visitedWeekExceptions = false;
-
+        
         WizardManager.infoEditor = new InfoEditor();
         WizardManager.periodEditor = new PeriodEditor();
         WizardManager.dayEditor = new DayEditor();
         WizardManager.weekEditor = new WeekEditor();
         WizardManager.weekExceptionEditor = new WeekExceptionEditor();
         WizardManager.jsonViewer = new JSONViewer();
-
+        
         WizardManager.periodEditor.addManualEntry(Period.getFreeDayPeriod());
         WizardManager.dayEditor.addManualEntry(Day.getWeekend());
         WizardManager.dayEditor.addManualEntry(Day.getHoliday());
     }
-
-
+    
+    
     /**
      * Remembers an editor entry, whose {@code reinitComponent} method is called when data tabs
      * are switched.
@@ -85,8 +85,8 @@ public class WizardManager {
     public static void registerEditorEntry(EditorEntry entry) {
         WizardManager.entries.add(entry);
     }
-
-
+    
+    
     /**
      * Notifies all registered editor entries of a change in data tab. This method also performs
      * validation on all existing data and generates the final json output, if no errors are
@@ -97,34 +97,34 @@ public class WizardManager {
     protected static void notifyEditorEntries(int switchedToIndex) {
         for (EditorEntry entry : WizardManager.entries)
             entry.reinitComponent();
-
+        
         String infoFirstDayTag = WizardManager.infoEditor.getFirstDayTag();
         String infoLastDayTag = WizardManager.infoEditor.getLastDayTag();
         String infoTimezone = WizardManager.infoEditor.getTimezone();
         String infoErrors = WizardBuilder.validateInfo(infoFirstDayTag, infoLastDayTag);
         if (infoErrors != null && WizardManager.visitedInfo)
             Wizard.displayMessage("Errors Exist in 'Info'", infoErrors);
-
+        
         List<EditorEntry> periods = WizardManager.periodEditor.getEditorList().getEntries();
         String periodErrors = WizardBuilder.validatePeriodList(periods);
         if (periodErrors != null && WizardManager.visitedPeriods)
             Wizard.displayMessage("Errors Exist in 'Periods'", periodErrors);
-		
+	
         List<EditorEntry> days = WizardManager.dayEditor.getEditorList().getEntries();
         String dayErrors = WizardBuilder.validateDayList(days, periods);
         if (dayErrors != null && WizardManager.visitedDays)
             Wizard.displayMessage("Errors Exist in 'Days'", dayErrors);
-		
+	
         List<EditorEntry> weeks = WizardManager.weekEditor.getEditorList().getEntries();
         String weekErrors = WizardBuilder.validateWeekList(weeks, days);
         if (weekErrors != null && WizardManager.visitedWeeks)
             Wizard.displayMessage("Errors Exist in 'Weeks'", weekErrors);
-
+        
         List<EditorEntry> weekExs = WizardManager.weekExceptionEditor.getEditorList().getEntries();
         String weekExceptionErrors = WizardBuilder.validateWeekExceptionList(weekExs, weeks);
         if (weekExceptionErrors != null && WizardManager.visitedWeekExceptions)
             Wizard.displayMessage("Errors Exist in 'Week Exceptions'", weekExceptionErrors);
-
+        
         switch (switchedToIndex) {
         case 0 -> WizardManager.visitedInfo = true;
         case 1 -> WizardManager.visitedPeriods = true;
@@ -132,7 +132,7 @@ public class WizardManager {
         case 3 -> WizardManager.visitedWeeks = true;
         case 4 -> WizardManager.visitedWeekExceptions = true;
         }
-
+        
         String errors = "";
         if (infoErrors != null)
             errors += "# Errors Exist in 'Info'\n" + infoErrors;
@@ -144,7 +144,7 @@ public class WizardManager {
             errors += "# Errors Exist in 'Week'\n" + weekErrors;
         if (weekExceptionErrors != null)
             errors += "# Errors Exist in 'Week Exceptions'\n" + weekExceptionErrors;
-
+        
         if (!errors.equals(""))
             WizardManager.jsonViewer.setJson(errors);
         else {
@@ -158,8 +158,8 @@ public class WizardManager {
             WizardManager.jsonViewer.setJson(jsonStr);
         }
     }
-
-
+    
+    
     /**
      * Returns the info editor.
      *
@@ -168,8 +168,8 @@ public class WizardManager {
     public static InfoEditor getInfoEditor() {
         return WizardManager.infoEditor;
     }
-
-
+    
+    
     /**
      * Returns the period editor.
      *
@@ -178,8 +178,8 @@ public class WizardManager {
     public static PeriodEditor getPeriodEditor() {
         return WizardManager.periodEditor;
     }
-
-
+    
+    
     /**
      * Returns the day editor.
      *
@@ -188,8 +188,8 @@ public class WizardManager {
     public static DayEditor getDayEditor() {
         return WizardManager.dayEditor;
     }
-
-
+    
+    
     /**
      * Returns the week editor.
      *
@@ -198,8 +198,8 @@ public class WizardManager {
     public static WeekEditor getWeekEditor() {
         return WizardManager.weekEditor;
     }
-
-
+    
+    
     /**
      * Returns the week exception editor.
      *
@@ -208,8 +208,8 @@ public class WizardManager {
     public static WeekExceptionEditor getWeekExceptionEditor() {
         return WizardManager.weekExceptionEditor;
     }
-
-
+    
+    
     /**
      * Returns the json viewer.
      *
@@ -218,5 +218,5 @@ public class WizardManager {
     public static JSONViewer getJsonViewer() {
         return WizardManager.jsonViewer;
     }
-
+    
 }

@@ -1,7 +1,6 @@
-package util;
+package time;
 
 
-import jnet.Log;
 import java.time.ZonedDateTime;
 import java.time.ZoneOffset;
 import java.time.ZoneId;
@@ -19,7 +18,7 @@ import java.time.DateTimeException;
  * @author Jonathan Uhler
  */
 public class UTCTime implements Comparable<UTCTime> {
-
+    
     /** The concept of a year. */
     public static final ChronoField YEAR = ChronoField.YEAR;
     /** The concept of a month. */
@@ -36,7 +35,7 @@ public class UTCTime implements Comparable<UTCTime> {
     public static final ChronoField SECOND = ChronoField.SECOND_OF_MINUTE;
     /** The concept of a millisecond. */
     public static final ChronoField MILLISECOND = ChronoField.MILLI_OF_SECOND;
-
+    
     /** The unit of year. */
     public static final ChronoUnit YEARS = ChronoUnit.YEARS;
     /** The unit of month. */
@@ -51,7 +50,7 @@ public class UTCTime implements Comparable<UTCTime> {
     public static final ChronoUnit SECONDS = ChronoUnit.SECONDS;
     /** The unit of millisecond. */
     public static final ChronoUnit MILLISECONDS = ChronoUnit.MILLIS;
-
+    
     /** The concept of sunday. */
     public static final DayOfWeek SUNDAY = DayOfWeek.SUNDAY;
     /** The concept of monday. */
@@ -66,16 +65,16 @@ public class UTCTime implements Comparable<UTCTime> {
     public static final DayOfWeek FRIDAY = DayOfWeek.FRIDAY;
     /** The concept of saturday. */
     public static final DayOfWeek SATURDAY = DayOfWeek.SATURDAY;
-
-
+    
+    
     /** The format of a full timestamp. */
     private static final DateTimeFormatter DATE_TIME_FORMAT =
         DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS VV");
-
+    
     /** Internal representation of the time held by this UTCTime. */
     private ZonedDateTime datetime;
-
-
+    
+    
     /**
      * Constructs a new {@code UTCTime} object from a {@code ZonedDateTime} object.
      *
@@ -88,8 +87,8 @@ public class UTCTime implements Comparable<UTCTime> {
             throw new NullPointerException("datetime was null");
         this.datetime = datetime;
     }
-
-
+    
+    
     /**
      * Ensures that a {@code ZonedDateTime} object is in UTC.
      *
@@ -101,8 +100,8 @@ public class UTCTime implements Comparable<UTCTime> {
         ZonedDateTime utc = local.withZoneSameInstant(ZoneOffset.UTC);
         return new UTCTime(utc);
     }
-
-
+    
+    
     /**
      * Gets the current time as a {@code UTCTime} object.
      *
@@ -112,8 +111,8 @@ public class UTCTime implements Comparable<UTCTime> {
         ZonedDateTime localNow = ZonedDateTime.now();
         return UTCTime.ensureUTC(localNow);
     }
-
-
+    
+    
     /**
      * Creates a new {@code UTCTime} object from a datetime string and unix TZ identifier.
      *
@@ -137,17 +136,15 @@ public class UTCTime implements Comparable<UTCTime> {
                 return UTCTime.ensureUTC(local);
             }
             catch (DateTimeException e2) {
-                throw new IllegalArgumentException(Log.format(Log.ERROR, "UTCTime",
-                                                              "UTCTime of failed for string: " +
-                                                              datetime + ", make sure dates are " +
-                                                              "in the format yyyy-MM-dd and " +
-                                                              "times are in the format " +
-                                                              "HH:mm:ss.SSS"));
+                throw new IllegalArgumentException("UTCTime of failed for string: " + datetime +
+                                                   ", make sure dates are in the format " +
+                                                   "yyyy-MM-dd and times are in the format " +
+                                                   "HH:mm:ss.SSS");
             }
         }
     }
-
-
+    
+    
     /**
      * Creates a new {@code UTCTime} object representing the same instant in time as this object
      * in the specified timezone.
@@ -163,16 +160,15 @@ public class UTCTime implements Comparable<UTCTime> {
             zone = ZoneId.of(timezone);
         }
         catch (DateTimeException e) {
-            throw new IllegalArgumentException(Log.format(Log.ERROR, "UTCTime",
-                                                          "UTCTime to invalid timezone id: " +
-                                                          timezone + ", " + e));
+            throw new IllegalArgumentException("UTCTime to invalid timezone id: " +
+                                               timezone + ", " + e);
         }
-		
+	
         ZonedDateTime local = this.datetime.withZoneSameInstant(zone);
         return new UTCTime(local);
     }
-
-
+    
+    
     /**
      * Returns this {@code UTCTime} object as a {@code ZonedDateTime} object.
      *
@@ -181,8 +177,8 @@ public class UTCTime implements Comparable<UTCTime> {
     public ZonedDateTime asZonedDateTime() {
         return this.datetime;
     }
-
-
+    
+    
     /**
      * Returns whether this {@code UTCTime} is chronologically before the argument.
      *
@@ -193,8 +189,8 @@ public class UTCTime implements Comparable<UTCTime> {
     public boolean isBefore(UTCTime utcTime) {
         return this.datetime.isBefore(utcTime.asZonedDateTime());
     }
-
-
+    
+    
     /**
      * Returns whether this {@code UTCTime} represents the same chronological instant as the 
      * argument.
@@ -207,8 +203,8 @@ public class UTCTime implements Comparable<UTCTime> {
     public boolean isEqual(UTCTime utcTime) {
         return this.datetime.isEqual(utcTime.asZonedDateTime());
     }
-
-
+    
+    
     /**
      * Compares this {@code UTCTime} object to another {@code UTCTime} object.
      *
@@ -229,8 +225,8 @@ public class UTCTime implements Comparable<UTCTime> {
         else
             return 1;
     }
-
-
+    
+    
     /**
      * Gets the value of a field in this {@code UTCTime}.
      *
@@ -242,8 +238,8 @@ public class UTCTime implements Comparable<UTCTime> {
     public int get(ChronoField field) {
         return this.datetime.get(field);
     }
-
-
+    
+    
     /**
      * Returns a new {@code UTCTime} object where the specified time-related unit has the
      * specified amount added to the original value.
@@ -258,11 +254,11 @@ public class UTCTime implements Comparable<UTCTime> {
     public UTCTime plus(long amount, ChronoUnit unit) {
         if (unit == null)
             return null;
-		
+	
         return new UTCTime(this.datetime.plus(amount, unit));
     }
-
-
+    
+    
     /**
      * Gets the millisecond offset from the unix epoch of this {@code UTCTime}.
      *
@@ -271,8 +267,8 @@ public class UTCTime implements Comparable<UTCTime> {
     public long getEpoch() {
         return this.datetime.toInstant().toEpochMilli();
     }
-
-
+    
+    
     /**
      * Returns a new {@code UTCTime} object with the day value set to the closest instance of the
      * specified day of the week.
@@ -285,16 +281,16 @@ public class UTCTime implements Comparable<UTCTime> {
     public UTCTime shiftedToClosest(DayOfWeek day) {
         if (day == null)
             return null;
-
+        
         if (this.datetime.getDayOfWeek() == day)
             return new UTCTime(this.datetime);
-
+        
         ZonedDateTime closestDateTime = this.datetime.with(TemporalAdjusters.previous(day));
         UTCTime closestUTC = UTCTime.ensureUTC(closestDateTime);
         return closestUTC;
     }
-
-
+    
+    
     /**
      * Returns a new {@code UTCTime} object with the same date as this object and a time of 
      * {@code 00:00:00.000}.
@@ -307,8 +303,8 @@ public class UTCTime implements Comparable<UTCTime> {
         UTCTime midnightUTC = UTCTime.ensureUTC(midnightDateTime);
         return midnightUTC;
     }
-
-
+    
+    
     /**
      * Returns a new {@code UTCTime} object representing midnight in the specified timezone.
      * <p>
@@ -329,20 +325,20 @@ public class UTCTime implements Comparable<UTCTime> {
         localTime = localTime.toMidnight();
         return localTime.to("Z");
     }
-
-
+    
+    
     /**
      * Returns the day tag of this {@code UTCTime}. The day tag is in the format {@code yyyy-MM-dd}.
      *
      * @return the day tag of this {@code UTCTime}.
      */
     public String getDayTag() {
-        return (Tools.pad(Integer.toString(this.datetime.get(UTCTime.YEAR)), 4, '0') + "-" +
-                Tools.pad(Integer.toString(this.datetime.get(UTCTime.MONTH)), 2, '0') + "-" +
-                Tools.pad(Integer.toString(this.datetime.get(UTCTime.DAY)), 2, '0'));
+        return (String.format("%04d", this.datetime.get(UTCTime.YEAR)) + "-" +
+                String.format("%02d", this.datetime.get(UTCTime.MONTH)) + "-" +
+                String.format("%02d", this.datetime.get(UTCTime.DAY)));
     }
-
-
+    
+    
     /**
      * Returns the day tag of the result of {@code shiftedToClosest(day)}.
      *
@@ -355,8 +351,8 @@ public class UTCTime implements Comparable<UTCTime> {
     public String getTagForClosest(DayOfWeek day) {
         return this.shiftedToClosest(day).getDayTag();
     }
-
-
+    
+    
     /**
      * Returns the day tag of the closest sunday to the current time. This method is identical
      * to {@code getTagForClosest(UTCTime.SUNDAY)}.
@@ -366,8 +362,8 @@ public class UTCTime implements Comparable<UTCTime> {
     public String getWeekTag() {
         return this.getTagForClosest(UTCTime.SUNDAY);
     }
-	
-
+    
+    
     /**
      * Returns a string representation of this {@code UTCTime} object.
      *
@@ -375,14 +371,14 @@ public class UTCTime implements Comparable<UTCTime> {
      */
     @Override
     public String toString() {
-        return (Tools.pad(Integer.toString(this.datetime.get(UTCTime.YEAR)), 4, '0') + "-" +
-                Tools.pad(Integer.toString(this.datetime.get(UTCTime.MONTH)), 2, '0') + "-" +
-                Tools.pad(Integer.toString(this.datetime.get(UTCTime.DAY)), 2, '0') + "T" +
-                Tools.pad(Integer.toString(this.datetime.get(UTCTime.HOUR)), 2, '0') + ":" +
-                Tools.pad(Integer.toString(this.datetime.get(UTCTime.MINUTE)), 2, '0') + ":" +
-                Tools.pad(Integer.toString(this.datetime.get(UTCTime.SECOND)), 2, '0') + "." +
-                Tools.pad(Integer.toString(this.datetime.get(UTCTime.MILLISECOND)), 3, '0') + " " +
+        return (String.format("%04d", this.datetime.get(UTCTime.YEAR)) + "-" +
+                String.format("%02d", this.datetime.get(UTCTime.MONTH)) + "-" +
+                String.format("%02d", this.datetime.get(UTCTime.DAY)) + "T" +
+                String.format("%02d", this.datetime.get(UTCTime.HOUR)) + ":" +
+                String.format("%02d", this.datetime.get(UTCTime.MINUTE)) + ":" +
+                String.format("%02d", this.datetime.get(UTCTime.SECOND)) + "." +
+                String.format("%03d", this.datetime.get(UTCTime.MILLISECOND)) + " " +
                 this.datetime.getZone());
     }
-
+    
 }

@@ -1,17 +1,6 @@
 package desktop;
 
 
-import jnet.Log;
-import util.UTCTime;
-import util.Duration;
-import util.Tools;
-import util.OSPath;
-import school.SchoolAPI;
-import school.SchoolPeriod;
-import school.SchoolJson;
-import user.UserAPI;
-import user.UserPeriod;
-import user.UserJson;
 import java.util.Map;
 import java.util.HashMap;
 import java.util.List;
@@ -23,9 +12,20 @@ import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Color;
 import java.awt.Font;
+import java.awt.geom.Rectangle2D;
 import java.awt.font.FontRenderContext;
 import java.awt.geom.AffineTransform;
 import javax.swing.JPanel;
+import jnet.Log;
+import time.UTCTime;
+import time.Duration;
+import os.OSPath;
+import school.SchoolAPI;
+import school.SchoolPeriod;
+import school.SchoolJson;
+import user.UserAPI;
+import user.UserPeriod;
+import user.UserJson;
 
 
 /**
@@ -39,22 +39,22 @@ import javax.swing.JPanel;
  * @author Jonathan Uhler
  */
 public class Screen extends JPanel {
-
+    
     /** Name of the font. The default font is Arial, which is changed later by the user json file */
     private static String FONT_NAME = "Arial";
     /** Font style. */
     private static int FONT_STYLE = Font.PLAIN;
-
+    
     /** A graphical buffer between displayed elements. */
     private int MARGIN = this.getSize().width / 40;
-	
-
+    
+    
     /** API to access information from the school json file. */
     private SchoolAPI schoolAPI;
     /** API to access information from the school user file. */
     private UserAPI userAPI;
-	
-
+    
+    
     /**
      * Constructs a new {@code Screen} object.
      */
@@ -68,7 +68,7 @@ public class Screen extends JPanel {
         catch (FileNotFoundException | IllegalArgumentException e) {
             Log.gfxmsg("Error", "Screen: Exception when creating UserAPI\n\n" + e);
         }
-
+        
         try {
             if (this.userAPI == null)
                 throw new IllegalArgumentException("userAPI is null, cannot get school file name");
@@ -83,8 +83,8 @@ public class Screen extends JPanel {
             Log.gfxmsg("Error", "Screen: Exception when creating SchoolAPI\n\n" + e);
         }
     }
-
-
+    
+    
     /**
      * Returns a list of period numbers defined by the user json file.
      *
@@ -95,8 +95,8 @@ public class Screen extends JPanel {
             return null;
         return this.userAPI.getPeriodKeys();
     }
-
-
+    
+    
     /**
      * Returns a {@code UserPeriod} object for the given period number.
      *
@@ -111,8 +111,8 @@ public class Screen extends JPanel {
         SchoolPeriod keyPeriod = new SchoolPeriod(key, "", UTCTime.now(), UTCTime.now(), false);
         return this.userAPI.getPeriod(keyPeriod);
     }
-
-
+    
+    
     /**
      * Returns the current school json file path.
      *
@@ -123,8 +123,8 @@ public class Screen extends JPanel {
             return null;
         return this.userAPI.getSchoolFile();
     }
-
-
+    
+    
     /**
      * Returns a list of available school json file names.
      *
@@ -135,8 +135,8 @@ public class Screen extends JPanel {
             return new ArrayList<>();
         return this.userAPI.getAvailableSchools();
     }
-
-
+    
+    
     /**
      * Returns the verbosity for the "next up" feature.
      *
@@ -147,8 +147,8 @@ public class Screen extends JPanel {
             return null;
         return this.userAPI.getNextUp();
     }
-
-
+    
+    
     /**
      * Returns the theme color.
      *
@@ -159,8 +159,8 @@ public class Screen extends JPanel {
             return 0xffffff;
         return this.userAPI.getTheme();
     }
-
-
+    
+    
     /**
      * Returns the name of the font.
      *
@@ -171,8 +171,8 @@ public class Screen extends JPanel {
             return null;
         return this.userAPI.getFont();
     }
-
-
+    
+    
     /**
      * Sets information for a user-defined period.
      *
@@ -190,8 +190,8 @@ public class Screen extends JPanel {
             this.userAPI.setPeriod(key, data);
         }
     }
-
-
+    
+    
     /**
      * Sets the school json file.
      *
@@ -200,7 +200,7 @@ public class Screen extends JPanel {
     protected void setUserSchoolFile(String file) {
         if (this.userAPI == null)
             return;
-
+        
         this.userAPI.setSchoolFile(Paths.get(file));
         // School file was changed, so use the same routine as the constructor to reload the
         // information
@@ -213,8 +213,8 @@ public class Screen extends JPanel {
             Log.gfxmsg("Error", "Screen: Exception when creating SchoolAPI\n\n" + e);
         }
     }
-
-
+    
+    
     /**
      * Sets the verbosity for the "next up" feature.
      *
@@ -224,8 +224,8 @@ public class Screen extends JPanel {
         if (this.userAPI != null)
             this.userAPI.setNextUp(verbosity);
     }
-
-
+    
+    
     /**
      * Sets the theme color.
      *
@@ -237,8 +237,8 @@ public class Screen extends JPanel {
         if (this.userAPI != null)
             this.userAPI.setTheme(r, g, b);
     }
-
-
+    
+    
     /**
      * Sets the font name.
      *
@@ -249,8 +249,8 @@ public class Screen extends JPanel {
             this.userAPI.setFont(font);
         Screen.FONT_NAME = font;
     }
-
-
+    
+    
     /**
      * Gets the width, in pixels, of a string.
      *
@@ -262,13 +262,14 @@ public class Screen extends JPanel {
     private int getTextWidth(Font font, String text) {
         if (font == null || text == null)
             return 0;
-		
-        return (int) (font.getStringBounds(text,
-                                           new FontRenderContext(new AffineTransform(), true, true))
-                      .getWidth());
+
+        AffineTransform affineTransform = new AffineTransform();
+        FontRenderContext fontRenderContext = new FontRenderContext(affineTransform, true, true);
+        Rectangle2D fontBounds = font.getStringBounds(text, fontRenderContext);
+        return (int) fontBounds.getWidth();
     }
-
-
+    
+    
     /**
      * Gets a {@code Font} object such that the given string is less than or equal to the given
      * width.
@@ -281,7 +282,7 @@ public class Screen extends JPanel {
     private Font getFontForWidth(String text, int width) {
         if (width < 0 || text == null)
             return null;
-
+        
         Font font = new Font(Screen.FONT_NAME, Screen.FONT_STYLE, width);
         int textWidth = width + 1; // Start with textWidth larger than width to run the while loop
         while (textWidth > width) {
@@ -290,8 +291,8 @@ public class Screen extends JPanel {
         }
         return font;
     }
-
-
+    
+    
     /**
      * Draws information to the screen.
      *
@@ -303,7 +304,7 @@ public class Screen extends JPanel {
         // Cannot draw anything if the APIs are undefined
         if (this.schoolAPI == null || this.userAPI == null)
             return;
-
+        
         // Get current time
         UTCTime now = UTCTime.now();
         // School json API information
@@ -311,23 +312,24 @@ public class Screen extends JPanel {
         Duration timeRemaining = schoolAPI.getTimeRemaining(now);
         if (timeRemaining == null)
             timeRemaining = new Duration(0, 0, 0, 0);
-
+        
         // User json API information
         UserPeriod userPeriod = userAPI.getPeriod(schoolPeriod);
         String periodName = userPeriod.getName();
         String periodStatus = userPeriod.getStatus();
-
+        
         // Next up information
         String nextUp = this.userAPI.getNextUp();
-        List<String> nextPeriods = Tools.getNextUpList(this.schoolAPI, this.userAPI,
-                                                       this.schoolAPI.getTimezone(), now);
-
+        List<String> nextPeriods = this.userAPI.getNextUpList(this.schoolAPI,
+                                                              this.schoolAPI.getTimezone(),
+                                                              now);
+        
         // Displaying
         // Update margin size if the screen has changed size
         this.MARGIN = this.getSize().width / 40;
         int textY = 0;
         this.setBackground(new Color(this.getUserTheme()));
-
+        
         // Displaying user data
         String userStr = periodName + " | " + periodStatus;
         int userWidth = this.getSize().width - (this.MARGIN * 2);
@@ -336,7 +338,7 @@ public class Screen extends JPanel {
         g.setFont(userFont);
         g.setColor(Color.BLACK);
         g.drawString(userStr, this.MARGIN, textY);
-
+        
         // Displaying time data
         // Create timeRemainingLen as a string which is the length of the current time string as
         // all zeros. This fixes a minor bug with fonts where digits are not the same width and
@@ -352,7 +354,7 @@ public class Screen extends JPanel {
         g.setFont(timeRemainingFont);
         g.setColor(Color.BLACK);
         g.drawString(timeRemainingStr, this.MARGIN, textY);
-
+        
         // Displaying next up
         int nextUpWidth = this.getSize().width - (this.MARGIN);
         String nextUpLen = "********** | **:**-**:** | **********, **********";
@@ -374,8 +376,8 @@ public class Screen extends JPanel {
             g.drawString(nextPeriodStr, this.MARGIN, textY);
         }
     }
-	
-
+    
+    
     /**
      * Returns the size of the windows. Default is 400x400 pixels.
      *
@@ -385,15 +387,19 @@ public class Screen extends JPanel {
     public Dimension getPreferredSize() {
         return new Dimension(400, 400);
     }
-
-
+    
+    
     /**
      * Starts the graphical refresh loop.
+     *
+     * This loop will take over the current thread. Any caller of this method should not expect
+     * the thread to be returned to them. Upon an {@code InterruptedException}, a message
+     * is logged and the loop will attempt to recover.
      */
     public void start() {
         while (true) {
             this.repaint();
-			
+            
             try {
                 Thread.sleep(1000);
             }
@@ -402,5 +408,5 @@ public class Screen extends JPanel {
             }			
         }
     }
-
+    
 }

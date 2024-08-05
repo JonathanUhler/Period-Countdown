@@ -11,15 +11,15 @@ import wizard.interfaces.EditorViewport;
  * @author Jonathan Uhler
  */
 public class DayEditor extends EditorViewport<Day> {
-
+    
     /**
      * Constructs a new mutable {@code DayEditor}.
      */
     public DayEditor() {
         this(true);
     }
-	
-
+    
+    
     /**
      * Constructs a new {@code DayEditor} with the specified mutability.
      *
@@ -28,8 +28,8 @@ public class DayEditor extends EditorViewport<Day> {
     public DayEditor(boolean mutable) {
         super(mutable);
     }
-	
-
+    
+    
     /**
      * Creates and returns a new {@code Day} object with the specified mutability.
      *
@@ -39,5 +39,5 @@ public class DayEditor extends EditorViewport<Day> {
     public Day entryFactory(boolean mutable) {
         return new Day(mutable);
     }
-
+    
 }
