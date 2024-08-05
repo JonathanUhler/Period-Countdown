@@ -15,36 +15,36 @@ import javax.swing.JScrollPane;
  */
 public class JSONViewer extends JPanel {
 
-	/** Data view form for the JSON output or any error messages. */
-	private JTextArea jsonTextArea;
+    /** Data view form for the JSON output or any error messages. */
+    private JTextArea jsonTextArea;
 
 
-	/**
-	 * Constructs a new {@code JSONViewer} object.
-	 */
-	public JSONViewer() {
-		this.setLayout(new GridBagLayout());
+    /**
+     * Constructs a new {@code JSONViewer} object.
+     */
+    public JSONViewer() {
+        this.setLayout(new GridBagLayout());
 
-		this.jsonTextArea = new JTextArea("", 45, 60);
-		this.jsonTextArea.setEditable(false);
+        this.jsonTextArea = new JTextArea("", 45, 60);
+        this.jsonTextArea.setEditable(false);
 
-		GridBagConstraints gbc = new GridBagConstraints();
+        GridBagConstraints gbc = new GridBagConstraints();
 		
-		gbc.gridx = 0;
-		gbc.gridy = 0;
-		JScrollPane jsonScrollPane = new JScrollPane(this.jsonTextArea);
-		jsonScrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
-		this.add(jsonScrollPane, gbc);
-	}
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+        JScrollPane jsonScrollPane = new JScrollPane(this.jsonTextArea);
+        jsonScrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
+        this.add(jsonScrollPane, gbc);
+    }
 
 
-	/**
-	 * Updates the contents of the JSON viewer.
-	 *
-	 * @param json  the new contents to display in the viewer.
-	 */
-	public void setJson(String json) {
-		this.jsonTextArea.setText(json);
-	}
+    /**
+     * Updates the contents of the JSON viewer.
+     *
+     * @param json  the new contents to display in the viewer.
+     */
+    public void setJson(String json) {
+        this.jsonTextArea.setText(json);
+    }
 
 }
