@@ -1,17 +1,26 @@
-# Compiled/artifact files
+# IDE files
 .DS_Store
+.vscode
+.idea
 *~
-obj/
-bin/*
+
+# Compiled/artifact files
+obj
+bin
+venv
 *.log
+
 # Old deprecated web build format
 release/PeriodCountdown-*-web/
 release/PeriodCountdown-*-web/**
 
-# Additional files to ignore
+# Test keys and other deprecated/test files
+# Auto-generated documentation
+docs/AWS-Setup.txt
+docs/javadoc
+# Deprecated files
 deprecated/*
-documentation/AWS-Setup.txt
+# Files for dev testing
 *.pem
 *.jks
 install_web.sh
-sensitive/*
