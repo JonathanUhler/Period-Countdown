@@ -20,7 +20,6 @@ import java.util.jar.JarEntry;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonSyntaxException;
-import jnet.Log;
 import time.UTCTime;
 import os.OSPath;
 import school.SchoolPeriod;
@@ -297,7 +296,6 @@ public class UserAPI {
             jarFile = new JarFile(jarPath);
         }
         catch (IOException e) {
-            Log.error("cannot load jarfile resources: " + e);
             return new ArrayList<>();
         }
 	
