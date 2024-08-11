@@ -214,12 +214,19 @@ public class UTCTime implements Comparable<UTCTime> {
      *
      * @return whether this {@code UTCTime} represents the same chronological instant as the 
      *         argument.
-     *
-     * @throws NullPointerException  if {@code other} is null.
      */
-    public boolean isEqual(UTCTime other) {
-        if (other == null) {
-            throw new NullPointerException("other cannot be null");
+    @Override
+    public boolean equals(Object o) {
+        if (o == null) {
+            return false;
+        }
+
+        UTCTime other;
+        try {
+            other = (UTCTime) o;
+        }
+        catch (ClassCastException e) {
+            return false;
         }
 
         return this.datetime.isEqual(other.asZonedDateTime());
@@ -245,7 +252,7 @@ public class UTCTime implements Comparable<UTCTime> {
             throw new NullPointerException("other cannot be null");
         }
 
-        if (this.isEqual(other)) {
+        if (this.equals(other)) {
             return 0;
         }
         else if (this.isBefore(other)) {
@@ -309,25 +316,43 @@ public class UTCTime implements Comparable<UTCTime> {
     
     /**
      * Returns a new {@code UTCTime} object with the day value set to the closest instance of the
-     * specified day of the week.
+     * specified day of the week that is on or before the this time.
      *
-     * @param day  the day of the week to shift towards.
+     * @param day  the day of the week to shift backwards to.
      *
      * @return a new {@code UTCTime} object with the day value set to the closest instance of the
-     *         specified day of the week.
+     *         specified day of the week that is on or before this time.
      *
      * @throws NullPointerException  if {@code day} is null.
      */
-    public UTCTime shiftedToClosest(DayOfWeek day) {
+    public UTCTime shiftedToPrevious(DayOfWeek day) {
         if (day == null) {
             throw new NullPointerException("day cannot be null");
         }
         
-        if (this.datetime.getDayOfWeek() == day) {
-            return new UTCTime(this.datetime);
+        ZonedDateTime closestDateTime = this.datetime.with(TemporalAdjusters.previousOrSame(day));
+        UTCTime closestUTC = UTCTime.ensureUTC(closestDateTime);
+        return closestUTC;
+    }
+    
+    
+    /**
+     * Returns a new {@code UTCTime} object with the day value set to the closest instance of the
+     * specified day of the week that is on or after the this time.
+     *
+     * @param day  the day of the week to shift forwards to.
+     *
+     * @return a new {@code UTCTime} object with the day value set to the closest instance of the
+     *         specified day of the week that is on or after this time.
+     *
+     * @throws NullPointerException  if {@code day} is null.
+     */
+    public UTCTime shiftedToNext(DayOfWeek day) {
+        if (day == null) {
+            throw new NullPointerException("day cannot be null");
         }
         
-        ZonedDateTime closestDateTime = this.datetime.with(TemporalAdjusters.previous(day));
+        ZonedDateTime closestDateTime = this.datetime.with(TemporalAdjusters.nextOrSame(day));
         UTCTime closestUTC = UTCTime.ensureUTC(closestDateTime);
         return closestUTC;
     }
@@ -354,8 +379,8 @@ public class UTCTime implements Comparable<UTCTime> {
      *
      * - Convert this object to the specified timezone.
      * - Convert the new object (in the specified local timezone) to midnight in that tz.
-     * -Convert the local-midnight object back to UTC time. The result may or may not have a
-     *  final time of {@code 00:00:00.000}.
+     * - Convert the local-midnight object back to UTC time. The result may or may not have a
+     *   final time of {@code 00:00:00.000}.
      *
      * @param timezone  the unix TZ identifier to get a UTC-aligned midnight time for.
      *
@@ -387,33 +412,13 @@ public class UTCTime implements Comparable<UTCTime> {
     
     
     /**
-     * Returns the day tag of the result of {@code shiftedToClosest(day)}.
-     *
-     * @param day  the day of the week to get the day tag for.
-     *
-     * @return the day tag of the result of {@code shiftedToClosest(day)}.
-     *
-     * @throws NullPointerException  if {@code day} is null.
-     *
-     * @see shiftedToClosest
-     */
-    public String getTagForClosest(DayOfWeek day) {
-        if (day == null) {
-            throw new NullPointerException("day cannot be null");
-        }
-
-        return this.shiftedToClosest(day).getDayTag();
-    }
-    
-    
-    /**
      * Returns the day tag of the closest sunday to the current time. This method is identical
      * to {@code getTagForClosest(UTCTime.SUNDAY)}.
      *
      * @return the day tag of the closest sunday to the current time.
      */
     public String getWeekTag() {
-        return this.getTagForClosest(UTCTime.SUNDAY);
+        return this.shiftedToPrevious(UTCTime.SUNDAY).getDayTag();
     }
     
     

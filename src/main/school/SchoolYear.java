@@ -157,9 +157,9 @@ public class SchoolYear {
         UTCTime firstDay = UTCTime.of(this.firstDayTag, this.timezone);
         UTCTime lastDay = UTCTime.of(this.lastDayTag, this.timezone);
         
-        UTCTime current = firstDay.shiftedToClosest(UTCTime.SUNDAY);
+        UTCTime current = firstDay.shiftedToPrevious(UTCTime.SUNDAY);
         UTCTime previousEndTime = null;
-        UTCTime end = lastDay.shiftedToClosest(UTCTime.SATURDAY);
+        UTCTime end = lastDay.shiftedToNext(UTCTime.SATURDAY);
         
         while (current.isBefore(end)) {
             // Determine the type of week for the week occupied by `current`. Start by assuming
@@ -252,7 +252,7 @@ public class SchoolYear {
                     // does not yield the current period there is a discontinuity of >1 ms which
                     // is illegal.
                     if (previousEndTime != null &&
-                        !(previousEndTime.plus(1, UTCTime.MILLISECONDS)).isEqual(startTime))
+                        !previousEndTime.plus(1, UTCTime.MILLISECONDS).equals(startTime))
                     {
                         throw new IllegalArgumentException("previous end + 1ms != next start: " +
                                                            previousEndTime + ", " + startTime +
