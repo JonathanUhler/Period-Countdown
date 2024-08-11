@@ -45,7 +45,6 @@ public class SchoolJson {
     
     /** Json tag for the calendar week tag on which an exception occurs. */
     public static final String WEEK_TAG = "WeekTag";
-    // The "TYPE" keyword is also used here for week type
     
     
     /** Info section from the json file. */

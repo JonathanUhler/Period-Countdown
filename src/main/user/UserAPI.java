@@ -63,17 +63,19 @@ public class UserAPI {
      *
      * @param path  a {@code Path} object that points to the user json file on the disk.
      *
-     * @throws NullPointerException      if {@code path == null}.
+     * @throws NullPointerException      if {@code path} is null.
      * @throws FileNotFoundException     if the user json file does not exist.
      * @throws IllegalArgumentException  upon any parse error.
      * @throws IllegalArgumentException  if {@code OSPath.isInJar(path)} is {@code true}.
      */
-    public UserAPI(Path path) throws FileNotFoundException {
-        if (path == null)
-            throw new NullPointerException("path was null");
-        if (OSPath.isInJar(path))
+    public UserAPI(Path path) throws IOException {
+        if (path == null) {
+            throw new NullPointerException("path cannot be null");
+        }
+        if (OSPath.isInJar(path)) {
             throw new IllegalArgumentException("expected disk path, found pointer to jar: " + path);
-	
+        }
+
         this.loadFromDisk(path);
         this.validate();
     }
@@ -84,16 +86,44 @@ public class UserAPI {
      *
      * @param json  the {@code UserJson} object containing user data.
      *
-     * @throws NullPointerException      if {@code json == null}.
+     * @throws NullPointerException      if {@code json} is null.
      * @throws IllegalArgumentException  upon any parse error.
      */
-    public UserAPI(UserJson json) throws IllegalArgumentException {
-        if (json == null)
-            throw new NullPointerException("UserJson object was null");
+    public UserAPI(UserJson json) {
+        if (json == null) {
+            throw new NullPointerException("json cannot be null");
+        }
+
         this.json = json;
-        
-        // Validate the json data
         this.validate();
+    }
+
+
+    /**
+     * Creates a new user json file on the disk at the specified path from the jarfile template.
+     *
+     * @param path  the path of the user json file to create.
+     */
+    private void createFileOnDisk(Path path) throws IOException {
+        Gson gson = new Gson();
+        this.loadFromJar();
+
+        try {
+            this.path = path;  // Override path from the loadFromJar() call
+            File userDirectory = new File(this.path.toString());
+            if (!userDirectory.getParentFile().exists()) {
+                userDirectory.getParentFile().mkdirs();
+            }
+		
+            FileWriter userWriter = new FileWriter(this.path.toString());
+            gson.toJson(this.json, userWriter);  // json is set from the loadFromJar call above
+            userWriter.flush();
+            userWriter.close();
+        }
+        catch (IOException | JsonSyntaxException e) {
+            throw new IOException("while attempting to create the resource '" +
+                                  this.path + "' an exception was thrown:\n" + e);
+        }
     }
     
     
@@ -106,45 +136,27 @@ public class UserAPI {
      * @throws FileNotFoundException     if the user json file does not exist.
      * @throws IllegalArgumentException  upon any parse error.
      */
-    private void loadFromDisk(Path path) throws FileNotFoundException {
+    private void loadFromDisk(Path path) throws IOException {
         Gson gson = new Gson();
         this.path = path;
-        
+
+        // Define a reader object to read the user file. If the user file does not exist on the
+        // disk, create a new one based on the template packaged with the jarfile.
         FileReader userReader = null;
         try {
             userReader = new FileReader(this.path.toString());
         }
         catch (FileNotFoundException fnfe) {
-            // Load from jar to get the local version of the file that can be written to the
-            // newly created file
-            this.loadFromJar();
-            
-            // Write the template User.json file to the expected path
-            try {
-                this.path = path; // Override path from the loadFromJar() call
-                File userDirectory = new File(this.path.toString());
-                if (!userDirectory.getParentFile().exists())
-                    userDirectory.getParentFile().mkdirs();
-		
-                FileWriter userWriter = new FileWriter(this.path.toString());
-                gson.toJson(this.json, userWriter); // json is set from the loadFromJar call above
-                userWriter.flush();
-                userWriter.close();
-            }
-            catch (IOException | JsonSyntaxException e) {
-                throw new IllegalArgumentException("while attempting to create the resource '" +
-                                                   this.path + "' an exception was thrown:\n" + e);
-            }
+            this.createFileOnDisk(path);
         }
-        
-        
-        // Read the user json file once it is certain the local file structure has been created
+
+        // Read and parse the user json file
         try {
             userReader = new FileReader(this.path.toString());
             this.json = gson.fromJson(userReader, UserJson.class);
         }
         catch (FileNotFoundException | JsonSyntaxException e) {
-            throw new IllegalArgumentException("json cannot be parsed: " + e);
+            throw new IllegalArgumentException("user json cannot be parsed: " + e);
         }
     }
     
@@ -160,17 +172,15 @@ public class UserAPI {
     private void loadFromJar() throws FileNotFoundException {
         Gson gson = new Gson();
         this.path = OSPath.join(OSPath.getUserJsonJarPath(), OSPath.getUserJsonFile());
-        
-        // Get the file as a stream
+
         InputStream jsonStream = Thread.currentThread()
             .getContextClassLoader()
             .getResourceAsStream(this.path.toString());
-        if (jsonStream == null)
+        if (jsonStream == null) {
             throw new FileNotFoundException("json resource \"" + this.path + "\" was null");
-        
-        // Read the stream with a reader and load with GSON
-        InputStreamReader jsonReader = new InputStreamReader(jsonStream);
-        
+        }
+
+        InputStreamReader jsonReader = new InputStreamReader(jsonStream);        
         try {
             this.json = gson.fromJson(jsonReader, UserJson.class);
         }
@@ -187,45 +197,57 @@ public class UserAPI {
      * @throws NullPointerException      if the settings or schools section of the file is missing.
      * @throws IllegalArgumentException  upon any validation error.
      */
-    private void validate() throws IllegalArgumentException {
-        if (this.json == null)
+    private void validate() {
+        if (this.json == null) {
             throw new NullPointerException("json is null, cannot validate");
-        
-        if (this.json.settings == null)
+        }
+
+        if (this.json.settings == null) {
             throw new NullPointerException("missing settings in school json file");
-        if (this.json.schools == null)
+        }
+        if (this.json.schools == null) {
             throw new NullPointerException("missing schools");
-        
-        if (!this.json.settings.containsKey(UserJson.NEXT_UP))
+        }
+
+        if (!this.json.settings.containsKey(UserJson.NEXT_UP)) {
             throw new IllegalArgumentException("missing key " + UserJson.NEXT_UP);
-        if (!this.json.settings.containsKey(UserJson.THEME))
+        }
+        if (!this.json.settings.containsKey(UserJson.THEME)) {
             throw new IllegalArgumentException("missing key " + UserJson.THEME);
-        if (!this.json.settings.containsKey(UserJson.FONT))
+        }
+        if (!this.json.settings.containsKey(UserJson.FONT)) {
             throw new IllegalArgumentException("missing key " + UserJson.FONT);
-        if (!this.json.settings.containsKey(UserJson.SCHOOL_JSON))
+        }
+        if (!this.json.settings.containsKey(UserJson.SCHOOL_JSON)) {
             throw new IllegalArgumentException("missing key " + UserJson.SCHOOL_JSON);
-        
+        }
+
         for (String schoolName : this.json.schools.keySet()) {
             UserJsonSchoolDef school = this.json.schools.get(schoolName);
-            if (school.periods == null)
+            if (school.periods == null) {
                 throw new IllegalArgumentException("user school info " + schoolName +
                                                    " does not contain Periods list");
+            }
             
             for (Map<String, String> period : school.periods.values()) {
-                if (!period.containsKey(UserJson.NAME))
+                if (!period.containsKey(UserJson.NAME)) {
                     throw new IllegalArgumentException("period missing key " + UserJson.NAME);
-                if (!period.containsKey(UserJson.TEACHER))
+                }
+                if (!period.containsKey(UserJson.TEACHER)) {
                     throw new IllegalArgumentException("period missing key " + UserJson.TEACHER);
-                if (!period.containsKey(UserJson.ROOM))
+                }
+                if (!period.containsKey(UserJson.ROOM)) {
                     throw new IllegalArgumentException("period missing key " + UserJson.ROOM);
+                }
             }
         }
         
         // Set the schoolDef instance variable, creating that definition in the json file if
         // it does not exist
         Path schoolPath = Paths.get(this.json.settings.get(UserJson.SCHOOL_JSON));
-        if (!this.json.schools.keySet().contains(schoolPath.getFileName().toString()))
+        if (!this.json.schools.keySet().contains(schoolPath.getFileName().toString())) {
             this.addSchool(schoolPath);
+        }
         this.schoolDef = this.json.schools.get(schoolPath.getFileName().toString());
     }
     
@@ -246,11 +268,10 @@ public class UserAPI {
         catch(FileNotFoundException e) {
             return;
         }
-	
+
         int firstPeriod = schoolAPI.getFirstPeriod();
         int lastPeriod = schoolAPI.getLastPeriod();
-        
-        // Create the new json structure
+
         Map<String, Map<String, String>> schoolPeriods = new HashMap<>();
         for (int period = firstPeriod; period <= lastPeriod; period++) {
             Map<String, String> periodInfo = new HashMap<>();
@@ -259,7 +280,7 @@ public class UserAPI {
             periodInfo.put(UserJson.NAME, "");
             schoolPeriods.put(period + "", periodInfo);
         }
-        
+
         UserJsonSchoolDef schoolInfo = new UserJsonSchoolDef();
         schoolInfo.periods = schoolPeriods;
         this.json.schools.put(schoolPath.getFileName().toString(), schoolInfo);
@@ -287,10 +308,8 @@ public class UserAPI {
         
         // ** Detect any school files that are part of the application itself (native support) **
         // Get and load the path to the running jar file, independent of the working directory
-        String jarPath = UserAPI.class.getProtectionDomain()
-            .getCodeSource()
-            .getLocation()
-            .getPath();
+        String jarPath =
+            UserAPI.class.getProtectionDomain().getCodeSource().getLocation().getPath();
         JarFile jarFile = null;
         try {
             jarFile = new JarFile(jarPath);
@@ -305,8 +324,9 @@ public class UserAPI {
             JarEntry jarResource = jarResources.nextElement();
             String resourceName = jarResource.getName();
             Path resourcePath = Paths.get(resourceName);
-            if (OSPath.isSchoolInJar(resourcePath) && OSPath.isJsonFile(resourcePath))
+            if (OSPath.isSchoolInJar(resourcePath) && OSPath.isJsonFile(resourcePath)) {
                 schoolJsonNames.add(resourcePath.toString());
+            }
         }
         
         // ** Detect any school files on the disk (local) **
@@ -315,8 +335,9 @@ public class UserAPI {
         if (schoolFiles != null) {
             for (File schoolFile : schoolFiles) {
                 Path schoolPath = schoolFile.toPath();
-                if (OSPath.isJsonFile(schoolPath))
+                if (OSPath.isJsonFile(schoolPath)) {
                     schoolJsonNames.add(schoolPath.toString());
+                }
             }
         }
         
@@ -339,12 +360,11 @@ public class UserAPI {
     /**
      * Returns an {@code UserPeriod} object for the same period as the given {@code SchoolPeriod}.
      * The following {@code UserPeriod} will be returned:
-     * <ul>
-     * <li> If {@code schoolPeriod == null}, then "Summer | Free" is returned.
-     * <li> If {@code schoolPeriod.isFree()}, then the school period's name is returned.
-     * <li> If the type of {@code schoolPeriod} is undefined, then "??? | ???" is returned.
-     * <li> Else, the user-defined name is returned.
-     * </ul>
+     *
+     * - If {@code schoolPeriod == null}, then "Summer | Free" is returned.
+     * - If {@code schoolPeriod.isFree()}, then the school period's name is returned.
+     * - If the type of {@code schoolPeriod} is undefined, then "??? | ???" is returned.
+     * - Else, the user-defined name is returned.
      *
      * @param schoolPeriod  the school period to get the corresponding user period for.
      *
@@ -354,21 +374,24 @@ public class UserAPI {
     public UserPeriod getPeriod(SchoolPeriod schoolPeriod) {
         // Null period means nothing could be found for the next year, so the current time is
         // probably out of range for the school json file
-        if (schoolPeriod == null)
+        if (schoolPeriod == null) {
             return new UserPeriod("Summer", "Free");
+        }
         
-        String schoolPeriodType = schoolPeriod.getType(); // Nothing, Special, or a number
+        String schoolPeriodType = schoolPeriod.getType();
         
         // School period is free, this is not for free classes, but for periods without events
         // (e.g. lunch, tutorial, passing period)
-        if (schoolPeriod.isFree())
+        if (schoolPeriod.isFree()) {
             return new UserPeriod(schoolPeriod.getName(), "Free");
+        }
         
         // Not a free period (not Speical or Nothing, so should be a number) but the number does
         // not match any of the declared periods in the user file. Resort to a simple error bypass
         // with "???"
-        if (!this.schoolDef.periods.containsKey(schoolPeriodType))
+        if (!this.schoolDef.periods.containsKey(schoolPeriodType)) {
             return new UserPeriod("???", "???");
+        }
         
         // Valid numbered period that is not Nothing or Special. Need to check if the user has
         // named this period as a free period in the User.json file
@@ -379,7 +402,10 @@ public class UserAPI {
         if (userPeriodName.toLowerCase().equals("free") ||
             userPeriodName.toLowerCase().equals("none") ||
             userPeriodName.toLowerCase().equals("n/a"))
+        {
             return new UserPeriod(schoolPeriod.getName(), "Free");
+        }
+
         return new UserPeriod(userPeriodName,
                               schoolPeriod.getName(),
                               userPeriodTeacher,
@@ -420,22 +446,25 @@ public class UserAPI {
      * @return the list of next class information.
      */
     public List<String> getNextUpList(SchoolAPI schoolAPI, String timezone, UTCTime now) {
-        if (schoolAPI == null)
+        if (schoolAPI == null) {
             return new ArrayList<>();
+        }
 	
         String nextUp = this.getNextUp();
         ArrayList<String> nextUpList = new ArrayList<>();
 	
         SchoolPeriod nextPeriod = schoolAPI.getNextPeriodToday(now);
         while (nextPeriod != null) {
-            if (nextUp.equals(UserJson.NEXT_UP_DISABLED))
+            if (nextUp.equals(UserJson.NEXT_UP_DISABLED)) {
                 break;
+            }
             
             // Get the class (with user data like teacher and room) based on the generic period,
             // if that generic period can have a class
             UserPeriod nextClass = null;
-            if (nextPeriod.isCounted())
+            if (nextPeriod.isCounted()) {
                 nextClass = this.getPeriod(nextPeriod);
+            }
             
             // Format the string
             // Default periodString is "<period/class name> | <start>-<end>"
@@ -471,25 +500,30 @@ public class UserAPI {
                 String room = nextClass.getRoom();
                 
                 // Format based on what data is available (either one, the other, both, or neither)
-                if (!teacher.equals("") && room.equals(""))
+                if (!teacher.equals("") && room.equals("")) {
                     periodString += " | " + teacher;
-                else if (!room.equals("") && teacher.equals(""))
+                }
+                else if (!room.equals("") && teacher.equals("")) {
                     periodString += " | " + room;
-                else if (!room.equals("") && !teacher.equals(""))
+                }
+                else if (!room.equals("") && !teacher.equals("")) {
                     periodString += " | " + teacher + ", " + room;
+                }
             }
             // If the period has something during it (a period, lunch, brunch, etc.) add it to
             // the list
-            if (nextPeriod.isCounted())
+            if (nextPeriod.isCounted()) {
                 nextUpList.add(periodString);
+            }
             
             // Get next period
             nextPeriod = schoolAPI.getNextPeriodToday(periodStart);
             
             // If only the next period should be shown and that period has been found, skip
             // the rest of the search
-            if (nextUp.equals(UserJson.NEXT_UP_ONE) && nextUpList.size() == 1)
+            if (nextUp.equals(UserJson.NEXT_UP_ONE) && nextUpList.size() == 1) {
                 break;
+            }
         }
         
         return nextUpList;
@@ -507,7 +541,7 @@ public class UserAPI {
             return Integer.parseInt(rgbStr);
         }
         catch (NumberFormatException e) {
-            return 0xffffff; // 16777215 dec, 111111111111111111111111 bin, color for white
+            throw new NumberFormatException("cannot parse theme color: " + rgbStr + ", " + e);
         }
     }
     
@@ -523,33 +557,48 @@ public class UserAPI {
     
     
     /**
-     * Updates the school file being viewed by the user. No change is made if the file is not
-     * a valid json file, or is null.
+     * Updates the school file being viewed by the user.
      *
      * @param path  the path to the school file.
+     *
+     * @throws NullPointerException      if {@code path} is null.
+     * @throws IllegalArgumentException  if {@code path} is not a json file.
      */
     public void setSchoolFile(Path path) {
-        if (path == null || !OSPath.isJsonFile(path))
-            return;
+        if (path == null) {
+            throw new NullPointerException("path cannot be null");
+        }
+        if (!OSPath.isJsonFile(path)) {
+            throw new IllegalArgumentException("path is not a json file");
+        }
+
         this.json.settings.put(UserJson.SCHOOL_JSON, path.toString());
         this.updateJsonFile();
     }
     
     
     /**
-     * Sets the information for a user-defined class period. If any argument is null, or the
-     * {@code value} map does not contain all required keys, no change is made.
+     * Sets the information for a user-defined class period.
      *
      * @param key    the period number being set.
      * @param value  a map with the period teacher, room, and name.
+     *
+     * @throws NullPointerException      if either argument is null.
+     * @throws IllegalArgumentException  if {@code value} is missing keys.
      */
     public void setPeriod(String key, Map<String, String> value) {
-        if (key == null ||
-            value == null ||
-            !value.containsKey(UserJson.TEACHER) ||
+        if (key == null) {
+            throw new NullPointerException("key cannot be null");
+        }
+        if (value == null) {
+            throw new NullPointerException("value cannot be null");
+        }
+        if (!value.containsKey(UserJson.TEACHER) ||
             !value.containsKey(UserJson.ROOM) ||
             !value.containsKey(UserJson.NAME))
-            return;
+        {
+            throw new IllegalArgumentException("value is missing teacher, room, or name");
+        }
 	
         this.schoolDef.periods.put(key, value);
         this.updateJsonFile();
@@ -568,22 +617,26 @@ public class UserAPI {
     
     
     /**
-     * Sets the theme color from an rgb value. If any of the color channels is outside the
-     * interval {@code [0, 255]}, the color being set is forced to white.
+     * Sets the theme color from an rgb value.
      *
      * @param r  the red channel.
      * @param g  the green channel.
      * @param b  the blue channel.
+     * 
+     * @throws IllegalArgumentException  if any color channel is out of the range [0, 255].
      */
     public void setTheme(int r, int g, int b) {
-        if (r < 0 || r > 255 || g < 0 || g > 255 || b < 0 || b > 255) {
-            r = 255;
-            g = 255;
-            b = 255;
+        if (r < 0 || r > 255) {
+            throw new IllegalArgumentException("red channel is out of range");
         }
-        
+        if (b < 0 || b > 255) {
+            throw new IllegalArgumentException("blue channel is out of range");
+        }
+        if (g < 0 || g > 255) {
+            throw new IllegalArgumentException("green channel is out of range");
+        }
+
         int rgb = (((r << 8) | g) << 8) | b;
-        
         this.json.settings.put(UserJson.THEME, Integer.toString(rgb));
         this.updateJsonFile();
     }

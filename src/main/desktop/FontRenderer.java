@@ -16,6 +16,9 @@ import javax.swing.UIManager;
  * @author Jonathan Uhler.
  */
 public class FontRenderer extends DefaultListCellRenderer {
+
+    public static final int FONT_SIZE = 14;
+    
     
     @Override
     public Component getListCellRendererComponent(JList list,
@@ -27,17 +30,16 @@ public class FontRenderer extends DefaultListCellRenderer {
         super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
         
         // Create JLabel that renders the font, if applicable
-        float fontSize = 14;
         JLabel label = new JLabel();
         if (value instanceof String) {
             String fontName = (String) value;
-            Font font = new Font(fontName, Font.PLAIN, (int) fontSize);
+            Font font = new Font(fontName, Font.PLAIN, FontRenderer.FONT_SIZE);
             label.setFont(font);
             label.setText(fontName);
         }
         else if (value instanceof Font) {
             Font font = (Font) value;
-            label.setFont(font.deriveFont(fontSize));
+            label.setFont(font.deriveFont(FontRenderer.FONT_SIZE));
             label.setText(font.getFontName());
         }
         else {
@@ -49,12 +51,14 @@ public class FontRenderer extends DefaultListCellRenderer {
         label.setOpaque(true);
         if (isSelected) {
             Color selectionBackground = UIManager.getColor("ComboBox.selectionBackground");
-            if (selectionBackground != null)
+            if (selectionBackground != null) {
                 label.setBackground(selectionBackground);
+            }
             
             Color selectionForeground = UIManager.getColor("ComboBox.selectionForeground");
-            if (selectionForeground != null)
+            if (selectionForeground != null) {
                 label.setForeground(selectionForeground);
+            }
         }
         
         // Return label

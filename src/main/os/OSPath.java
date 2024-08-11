@@ -6,8 +6,7 @@ import java.nio.file.Paths;
 
 
 /**
- * Provides some useful functions for manipulating pathnames in an operating system conscious
- * manner.
+ * Utilities for manipulating pathnames in an operating system agnostic manner.
  *
  * @author Jonathan Uhler
  */
@@ -28,29 +27,34 @@ public class OSPath {
     
     
     /**
-     * Returns a {@code Path} object that points to the PeriodCountdown directory used by 
-     * the application for local data storage.
-     * <p>
-     * This path is operating system dependent. If the operating system is not known, then
-     * {@code null} is returned:
-     * <ul>
-     * <li> Windows: {@code $HOME\AppData\PeriodCountdown}
-     * <li> Mac OS X: {@code $HOME/Library/Application Support/PeriodCountdown}
-     * <li> Linux: {@code $HOME/.PeriodCountdown}
-     * </ul>
+     * Returns a {@code Path} object that points to the directory used by the application for
+     * local data storage.
      *
-     * @return a {@code Path} object that points to the PeriodCountdown directory.
+     * This path is operating system dependent. If the operating system is not known, then
+     * an exception is thrown.
+     * 
+     * - Windows: {@code $HOME\AppData\PeriodCountdown}
+     * - Mac OS X: {@code $HOME/Library/Application Support/PeriodCountdown}
+     * - Linux: {@code $HOME/.PeriodCountdown}
+     *
+     * @return a {@code Path} object that points to the local data directory.
+     *
+     * @throws IllegalStateException  if the operating system is not Mac, Windows, or Linux.
      */
     public static Path getAppSupportPath() {
-        if (OSPath.IS_WIN)
+        if (OSPath.IS_WIN) {
             return OSPath.join(OSPath.HOME, Paths.get("AppData\\PeriodCountdown"));
-        else if (OSPath.IS_MAC)
+        }
+        else if (OSPath.IS_MAC) {
             return OSPath.join(OSPath.HOME,
                                Paths.get("Library/Application Support/PeriodCountdown"));
-        else if (OSPath.IS_LIN)
+        }
+        else if (OSPath.IS_LIN) {
             return OSPath.join(OSPath.HOME, Paths.get(".PeriodCountdown"));
-        else
-            return null;
+        }
+        else {
+            throw new IllegalStateException("unknown operating system type: " + OSPath.OS);
+        }
     }
     
     
@@ -115,8 +119,17 @@ public class OSPath {
      * @param b  the second path component.
      *
      * @return the merged path {@code a + b}.
+     *
+     * @throws NullPointerException  if either string is null.
      */
     public static String join(String a, String b) {
+        if (a == null) {
+            throw new NullPointerException("a cannot be null");
+        }
+        if (b == null) {
+            throw new NullPointerException("b cannot be null");
+        }
+
         Path pa = Paths.get(a);
         Path pb = Paths.get(b);
         return OSPath.join(pa, pb).toString();
@@ -124,17 +137,23 @@ public class OSPath {
     
     
     /**
-     * Joins two {@code Path}s. If either path component is {@code null}, then {@code null}
-     * is returned.
+     * Joins two {@code Path}s.
      *
      * @param a  the first path component.
      * @param b  the second path component.
      *
      * @return the merged path {@code a + b}.
+     *
+     * @throws NullPointerException  if either path is null.
      */
     public static Path join(Path a, Path b) {
-        if (a == null || b == null)
-            return null;
+        if (a == null) {
+            throw new NullPointerException("a cannot be null");
+        }
+        if (b == null) {
+            throw new NullPointerException("b cannot be null");
+        }
+
         return Paths.get(a.toString(), b.toString());
     }
     
@@ -145,11 +164,35 @@ public class OSPath {
      * @param path  the path to check.
      *
      * @return whether the specified path is a file in {@code OSPath.getSchoolJsonJarPath()}.
+     *
+     * @throws NullPointerException  if {@code path} is null.
      */
     public static boolean isSchoolInJar(Path path) {
-        if (path == null)
-            return false;
-        return path.startsWith(OSPath.getSchoolJsonJarPath());
+        if (path == null) {
+            throw new NullPointerException("path cannot be null");
+        }
+
+        Path schoolJsonJarPath = OSPath.getSchoolJsonJarPath();
+        return path.startsWith(schoolJsonJarPath) && !path.equals(schoolJsonJarPath);
+    }
+    
+    
+    /**
+     * Determines whether the specified path is a file in {@code OSPath.getUserJsonJarPath()}.
+     *
+     * @param path  the path to check.
+     *
+     * @return whether the specified path is a file in {@code OSPath.getUserJsonJarPath()}.
+     *
+     * @throws NullPointerException  if {@code path} is null.
+     */
+    public static boolean isUserInJar(Path path) {
+        if (path == null) {
+            throw new NullPointerException("path cannot be null");
+        }
+
+        Path userJsonJarPath = OSPath.getUserJsonJarPath();
+        return path.startsWith(userJsonJarPath) && !path.equals(userJsonJarPath);
     }
     
     
@@ -159,26 +202,35 @@ public class OSPath {
      * @param path  the path to check.
      *
      * @return whether the specified path is in the jar file.
+     *
+     * @throws NullPointerException  if {@code path} is null.
      */
     public static boolean isInJar(Path path) {
-        if (path == null)
-            return false;
-        
-        return path.startsWith(OSPath.getSchoolJsonJarPath()) ||
-            path.startsWith(OSPath.getUserJsonJarPath());
+        if (path == null) {
+            throw new NullPointerException("path cannot be null");
+        }
+
+        return OSPath.isSchoolInJar(path) || OSPath.isUserInJar(path);
     }
     
     
     /**
      * Determines whether the specified path is has the name of a valid json file.
      *
+     * If the check passes, the path may or may not be a json file that exists, but is
+     * syntactically correct in its name.
+     *
      * @param path  the path to check.
      *
      * @return whether the specified path is has the name of a valid json file.
+     *
+     * @throws NullPointerException  if {@code path} is null.
      */
     public static boolean isJsonFile(Path path) {
-        if (path == null)
-            return false;
+        if (path == null) {
+            throw new NullPointerException("path cannot be null");
+        }
+
         return path.getFileName().toString().matches("^[\\w\\-. ]+\\.json$");
     }
     

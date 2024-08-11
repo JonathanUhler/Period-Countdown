@@ -46,14 +46,20 @@ public class Duration {
      * @param start  the start time of the duration.
      * @param end    the end time of the duration.
      *
-     * @throws IllegalArgumentException  if {@code start == null}.
-     * @throws IllegalArgumentException  if {@code end == null}.
+     * @throws NullPointerException      if {@code start} is null.
+     * @throws NullPointerException      if {@code end} is null.
+     * @throws IllegalArgumentException  if {@code start} is not at or before {@code end}.
      */
     public Duration(UTCTime start, UTCTime end) {
-        if (start == null)
-            throw new IllegalArgumentException("duration start was null");
-        if (end == null)
-            throw new IllegalArgumentException("duration end was null");
+        if (start == null) {
+            throw new NullPointerException("start cannot be null");
+        }
+        if (end == null) {
+            throw new NullPointerException("end cannot be null");
+        }
+        if (start.compareTo(end) > 0) {
+            throw new IllegalArgumentException("start cannot be after end");
+        }
 	
         this.start = start;
         this.end = end;
@@ -92,20 +98,21 @@ public class Duration {
      * @param seconds  the number of seconds in the duration, on the interval [0, 60).
      * @param millis   the number of milliseconds in the duration, on the interval [0, 1000).
      *
-     * @throws IllegalArgumentException  if {@code hours < 0}.
-     * @throws IllegalArgumentException  if {@code minutes < 0 || minutes >= 60}.
-     * @throws IllegalArgumentException  if {@code seconds < 0 || seconds >= 60}.
-     * @throws IllegalArgumentException  if {@code millis < 0 || millis >= 10000}.
+     * @throws IllegalArgumentException  if any time unit is out of bounds.
      */
     public Duration(int hours, int minutes, int seconds, int millis) {
-        if (hours < 0)
+        if (hours < 0) {
             throw new IllegalArgumentException(hours + " is out of bounds for hours");
-        if (minutes < 0 || minutes >= 60)
+        }
+        if (minutes < 0 || minutes >= Duration.MINUTES_PER_HOUR) {
             throw new IllegalArgumentException(minutes + " is out of bounds for minutes");
-        if (seconds < 0 || seconds >= 60)
+        }
+        if (seconds < 0 || seconds >= Duration.SECONDS_PER_MINUTE) {
             throw new IllegalArgumentException(seconds + " is out of bounds for seconds");
-        if (millis < 0 || millis >= 1000)
+        }
+        if (millis < 0 || millis >= Duration.MS_PER_SECOND) {
             throw new IllegalArgumentException(millis + " is out of bounds for millis");
+        }
 	
         this.start = null;
         this.end = null;
@@ -120,6 +127,8 @@ public class Duration {
     /**
      * Returns the start time of the duration.
      *
+     * If this {@code Duration} was not constructed from a start and end time, this will be null.
+     *
      * @return the start time of the duration.
      */
     public UTCTime getStart() {
@@ -129,6 +138,8 @@ public class Duration {
     
     /**
      * Returns the end time of the duration.
+     *
+     * If this {@code Duration} was not constructed from a start and end time, this will be null.
      *
      * @return the end time of the duration.
      */
@@ -186,8 +197,9 @@ public class Duration {
     public String toString() {
         String paddedMinutes = String.format("%02d", this.minutes);
         String paddedSeconds = String.format("%02d", this.seconds);
-        if (this.hours == 0)
+        if (this.hours == 0) {
             return paddedMinutes + ":" + paddedSeconds;
+        }
         return this.hours + ":" + paddedMinutes + ":" + paddedSeconds;
     }
     

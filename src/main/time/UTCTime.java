@@ -79,12 +79,8 @@ public class UTCTime implements Comparable<UTCTime> {
      * Constructs a new {@code UTCTime} object from a {@code ZonedDateTime} object.
      *
      * @param datetime  a {@code ZonedDateTime} object.
-     *
-     * @throws NullPointerException  if {@code datetime == null}.
      */
     private UTCTime(ZonedDateTime datetime) {
-        if (datetime == null)
-            throw new NullPointerException("datetime was null");
         this.datetime = datetime;
     }
     
@@ -121,27 +117,34 @@ public class UTCTime implements Comparable<UTCTime> {
      * @param timezone  the unix TZ identifier of a timezone.
      *
      * @return a new {@code UTCTime} object from a datetime string and unix TZ identifier.
+     *
+     * @throws NullPointerException      if {@code datetime} is null.
+     * @throws NullPointerException      if {@code timezone} is null.
+     * @throws IllegalArgumentException  if the arguments do not represent a valid time.
      */
-    public static UTCTime of(String datetime, String timezone) throws IllegalArgumentException {
+    public static UTCTime of(String datetime, String timezone) {
+        if (datetime == null) {
+            throw new NullPointerException("datetime cannot be null");
+        }
+        if (timezone == null) {
+            throw new NullPointerException("timezone cannot be null");
+        }
+
+        ZonedDateTime local;
         try {
-            ZonedDateTime local = ZonedDateTime.parse(datetime + " " + timezone,
-                                                      UTCTime.DATE_TIME_FORMAT);
-            return UTCTime.ensureUTC(local);
+            local = ZonedDateTime.parse(datetime + " " + timezone, UTCTime.DATE_TIME_FORMAT);
         }
         catch (DateTimeException e) {
             try {
                 // Allow construction from just a date yyyy-MM-dd
-                ZonedDateTime local = ZonedDateTime.parse(datetime + "T00:00:00.000 " + timezone,
-                                                          UTCTime.DATE_TIME_FORMAT);
-                return UTCTime.ensureUTC(local);
+                local = ZonedDateTime.parse(datetime + "T00:00:00.000 " + timezone,
+                                            UTCTime.DATE_TIME_FORMAT);
             }
             catch (DateTimeException e2) {
-                throw new IllegalArgumentException("UTCTime of failed for string: " + datetime +
-                                                   ", make sure dates are in the format " +
-                                                   "yyyy-MM-dd and times are in the format " +
-                                                   "HH:mm:ss.SSS");
+                throw new IllegalArgumentException("invalid datetime format for " + datetime);
             }
         }
+        return UTCTime.ensureUTC(local);
     }
     
     
@@ -153,15 +156,21 @@ public class UTCTime implements Comparable<UTCTime> {
      *
      * @return a new {@code UTCTime} representing the same instant in time with the specified
      *         timezone.
+     *
+     * @throws NullPointerException      if {@code timezone} is null.
+     * @throws IllegalArgumentException  if {@code timezone} is an invalid TZ identifier.
      */
-    public UTCTime to(String timezone) throws IllegalArgumentException {
-        ZoneId zone = null;
+    public UTCTime to(String timezone) {
+        if (timezone == null) {
+            throw new NullPointerException("timezone cannot be null");
+        }
+
+        ZoneId zone;
         try {
             zone = ZoneId.of(timezone);
         }
         catch (DateTimeException e) {
-            throw new IllegalArgumentException("UTCTime to invalid timezone id: " +
-                                               timezone + ", " + e);
+            throw new IllegalArgumentException("invalid timezone id: " + timezone + ", " + e);
         }
 	
         ZonedDateTime local = this.datetime.withZoneSameInstant(zone);
@@ -182,12 +191,18 @@ public class UTCTime implements Comparable<UTCTime> {
     /**
      * Returns whether this {@code UTCTime} is chronologically before the argument.
      *
-     * @param utcTime  a {@code UTCTime} to compare to.
+     * @param other  a {@code UTCTime} to compare to.
      *
      * @return whether this {@code UTCTime} is chronologically before the argument.
+     *
+     * @throws NullPointerException  if {@code other} is null.
      */
-    public boolean isBefore(UTCTime utcTime) {
-        return this.datetime.isBefore(utcTime.asZonedDateTime());
+    public boolean isBefore(UTCTime other) {
+        if (other == null) {
+            throw new NullPointerException("other cannot be null");
+        }
+
+        return this.datetime.isBefore(other.asZonedDateTime());
     }
     
     
@@ -195,35 +210,50 @@ public class UTCTime implements Comparable<UTCTime> {
      * Returns whether this {@code UTCTime} represents the same chronological instant as the 
      * argument.
      *
-     * @param utcTime  a {@code UTCTime} to compare to.
+     * @param other  a {@code UTCTime} to compare to.
      *
      * @return whether this {@code UTCTime} represents the same chronological instant as the 
      *         argument.
+     *
+     * @throws NullPointerException  if {@code other} is null.
      */
-    public boolean isEqual(UTCTime utcTime) {
-        return this.datetime.isEqual(utcTime.asZonedDateTime());
+    public boolean isEqual(UTCTime other) {
+        if (other == null) {
+            throw new NullPointerException("other cannot be null");
+        }
+
+        return this.datetime.isEqual(other.asZonedDateTime());
     }
     
     
     /**
      * Compares this {@code UTCTime} object to another {@code UTCTime} object.
      *
-     * @param utcTime  the {@code UTCTime} to compare to.
+     * @param other  the {@code UTCTime} to compare to.
      *
      * @return {@code 0} if the times are equal, {@code -1} if this object is before the argument,
      *         and {@code 1} if this object is after the argument.
+     *
+     * @throws NullPointerException  if {@code other} is null.
      *
      * @see isBefore
      * @see isEqual
      */
     @Override
-    public int compareTo(UTCTime utcTime) {
-        if (this.isEqual(utcTime))
+    public int compareTo(UTCTime other) {
+        if (other == null) {
+            throw new NullPointerException("other cannot be null");
+        }
+
+        if (this.isEqual(other)) {
             return 0;
-        else if (this.isBefore(utcTime))
+        }
+        else if (this.isBefore(other)) {
             return -1;
-        else
+        }
+        else {
             return 1;
+        }
     }
     
     
@@ -234,8 +264,14 @@ public class UTCTime implements Comparable<UTCTime> {
      *               {@code ChronoField}s of {@code UTCTime}.
      *
      * @return the value of a field in this {@code UTCTime}.
+     *
+     * @throws NullPointerException  if {@code field} is null.
      */
     public int get(ChronoField field) {
+        if (field == null) {
+            throw new NullPointerException("field cannot be null");
+        }
+
         return this.datetime.get(field);
     }
     
@@ -248,12 +284,14 @@ public class UTCTime implements Comparable<UTCTime> {
      * @param unit    the unit to add the specified amount to.
      *
      * @return a new {@code UTCTime} object where the specified time-related unit has the
-     *         specified amount added to the original value. If {@code unit == null}, then
-     *         {@code null} is returned.
+     *         specified amount added to the original value.
+     *
+     * @throws NullPointerException  if {@code unit} is null.
      */
     public UTCTime plus(long amount, ChronoUnit unit) {
-        if (unit == null)
-            return null;
+        if (unit == null) {
+            throw new NullPointerException("unit cannot be null");
+        }
 	
         return new UTCTime(this.datetime.plus(amount, unit));
     }
@@ -277,13 +315,17 @@ public class UTCTime implements Comparable<UTCTime> {
      *
      * @return a new {@code UTCTime} object with the day value set to the closest instance of the
      *         specified day of the week.
+     *
+     * @throws NullPointerException  if {@code day} is null.
      */
     public UTCTime shiftedToClosest(DayOfWeek day) {
-        if (day == null)
-            return null;
+        if (day == null) {
+            throw new NullPointerException("day cannot be null");
+        }
         
-        if (this.datetime.getDayOfWeek() == day)
+        if (this.datetime.getDayOfWeek() == day) {
             return new UTCTime(this.datetime);
+        }
         
         ZonedDateTime closestDateTime = this.datetime.with(TemporalAdjusters.previous(day));
         UTCTime closestUTC = UTCTime.ensureUTC(closestDateTime);
@@ -307,20 +349,25 @@ public class UTCTime implements Comparable<UTCTime> {
     
     /**
      * Returns a new {@code UTCTime} object representing midnight in the specified timezone.
-     * <p>
+     *
      * The returned {@code UTCTime} object is still in UTC time. The operation is order is:
-     * <ul>
-     * <li> Convert this object to the specified timezone.
-     * <li> Convert the new object (in the specified local timezone) to midnight in that tz.
-     * <li> Convert the local-midnight object back to UTC time. The result may or may not have a
-     *      final time of {@code 00:00:00.000}.
-     * </ul>
+     *
+     * - Convert this object to the specified timezone.
+     * - Convert the new object (in the specified local timezone) to midnight in that tz.
+     * -Convert the local-midnight object back to UTC time. The result may or may not have a
+     *  final time of {@code 00:00:00.000}.
      *
      * @param timezone  the unix TZ identifier to get a UTC-aligned midnight time for.
      *
      * @return a new {@code UTCTime} object representing midnight in the specified timezone.
+     *
+     * @throws NullPointerException  if {@code timezone} is null.
      */
     public UTCTime toMidnight(String timezone) {
+        if (timezone == null) {
+            throw new NullPointerException("timezone cannot be null");
+        }
+
         UTCTime localTime = this.to(timezone);
         localTime = localTime.toMidnight();
         return localTime.to("Z");
@@ -333,9 +380,9 @@ public class UTCTime implements Comparable<UTCTime> {
      * @return the day tag of this {@code UTCTime}.
      */
     public String getDayTag() {
-        return (String.format("%04d", this.datetime.get(UTCTime.YEAR)) + "-" +
-                String.format("%02d", this.datetime.get(UTCTime.MONTH)) + "-" +
-                String.format("%02d", this.datetime.get(UTCTime.DAY)));
+        return String.format("%04d", this.datetime.get(UTCTime.YEAR)) + "-" +
+               String.format("%02d", this.datetime.get(UTCTime.MONTH)) + "-" +
+               String.format("%02d", this.datetime.get(UTCTime.DAY));
     }
     
     
@@ -346,9 +393,15 @@ public class UTCTime implements Comparable<UTCTime> {
      *
      * @return the day tag of the result of {@code shiftedToClosest(day)}.
      *
+     * @throws NullPointerException  if {@code day} is null.
+     *
      * @see shiftedToClosest
      */
     public String getTagForClosest(DayOfWeek day) {
+        if (day == null) {
+            throw new NullPointerException("day cannot be null");
+        }
+
         return this.shiftedToClosest(day).getDayTag();
     }
     
@@ -371,14 +424,14 @@ public class UTCTime implements Comparable<UTCTime> {
      */
     @Override
     public String toString() {
-        return (String.format("%04d", this.datetime.get(UTCTime.YEAR)) + "-" +
-                String.format("%02d", this.datetime.get(UTCTime.MONTH)) + "-" +
-                String.format("%02d", this.datetime.get(UTCTime.DAY)) + "T" +
-                String.format("%02d", this.datetime.get(UTCTime.HOUR)) + ":" +
-                String.format("%02d", this.datetime.get(UTCTime.MINUTE)) + ":" +
-                String.format("%02d", this.datetime.get(UTCTime.SECOND)) + "." +
-                String.format("%03d", this.datetime.get(UTCTime.MILLISECOND)) + " " +
-                this.datetime.getZone());
+        return String.format("%04d", this.datetime.get(UTCTime.YEAR)) + "-" +
+               String.format("%02d", this.datetime.get(UTCTime.MONTH)) + "-" +
+               String.format("%02d", this.datetime.get(UTCTime.DAY)) + "T" +
+               String.format("%02d", this.datetime.get(UTCTime.HOUR)) + ":" +
+               String.format("%02d", this.datetime.get(UTCTime.MINUTE)) + ":" +
+               String.format("%02d", this.datetime.get(UTCTime.SECOND)) + "." +
+               String.format("%03d", this.datetime.get(UTCTime.MILLISECOND)) + " " +
+               this.datetime.getZone();
     }
     
 }

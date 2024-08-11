@@ -2,11 +2,11 @@ SRC_DIR     := src
 LIB_DIR     := lib
 OBJ_DIR     := obj
 BIN_DIR     := bin
-REL_DIR     := rel
+TEST_DIR    := tests
 JAVADOC_DIR := docs/javadoc
 
-DESKTOP_MANIFEST := "manifest-desktop.mf"
-WEB_MANIFEST     := "web-manifest.mf"
+DESKTOP_MANIFEST := manifest-desktop.mf
+WEB_MANIFEST     := web-manifest.mf
 
 
 .PHONY: compile_desktop \
@@ -17,6 +17,7 @@ WEB_MANIFEST     := "web-manifest.mf"
 	build_linux     \
 	build_windos    \
 	build_web       \
+        test            \
 	javadoc         \
 	javadoc_dir     \
 	obj_dir         \
@@ -55,7 +56,7 @@ build_mac: jar_desktop rel_dir
 		--name PeriodCountdown                 \
 		--app-version $(APP_VERSION)           \
 		--input $(BIN_DIR)                     \
-		--dest $(REL_DIR)                      \
+		--dest $(BIN_DIR)                      \
 		--icon $(SRC_DIR)/assets/icon.icns     \
 		--main-jar PeriodCountdown-desktop.jar \
 		--main-class desktop.PCDesktopApp      \
@@ -66,7 +67,7 @@ build_linux: jar_desktop rel_dir
 		--name PeriodCountdown                 \
 		--app-version $(APP_VERSION)           \
 		--input $(BIN_DIR)                     \
-		--dest $(REL_DIR)                      \
+		--dest $(BIN_DIR)                      \
 		--icon $(SRC_DIR)/assets/icon.png      \
 		--main-jar PeriodCountdown-desktop.jar \
 		--main-class desktop.PCDesktopApp
@@ -76,17 +77,24 @@ build_windows: jar_desktop rel_dir
 		--name PeriodCountdown                 \
 		--app-version $(APP_VERSION)           \
 		--input $(BIN_DIR)                     \
-		--dest $(REL_DIR)                      \
+		--dest $(BIN_DIR)                      \
 		--icon $(SRC_DIR)/assets/icon.ico      \
 		--main-jar PeriodCountdown-desktop.jar \
 		--main-class desktop.PCDesktopApp
 
 build_web: jar_web rel_dir
-	mkdir -p $(REL_DIR)/PeriodCountdown-$(APP_VERSION)-web
-	rsync -r --exclude "*~" $(BIN_DIR)/* $(REL_DIR)/PeriodCountdown-$(APP_VERSION)-web
+	mkdir -p $(BIN_DIR)/PeriodCountdown-$(APP_VERSION)-web
+	rsync -r --exclude "*~" $(BIN_DIR)/* $(BIN_DIR)/PeriodCountdown-$(APP_VERSION)-web
 	tar -czvf                                                    \
-		$(REL_DIR)/PeriodCountdown-$(APP_VERSION)-web.tar.gz \
-		$(REL_DIR)/PeriodCountdown-$(APP_VERSION)-web/*
+		$(BIN_DIR)/PeriodCountdown-$(APP_VERSION)-web.tar.gz \
+		$(BIN_DIR)/PeriodCountdown-$(APP_VERSION)-web/*
+
+test: jar_desktop
+	javac -cp '.:$(SRC_DIR)/lib/*:$(BIN_DIR)/*' -d $(OBJ_DIR)/$(TEST_DIR) \
+		$(shell find $(TEST_DIR) -name '*.java')
+	java -cp '.:$(SRC_DIR)/lib/*:$(OBJ_DIR)/$(TEST_DIR):$(BIN_DIR)/*' \
+		org.junit.runner.JUnitCore                                \
+		TestOSPath TestUTCTime TestDuration
 
 javadoc: javadoc_dir
 	javadoc $(shell find $(SRC_DIR)/main -name "*.java" -not -path "web/*")   \
@@ -101,9 +109,6 @@ obj_dir:
 
 bin_dir:
 	mkdir -p $(BIN_DIR)
-
-rel_dir:
-	mkdir -p $(REL_DIR)
 
 clean:
 	@rm -rf $(BIN_DIR) $(OBJ_DIR) $(JAVADOC_DIR)

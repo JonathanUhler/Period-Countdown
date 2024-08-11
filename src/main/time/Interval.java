@@ -15,17 +15,16 @@ public class Interval {
     
     
     /**
-     * Constructs a new {@code Interval} object. If the minimum is less than the maximum, the two
-     * values are swapped.
+     * Constructs a new {@code Interval} object.
      *
      * @param min  the minimum inclusive value of the interval.
      * @param max  the maximum inclusive value of the interval.
+     *
+     * @throws IllegalArgumentException  if {@code min} is greater than {@code max}.
      */
     public Interval(int min, int max) {
         if (min > max) {
-            int tempMin = min;
-            min = max;
-            max = tempMin;
+            throw new IllegalArgumentException("invalid interval [" + min + ", " + max + "]");
         }
 	
         this.min = min;
@@ -54,23 +53,21 @@ public class Interval {
     
     
     /**
-     * Returns whether a given sub-range is within the range of this interval. If the minimum
-     * of the sub-range is less than the maximum of the sub-range, the two values are swapped.
+     * Returns whether this interval is inside of the specified interval
      *
-     * @param minParent  the inclusive minimum for the sub-range.
-     * @param maxParent  the inclusive maximum for the sub-range.
+     * @param other  the interval that must contain this interval.
      *
-     * @return whether a given sub-range is within the range of this interval.
+     * @return whether this interval is inside of the specified interval.
+     *
+     * @throws NullPointerException  if {@code other} is null.
      */
-    public boolean isIn(int minParent, int maxParent) {
-        if (minParent > maxParent) {
-            int tempMin = minParent;
-            minParent = maxParent;
-            maxParent = tempMin;
+    public boolean isIn(Interval other) {
+        if (other == null) {
+            throw new NullPointerException("other cannot be null");
         }
-        
-        return (this.min >= minParent && this.max >= minParent &&
-                this.min <= maxParent && this.max <= maxParent);
+
+        return this.min >= other.min && this.max >= other.min &&
+               this.min <= other.max && this.max <= other.max;
     }
     
     

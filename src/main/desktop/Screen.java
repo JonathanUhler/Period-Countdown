@@ -5,6 +5,7 @@ import java.util.Map;
 import java.util.HashMap;
 import java.util.List;
 import java.util.ArrayList;
+import java.io.IOException;
 import java.io.FileNotFoundException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -16,7 +17,6 @@ import java.awt.geom.Rectangle2D;
 import java.awt.font.FontRenderContext;
 import java.awt.geom.AffineTransform;
 import javax.swing.JPanel;
-import jnet.Log;
 import time.UTCTime;
 import time.Duration;
 import os.OSPath;
@@ -31,16 +31,16 @@ import user.UserJson;
 /**
  * Graphical interface for the desktop application. This class is completely isolated from
  * the user and school API classes, which are shared by the desktop and web user interfaces.
- * <p>
+ *
  * The {@code start} method is used to begin a timer that will refresh the screen every second.
- * <p>
+ *
  * This class also contains several getters and setters for the information in the user json file.
  *
  * @author Jonathan Uhler
  */
 public class Screen extends JPanel {
     
-    /** Name of the font. The default font is Arial, which is changed later by the user json file */
+    /** Name of the font used for display. This is updated once the user json file is loaded. */
     private static String FONT_NAME = "Arial";
     /** Font style. */
     private static int FONT_STYLE = Font.PLAIN;
@@ -59,19 +59,20 @@ public class Screen extends JPanel {
      * Constructs a new {@code Screen} object.
      */
     public Screen() {
-        // userAPI must be defined first, since data within it is needed to define schoolAPI
+        // userAPI must be defined first, since data within it may be used to define schoolAPI
         try {
             this.userAPI = new UserAPI(OSPath.join(OSPath.getUserJsonDiskPath(),
                                                    OSPath.getUserJsonFile()));
-            Screen.FONT_NAME = this.userAPI.getFont(); // Set user's preferred font
+            Screen.FONT_NAME = this.userAPI.getFont();
         }
-        catch (FileNotFoundException | IllegalArgumentException e) {
-            Log.gfxmsg("Error", "Screen: Exception when creating UserAPI\n\n" + e);
+        catch (IOException | IllegalArgumentException e) {
+            PCDesktopApp.displayMessage("Error", "Screen: Exception when creating UserAPI\n" + e);
         }
         
         try {
-            if (this.userAPI == null)
+            if (this.userAPI == null) {
                 throw new IllegalArgumentException("userAPI is null, cannot get school file name");
+            }
             // Create schoolAPI with the user's preferred school file. Also, since some
             // institutions (like colleges) have "Days" data that is specific to each user rather
             // than a consistent bell schedule, there is an option to store that data in User.json
@@ -79,8 +80,7 @@ public class Screen extends JPanel {
             this.schoolAPI = new SchoolAPI(this.userAPI.getSchoolFile());
         }
         catch (FileNotFoundException | IllegalArgumentException e) {
-            e.printStackTrace();
-            Log.gfxmsg("Error", "Screen: Exception when creating SchoolAPI\n\n" + e);
+            PCDesktopApp.displayMessage("Error", "Screen: Exception when creating SchoolAPI\n" + e);
         }
     }
     
@@ -91,8 +91,9 @@ public class Screen extends JPanel {
      * @return a list of period numbers defined by the user json file.
      */
     protected List<String> getUserPeriodKeys() {
-        if (this.userAPI == null)
+        if (this.userAPI == null) {
             return null;
+        }
         return this.userAPI.getPeriodKeys();
     }
     
@@ -105,9 +106,9 @@ public class Screen extends JPanel {
      * @return a {@code UserPeriod} object for the given period number.
      */
     protected UserPeriod getUserPeriod(String key) {
-        if (this.userAPI == null)
+        if (this.userAPI == null) {
             return null;
-        // Access to getPeriod here only needs the key, so the other information can be placeholder
+        }
         SchoolPeriod keyPeriod = new SchoolPeriod(key, "", UTCTime.now(), UTCTime.now(), false);
         return this.userAPI.getPeriod(keyPeriod);
     }
@@ -119,8 +120,9 @@ public class Screen extends JPanel {
      * @return the current school json file path.
      */
     protected Path getUserSchoolFile() {
-        if (this.userAPI == null)
+        if (this.userAPI == null) {
             return null;
+        }
         return this.userAPI.getSchoolFile();
     }
     
@@ -131,8 +133,9 @@ public class Screen extends JPanel {
      * @return a list of available school json file names.
      */
     protected List<String> getAvailableSchools() {
-        if (this.userAPI == null)
+        if (this.userAPI == null) {
             return new ArrayList<>();
+        }
         return this.userAPI.getAvailableSchools();
     }
     
@@ -143,8 +146,9 @@ public class Screen extends JPanel {
      * @return the verbosity for the "next up" feature.
      */
     protected String getUserNextUp() {
-        if (this.userAPI == null)
+        if (this.userAPI == null) {
             return null;
+        }
         return this.userAPI.getNextUp();
     }
     
@@ -155,8 +159,9 @@ public class Screen extends JPanel {
      * @return the theme color.
      */
     protected int getUserTheme() {
-        if (this.userAPI == null)
+        if (this.userAPI == null) {
             return 0xffffff;
+        }
         return this.userAPI.getTheme();
     }
     
@@ -167,8 +172,9 @@ public class Screen extends JPanel {
      * @return the name of the font.
      */
     protected String getUserFont() {
-        if (this.userAPI == null)
+        if (this.userAPI == null) {
             return null;
+        }
         return this.userAPI.getFont();
     }
     
@@ -198,19 +204,21 @@ public class Screen extends JPanel {
      * @param file  the name of the school json file.
      */
     protected void setUserSchoolFile(String file) {
-        if (this.userAPI == null)
+        if (this.userAPI == null) {
             return;
+        }
         
         this.userAPI.setSchoolFile(Paths.get(file));
         // School file was changed, so use the same routine as the constructor to reload the
         // information
         try {
-            if (this.userAPI == null)
+            if (this.userAPI == null) {
                 throw new IllegalArgumentException("userAPI is null, cannot get school file name");
+            }
             this.schoolAPI = new SchoolAPI(this.userAPI.getSchoolFile());
         }
         catch (FileNotFoundException | IllegalArgumentException e) {
-            Log.gfxmsg("Error", "Screen: Exception when creating SchoolAPI\n\n" + e);
+            PCDesktopApp.displayMessage("Error", "Screen: Exception when creating SchoolAPI\n" + e);
         }
     }
     
@@ -221,8 +229,9 @@ public class Screen extends JPanel {
      * @param verbosity  the verbosity for the "next up" feature.
      */
     protected void setUserNextUp(String verbosity) {
-        if (this.userAPI != null)
+        if (this.userAPI != null) {
             this.userAPI.setNextUp(verbosity);
+        }
     }
     
     
@@ -234,8 +243,9 @@ public class Screen extends JPanel {
      * @param b  the blue channel.
      */
     protected void setUserTheme(int r, int g, int b) {
-        if (this.userAPI != null)
+        if (this.userAPI != null) {
             this.userAPI.setTheme(r, g, b);
+        }
     }
     
     
@@ -245,8 +255,9 @@ public class Screen extends JPanel {
      * @param font  the name of the font.
      */
     protected void setUserFont(String font) {
-        if (this.userAPI != null)
+        if (this.userAPI != null) {
             this.userAPI.setFont(font);
+        }
         Screen.FONT_NAME = font;
     }
     
@@ -260,8 +271,9 @@ public class Screen extends JPanel {
      * @return the width of the string, in pixels, when displayed with the specified font.
      */
     private int getTextWidth(Font font, String text) {
-        if (font == null || text == null)
+        if (font == null || text == null) {
             return 0;
+        }
 
         AffineTransform affineTransform = new AffineTransform();
         FontRenderContext fontRenderContext = new FontRenderContext(affineTransform, true, true);
@@ -280,8 +292,9 @@ public class Screen extends JPanel {
      * @return the {@code Font} object that fits the text to the width.
      */
     private Font getFontForWidth(String text, int width) {
-        if (width < 0 || text == null)
+        if (width < 0 || text == null) {
             return null;
+        }
         
         Font font = new Font(Screen.FONT_NAME, Screen.FONT_STYLE, width);
         int textWidth = width + 1; // Start with textWidth larger than width to run the while loop
@@ -404,7 +417,7 @@ public class Screen extends JPanel {
                 Thread.sleep(1000);
             }
             catch (InterruptedException e) {
-                Log.gfxmsg("Error", "Screen: InterruptedException from Thread.sleep\n\n" + e);
+                PCDesktopApp.displayMessage("Error", "Screen: InterruptedException\n" + e);
             }			
         }
     }

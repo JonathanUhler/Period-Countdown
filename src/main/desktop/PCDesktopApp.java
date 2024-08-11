@@ -8,7 +8,6 @@ import javax.swing.JOptionPane;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Dimension;
-import jnet.Log;
 
 
 /**
@@ -29,32 +28,35 @@ public class PCDesktopApp {
      * @param message  the message body to display.
      */
     public static void displayMessage(String title, String message) {
-        JOptionPane.showMessageDialog(null, message, title,
-                                      JOptionPane.PLAIN_MESSAGE);
+        JOptionPane.showMessageDialog(null, message, title, JOptionPane.PLAIN_MESSAGE);
     }
-    
-    
+
+
     /**
      * Displays a graphical message with arbitrary components.
      *
      * @param title       the title of the message.
      * @param components  a list of components to display.
      *
-     * @return a {@code JOptionPane.*_OPTION}.
+     * @return a {@code JOptionPane.*_OPTION} status code.
      */
     public static int displayDialog(String title, JComponent[] components) {
         JPanel panel = new JPanel();
         panel.setFocusable(true);
         panel.setLayout(new GridBagLayout());
-        GridBagConstraints g = new GridBagConstraints();
-        g.gridwidth = GridBagConstraints.REMAINDER;
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.gridwidth = GridBagConstraints.REMAINDER;
         
-        for (int i = 0; i < components.length; i++)
-            panel.add(components[i], g);
+        for (int i = 0; i < components.length; i++) {
+            panel.add(components[i], gbc);
+        }
         
-        return JOptionPane.showConfirmDialog(null, panel, title,
+        return JOptionPane.showConfirmDialog(null,
+                                             panel,
+                                             title,
                                              JOptionPane.OK_CANCEL_OPTION,
-                                             JOptionPane.PLAIN_MESSAGE, null);
+                                             JOptionPane.PLAIN_MESSAGE,
+                                             null);
     }
     
     
@@ -81,7 +83,7 @@ public class PCDesktopApp {
         catch (Exception e) {
             // Catch any exceptions that aren't handled in the rest of the code
             e.printStackTrace();
-            Log.gfxmsg("Error", "Unchecked exception thrown: " + e);
+            PCDesktopApp.displayMessage("Error", "Unchecked exception thrown: " + e);
         }
     }
     

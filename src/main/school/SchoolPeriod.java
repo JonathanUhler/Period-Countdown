@@ -7,22 +7,20 @@ import time.UTCTime;
 /**
  * Represents the concept of a block of time during the school year defined by the json file. This
  * "block of time" can include:
- * <ul>
- * <li> Scheduled academic classes
- * <li> Special blocks (e.g. lunch, study hall)
- * <li> Non-significant, "filler" blocks (e.g. passing period, before classes, after classes)
- * </ul>
- * <p>
+ *
+ * - Scheduled academic classes
+ * - Special blocks (e.g. lunch, study hall)
+ * - Non-significant, "filler" blocks (e.g. passing period, before classes, after classes)
+ * 
  * Each period has a start and end time defined to the nearst millisecond of precision as
- * {@code UTCTime} objects. For any period {@code P_(n)} that is not the first or last period in the
- * school year, the following <b>must</b> be true:
- * <ul>
- * <li> {@code P_(n).start < P_(n).end}. That is, the minimum length of a period is 1 millisecond.
- * <li> {@code P_(n).end = P_(n + 1).start + 1 ms}. That is, no point exists in the exclusive
- *      interval between the start and end of the school year where there is a gap of >= 1 ms.
- * </ul>
- * <p>
- * The properties of a {@code SchoolPeriod} object are defined by the {@code "Type"} filed. The
+ * {@code UTCTime} objects. For any period {@code P_n} that is not the first or last period in the
+ * school year, the following must be true:
+ * 
+ * - {@code P_n.start < P_n.end}. That is, the minimum length of a period is 1 millisecond.
+ * - {@code P_n.end = P_(n + 1).start + 1 ms}. That is, no point exists in the exclusive interval
+ *   between the start and end of the school year where there is any gap of time.
+ * 
+ * The properties of a {@code SchoolPeriod} object are defined by the {@code "Type"} field. The
  * options of this field are defined in more detail in the documentation for this class's
  * constructor.
  */
@@ -59,21 +57,22 @@ public class SchoolPeriod {
      * @param isLast  whether this period is the last in its containing day (local time).
      *
      * @throws NullPointerException      if any argument is null.
-     * @throws IllegalArgumentException  if {@code type} is not {@code "Nothing"}, 
+     * @throws IllegalArgumentException  if {@code type} is not {@code "Nothing"},
      *                                   {@code "Special"}, or an integer.
      */
-    public SchoolPeriod(String type, String name,
-                        UTCTime start, UTCTime end,
-                        boolean isLast)
-    {
-        if (type == null)
-            throw new NullPointerException("type is null");
-        if (name == null)
-            throw new NullPointerException("name is null");
-        if (start == null)
-            throw new NullPointerException("start is null");
-        if (end == null)
-            throw new NullPointerException("end is null");
+    public SchoolPeriod(String type, String name, UTCTime start, UTCTime end, boolean isLast) {
+        if (type == null) {
+            throw new NullPointerException("type cannot be null");
+        }
+        if (name == null) {
+            throw new NullPointerException("name cannot be  null");
+        }
+        if (start == null) {
+            throw new NullPointerException("start cannot be null");
+        }
+        if (end == null) {
+            throw new NullPointerException("end cannot be null");
+        }
         
         if (!type.equals(SchoolJson.NOTHING) && !type.equals(SchoolJson.SPECIAL)) {
             try {
@@ -159,8 +158,7 @@ public class SchoolPeriod {
      * @return whether this period is free.
      */
     public boolean isFree() {
-        return (this.type.equals(SchoolJson.NOTHING) ||
-                this.type.equals(SchoolJson.SPECIAL));
+        return this.type.equals(SchoolJson.NOTHING) || this.type.equals(SchoolJson.SPECIAL);
     }
     
     

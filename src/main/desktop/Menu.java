@@ -51,39 +51,38 @@ public class Menu extends JMenuBar {
         
         // App settings menu
         JMenu settings = new JMenu("Settings");
-        this.add(settings);
         
         JMenuItem classInformation = new JMenuItem("Class Information");
-        classInformation.addActionListener(e -> this.classInformationAction());
-        settings.add(classInformation);
-        
         JMenuItem schoolInformation = new JMenuItem("School Information");
-        schoolInformation.addActionListener(e -> this.schoolInformationAction());
-        settings.add(schoolInformation);
-        
         JMenuItem nextUp = new JMenuItem("Next Up");
-        nextUp.addActionListener(e -> this.nextUpAction());
-        settings.add(nextUp);
-        
         JMenuItem theme = new JMenuItem("Theme");
-        theme.addActionListener(e -> this.themeAction());
-        settings.add(theme);
-        
         JMenuItem font = new JMenuItem("Font");
+
+        classInformation.addActionListener(e -> this.classInformationAction());
+        schoolInformation.addActionListener(e -> this.schoolInformationAction());
+        nextUp.addActionListener(e -> this.nextUpAction());
+        theme.addActionListener(e -> this.themeAction());
         font.addActionListener(e -> this.fontAction());
+
+        settings.add(classInformation);        
+        settings.add(schoolInformation);
+        settings.add(nextUp);
+        settings.add(theme);
         settings.add(font);
+        this.add(settings);
         
         // Help menu
         JMenu help = new JMenu("Help");
-        this.add(help);
-        
+
         JMenuItem dataWizard = new JMenuItem("School Data Wizard");
-        dataWizard.addActionListener(e -> this.dataWizardAction());
-        help.add(dataWizard);
-        
         JMenuItem submitIssue = new JMenuItem("Submit An Issue");
+
+        dataWizard.addActionListener(e -> this.dataWizardAction());
         submitIssue.addActionListener(e -> this.submitIssueAction());
+
+        help.add(dataWizard);
         help.add(submitIssue);
+        this.add(help);
     }
     
     
@@ -95,8 +94,9 @@ public class Menu extends JMenuBar {
      */
     private void classInformationAction() {
         List<String> periodNumbers = this.screen.getUserPeriodKeys();
-        if (periodNumbers == null)
+        if (periodNumbers == null) {
             return;
+        }
 	
         // Create a structure to access the JTextFields later. The first set of keys is the period
         // numbers. The second set of keys is the field name ("Teacher", "Room", or "Name")
@@ -107,8 +107,9 @@ public class Menu extends JMenuBar {
         // Initialize periodInputFields
         for (String periodNumber : periodNumbers) {
             UserPeriod periodInfo = this.screen.getUserPeriod(periodNumber);
-            if (periodInfo == null)
+            if (periodInfo == null) {
                 continue;
+            }
             
             String name = periodInfo.getName();
             String teacher = periodInfo.getTeacher();
@@ -156,24 +157,27 @@ public class Menu extends JMenuBar {
                                                     JOptionPane.OK_CANCEL_OPTION,
                                                     JOptionPane.PLAIN_MESSAGE, null);
         
-        if (confirm == JOptionPane.OK_OPTION) {
-            // Set all of the information
-            for (String key : periodInputFields.keySet()) {
-                Map<String, JTextField> periodInputField = periodInputFields.get(key);
-                String name = periodInputField.get(UserJson.NAME).getText();
-                String teacher = periodInputField.get(UserJson.TEACHER).getText();
-                String room = periodInputField.get(UserJson.ROOM).getText();
-                
-                // Limit entries for the three fields to a maximum length for display purposes
-                if (name.length() > UserJson.MAX_FIELD_LEN)
-                    name = name.substring(0, UserJson.MAX_FIELD_LEN) + "...";
-                if (teacher.length() > UserJson.MAX_FIELD_LEN)
-                    teacher = teacher.substring(0, UserJson.MAX_FIELD_LEN) + "...";
-                if (room.length() > UserJson.MAX_FIELD_LEN)
-                    room = room.substring(0, UserJson.MAX_FIELD_LEN) + "...";
-                
-                this.screen.setUserPeriod(key, name, teacher, room);
+        if (confirm != JOptionPane.OK_OPTION) {
+            return;
+        }
+
+        for (String key : periodInputFields.keySet()) {
+            Map<String, JTextField> periodInputField = periodInputFields.get(key);
+            String name = periodInputField.get(UserJson.NAME).getText();
+            String teacher = periodInputField.get(UserJson.TEACHER).getText();
+            String room = periodInputField.get(UserJson.ROOM).getText();
+
+            if (name.length() > UserJson.MAX_FIELD_LEN) {
+                name = name.substring(0, UserJson.MAX_FIELD_LEN) + "...";
             }
+            if (teacher.length() > UserJson.MAX_FIELD_LEN) {
+                teacher = teacher.substring(0, UserJson.MAX_FIELD_LEN) + "...";
+            }
+            if (room.length() > UserJson.MAX_FIELD_LEN) {
+                room = room.substring(0, UserJson.MAX_FIELD_LEN) + "...";
+            }
+                
+            this.screen.setUserPeriod(key, name, teacher, room);
         }
     }
     
@@ -190,8 +194,9 @@ public class Menu extends JMenuBar {
         JComponent[] components = new JComponent[] {new JLabel("Select data file:"), options};
 	
         int confirm = PCDesktopApp.displayDialog("School Information", components);
-        if (confirm != JOptionPane.OK_OPTION)
+        if (confirm != JOptionPane.OK_OPTION) {
             return;
+        }
         
         this.screen.setUserSchoolFile((String) options.getSelectedItem());
     }
@@ -210,8 +215,9 @@ public class Menu extends JMenuBar {
         JComponent[] components = new JComponent[] {new JLabel("Select verbosity:"), options};
         
         int confirm = PCDesktopApp.displayDialog("Next Up", components);
-        if (confirm != JOptionPane.OK_OPTION)
+        if (confirm != JOptionPane.OK_OPTION) {
             return;
+        }
         
         String verbosity = (String) options.getSelectedItem();
         this.screen.setUserNextUp(verbosity);
@@ -230,8 +236,9 @@ public class Menu extends JMenuBar {
         JComponent[] components = new JComponent[] {colorChooser};
         
         int confirm = PCDesktopApp.displayDialog("Theme", components);
-        if (confirm != JOptionPane.OK_OPTION)
+        if (confirm != JOptionPane.OK_OPTION) {
             return;
+        }
         
         Color color = colorChooser.getColor();
         this.screen.setUserTheme(color.getRed(), color.getGreen(), color.getBlue());
@@ -255,8 +262,9 @@ public class Menu extends JMenuBar {
         JComponent[] components = new JComponent[] {new JLabel("Select font: "), options};
 	
         int confirm = PCDesktopApp.displayDialog("Font", components);
-        if (confirm != JOptionPane.OK_OPTION)
+        if (confirm != JOptionPane.OK_OPTION) {
             return;
+        }
         
         // Font name is set directly. If the font used in the Font(String) constructor is
         // invalid, there is no error and the default font is chosen instead, so this
@@ -282,11 +290,6 @@ public class Menu extends JMenuBar {
      * to proceed to an external website.
      */
     private void submitIssueAction() {
-        JComponent[] components = new JComponent[] {new JLabel("Continue to github.com?")};
-        int confirm = PCDesktopApp.displayDialog("Submit An Issue", components);
-        if (confirm != JOptionPane.OK_OPTION)
-            return;
-        
         String url = "https://github.com/JonathanUhler/Period-Countdown/issues/new/choose";
         Desktop desktop = Desktop.isDesktopSupported() ? Desktop.getDesktop() : null;
         if (desktop != null) {
@@ -297,8 +300,9 @@ public class Menu extends JMenuBar {
                 PCDesktopApp.displayMessage("Browser Error", "Unabled to open link: " + e);
             }
         }
-        else
+        else {
             PCDesktopApp.displayMessage("Browser Error", "Unabled to open link:\n" + url);
+        }
     }
     
 }

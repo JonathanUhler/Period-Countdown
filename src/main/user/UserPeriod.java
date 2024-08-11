@@ -2,9 +2,10 @@ package user;
 
 
 /**
- * Represents the user-defined data in a school period. This information is as opposed to
- * the {@code SchoolPeriod} class which defines generic timing and type data. This class holds
- * user-specific data (teacher, room, and name).
+ * Represents the user-defined data in a school period.
+ *
+ * This information exists as opposed to the {@code SchoolPeriod} class which defines generic
+ * timing and type data. This class holds user-specific data (teacher, room, and name).
  *
  * @author Jonathan Uhler
  */

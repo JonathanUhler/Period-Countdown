@@ -9,6 +9,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
@@ -25,9 +26,7 @@ import user.UserJson;
  * @author Jonathan Uhler
  */
 public class SchoolYear {
-    
-    /** Whether the information in this class has been initialized. */
-    private boolean isInitialized;
+
     /** The json information. */
     private SchoolJson schoolJson;
     /** All periods in the year. */
@@ -55,30 +54,30 @@ public class SchoolYear {
      *              disk operations).
      *
      * @throws FileNotFoundException     if the json file does not exist.
-     * @throws IllegalArgumentException  if any parse error occurs.
+     * @throws IllegalArgumentException  if any parse error occurs from the provided path.
      */
     public SchoolYear(Path path) throws FileNotFoundException {
-        // Init instance variables
         this.year = new ArrayList<>();
-        
+
+        // Load school json file
         InputStreamReader schoolReader;
         if (OSPath.isInJar(path)) {
-            // Read the json file as a jar resource stream
             InputStream schoolStream = Thread.currentThread()
                 .getContextClassLoader()
                 .getResourceAsStream(path.toString());
-            if (schoolStream == null)
-                throw new FileNotFoundException("resource \"" + path + "\" is null");
+            if (schoolStream == null) {
+                throw new FileNotFoundException("jar resource \"" + path + "\" is null");
+            }
             schoolReader = new InputStreamReader(schoolStream);
         }
         else {
-            if (path.toString().length() == 0)
-                throw new FileNotFoundException("no school data file set. " +
-                                                "select a file in Settings > School Information");
+            if (!Files.exists(path)) {
+                throw new FileNotFoundException("no school data file set");
+            }
             schoolReader = new InputStreamReader(new FileInputStream(path.toString()));
         }
         
-        // Load json file with GSON as a SchoolJson object
+        // Parse school json file
         Gson gson = new Gson();
         try {
             this.schoolJson = gson.fromJson(schoolReader, SchoolJson.class);
@@ -86,17 +85,13 @@ public class SchoolYear {
         catch (JsonSyntaxException e) {
             throw new IllegalArgumentException("json cannot be parsed: " + e);
         }
-        
-        // If no school file is defined, this as the most that can be set up.
         if (this.schoolJson == null) {
-            this.isInitialized = false;
-            return;
+            throw new FileNotFoundException("school data file is empty");
         }
         
         // Initialize class information
         this.initInfo();
         this.initYear();
-        this.isInitialized = true;
     }
     
     
@@ -106,19 +101,24 @@ public class SchoolYear {
      *
      * @throws IllegalArgumentException  if any required key is missing.
      * @throws IllegalArgumentException  if the first or last period is not an integer.
-     * @throws IllegalArgumentException  if {@code FirstPeriod < LastPeriod}.
+     * @throws IllegalArgumentException  if FirstPeriod is greater than LastPeriod.
      */
     private void initInfo() {
-        if (!this.schoolJson.info.containsKey(SchoolJson.FIRST_PERIOD))
+        if (!this.schoolJson.info.containsKey(SchoolJson.FIRST_PERIOD)) {
             throw new IllegalArgumentException("missing " + SchoolJson.FIRST_PERIOD + " in Info");
-        if (!this.schoolJson.info.containsKey(SchoolJson.LAST_PERIOD))
+        }
+        if (!this.schoolJson.info.containsKey(SchoolJson.LAST_PERIOD)) {
             throw new IllegalArgumentException("missing " + SchoolJson.LAST_PERIOD + " in Info");
-        if (!this.schoolJson.info.containsKey(SchoolJson.FIRST_DAY_TAG))
+        }
+        if (!this.schoolJson.info.containsKey(SchoolJson.FIRST_DAY_TAG)) {
             throw new IllegalArgumentException("missing " + SchoolJson.FIRST_DAY_TAG + " in Info");
-        if (!this.schoolJson.info.containsKey(SchoolJson.LAST_DAY_TAG))
+        }
+        if (!this.schoolJson.info.containsKey(SchoolJson.LAST_DAY_TAG)) {
             throw new IllegalArgumentException("missing " + SchoolJson.LAST_DAY_TAG + " in Info");
-        if (!this.schoolJson.info.containsKey(SchoolJson.TIMEZONE))
+        }
+        if (!this.schoolJson.info.containsKey(SchoolJson.TIMEZONE)) {
             throw new IllegalArgumentException("missing " + SchoolJson.TIMEZONE + " in Info");
+        }
         
         try {
             this.firstPeriod = Integer.parseInt(this.schoolJson.info.get(SchoolJson.FIRST_PERIOD));
@@ -142,7 +142,7 @@ public class SchoolYear {
         this.lastDayTag = this.schoolJson.info.get(SchoolJson.LAST_DAY_TAG);
         this.timezone = this.schoolJson.info.get(SchoolJson.TIMEZONE);
     }
-    
+
     
     /**
      * Initializes all the periods of the year.
@@ -150,32 +150,35 @@ public class SchoolYear {
      * @throws IllegalArgumentException  if any check fails.
      */
     private void initYear() {
-        if (this.schoolJson.days == null)
+        if (this.schoolJson.days == null) {
             throw new IllegalArgumentException("missing Days field in school json file");
+        }
 	
         UTCTime firstDay = UTCTime.of(this.firstDayTag, this.timezone);
         UTCTime lastDay = UTCTime.of(this.lastDayTag, this.timezone);
         
         UTCTime current = firstDay.shiftedToClosest(UTCTime.SUNDAY);
-        UTCTime previousEndTime = null; // Running previous end time, to check continuity
+        UTCTime previousEndTime = null;
         UTCTime end = lastDay.shiftedToClosest(UTCTime.SATURDAY);
         
         while (current.isBefore(end)) {
-            // Search for a week exception in order to get the correct week structure
+            // Determine the type of week for the week occupied by `current`. Start by assuming
+            // a DEFAULT week, and search for any week exception that overwrites that. This search
+            // will also validate the syntax and semantics of the week exceptions.
             String weekTag = current.getWeekTag();
             String weekType = SchoolJson.DEFAULT;
             for (Map<String, String> exception : this.schoolJson.exceptions) {
-                if (!exception.containsKey(SchoolJson.TYPE))
-                    throw new IllegalArgumentException("week exception missing " + SchoolJson.TYPE);
-                if (!exception.containsKey(SchoolJson.WEEK_TAG))
-                    throw new IllegalArgumentException("week exception missing " +
-                                                       SchoolJson.WEEK_TAG);
+                if (!exception.containsKey(SchoolJson.TYPE)) {
+                    throw new IllegalArgumentException("exception missing " + SchoolJson.TYPE);
+                }
+                if (!exception.containsKey(SchoolJson.WEEK_TAG)) {
+                    throw new IllegalArgumentException("exception missing " + SchoolJson.WEEK_TAG);
+                }
                 
-                // At this point the exception structure is valid to index
+                // At this point the exception structure is valid to index. Get the date tag of
+                // the exception being analyzed and determine if its week tag aligns with the week
+                // tag of the `current` time. If so, we have found the exception for this week.
                 String exceptionTag = exception.get(SchoolJson.WEEK_TAG);
-                // Week tags are preferred to be used for the week exception list, but a day tag
-                // within that week can also be used. The tag is converted to be a week tag
-                // with this line
                 String exceptionWeekTag = UTCTime.of(exceptionTag, this.timezone).getWeekTag();
                 if (weekTag.equals(exceptionWeekTag)) {
                     weekType = exception.get(SchoolJson.TYPE);
@@ -187,58 +190,60 @@ public class SchoolYear {
             // weekType variables. We want to search for that week type, then go through each of
             // the day types in that week, and finally each of the period definitions for those
             // days. This should create all the periods for a given week
-            if (!this.schoolJson.weeks.containsKey(weekType))
+            if (!this.schoolJson.weeks.containsKey(weekType)) {
                 throw new IllegalArgumentException("missing defintion for week: " + weekType);
+            }
             
             List<String> dayTypes = this.schoolJson.weeks.get(weekType);
-            
-            if (dayTypes.size() != Duration.DAYS_PER_WEEK)
+            if (dayTypes.size() != Duration.DAYS_PER_WEEK) {
                 throw new IllegalArgumentException("week '" + weekType + "' does not have 7 days");
+            }
             
             for (String dayType : dayTypes) {
-                if (!this.schoolJson.days.containsKey(dayType))
+                if (!this.schoolJson.days.containsKey(dayType)) {
                     throw new IllegalArgumentException("missing definition for day: " + dayType);
+                }
                 
                 // Get the list of period definitions for this day. Then loop through each of the
                 // periods and create a SchoolPeriod object to add to the year
                 List<Map<String, String>> periodDefs = this.schoolJson.days.get(dayType);
-                
-                if (periodDefs.size() == 0)
+                if (periodDefs.size() == 0) {
                     throw new IllegalArgumentException("day '" + dayType + "' has 0 periods");
+                }
                 
                 for (Map<String, String> periodDef : periodDefs) {
-                    if (!periodDef.containsKey(SchoolJson.TYPE))
-                        throw new IllegalArgumentException("period definition missing: " +
-                                                           SchoolJson.TYPE);
-                    if (!periodDef.containsKey(SchoolJson.NAME))
-                        throw new IllegalArgumentException("period definition missing: " +
-                                                           SchoolJson.NAME);
-                    if (!periodDef.containsKey(SchoolJson.START))
-                        throw new IllegalArgumentException("period definition missing: " +
-                                                           SchoolJson.START);
-                    if (!periodDef.containsKey(SchoolJson.END))
-                        throw new IllegalArgumentException("period definition missing: " +
-                                                           SchoolJson.END);
+                    if (!periodDef.containsKey(SchoolJson.TYPE)) {
+                        throw new IllegalArgumentException("period missing " + SchoolJson.TYPE);
+                    }
+                    if (!periodDef.containsKey(SchoolJson.NAME)) {
+                        throw new IllegalArgumentException("period missing " + SchoolJson.NAME);
+                    }
+                    if (!periodDef.containsKey(SchoolJson.START)) {
+                        throw new IllegalArgumentException("period missing " + SchoolJson.START);
+                    }
+                    if (!periodDef.containsKey(SchoolJson.END)) {
+                        throw new IllegalArgumentException("period missing " + SchoolJson.END);
+                    }
                     
                     String type = periodDef.get(SchoolJson.TYPE);
                     String name = periodDef.get(SchoolJson.NAME);
                     String startStr = periodDef.get(SchoolJson.START);
                     String endStr = periodDef.get(SchoolJson.END);
                     
-                    // Convert the "current" time to the timezone specified by the json. Use the
+                    // Convert the `current` time to the timezone specified by the json. Use the
                     // day tag of that local object to create the local strings for the start/end.
                     // Then construct UTCTime objects for the start/end in UTC.
-                    UTCTime startTime = UTCTime.of(current.getDayTag() + "T" + startStr + ":00.000",
-                                                   this.timezone);
+                    String startTimestamp = current.getDayTag() + "T" + startStr + ":00.000";
+                    UTCTime startTime = UTCTime.of(startTimestamp, this.timezone);
                     UTCTime endTime = null;
                     if (!endStr.equals(UserJson.LAST_TIME)) {
-                        endTime = UTCTime.of(current.getDayTag() + "T" + endStr + ":00.999",
-                                             this.timezone);
+                        String endTimestamp = current.getDayTag() + "T" + endStr + ":00.999";
+                        endTime = UTCTime.of(endTimestamp, this.timezone);
                         endTime = endTime.plus(-1, UTCTime.SECONDS);
                     }
                     else {
-                        endTime = UTCTime.of(current.plus(1, UTCTime.DAYS).getDayTag() +
-                                             "T00:00:00.000", this.timezone);
+                        String endTimestamp = current.plus(1, UTCTime.DAYS).getDayTag();
+                        endTime = UTCTime.of(endTimestamp, this.timezone);
                         endTime = endTime.plus(-1, UTCTime.MILLISECONDS);
                     }
                     
@@ -248,9 +253,11 @@ public class SchoolYear {
                     // is illegal.
                     if (previousEndTime != null &&
                         !(previousEndTime.plus(1, UTCTime.MILLISECONDS)).isEqual(startTime))
+                    {
                         throw new IllegalArgumentException("previous end + 1ms != next start: " +
                                                            previousEndTime + ", " + startTime +
                                                            " for dayType=" + dayType);
+                    }
                     previousEndTime = endTime;
                     
                     SchoolPeriod addition = new SchoolPeriod(type, name,
@@ -267,54 +274,61 @@ public class SchoolYear {
     
     
     /**
-     * Binary search implementation to find the period that occupies the target time.
+     * Binary search implementation to find the period index that occupies the target time.
      *
-     * @param now  the time to find a period for.
-     * @param min  the minimum index to search in the year list.
-     * @param max  the maximum index to search in the year list.
+     * If a period at the provided time does not exist, -1 is returned.
      *
-     * @return the index of the period such that {@code start <= now <= end} in the year list,
-     *         or {@code -1} is no such period exists.
+     * @param time  the time to find a period for.
+     * @param min   the minimum index to search in the year list.
+     * @param max   the maximum index to search in the year list.
+     *
+     * @return the index of the period such that {@code start <= time <= end} in the year list.
      */
-    private int periodSearch(UTCTime now, int min, int max) {
-        if (!this.isInitialized)
+    private int periodSearch(UTCTime time, int min, int max) {
+        if (min > max) {
             return -1;
-	
-        if (min > max)
-            return -1;
+        }
 	
         int middle = (min + max) / 2;
         SchoolPeriod period = this.year.get(middle);
         UTCTime start = period.getStart();
         UTCTime end = period.getEnd();
 	
-        if (start.compareTo(now) <= 0 && now.compareTo(end) <= 0) // period is during now
+        if (start.compareTo(time) <= 0 && time.compareTo(end) <= 0) {
             return middle;
-        else if (start.compareTo(now) > 0) // period is after now
-            return this.periodSearch(now, min, middle - 1);
-        else
-            return this.periodSearch(now, middle + 1, max); // period is before now
+        }
+        else if (start.compareTo(time) > 0) {
+            return this.periodSearch(time, min, middle - 1);
+        }
+        else {
+            return this.periodSearch(time, middle + 1, max);
+        }
     }
     
     
     /**
-     * Gets a period from the year structure at a given time such that {@code start <= now <= end}.
+     * Gets a period from the year structure at a given time such that {@code start <= time <= end}.
      *
-     * @param now  the time to get a period for.
+     * If no such period exists, {@code null} is returned.
      *
-     * @return the period if one exists. If {@code now == null}, then {@code null} is returned.
+     * @param time  the time to get a period for.
+     *
+     * @return the period which occurs during the provided time.
+     *
+     * @throws NullPointerException  if {@code time} is null.
      */
-    public SchoolPeriod getPeriod(UTCTime now) {
-        if (!this.isInitialized)
-            return null;
-        if (now == null)
-            return null;
+    public SchoolPeriod getPeriod(UTCTime time) {
+        if (time == null) {
+            throw new NullPointerException("time cannot be null");
+        }
 	
-        int index = this.periodSearch(now, 0, this.year.size() - 1);
-        if (index == -1 || index >= this.year.size())
+        int index = this.periodSearch(time, 0, this.year.size() - 1);
+        if (index == -1 || index >= this.year.size()) {
             return null;
-        else
+        }
+        else {
             return this.year.get(index);
+        }
     }
     
     
@@ -359,9 +373,9 @@ public class SchoolYear {
         
         for (SchoolPeriod period : this.year) {
             str += period + "\n";
-            
-            if (period.isLast())
+            if (period.isLast()) {
                 str += "\n";
+            }
         }
         
         return str;
