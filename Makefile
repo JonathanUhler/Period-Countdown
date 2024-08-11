@@ -95,7 +95,8 @@ test: jar_desktop
 	java -cp '.:$(SRC_DIR)/lib/*:$(OBJ_DIR)/$(TEST_DIR):$(BIN_DIR)/*' \
 		org.junit.runner.JUnitCore                                \
 		TestOSPath TestUTCTime TestDuration TestInterval          \
-                TestSchoolPeriod TestSchoolYear TestSchoolAPI
+                TestSchoolPeriod TestSchoolYear TestSchoolAPI             \
+		TestUserPeriod
 
 javadoc: javadoc_dir
 	javadoc $(shell find $(SRC_DIR)/main -name "*.java" -not -path "web/*")   \
