@@ -1,0 +1,22 @@
+{
+  "Weeks": {
+    "DEFAULT": [
+      "Day",
+      "Day",
+      "Day",
+      "Day",
+      "Day",
+      "Day",
+      "Day"
+    ]
+  },
+  "Exceptions": [
+  ],
+  "Info": {
+    "Timezone": "Z",
+    "FirstPeriod": "1",
+    "LastPeriod": "7",
+    "FirstDayTag": "1970-01-01",
+    "LastDayTag": "1971-01-01"
+  }
+}

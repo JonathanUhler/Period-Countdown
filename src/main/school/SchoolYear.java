@@ -86,7 +86,7 @@ public class SchoolYear {
             throw new IllegalArgumentException("json cannot be parsed: " + e);
         }
         if (this.schoolJson == null) {
-            throw new FileNotFoundException("school data file is empty");
+            throw new IllegalArgumentException("school data file is empty");
         }
         
         // Initialize class information
@@ -104,6 +104,9 @@ public class SchoolYear {
      * @throws IllegalArgumentException  if FirstPeriod is greater than LastPeriod.
      */
     private void initInfo() {
+        if (this.schoolJson.info == null) {
+            throw new IllegalArgumentException("missing Info field in school json file");
+        }
         if (!this.schoolJson.info.containsKey(SchoolJson.FIRST_PERIOD)) {
             throw new IllegalArgumentException("missing " + SchoolJson.FIRST_PERIOD + " in Info");
         }
@@ -152,6 +155,12 @@ public class SchoolYear {
     private void initYear() {
         if (this.schoolJson.days == null) {
             throw new IllegalArgumentException("missing Days field in school json file");
+        }
+        if (this.schoolJson.weeks == null) {
+            throw new IllegalArgumentException("missing Weeks field in school json file");
+        }
+        if (this.schoolJson.exceptions == null) {
+            throw new IllegalArgumentException("missing Exceptions field in school json file");
         }
 	
         UTCTime firstDay = UTCTime.of(this.firstDayTag, this.timezone);

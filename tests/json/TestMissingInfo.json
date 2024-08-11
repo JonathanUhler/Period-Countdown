@@ -1,0 +1,25 @@
+{
+  "Weeks": {
+    "DEFAULT": [
+      "Day",
+      "Day",
+      "Day",
+      "Day",
+      "Day",
+      "Day",
+      "Day"
+    ]
+  },
+  "Days": {
+    "Day": [
+      {
+        "Type": "Nothing",
+        "Start": "00:00",
+        "End": "23:59",
+        "Name": "Free"
+      }
+    ]
+  },
+  "Exceptions": [
+  ]
+}

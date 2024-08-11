@@ -1,0 +1,32 @@
+{
+  "Weeks": {
+    "DEFAULT": [
+      "Day",
+      "Day",
+      "Day",
+      "Day",
+      "Day",
+      "Day",
+      "Day"
+    ]
+  },
+  "Days": {
+    "Day": [
+      {
+        "Type": "Nothing",
+        "Start": "00:00",
+        "End": "23:59",
+        "Name": "Free"
+      }
+    ]
+  },
+  "Exceptions": [
+  ],
+  "Info": {
+    "Timezone": "Z",
+    "FirstPeriod": "1",
+    "LastPeriod": "7",
+    "FirstDayTag": "not a day tag",
+    "LastDayTag": "1971-01-01"
+  }
+}

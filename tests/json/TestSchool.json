@@ -1,0 +1,53 @@
+{
+    "Weeks": {
+        "MondayHoliday": [
+            "Weekend",
+            "Holiday",
+            "Day1",
+            "Day2",
+            "Day1",
+            "Day2",
+            "Weekend"
+        ],
+        "DEFAULT": [
+            "Weekend",
+            "Day2",
+            "Day1",
+            "Day2",
+            "Day1",
+            "Day2",
+            "Weekend"
+        ]
+    },
+    "Days": {
+        "Weekend": [
+            {"Type": "Nothing", "Start": "00:00", "End": "23:59", "Name": "WeekendDay"}
+        ],
+        "Holiday": [
+            {"Type": "Nothing", "Start": "00:00", "End": "23:59", "Name": "HolidayDay"}
+        ],
+        "Day1": [
+            {"Type": "Nothing", "Start": "00:00", "End": "10:00", "Name": "BeforeClass"},
+            {"Type": "1", "Start": "10:00", "End": "12:00", "Name": "Class1"},
+            {"Type": "Special", "Start": "12:00", "End": "13:00", "Name": "Lunch" },
+            {"Type": "2", "Start": "13:00", "End": "15:00", "Name": "Class2" },
+            {"Type": "Nothing", "Start": "15:00", "End": "23:59", "Name": "AfterClass"}
+        ],
+        "Day2": [
+            {"Type": "Nothing", "Start": "00:00", "End": "11:00", "Name": "BeforeClass"},
+            {"Type": "3", "Start": "11:00", "End": "13:00", "Name": "Class3"},
+            {"Type": "Nothing", "Start": "13:00", "End": "23:59", "Name": "AfterClass"}
+        ]
+    },
+    "Exceptions": [
+        {"Type": "MondayHoliday", "WeekTag": "1970-01-05"},
+        {"Type": "MondayHoliday", "WeekTag": "1970-01-11"}
+    ],
+    "Info": {
+        "Timezone": "Z",
+        "FirstPeriod": "1",
+        "LastPeriod": "2",
+        "FirstDayTag": "1970-01-01",
+        "LastDayTag": "1971-01-01"
+    }
+}

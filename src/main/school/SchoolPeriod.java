@@ -57,6 +57,7 @@ public class SchoolPeriod {
      * @param isLast  whether this period is the last in its containing day (local time).
      *
      * @throws NullPointerException      if any argument is null.
+     * @throws IllegalArgumentException  if {@code start} is after {@code end}.
      * @throws IllegalArgumentException  if {@code type} is not {@code "Nothing"},
      *                                   {@code "Special"}, or an integer.
      */
@@ -73,7 +74,9 @@ public class SchoolPeriod {
         if (end == null) {
             throw new NullPointerException("end cannot be null");
         }
-        
+        if (start.compareTo(end) > 0) {
+            throw new IllegalArgumentException("start cannot be after end");
+        }
         if (!type.equals(SchoolJson.NOTHING) && !type.equals(SchoolJson.SPECIAL)) {
             try {
                 Integer.parseInt(type);
