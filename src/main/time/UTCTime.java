@@ -1,6 +1,7 @@
 package time;
 
 
+import java.util.Arrays;
 import java.time.ZonedDateTime;
 import java.time.ZoneOffset;
 import java.time.ZoneId;
@@ -18,6 +19,10 @@ import java.time.DateTimeException;
  * @author Jonathan Uhler
  */
 public class UTCTime implements Comparable<UTCTime> {
+
+    /** A list of all Unix TZ identifiers. */
+    public static final String[] TIMEZONES =
+        ZoneId.getAvailableZoneIds().stream().sorted().toArray(String[]::new);
     
     /** The concept of a year. */
     public static final ChronoField YEAR = ChronoField.YEAR;

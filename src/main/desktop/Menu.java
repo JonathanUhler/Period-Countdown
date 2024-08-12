@@ -26,7 +26,7 @@ import javax.swing.JColorChooser;
 import school.SchoolJson;
 import user.UserJson;
 import user.UserPeriod;
-import wizard.Wizard;
+import desktop.wizard.Wizard;
 
 
 /**
@@ -281,7 +281,8 @@ public class Menu extends JMenuBar {
      * and controlled by the wizard.
      */
     private void dataWizardAction() {
-        Wizard.main(null);
+        Wizard wizard = new Wizard();
+        wizard.display();
     }
     
     
