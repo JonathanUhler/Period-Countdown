@@ -162,6 +162,9 @@ public abstract class EntryList<E extends JComponent>
         if (this.selectedIndex != -1) {
             this.entries.get(this.selectedIndex).setBackground(new Color(255, 255, 255));
         }
+        if (entry == this) {
+            return;
+        }
 
         this.selectedIndex = this.entries.indexOf(entry);
         entry.setBackground(new Color(100, 100, 255));
@@ -189,8 +192,9 @@ public abstract class EntryList<E extends JComponent>
         if (this.selectedIndex == -1 || !this.mutable) {
             return;
         }
-
-        // MARK: MAKE THIS ONLY RUN ON THE DELETE KEY PRESSED
+        if (e.getKeyChar() != KeyEvent.VK_DELETE && e.getKeyChar() != KeyEvent.VK_BACK_SPACE) {
+            return;
+        }
 
         E removed = this.entries.remove(this.selectedIndex);
         this.remove(removed);

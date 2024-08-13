@@ -3,10 +3,13 @@ package desktop.wizard;
 
 import java.util.List;
 import java.util.ArrayList;
+import java.util.Map;
+import java.util.HashMap;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextField;
 import javax.swing.JComboBox;
+import javax.swing.DefaultComboBoxModel;
 import javax.swing.JLabel;
 import java.awt.GridBagLayout;
 import java.awt.GridBagConstraints;
@@ -17,8 +20,8 @@ public class WeeksEditor extends JPanel {
 
     private class WeekEntry extends JPanel {
 
-        private JTextField nameTextField;
-        private EntryList<JComboBox<String>> days;
+        public JTextField nameTextField;
+        public EntryList<JComboBox<String>> days;
 
 
         public WeekEntry() {
@@ -28,7 +31,7 @@ public class WeeksEditor extends JPanel {
             this.days = new EntryList<>(false) {
                     @Override
                     public JComboBox<String> entryFactory() {
-                        return new JComboBox<>(new String[] {"a", "b"});
+                        return new JComboBox<>(WeeksEditor.this.dataSource.getDayNames());
                     }
                 };
 
@@ -55,18 +58,15 @@ public class WeeksEditor extends JPanel {
             this.add(this.days, gbc);
         }
 
-
-        public String getName() {
-            return this.nameTextField.getText();
-        }
-
     }
 
 
+    private DaysEditor dataSource;
     private EntryList<WeekEntry> entries;
 
 
-    public WeeksEditor() {
+    public WeeksEditor(DaysEditor dataSource) {
+        this.dataSource = dataSource;
         this.entries = new EntryList<>() {
                 @Override
                 public WeekEntry entryFactory() {
@@ -78,12 +78,39 @@ public class WeeksEditor extends JPanel {
     }
 
 
-    public List<String> getWeekNames() {
+    public String[] getWeekNames() {
         List<String> names = new ArrayList<>();
         for (WeekEntry entry : this.entries) {
-            names.add(entry.getName());
+            names.add(entry.nameTextField.getText());
         }
-        return names;
+        return names.toArray(new String[0]);
+    }
+
+
+    public void update() {
+        String[] names = this.dataSource.getDayNames();
+        for (WeekEntry entry : this.entries) {
+            for (JComboBox<String> day : entry.days) {
+                String previousItem = (String) day.getSelectedItem();
+                day.setModel(new DefaultComboBoxModel<>(names));
+                day.setSelectedItem(previousItem);
+            }
+        }
+    }
+
+
+    public Map<String, List<String>> collect() {
+        Map<String, List<String>> data = new HashMap<>();
+        for (WeekEntry entry : this.entries) {
+            String name = entry.nameTextField.getText();
+            List<String> entryData = new ArrayList<>();
+            for (JComboBox<String> day : entry.days) {
+                entryData.add((String) day.getSelectedItem());
+            }
+
+            data.put(name, entryData);
+        }
+        return data;
     }
 
 }

@@ -2,6 +2,8 @@ package desktop.wizard;
 
 
 import java.util.Date;
+import java.util.Map;
+import java.util.HashMap;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.awt.GridBagLayout;
@@ -13,6 +15,7 @@ import javax.swing.JSpinner;
 import javax.swing.SpinnerDateModel;
 import javax.swing.JComboBox;
 import time.UTCTime;
+import school.SchoolJson;
 
 
 public class InfoEditor extends JPanel {
@@ -58,20 +61,20 @@ public class InfoEditor extends JPanel {
     }
 
 
-    public String getFirstDayTag() {
-        DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
-        return df.format((Date) this.firstDayTagSpinner.getValue());
-    }
+    public Map<String, String> collect(int numAcademicPeriods) {
+        DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+        String lastPeriod = Integer.toString(numAcademicPeriods);
+        String firstDayTag = dateFormat.format((Date) this.firstDayTagSpinner.getValue());
+        String lastDayTag = dateFormat.format((Date) this.lastDayTagSpinner.getValue());
+        String timezone = (String) this.timezoneComboBox.getSelectedItem();
 
-
-    public String getLastDayTag() {
-        DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
-        return df.format((Date) this.lastDayTagSpinner.getValue());
-    }
-
-
-    public String getTimezone() {
-        return (String) this.timezoneComboBox.getSelectedItem();
+        Map<String, String> data = new HashMap<>();
+        data.put(SchoolJson.FIRST_PERIOD, "1");
+        data.put(SchoolJson.LAST_PERIOD, lastPeriod);
+        data.put(SchoolJson.FIRST_DAY_TAG, firstDayTag);
+        data.put(SchoolJson.LAST_DAY_TAG, lastDayTag);
+        data.put(SchoolJson.TIMEZONE, timezone);
+        return data;
     }
     
 }

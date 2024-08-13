@@ -3,6 +3,8 @@ package desktop.wizard;
 
 import java.util.List;
 import java.util.ArrayList;
+import java.util.Map;
+import java.util.HashMap;
 import java.util.Date;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -21,10 +23,10 @@ public class PeriodsEditor extends JPanel {
 
     private class PeriodEntry extends JPanel {
 
-        private JComboBox<String> typeComboBox;
-        private JTextField nameTextField;
-        private JSpinner startSpinner;
-        private JSpinner endSpinner;
+        public JComboBox<String> typeComboBox;
+        public JTextField nameTextField;
+        public JSpinner startSpinner;
+        public JSpinner endSpinner;
 
 
         public PeriodEntry() {
@@ -50,28 +52,6 @@ public class PeriodsEditor extends JPanel {
             this.add(this.endSpinner);
         }
 
-
-        public String getType() {
-            return (String) this.typeComboBox.getSelectedItem();
-        }
-
-
-        public String getName() {
-            return this.nameTextField.getText();
-        }
-
-
-        public String getStart() {
-            DateFormat df = new SimpleDateFormat("HH:mm");
-            return df.format((Date) this.startSpinner.getValue());
-        }
-
-
-        public String getEnd() {
-            DateFormat df = new SimpleDateFormat("HH:mm");
-            return df.format((Date) this.endSpinner.getValue());
-        }
-
     }
 
 
@@ -90,12 +70,45 @@ public class PeriodsEditor extends JPanel {
     }
 
 
-    public List<String> getPeriodNames() {
+    public String[] getPeriodNames() {
         List<String> names = new ArrayList<>();
         for (PeriodEntry entry : this.entries) {
-            names.add(entry.getName());
+            names.add(entry.nameTextField.getText());
         }
-        return names;
+        return names.toArray(new String[0]);
+    }
+
+
+    public int getNumAcademicPeriods() {
+        int count = 0;
+        for (PeriodEntry entry : this.entries) {
+            if (entry.typeComboBox.getSelectedItem().equals("Academic")) {
+                count++;
+            }
+        }
+        return count;
+    }
+
+
+    public Map<String, Map<String, String>> collect() {
+        DateFormat dateFormat = new SimpleDateFormat("HH:mm");
+
+        Map<String, Map<String, String>> data = new HashMap<>();
+        for (PeriodEntry entry : this.entries) {
+            String type = (String) entry.typeComboBox.getSelectedItem();
+            String name = entry.nameTextField.getText();
+            String start = dateFormat.format((Date) entry.startSpinner.getValue());
+            String end = dateFormat.format((Date) entry.endSpinner.getValue());
+
+            Map<String, String> entryData = new HashMap<>();
+            entryData.put(SchoolJson.TYPE, type);
+            entryData.put(SchoolJson.NAME, name);
+            entryData.put(SchoolJson.START, start);
+            entryData.put(SchoolJson.END, end);
+
+            data.put(name, entryData);
+        }
+        return data;
     }
 
 }
