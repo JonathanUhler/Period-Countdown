@@ -1,6 +1,8 @@
 package desktop.wizard;
 
 
+import java.util.Set;
+import java.util.HashSet;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Map;
@@ -66,8 +68,6 @@ public class DaysEditor extends JPanel {
 
             gbc.gridy++;
             this.add(this.periods, gbc);
-
-            this.periods.addEntry(new PeriodChoiceEntry());
         }
 
     }
@@ -173,13 +173,20 @@ public class DaysEditor extends JPanel {
     }
 
 
-    public Map<String, List<Map<String, String>>> collect(Map<String, Map<String, String>> periods)
+    public Map<String, List<Map<String, String>>> collect(Map<String, Map<String, String>> periods,
+                                                          List<String> errors)
     {
         Map<String, List<Map<String, String>>> data = new HashMap<>();
+        Set<String> seenNames = new HashSet<>();
         for (DayEntry entry : this.entries) {
             String name = entry.nameTextField.getText();
-            List<Map<String, String>> entryData = new ArrayList<>();
 
+            if (seenNames.contains(name)) {
+                errors.add("Days: Duplicate name '" + name + "'");
+            }
+            seenNames.add(name);
+
+            List<Map<String, String>> entryData = new ArrayList<>();
             for (PeriodChoiceEntry periodEntry : entry.periods) {
                 String periodName = (String) periodEntry.periodNameComboBox.getSelectedItem();
                 entryData.add(periods.get(periodName));

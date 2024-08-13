@@ -19,15 +19,18 @@ public class Wizard {
         DaysEditor daysEditor = new DaysEditor(periodsEditor);
         WeeksEditor weeksEditor = new WeeksEditor(daysEditor);
         ExceptionsEditor exceptionsEditor = new ExceptionsEditor(weeksEditor);
+        Builder builder = new Builder(infoEditor,
+                                      periodsEditor,
+                                      daysEditor,
+                                      weeksEditor,
+                                      exceptionsEditor);
 
         dataPane.add("Info", infoEditor);
         dataPane.add("Periods", periodsEditor);
         dataPane.add("Days", daysEditor);
         dataPane.add("Weeks", weeksEditor);
         dataPane.add("Exceptions", exceptionsEditor);
-        /*
-        dataPane.add("Export", );
-        */
+        dataPane.add("Export", builder);
 
         Wizard.currentTabIndex = dataPane.getSelectedIndex();
         dataPane.addChangeListener(e -> {
@@ -36,6 +39,9 @@ public class Wizard {
                     daysEditor.update();
                     weeksEditor.update();
                     exceptionsEditor.update();
+                }
+                if (newIndex == dataPane.getTabCount() - 1) {
+                    builder.update();
                 }
                 Wizard.currentTabIndex = newIndex;
             });

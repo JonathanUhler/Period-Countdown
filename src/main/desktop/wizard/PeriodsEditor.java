@@ -1,6 +1,8 @@
 package desktop.wizard;
 
 
+import java.util.Set;
+import java.util.HashSet;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Map;
@@ -90,22 +92,32 @@ public class PeriodsEditor extends JPanel {
     }
 
 
-    public Map<String, Map<String, String>> collect() {
+    public Map<String, Map<String, String>> collect(List<String> errors) {
         DateFormat dateFormat = new SimpleDateFormat("HH:mm");
 
         Map<String, Map<String, String>> data = new HashMap<>();
+        Set<String> seenNames = new HashSet<>();
         for (PeriodEntry entry : this.entries) {
+            Date startTime = (Date) entry.startSpinner.getValue();
+            Date endTime = (Date) entry.endSpinner.getValue();
             String type = (String) entry.typeComboBox.getSelectedItem();
             String name = entry.nameTextField.getText();
-            String start = dateFormat.format((Date) entry.startSpinner.getValue());
-            String end = dateFormat.format((Date) entry.endSpinner.getValue());
+            String start = dateFormat.format(startTime);
+            String end = dateFormat.format(endTime);
+
+            if (!startTime.before(endTime)) {
+                errors.add("Periods: Period '" + name + "' Start must be before End");
+            }
+            if (seenNames.contains(name)) {
+                errors.add("Periods: Duplicate name '" + name + "'");
+            }
+            seenNames.add(name);
 
             Map<String, String> entryData = new HashMap<>();
             entryData.put(SchoolJson.TYPE, type);
             entryData.put(SchoolJson.NAME, name);
             entryData.put(SchoolJson.START, start);
             entryData.put(SchoolJson.END, end);
-
             data.put(name, entryData);
         }
         return data;

@@ -1,6 +1,8 @@
 package desktop.wizard;
 
 
+import java.util.Set;
+import java.util.HashSet;
 import java.util.Date;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -15,7 +17,7 @@ import javax.swing.SpinnerDateModel;
 import javax.swing.JComboBox;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JLabel;
-import time.Duration;
+import time.UTCTime;
 import school.SchoolJson;
 
 
@@ -69,13 +71,20 @@ public class ExceptionsEditor extends JPanel {
     }
 
 
-    public List<Map<String, String>> collect() {
+    public List<Map<String, String>> collect(List<String> errors) {
         DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
 
         List<Map<String, String>> data = new ArrayList<>();
+        Set<String> seenWeekTags = new HashSet<>();
         for (ExceptionEntry entry : this.entries) {
             String week = (String) entry.weekComboBox.getSelectedItem();
             String weekTag = dateFormat.format((Date) entry.dateSpinner.getValue());
+            weekTag = UTCTime.of(weekTag, "Z").getWeekTag();
+
+            if (seenWeekTags.contains(weekTag)) {
+                errors.add("Exceptions: Multiple week exceptions exist for the week of " + weekTag);
+            }
+            seenWeekTags.add(weekTag);
 
             Map<String, String> entryData = new HashMap<>();
             entryData.put(SchoolJson.TYPE, week);

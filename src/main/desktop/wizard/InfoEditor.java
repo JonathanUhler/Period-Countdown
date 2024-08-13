@@ -3,6 +3,8 @@ package desktop.wizard;
 
 import java.util.Date;
 import java.util.Map;
+import java.util.List;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -61,12 +63,18 @@ public class InfoEditor extends JPanel {
     }
 
 
-    public Map<String, String> collect(int numAcademicPeriods) {
+    public Map<String, String> collect(int numAcademicPeriods, List<String> errors) {
         DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+        Date firstDate = (Date) this.firstDayTagSpinner.getValue();
+        Date lastDate = (Date) this.lastDayTagSpinner.getValue();
         String lastPeriod = Integer.toString(numAcademicPeriods);
-        String firstDayTag = dateFormat.format((Date) this.firstDayTagSpinner.getValue());
-        String lastDayTag = dateFormat.format((Date) this.lastDayTagSpinner.getValue());
+        String firstDayTag = dateFormat.format(firstDate);
+        String lastDayTag = dateFormat.format(lastDate);
         String timezone = (String) this.timezoneComboBox.getSelectedItem();
+
+        if (!firstDate.before(lastDate)) {
+            errors.add("Info: First Date must be before Last Date");
+        }
 
         Map<String, String> data = new HashMap<>();
         data.put(SchoolJson.FIRST_PERIOD, "1");

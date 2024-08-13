@@ -1,6 +1,8 @@
 package desktop.wizard;
 
 
+import java.util.Set;
+import java.util.HashSet;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Map;
@@ -14,6 +16,7 @@ import javax.swing.JLabel;
 import java.awt.GridBagLayout;
 import java.awt.GridBagConstraints;
 import time.Duration;
+import school.SchoolJson;
 
 
 public class WeeksEditor extends JPanel {
@@ -99,17 +102,33 @@ public class WeeksEditor extends JPanel {
     }
 
 
-    public Map<String, List<String>> collect() {
+    public Map<String, List<String>> collect(List<String> errors) {
         Map<String, List<String>> data = new HashMap<>();
+        Set<String> seenNames = new HashSet<>();
         for (WeekEntry entry : this.entries) {
             String name = entry.nameTextField.getText();
+
+            if (seenNames.contains(name)) {
+                errors.add("Weeks: Duplicate name '" + name + "'");
+            }
+            seenNames.add(name);
+
             List<String> entryData = new ArrayList<>();
             for (JComboBox<String> day : entry.days) {
-                entryData.add((String) day.getSelectedItem());
+                String dayName = (String) day.getSelectedItem();
+                entryData.add(dayName);
             }
-
             data.put(name, entryData);
+
+            if (entryData.contains(null)) {
+                errors.add("Weeks: All days must be chosen for week '" + name + "'");
+            }
         }
+
+        if (!seenNames.contains(SchoolJson.DEFAULT)) {
+            errors.add("Weeks: A 'DEFAULT' week definition is required");
+        }
+
         return data;
     }
 
