@@ -10,38 +10,31 @@ import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import java.awt.GridBagLayout;
 import java.awt.GridBagConstraints;
+import time.Duration;
 
 
-public class DaysEditor extends JPanel {
+public class WeeksEditor extends JPanel {
 
-    private class PeriodChoiceEntry extends JPanel {
-
-        private JComboBox<String> periodNameComboBox;
-
-
-        public PeriodChoiceEntry() {
-            this.periodNameComboBox = new JComboBox<>();
-        }
-        
-    }
-
-
-    private class DayEntry extends JPanel {
+    private class WeekEntry extends JPanel {
 
         private JTextField nameTextField;
-        private EntryList<PeriodChoiceEntry> periods;
+        private EntryList<JComboBox<String>> days;
 
 
-        public DayEntry() {
+        public WeekEntry() {
             this.setLayout(new GridBagLayout());
 
             this.nameTextField = new JTextField("", 10);
-            this.periods = new EntryList<>() {
-                @Override
-                public PeriodChoiceEntry entryFactory() {
-                    return new PeriodChoiceEntry();
-                }
-            };
+            this.days = new EntryList<>(false) {
+                    @Override
+                    public JComboBox<String> entryFactory() {
+                        return new JComboBox<>(new String[] {"a", "b"});
+                    }
+                };
+
+            for (int i = 0; i < Duration.DAYS_PER_WEEK; i++) {
+                this.days.addEntry(this.days.entryFactory());
+            }
 
             GridBagConstraints gbc = new GridBagConstraints();
 
@@ -56,12 +49,10 @@ public class DaysEditor extends JPanel {
 
             gbc.gridx = 0;
             gbc.gridy++;
-            this.add(new JLabel("Periods"), gbc);
+            this.add(new JLabel("Days"), gbc);
 
-            gbc.gridy++;
-            this.add(this.periods, gbc);
-
-            this.periods.addEntry(new PeriodChoiceEntry());
+            gbc.gridx++;
+            this.add(this.days, gbc);
         }
 
 
@@ -72,14 +63,14 @@ public class DaysEditor extends JPanel {
     }
 
 
-    private EntryList<DayEntry> entries;
+    private EntryList<WeekEntry> entries;
 
 
-    public DaysEditor() {
+    public WeeksEditor() {
         this.entries = new EntryList<>() {
                 @Override
-                public DayEntry entryFactory() {
-                    return new DayEntry();
+                public WeekEntry entryFactory() {
+                    return new WeekEntry();
                 }
             };
 
@@ -87,9 +78,9 @@ public class DaysEditor extends JPanel {
     }
 
 
-    public List<String> getDayNames() {
+    public List<String> getWeekNames() {
         List<String> names = new ArrayList<>();
-        for (DayEntry entry : this.entries) {
+        for (WeekEntry entry : this.entries) {
             names.add(entry.getName());
         }
         return names;

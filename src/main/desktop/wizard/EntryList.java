@@ -7,6 +7,7 @@ import java.util.Iterator;
 import java.util.Collections;
 import javax.swing.BoxLayout;
 import javax.swing.JPanel;
+import javax.swing.JButton;
 import javax.swing.Scrollable;
 import javax.swing.SwingConstants;
 import javax.swing.UIManager;
@@ -22,7 +23,7 @@ import java.awt.Dimension;
 import java.awt.Rectangle;
 
 
-public class EditorList<E extends JComponent>
+public abstract class EntryList<E extends JComponent>
     extends JPanel
     implements Iterable<E>, Scrollable, MouseListener, KeyListener
 {
@@ -30,13 +31,27 @@ public class EditorList<E extends JComponent>
     public static final int MAX_HEIGHT = 500;
 
 
+    private boolean mutable;
     private int selectedIndex;
     private List<E> entries;
+    private JButton addEntryButton;
 
 
-    public EditorList() {
+    public EntryList() {
+        this(true);
+    }
+
+
+    public EntryList(boolean mutable) {
+        this.mutable = mutable;
         this.selectedIndex = -1;
         this.entries = new ArrayList<>();
+        this.addEntryButton = new JButton("+");
+
+        if (this.mutable) {
+            this.addEntryButton.addActionListener(e -> this.addEntry(this.entryFactory()));
+            this.add(this.addEntryButton);
+        }
 
         this.setLayout(new BoxLayout(this, BoxLayout.PAGE_AXIS));
         this.setBorder(BorderFactory.createLineBorder(Color.BLACK, 1));
@@ -52,6 +67,9 @@ public class EditorList<E extends JComponent>
         this.revalidate();
         this.repaint();
     }
+
+
+    public abstract E entryFactory();
 
 
     @Override
@@ -70,8 +88,8 @@ public class EditorList<E extends JComponent>
      */
     @Override
     public Dimension getPreferredScrollableViewportSize() {
-        int width = Math.max(EditorList.MAX_HEIGHT, this.getPreferredSize().width);
-        return new Dimension(width, EditorList.MAX_HEIGHT);
+        int width = Math.max(EntryList.MAX_HEIGHT, this.getPreferredSize().width);
+        return new Dimension(width, EntryList.MAX_HEIGHT);
     }
 
 
@@ -136,6 +154,10 @@ public class EditorList<E extends JComponent>
 
     @Override
     public void mousePressed(MouseEvent e) {
+        if (!this.mutable) {
+            return;
+        }
+
         E entry = (E) this.getComponentAt(e.getPoint());
         if (this.selectedIndex != -1) {
             this.entries.get(this.selectedIndex).setBackground(new Color(255, 255, 255));
@@ -164,9 +186,11 @@ public class EditorList<E extends JComponent>
 
     @Override
     public void keyPressed(KeyEvent e) {
-        if (this.selectedIndex == -1) {
+        if (this.selectedIndex == -1 || !this.mutable) {
             return;
         }
+
+        // MARK: MAKE THIS ONLY RUN ON THE DELETE KEY PRESSED
 
         E removed = this.entries.remove(this.selectedIndex);
         this.remove(removed);

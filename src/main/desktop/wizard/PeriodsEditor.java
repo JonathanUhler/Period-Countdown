@@ -11,11 +11,8 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextField;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
-import javax.swing.JButton;
 import javax.swing.JSpinner;
 import javax.swing.SpinnerDateModel;
-import java.awt.GridBagLayout;
-import java.awt.GridBagConstraints;
 import school.SchoolPeriod;
 import school.SchoolJson;
 
@@ -28,6 +25,7 @@ public class PeriodsEditor extends JPanel {
         private JTextField nameTextField;
         private JSpinner startSpinner;
         private JSpinner endSpinner;
+
 
         public PeriodEntry() {
             this.typeComboBox = new JComboBox<>(new String[] {"Academic",
@@ -77,27 +75,18 @@ public class PeriodsEditor extends JPanel {
     }
 
 
-    private JButton newEntryButton;
-    private EditorList<PeriodEntry> entries;
+    private EntryList<PeriodEntry> entries;
 
 
     public PeriodsEditor() {
-        this.setLayout(new GridBagLayout());
+        this.entries = new EntryList<>() {
+                @Override
+                public PeriodEntry entryFactory() {
+                    return new PeriodEntry();
+                }
+            };
 
-        this.newEntryButton = new JButton("Add Period");
-        this.entries = new EditorList<>();
-
-        this.newEntryButton.addActionListener(e -> this.entries.addEntry(new PeriodEntry()));
-
-        GridBagConstraints gbc = new GridBagConstraints();
-
-        gbc.gridx = 0;
-        gbc.gridy = 0;
-        gbc.gridwidth = 1;
-        gbc.gridheight = 1;
-        this.add(new JScrollPane(this.entries), gbc);
-        gbc.gridy++;
-        this.add(this.newEntryButton, gbc);
+        this.add(new JScrollPane(this.entries));
     }
 
 
