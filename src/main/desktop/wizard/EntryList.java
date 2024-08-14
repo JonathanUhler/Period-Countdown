@@ -23,11 +23,26 @@ import java.awt.Dimension;
 import java.awt.Rectangle;
 
 
+/**
+ * A generic graphic list, similar to classes like {@code javax.swing.JList} that allows displaying
+ * arbitrary {@code JComponent}s in its list items.
+ *
+ * The list supports iteration with an enhanced for-loop, but currently does not support the full
+ * {@code List} interface.
+ *
+ * This class implements all basic user iteration, including:
+ * - Scrolling if added to a {@code JScrollPane} or similar content pane
+ * - Mouse actions to select list items
+ * - Keyboard actions to delete list items
+ *
+ * @author Jonathan Uhler
+ */
 public abstract class EntryList<E extends JComponent>
     extends JPanel
     implements Iterable<E>, Scrollable, MouseListener, KeyListener
 {
 
+    /** The maximum height that an {@code EntryList} can have before scrolling in a content pane. */
     public static final int MAX_HEIGHT = 500;
 
 
@@ -37,11 +52,21 @@ public abstract class EntryList<E extends JComponent>
     private JButton addEntryButton;
 
 
+    /**
+     * Constructs a new mutable {@code EntryList}.
+     */
     public EntryList() {
         this(true);
     }
 
 
+    /**
+     * Constructs a new {@code EntryList} with the specified mutability.
+     *
+     * @param mutable  whether graphical interations are able to modify this entry list. If false,
+     *                 the list may still be mutated programmatically with {@code addEntry}, but
+     *                 will not display the "+" button, and will disable keyboard and mouse inputs.
+     */
     public EntryList(boolean mutable) {
         this.mutable = mutable;
         this.selectedIndex = -1;
@@ -60,6 +85,11 @@ public abstract class EntryList<E extends JComponent>
     }
 
 
+    /**
+     * Adds a new entry to the end of this list.
+     *
+     * @param entry  the entry to add.
+     */
     public void addEntry(E entry) {
         this.entries.add(entry);
         this.add(entry);
@@ -69,9 +99,21 @@ public abstract class EntryList<E extends JComponent>
     }
 
 
+    /**
+     * Constructs and returns a new, non-null entry of the type held by this list.
+     *
+     * This factory method must be implemented by all {@code EntryList} objects, as constructing
+     * the generic type {@code E} is not legal. When the "+" button is pressed by the end-user,
+     * {@code addEntry} will be called with the return value of this method.
+     */
     public abstract E entryFactory();
 
 
+    /**
+     * Returns the iterator of the underlying {@code List} maintained by this entry list.
+     *
+     * @return the iterator for this entry list.
+     */
     @Override
     public Iterator<E> iterator() {
         return this.entries.iterator();
@@ -152,6 +194,15 @@ public abstract class EntryList<E extends JComponent>
         return false;
     }
 
+
+    /**
+     * Responds to mouse interactions on this editor list.
+     *
+     * When an item of this entry list is clicked, it will be highlighted, and future mouse or
+     * keyboard events may then be applied to that entry.
+     *
+     * @param e  the mouse event.
+     */
     @Override
     public void mousePressed(MouseEvent e) {
         if (!this.mutable) {
@@ -187,6 +238,13 @@ public abstract class EntryList<E extends JComponent>
     public void mouseExited(MouseEvent e) { }
 
 
+    /**
+     * Responds to keyboard interactions on this editor list.
+     *
+     * If an item of this entry list is selected, then it may be interacted with.
+     *
+     * @param e  the keyboard event.
+     */
     @Override
     public void keyPressed(KeyEvent e) {
         if (this.selectedIndex == -1 || !this.mutable) {

@@ -5,11 +5,21 @@ import javax.swing.JFrame;
 import javax.swing.JTabbedPane;
 
 
+/**
+ * Main class for the school data generation wizard.
+ *
+ * @author Jonathan Uhler
+ */
 public class Wizard {
 
     private static int currentTabIndex;
 
 
+    /**
+     * Creates and displays a new JFrame with the graphical components of the wizard.
+     *
+     * This is the only entry point to the wizard, and manages all data/graphical resources.
+     */
     public void display() {
         JFrame frame = new JFrame("School Data Wizard");
         JTabbedPane dataPane = new JTabbedPane();
