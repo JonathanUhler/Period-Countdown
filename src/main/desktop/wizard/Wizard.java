@@ -35,11 +35,9 @@ public class Wizard {
         Wizard.currentTabIndex = dataPane.getSelectedIndex();
         dataPane.addChangeListener(e -> {
                 int newIndex = dataPane.getSelectedIndex();
-                if (newIndex > currentTabIndex) {
-                    daysEditor.update();
-                    weeksEditor.update();
-                    exceptionsEditor.update();
-                }
+                daysEditor.update();
+                weeksEditor.update();
+                exceptionsEditor.update();
                 if (newIndex == dataPane.getTabCount() - 1) {
                     builder.update();
                 }

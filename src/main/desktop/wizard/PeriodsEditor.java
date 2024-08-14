@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.Map;
 import java.util.HashMap;
 import java.util.Date;
+import java.util.Calendar;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import javax.swing.JPanel;
@@ -37,9 +38,9 @@ public class PeriodsEditor extends JPanel {
                                                               SchoolJson.SPECIAL});
             this.nameTextField = new JTextField("", 10);
             this.startSpinner =
-                new JSpinner(new SpinnerDateModel());
+                new JSpinner(new SpinnerDateModel(new Date(), null, null, Calendar.HOUR));
             this.endSpinner =
-                new JSpinner(new SpinnerDateModel());
+                new JSpinner(new SpinnerDateModel(new Date(), null, null, Calendar.HOUR));
 
             this.startSpinner.setEditor(new JSpinner.DateEditor(this.startSpinner, "HH:mm"));
             this.endSpinner.setEditor(new JSpinner.DateEditor(this.endSpinner, "HH:mm"));
@@ -97,10 +98,22 @@ public class PeriodsEditor extends JPanel {
 
         Map<String, Map<String, String>> data = new HashMap<>();
         Set<String> seenNames = new HashSet<>();
+        int academicPeriodNum = 1;
         for (PeriodEntry entry : this.entries) {
             Date startTime = (Date) entry.startSpinner.getValue();
             Date endTime = (Date) entry.endSpinner.getValue();
+            startTime.setYear(0);
+            startTime.setMonth(0);
+            startTime.setDate(1);
+            endTime.setYear(0);
+            endTime.setMonth(0);
+            endTime.setDate(1);
+
             String type = (String) entry.typeComboBox.getSelectedItem();
+            if (type.equals("Academic")) {
+                type = Integer.toString(academicPeriodNum);
+                academicPeriodNum++;
+            }
             String name = entry.nameTextField.getText();
             String start = dateFormat.format(startTime);
             String end = dateFormat.format(endTime);

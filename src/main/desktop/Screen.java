@@ -207,6 +207,9 @@ public class Screen extends JPanel {
         if (this.userAPI == null) {
             return;
         }
+        if (file == null) {
+            return;
+        }
         
         this.userAPI.setSchoolFile(Paths.get(file));
         // School file was changed, so use the same routine as the constructor to reload the

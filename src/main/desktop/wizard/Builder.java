@@ -10,9 +10,16 @@ import java.awt.GridBagConstraints;
 import javax.swing.JPanel;
 import javax.swing.JTextArea;
 import javax.swing.JScrollPane;
+import javax.swing.JButton;
+import javax.swing.JFileChooser;
+import javax.swing.filechooser.FileNameExtensionFilter;
+import java.io.File;
+import java.io.PrintWriter;
+import java.io.IOException;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import school.SchoolJson;
+import os.OSPath;
 
 
 public class Builder extends JPanel {
@@ -22,6 +29,8 @@ public class Builder extends JPanel {
     private DaysEditor daysEditor;
     private WeeksEditor weeksEditor;
     private ExceptionsEditor exceptionsEditor;
+
+    private JButton saveButton;
     private JTextArea jsonTextArea;
 
 
@@ -38,17 +47,47 @@ public class Builder extends JPanel {
         this.exceptionsEditor = exceptionsEditor;
 
         this.setLayout(new GridBagLayout());
-        
+
+        this.saveButton = new JButton("Save As");
         this.jsonTextArea = new JTextArea("", 30, 45);
+
+        this.saveButton.addActionListener(e -> this.saveAction());
+        this.saveButton.setEnabled(false);
         this.jsonTextArea.setEditable(false);
         
         GridBagConstraints gbc = new GridBagConstraints();
 	
         gbc.gridx = 0;
         gbc.gridy = 0;
+        this.add(this.saveButton, gbc);
+
+        gbc.gridy++;
         JScrollPane jsonScrollPane = new JScrollPane(this.jsonTextArea);
         jsonScrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
         this.add(jsonScrollPane, gbc);
+    }
+
+
+    private void saveAction() {
+        String json = this.jsonTextArea.getText();
+        JFileChooser fileChooser = new JFileChooser(OSPath.getSchoolJsonDiskPath().toFile());
+        FileNameExtensionFilter filter = new FileNameExtensionFilter("JSON Files", "json");
+        fileChooser.setFileFilter(filter);
+
+        int choice = fileChooser.showSaveDialog(null);
+        if (choice != JFileChooser.APPROVE_OPTION) {
+            return;
+        }
+
+        try {
+            File file = fileChooser.getSelectedFile();
+            PrintWriter writer = new PrintWriter(file);
+            writer.println(json);
+            writer.close();
+        }
+        catch (IOException e) {
+            return;
+        }
     }
 
 
@@ -68,6 +107,7 @@ public class Builder extends JPanel {
             for (String error : errors) {
                 this.jsonTextArea.append(error + "\n");
             }
+            this.saveButton.setEnabled(false);
             return;
         }
 
@@ -80,6 +120,7 @@ public class Builder extends JPanel {
         Gson gson = new GsonBuilder().setPrettyPrinting().create();
         String json = gson.toJson(data);
         this.jsonTextArea.setText(json);
+        this.saveButton.setEnabled(true);
     }
     
 }
