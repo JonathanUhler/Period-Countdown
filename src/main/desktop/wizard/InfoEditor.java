@@ -6,6 +6,7 @@ import java.util.Map;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.time.ZoneId;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.awt.GridBagLayout;
@@ -34,6 +35,7 @@ public class InfoEditor extends JPanel {
         this.lastDayTagSpinner = new JSpinner(new SpinnerDateModel());
         this.timezoneComboBox = new JComboBox<>(UTCTime.TIMEZONES);
 
+        this.timezoneComboBox.setSelectedItem(ZoneId.systemDefault().getId());
         this.firstDayTagSpinner.setEditor(new JSpinner.DateEditor(this.firstDayTagSpinner,
                                                                   "yyyy-MM-dd"));
         this.lastDayTagSpinner.setEditor(new JSpinner.DateEditor(this.lastDayTagSpinner,
