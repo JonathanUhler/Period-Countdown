@@ -54,19 +54,16 @@ public class Menu extends JMenuBar {
         
         JMenuItem classInformation = new JMenuItem("Class Information");
         JMenuItem schoolInformation = new JMenuItem("School Information");
-        JMenuItem nextUp = new JMenuItem("Next Up");
         JMenuItem theme = new JMenuItem("Theme");
         JMenuItem font = new JMenuItem("Font");
 
         classInformation.addActionListener(e -> this.classInformationAction());
         schoolInformation.addActionListener(e -> this.schoolInformationAction());
-        nextUp.addActionListener(e -> this.nextUpAction());
         theme.addActionListener(e -> this.themeAction());
         font.addActionListener(e -> this.fontAction());
 
         settings.add(classInformation);        
         settings.add(schoolInformation);
-        settings.add(nextUp);
         settings.add(theme);
         settings.add(font);
         this.add(settings);
@@ -199,28 +196,6 @@ public class Menu extends JMenuBar {
         }
         
         this.screen.setUserSchoolFile((String) options.getSelectedItem());
-    }
-    
-    
-    /**
-     * Action method for next up verbosity selector.
-     *
-     * This allows the user to select a new verbosity for the next up feature with a combo box.
-     */
-    private void nextUpAction() {
-        JComboBox<String> options = new JComboBox<>(new String[]{UserJson.NEXT_UP_DISABLED,
-                                                                 UserJson.NEXT_UP_ONE,
-                                                                 UserJson.NEXT_UP_ALL});
-        options.setSelectedItem(this.screen.getUserNextUp());
-        JComponent[] components = new JComponent[] {new JLabel("Select verbosity:"), options};
-        
-        int confirm = PCDesktopApp.displayDialog("Next Up", components);
-        if (confirm != JOptionPane.OK_OPTION) {
-            return;
-        }
-        
-        String verbosity = (String) options.getSelectedItem();
-        this.screen.setUserNextUp(verbosity);
     }
     
     

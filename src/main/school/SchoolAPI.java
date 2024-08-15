@@ -190,6 +190,40 @@ public class SchoolAPI {
         UTCTime nextPeriodStart = currentPeriodEnd.plus(1, UTCTime.MILLISECONDS);
         return this.getCurrentPeriod(nextPeriodStart);
     }
+
+
+    public SchoolPeriod getNextCountedPeriod(UTCTime time) {
+        if (time == null) {
+            throw new NullPointerException("time cannot be null");
+        }
+
+        UTCTime walk = time;
+        for (int i = 0; i < Duration.DAYS_PER_YEAR; i++) {
+            SchoolPeriod currentPeriod = this.getCurrentPeriod(walk);
+            SchoolPeriod nextPeriod = this.getNextPeriod(walk);
+            
+            if (currentPeriod != null && currentPeriod.isCounted() && !nextPeriod.isCounted()) {
+                return nextPeriod;
+            }
+            
+            // If the current period is not counted, then go through all other periods in
+            // this day to check for a counted period
+            while (nextPeriod != null && !nextPeriod.isLast()) {
+                if (nextPeriod.isCounted()) {
+                    return nextPeriod;
+                }
+                
+                walk = nextPeriod.getEnd().plus(1, UTCTime.MILLISECONDS);
+                nextPeriod = this.getCurrentPeriod(walk);
+            }
+            
+            // If no match found today, go to the next day and continue the search
+            walk = walk.plus(1, UTCTime.DAYS);
+            walk = walk.toMidnight(this.year.getTimezone());
+        }
+	
+        return null;
+    }
     
     
     /**
@@ -209,35 +243,11 @@ public class SchoolAPI {
             throw new NullPointerException("time cannot be null");
         }
 
-        UTCTime walk = time;
-        for (int i = 0; i < Duration.DAYS_PER_YEAR; i++) {
-            SchoolPeriod currentPeriod = this.getCurrentPeriod(walk);
-            SchoolPeriod nextPeriod = this.getNextPeriod(walk);
-            
-            if (currentPeriod != null &&
-                currentPeriod.isCounted() &&
-                !nextPeriod.isCounted())
-            {
-                return new Duration(time, currentPeriod.getEnd().plus(1, UTCTime.MILLISECONDS));
-            }
-            
-            // If the current period is not counted, then go through all other periods in
-            // this day to check for a counted period
-            while (nextPeriod != null && !nextPeriod.isLast()) {
-                if (nextPeriod.isCounted()) {
-                    return new Duration(time, nextPeriod.getStart());
-                }
-                
-                walk = nextPeriod.getEnd().plus(1, UTCTime.MILLISECONDS);
-                nextPeriod = this.getCurrentPeriod(walk);
-            }
-            
-            // If no match found today, go to the next day and continue the search
-            walk = walk.plus(1, UTCTime.DAYS);
-            walk = walk.toMidnight(this.year.getTimezone());
+        SchoolPeriod nextCountedPeriod = this.getNextCountedPeriod(time);
+        if (nextCountedPeriod == null) {
+            return null;
         }
-	
-        return null;
+        return new Duration(time, nextCountedPeriod.getStart());
     }
     
 }

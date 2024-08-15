@@ -24,19 +24,13 @@ public class Duration {
     public static final int MS_PER_MINUTE = MS_PER_SECOND * SECONDS_PER_MINUTE;
     /** Number of milliseconds in one hour. */
     public static final int MS_PER_HOUR = MS_PER_MINUTE * MINUTES_PER_HOUR;
-    
-    /** The start time of this duration. */
+
     private UTCTime start;
-    /** The end time of this duration. */
     private UTCTime end;
-    
-    /** The number of hours in this duration, on the interval [0, inf). */
+
     private int hours;
-    /** The number of minutes in this duration, on the interval [0, 60). */
     private int minutes;
-    /** The number of seconds in this duration, on the interval [0, 60). */
     private int seconds;
-    /** The number of milliseconds in this duration, on the interval [0, 1000). */
     private int millis;
     
     
@@ -122,6 +116,22 @@ public class Duration {
         this.seconds = seconds;
         this.millis = millis;
     }
+
+
+    public double portionComplete(Duration remaining) {
+        long totalMillis =
+            this.hours * Duration.MS_PER_HOUR +
+            this.minutes * Duration.MS_PER_MINUTE +
+            this.seconds * Duration.MS_PER_SECOND +
+            this.millis;
+        long remainingMillis =
+            remaining.hours * Duration.MS_PER_HOUR +
+            remaining.minutes * Duration.MS_PER_MINUTE +
+            remaining.seconds * Duration.MS_PER_SECOND +
+            remaining.millis;
+
+        return 1.0 - ((double) remainingMillis / (double) totalMillis);
+    }
     
     
     /**
@@ -195,11 +205,9 @@ public class Duration {
      */
     @Override
     public String toString() {
+        String paddedHours = String.format("%02d", this.hours);
         String paddedMinutes = String.format("%02d", this.minutes);
         String paddedSeconds = String.format("%02d", this.seconds);
-        if (this.hours == 0) {
-            return paddedMinutes + ":" + paddedSeconds;
-        }
         return this.hours + ":" + paddedMinutes + ":" + paddedSeconds;
     }
     

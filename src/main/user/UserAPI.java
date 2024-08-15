@@ -209,9 +209,6 @@ public class UserAPI {
             throw new NullPointerException("missing schools");
         }
 
-        if (!this.json.settings.containsKey(UserJson.NEXT_UP)) {
-            throw new IllegalArgumentException("missing key " + UserJson.NEXT_UP);
-        }
         if (!this.json.settings.containsKey(UserJson.THEME)) {
             throw new IllegalArgumentException("missing key " + UserJson.THEME);
         }
@@ -411,125 +408,8 @@ public class UserAPI {
                               userPeriodTeacher,
                               userPeriodRoom);
     }
-    
-    
-    /**
-     * Returns the verbosity level of the "next up" feature.
-     *
-     * @return the verbosity level of the "next up" feature.
-     */
-    public String getNextUp() {
-        return this.json.settings.get(UserJson.NEXT_UP);
-    }
-    
-    
-    /**
-     * Returns the list of next class information for this user's information.
-     *
-     * @param schoolAPI  school information to use.
-     * @param timezone   the unix TZ identifier for the school.
-     *
-     * @return the list of next class information.
-     */
-    public List<String> getNextUpList(SchoolAPI schoolAPI, String timezone) {
-        return this.getNextUpList(schoolAPI, timezone, UTCTime.now());
-    }
-    
-    
-    /**
-     * Returns the list of next class information for this user's information.
-     *
-     * @param schoolAPI  school information to use.
-     * @param timezone   the unix TZ identifier for the school.
-     * @param now        the time to get the next up information for.
-     *
-     * @return the list of next class information.
-     */
-    public List<String> getNextUpList(SchoolAPI schoolAPI, String timezone, UTCTime now) {
-        if (schoolAPI == null) {
-            return new ArrayList<>();
-        }
-	
-        String nextUp = this.getNextUp();
-        ArrayList<String> nextUpList = new ArrayList<>();
-	
-        SchoolPeriod nextPeriod = schoolAPI.getNextPeriodToday(now);
-        while (nextPeriod != null) {
-            if (nextUp.equals(UserJson.NEXT_UP_DISABLED)) {
-                break;
-            }
-            
-            // Get the class (with user data like teacher and room) based on the generic period,
-            // if that generic period can have a class
-            UserPeriod nextClass = null;
-            if (nextPeriod.isCounted()) {
-                nextClass = this.getPeriod(nextPeriod);
-            }
-            
-            // Format the string
-            // Default periodString is "<period/class name> | <start>-<end>"
-            UTCTime periodStart = nextPeriod.getStart();
-            UTCTime periodEnd = nextPeriod.getEnd();
-            
-            // Add 1 to the end time ms to make the end time the same as the start time of
-            // the next period
-            periodEnd = periodEnd.plus(1, UTCTime.MILLISECONDS);
-            
-            try {
-                periodStart = periodStart.to(timezone);
-                periodEnd = periodEnd.to(timezone);
-            }
-            catch (IllegalArgumentException e) {
-                // Ignore, just continue with UTC time
-            }
 
-            String periodString;
-            if (nextClass == null)
-                periodString = nextPeriod.getName();
-            else {
-                periodString = nextClass.getName() + " | " +
-                    String.format("%02d", periodStart.get(UTCTime.HOUR)) + ":" +
-                    String.format("%02d", periodStart.get(UTCTime.MINUTE)) + "-" +
-                    String.format("%02d", periodEnd.get(UTCTime.HOUR)) + ":" +
-                    String.format("%02d", periodEnd.get(UTCTime.MINUTE));
-            }
-                
-            // If the school period has a class during it add " | <teacher>, <room>"
-            if (!nextPeriod.isFree() && nextClass != null && !nextClass.isFree()) {
-                String teacher = nextClass.getTeacher();
-                String room = nextClass.getRoom();
-                
-                // Format based on what data is available (either one, the other, both, or neither)
-                if (!teacher.equals("") && room.equals("")) {
-                    periodString += " | " + teacher;
-                }
-                else if (!room.equals("") && teacher.equals("")) {
-                    periodString += " | " + room;
-                }
-                else if (!room.equals("") && !teacher.equals("")) {
-                    periodString += " | " + teacher + ", " + room;
-                }
-            }
-            // If the period has something during it (a period, lunch, brunch, etc.) add it to
-            // the list
-            if (nextPeriod.isCounted()) {
-                nextUpList.add(periodString);
-            }
-            
-            // Get next period
-            nextPeriod = schoolAPI.getNextPeriodToday(periodStart);
-            
-            // If only the next period should be shown and that period has been found, skip
-            // the rest of the search
-            if (nextUp.equals(UserJson.NEXT_UP_ONE) && nextUpList.size() == 1) {
-                break;
-            }
-        }
-        
-        return nextUpList;
-    }
-    
-    
+
     /**
      * Returns the theme color chosen by the user, as a 3-byte integer (for rgb).
      *
@@ -601,17 +481,6 @@ public class UserAPI {
         }
 	
         this.schoolDef.periods.put(key, value);
-        this.updateJsonFile();
-    }
-    
-    
-    /**
-     * Sets the verbosity level for the "next up" feature.
-     *
-     * @param verbosity  the verbosity level for the "next up" feature.
-     */
-    public void setNextUp(String verbosity) {
-        this.json.settings.put(UserJson.NEXT_UP, verbosity);
         this.updateJsonFile();
     }
     

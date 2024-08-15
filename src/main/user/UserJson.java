@@ -34,13 +34,6 @@ public class UserJson {
     /** Json key for the user settings. */
     public static final String SETTINGS = "Settings";
     /** Json key for the next up verbosity. */
-    public static final String NEXT_UP = "NextUp";
-    /** Json value to distable the next up feature. */
-    public static final String NEXT_UP_DISABLED = "Disabled";
-    /** Json value to show the next class only for the next up feature. */
-    public static final String NEXT_UP_ONE = "Next Class";
-    /** Json value to show all classes in the current day for the next up feature. */
-    public static final String NEXT_UP_ALL = "All Classes";
     /** Json key for the theme color. */
     public static final String THEME = "Theme";
     /** Json key for the name of the font. */
