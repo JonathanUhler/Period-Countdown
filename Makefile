@@ -6,7 +6,7 @@ TEST_DIR    := tests
 JAVADOC_DIR := docs/javadoc
 
 DESKTOP_MANIFEST := manifest-desktop.mf
-WEB_MANIFEST     := web-manifest.mf
+WEB_MANIFEST     := manifest-web.mf
 
 
 .PHONY: compile_desktop \
@@ -46,9 +46,9 @@ jar_web: compile_web bin_dir
 	mkdir -p $(BIN_DIR)/server
 	cp -a $(SRC_DIR)/$(LIB_DIR)/* $(BIN_DIR)/$(LIB_DIR)
 	cp -a $(SRC_DIR)/main/web/server bin/server
-	jar cmf $(DESKTOP_MANIFEST)             \
-		bin/PeriodCountdown-desktop.jar \
-		-C $(OBJ_DIR) .                 \
+	jar cmf $(WEB_MANIFEST)             \
+		bin/PeriodCountdown-web.jar \
+		-C $(OBJ_DIR) .             \
 		-C $(SRC_DIR) assets
 
 build_mac: jar_desktop rel_dir

@@ -1,3 +1,3 @@
 Manifest-Version: 1.0
 Main-Class: web.transport.PCTransport
-Class-Path: lib/gson-2.2.2.jar lib/javacli.jar
+Class-Path: lib/gson.jar lib/picocli.jar lib/jnet.jar
