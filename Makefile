@@ -7,6 +7,7 @@ JAVADOC_DIR := docs/javadoc
 
 DESKTOP_MANIFEST := manifest-desktop.mf
 WEB_MANIFEST     := manifest-web.mf
+APP_VERSION      := $(shell cat $(SRC_DIR)/assets/VERSION)
 
 
 .PHONY: compile_desktop \
@@ -18,6 +19,7 @@ WEB_MANIFEST     := manifest-web.mf
 	build_windos    \
 	build_web       \
         test            \
+        test_deploy     \
 	javadoc         \
 	javadoc_dir     \
 	obj_dir         \
@@ -43,15 +45,14 @@ jar_desktop: compile_desktop bin_dir
 
 jar_web: compile_web bin_dir
 	mkdir -p $(BIN_DIR)/$(LIB_DIR)
-	mkdir -p $(BIN_DIR)/server
 	cp -a $(SRC_DIR)/$(LIB_DIR)/* $(BIN_DIR)/$(LIB_DIR)
-	cp -a $(SRC_DIR)/main/web/server bin/server
+	rsync -r --exclude "*~" $(SRC_DIR)/main/web/server $(BIN_DIR)
 	jar cmf $(WEB_MANIFEST)             \
 		bin/PeriodCountdown-web.jar \
 		-C $(OBJ_DIR) .             \
 		-C $(SRC_DIR) assets
 
-build_mac: jar_desktop rel_dir
+build_mac: jar_desktop bin_dir
 	jpackage                                       \
 		--name PeriodCountdown                 \
 		--app-version $(APP_VERSION)           \
@@ -62,7 +63,7 @@ build_mac: jar_desktop rel_dir
 		--main-class desktop.PCDesktopApp      \
 		--mac-package-name "Period Countdown"
 
-build_linux: jar_desktop rel_dir
+build_linux: jar_desktop bin_dir
 	jpackage                                       \
 		--name PeriodCountdown                 \
 		--app-version $(APP_VERSION)           \
@@ -72,7 +73,7 @@ build_linux: jar_desktop rel_dir
 		--main-jar PeriodCountdown-desktop.jar \
 		--main-class desktop.PCDesktopApp
 
-build_windows: jar_desktop rel_dir
+build_windows: jar_desktop bin_dir
 	jpackage                                       \
 		--name PeriodCountdown                 \
 		--app-version $(APP_VERSION)           \
@@ -82,12 +83,11 @@ build_windows: jar_desktop rel_dir
 		--main-jar PeriodCountdown-desktop.jar \
 		--main-class desktop.PCDesktopApp
 
-build_web: jar_web rel_dir
-	mkdir -p $(BIN_DIR)/PeriodCountdown-$(APP_VERSION)-web
-	rsync -r --exclude "*~" $(BIN_DIR)/* $(BIN_DIR)/PeriodCountdown-$(APP_VERSION)-web
-	tar -czvf                                                    \
-		$(BIN_DIR)/PeriodCountdown-$(APP_VERSION)-web.tar.gz \
-		$(BIN_DIR)/PeriodCountdown-$(APP_VERSION)-web/*
+build_web: jar_web bin_dir
+	tar -czf PeriodCountdown-$(APP_VERSION)-web.tar.gz -C $(BIN_DIR) .
+	rm -rf $(BIN_DIR)
+	mkdir -p $(BIN_DIR)
+	mv PeriodCountdown-$(APP_VERSION)-web.tar.gz $(BIN_DIR)
 
 test: jar_desktop
 	javac -cp '.:$(SRC_DIR)/lib/*:$(BIN_DIR)/*' -d $(OBJ_DIR)/$(TEST_DIR) \
@@ -97,6 +97,18 @@ test: jar_desktop
 		TestOSPath TestUTCTime TestDuration TestInterval          \
                 TestSchoolPeriod TestSchoolYear TestSchoolAPI             \
 		TestUserPeriod
+
+test_deploy: build_web
+	tar -xzf $(BIN_DIR)/PeriodCountdown-$(APP_VERSION)-web.tar.gz -C $(BIN_DIR)
+	python3 -m venv $(BIN_DIR)/venv
+	source $(BIN_DIR)/venv/bin/activate; \
+        pip3 install -r requirements.txt
+	@echo "============================================================================"
+	@echo "[test_deploy] # WARNING: You are about to run an INSECURE development server"
+	@echo "[test_deploy] # Run the following to start the transport and server"
+	@echo "[test_deploy] java -jar $(BIN_DIR)/PeriodCountdown-web.jar localhost 9000 & ;"
+	@echo "              source $(BIN_DIR)/venv/bin/activate ;"
+	@echo "              python3 $(BIN_DIR)/server/pc_server.py"
 
 javadoc: javadoc_dir
 	javadoc $(shell find $(SRC_DIR)/main -name "*.java" -not -path "web/*")   \
