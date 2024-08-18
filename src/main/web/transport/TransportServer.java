@@ -2,19 +2,20 @@ package web.transport;
 
 
 import java.io.IOException;
+import java.util.Properties;
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
 import jnet.Bytes;
 import jnet.JClientSocket;
-import jnet.JServer;
+import jnet.secure.JSSLServer;
 import school.SchoolAPI;
 import user.UserAPI;
 import web.transport.commands.*;
 
 
-public class TransportServer extends JServer {
+public class TransportServer extends JSSLServer {
 
-    public TransportServer(String ip, int port) throws IOException {
+    public TransportServer(Properties properties, String ip, int port) throws IOException {
         super(ip, port);
     }
 

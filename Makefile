@@ -106,9 +106,9 @@ test_deploy: build_web
 	@echo "============================================================================"
 	@echo "[test_deploy] # WARNING: You are about to run an INSECURE development server"
 	@echo "[test_deploy] # Run the following to start the transport and server"
-	@echo "[test_deploy] java -jar $(BIN_DIR)/PeriodCountdown-web.jar localhost 9000 & ;"
-	@echo "              source $(BIN_DIR)/venv/bin/activate ;"
-	@echo "              python3 $(BIN_DIR)/server/pc_server.py"
+	@echo "[test_deploy] java -jar $(BIN_DIR)/PeriodCountdown-web.jar PROPERTIES_FILE &"
+	@echo "              source $(BIN_DIR)/venv/bin/activate"
+	@echo "              python3 $(BIN_DIR)/server/pc_server.py PROPERTIES_FILE"
 
 javadoc: javadoc_dir
 	javadoc $(shell find $(SRC_DIR)/main -name "*.java" -not -path "web/*")   \
