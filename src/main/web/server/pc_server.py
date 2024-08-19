@@ -5,18 +5,30 @@ from logging import FileHandler, Formatter
 from tempfile import NamedTemporaryFile
 from argparse import ArgumentParser, Namespace
 from typing import Final
+import flask
 from flask import Flask
+import flask_login
+from flask_login import LoginManager
 from pnet.secure.psslclientsocket import PSSLClientSocket
+from user import User
 
 
 logger: Final = logging.getLogger(__name__)
 server: Final = Flask(__name__)
+login_manager: Final = LoginManager()
 transport_client: Final = None
+
+
+@login_manager.user_loader
+def load_user(sub: str) -> User:
+    return User(sub)
 
 
 @server.route("/", methods = ["GET"])
 def index() -> str:
-    return "Hello from pc_server.py!"
+    sub: str = flask_login.current_user.get_id()
+    if (sub == None):
+        return flask.render_template("index.html", authenticated = False)
 
 
 def _load_properties(properties_file: str) -> dict:
