@@ -1,3 +1,5 @@
+requests
 Flask
 Flask-Login
+oauthlib
 git+https://github.com/JonathanUhler/Networking-Lib.git@1.1.1#subdirectory=src/pnet
