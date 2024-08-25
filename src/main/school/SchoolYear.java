@@ -93,6 +93,21 @@ public class SchoolYear {
         this.initInfo();
         this.initYear();
     }
+
+
+    /**
+     * Constructs a new {@code SchoolYear} object from a {@code SchoolJson} object.
+     *
+     * @param json  the {@code SchoolJson} object containing school data.
+     *
+     * @throws IllegalArgumentException  if any parse error occurs from the provided json data.
+     */
+    public SchoolYear(SchoolJson json) {
+        this.year = new ArrayList<>();
+        this.schoolJson = json;
+        this.initInfo();
+        this.initYear();
+    }
     
     
     /**

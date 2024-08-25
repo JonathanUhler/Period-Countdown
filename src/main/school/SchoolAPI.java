@@ -45,6 +45,20 @@ public class SchoolAPI {
     
     
     /**
+     * Constructs a new {@code SchoolAPI} object from a {@code SchoolJson} object.
+     *
+     * @param path  the {@code SchoolJson} object containg school data.
+     *
+     * @throws IllegalArgumentException  if any json parse error occurs.
+     *
+     * @see SchoolYear
+     */
+    public SchoolAPI(SchoolJson json) throws FileNotFoundException {
+        this.year = new SchoolYear(json);
+    }
+    
+    
+    /**
      * Returns the timezone of the loaded school json file as a Unix timezone identifier (e.g. 
      * {@code "America/Los_Angeles"} for much of the west coast of the United States).
      *

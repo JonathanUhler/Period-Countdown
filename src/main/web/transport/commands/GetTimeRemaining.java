@@ -11,6 +11,13 @@ import time.UTCTime;
 import time.Duration;
 
 
+/**
+ * Requests information about the amount of time remaining in the current period.
+ *
+ * See the Period Countdown Web Specification for more information on this command.
+ *
+ * @author Jonathan Uhler
+ */
 public class GetTimeRemaining extends Command {
 
 

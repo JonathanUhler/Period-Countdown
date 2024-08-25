@@ -53,7 +53,7 @@ public class UserAPI {
      * @throws IllegalArgumentException  upon any parse error.
      */
     public UserAPI() throws FileNotFoundException {
-        this.loadFromJar();
+        this.loadDefault();
         this.validate();
     }
     
@@ -100,23 +100,23 @@ public class UserAPI {
 
 
     /**
-     * Creates a new user json file on the disk at the specified path from the jarfile template.
+     * Creates a new user json file on the disk at the specified path from the default template.
      *
      * @param path  the path of the user json file to create.
      */
     private void createFileOnDisk(Path path) throws IOException {
         Gson gson = new Gson();
-        this.loadFromJar();
+        this.loadDefault();
 
         try {
-            this.path = path;  // Override path from the loadFromJar() call
+            this.path = path;  // Override path from the loadDefault call
             File userDirectory = new File(this.path.toString());
             if (!userDirectory.getParentFile().exists()) {
                 userDirectory.getParentFile().mkdirs();
             }
 		
             FileWriter userWriter = new FileWriter(this.path.toString());
-            gson.toJson(this.json, userWriter);  // json is set from the loadFromJar call above
+            gson.toJson(this.json, userWriter);  // json is set from the loadDefault call above
             userWriter.flush();
             userWriter.close();
         }
@@ -162,31 +162,13 @@ public class UserAPI {
     
     
     /**
-     * Loads the default {@code User.json} file from the list of jar artifacts. If the load is 
-     * sucessful, the instance variables {@code json} and {@code path} are set. This method
-     * does not write any files to the disk.
+     * Loads the default {@code User.json} contents from the default constructor of
+     * the {@code UserJson} class. This method does not write any files to the disk.
      *
-     * @throws FileNotFoundException     if the user json file does not exist as a jar artifact.
      * @throws IllegalArgumentException  upon any parse error.
      */
-    private void loadFromJar() throws FileNotFoundException {
-        Gson gson = new Gson();
-        this.path = OSPath.join(OSPath.getUserJsonJarPath(), OSPath.getUserJsonFile());
-
-        InputStream jsonStream = Thread.currentThread()
-            .getContextClassLoader()
-            .getResourceAsStream(this.path.toString());
-        if (jsonStream == null) {
-            throw new FileNotFoundException("json resource \"" + this.path + "\" was null");
-        }
-
-        InputStreamReader jsonReader = new InputStreamReader(jsonStream);        
-        try {
-            this.json = gson.fromJson(jsonReader, UserJson.class);
-        }
-        catch (JsonSyntaxException e) {
-            throw new IllegalArgumentException("json cannot be loaded locally: " + e);
-        }
+    private void loadDefault() {
+        this.json = new UserJson();
     }
     
     
@@ -275,7 +257,7 @@ public class UserAPI {
             periodInfo.put(UserJson.TEACHER, "");
             periodInfo.put(UserJson.ROOM, "");
             periodInfo.put(UserJson.NAME, "");
-            schoolPeriods.put(period + "", periodInfo);
+            schoolPeriods.put(Integer.toString(period), periodInfo);
         }
 
         UserJsonSchoolDef schoolInfo = new UserJsonSchoolDef();
@@ -524,8 +506,8 @@ public class UserAPI {
     
     /**
      * Updates the user's json file based on the existing contents of {@code this.json}. This
-     * method will not update the json file if this {@code UserAPI} was constructed with the
-     * {@code loadFromJar} flag set.
+     * method will not update anything if this {@code UserAPI} was constructed with the from
+     * a default {@code UserJson} object.
      */
     private void updateJsonFile() {
         FileWriter writer;

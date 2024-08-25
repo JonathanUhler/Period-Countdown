@@ -2,6 +2,7 @@ package user;
 
 
 import java.util.Map;
+import java.util.HashMap;
 import java.util.List;
 import com.google.gson.annotations.SerializedName;
 
@@ -49,5 +50,17 @@ public class UserJson {
     /** User settings. */
     @SerializedName("Settings")
     public Map<String, String> settings;
+
+
+    /**
+     * Constructs the default {@code UserJson} structure.
+     */
+    public UserJson() {
+        this.schools = new HashMap<>();
+        this.settings = new HashMap<>();
+        this.settings.put(UserJson.THEME, "0");
+        this.settings.put(UserJson.FONT, "Arial");
+        this.settings.put(UserJson.SCHOOL_JSON, "");
+    }
     
 }
