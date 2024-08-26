@@ -82,7 +82,7 @@ public class TransportServer extends JSSLServer {
             userAPI = new UserAPI(userJson);
         }
         catch (RuntimeException e) {
-            return Command.error(Command.ReturnCode.ERR_RESPONSE, "UserAPI exception: " + e);
+            return Command.error(userId, Command.ReturnCode.ERR_RESPONSE, "UserAPI: " + e);
         }
 
         try {
@@ -90,7 +90,7 @@ public class TransportServer extends JSSLServer {
             schoolAPI = new SchoolAPI(schoolJson);
         }
         catch (IOException | RuntimeException e) {
-            return Command.error(Command.ReturnCode.ERR_RESPONSE, "SchoolAPI exception: " + e);
+            return Command.error(userId, Command.ReturnCode.ERR_RESPONSE, "SchoolAPI: " + e);
         }
 
         // Process the command based on the provided opcode and return response information
@@ -103,7 +103,7 @@ public class TransportServer extends JSSLServer {
             }
         }
         catch (RuntimeException e) {
-            return Command.error(Command.ReturnCode.ERR_RESPONSE, "command process error: " + e);
+            return Command.error(userId, Command.ReturnCode.ERR_RESPONSE, "process error: " + e);
         }
     }
 

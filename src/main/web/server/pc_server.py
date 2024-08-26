@@ -14,6 +14,8 @@ from flask_login import LoginManager
 from oauthlib.oauth2 import WebApplicationClient
 from pnet.secure.psslclientsocket import PSSLClientSocket
 from user import User
+import commands
+from commands import Opcode, ReturnCode
 
 
 OPENID_URL: Final = "https://accounts.google.com/.well-known/openid-configuration"
@@ -33,8 +35,8 @@ def load_user(sub: str) -> User:
 
 
 @server.errorhandler(500)
-def error_500(message: str) -> str:
-    return flask.render_template("500.html"), 500
+def error_500(message: str = "An internal server error occurred.") -> str:
+    return flask.render_template("500.html", message = message), 500
 
 
 @server.route("/", methods = ["GET"])
@@ -42,7 +44,24 @@ def index() -> str:
     sub: str = flask_login.current_user.get_id()
     if (sub is None):
         return flask.render_template("index.html", authenticated = False)
-    return flask.render_template("index.html", authenticated = True)
+
+    time_remaining_resp: dict = commands.send(transport_client, Opcode.GET_TIME_REMAINING, sub)
+    if (time_remaining_resp is None):
+        logger.error("malformed GET_TIME_REMAINING from transport")
+        return error_500("An internal error occurred while gathering your timing data.")
+    if (time_remaining_resp["ReturnCode"] != ReturnCode.SUCCESS.name):
+        logger.error(f"unsuccessful GET_TIME_REMAINING from transport: {time_remaining_resp}")
+        return error_500("An internal error occurred while processing your timing data.")
+
+    time_remaining: str = time_remaining_resp["OutputPayload"]["TimeRemaining"]
+    end_time: str = time_remaining_resp["OutputPayload"]["EndTime"]
+    expire_time: str = time_remaining_resp["OutputPayload"]["ExpireTime"]
+
+    return flask.render_template("index.html",
+                                 authenticated = True,
+                                 time_remaining = time_remaining,
+                                 end_time = end_time,
+                                 expire_time = expire_time)
 
 
 def _get_openid_configuration(key: str) -> dict:

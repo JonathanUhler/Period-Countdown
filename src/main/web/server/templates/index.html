@@ -12,6 +12,7 @@
   </head>
   <body>
     {% if (authenticated == true) %}
+    <p> Time remaining: {{ time_remaining }} </p>
     <button onclick="location.href = 'logout';">Sign out</button>
     <button onclick="location.href = 'settings';">Settings</button>
     {% else %}

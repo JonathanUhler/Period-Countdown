@@ -1,6 +1,9 @@
 package web.transport.commands;
 
 
+import java.util.Map;
+import java.util.HashMap;
+import com.google.gson.Gson;
 import com.google.gson.annotations.SerializedName;
 import school.SchoolAPI;
 import user.UserAPI;
@@ -99,12 +102,17 @@ public class Command {
      * @param message     a message describing the error.
      */
     public static String error(String userId, ReturnCode returnCode, String message) {
-        String response = "{\"Opcode\": \"" + Opcode.ERROR + "\", " +
-            "\"UserID\": \"" + userId + "\", " +
-            "\"ReturnCode\": \"" + returnCode + "\", " +
-            "\"OutputPayload\": {\"Message\": \"" + message + "\"}}";
+        Map<String, Object> response = new HashMap<>();
+        Map<String, String> outputPayload = new HashMap<>();
+        outputPayload.put("Message", message);
+        response.put("Opcode", Opcode.ERROR.name());
+        response.put("UserID", userId);
+        response.put("ReturnCode", returnCode.name());
+        response.put("OutputPayload", outputPayload);
+
+        Gson gson = new Gson();
         PCTransport.LOGGER.warning("Command.error: " + response);
-        return response;
+        return gson.toJson(response);
     }
 
 }
