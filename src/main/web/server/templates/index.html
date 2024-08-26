@@ -12,11 +12,13 @@
   </head>
   <body>
     {% if (authenticated == true) %}
-    <p> Time remaining: {{ time_remaining }} </p>
+    <div id="time_remaining"> Time remaining: {{ time_remaining }} </div>
     <button onclick="location.href = 'logout';">Sign out</button>
     <button onclick="location.href = 'settings';">Settings</button>
     {% else %}
     <button onclick="location.href = 'login';">Sign in with Google</button>
     {% endif %}
+
+    <script src="{{ url_for('static', filename='javascript/index.js') }}" type="text/javascript"></script>
   </body>
 </html>
