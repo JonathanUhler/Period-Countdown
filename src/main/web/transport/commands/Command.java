@@ -47,7 +47,9 @@ public class Command {
         /** A special opcode indicating a return code that is not 'SUCCESS'. */
         ERROR,
         /** Requests information about the time remaining in the current period. */
-        GET_TIME_REMAINING
+        GET_TIME_REMAINING,
+        /** Requests information about the current and next period. */
+        GET_PERIOD
     }
 
 

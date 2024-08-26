@@ -12,7 +12,10 @@
   </head>
   <body>
     {% if (authenticated == true) %}
-    <div id="time_remaining"> Time remaining: {{ time_remaining }} </div>
+    <div> {{ current_period }} </div>
+    <div id="time_remaining"> {{ time_remaining }} </div>
+    <div> {{ next_period }} </div>
+    <div> ({{ next_period_duration }}) </div>
     <button onclick="location.href = 'logout';">Sign out</button>
     <button onclick="location.href = 'settings';">Settings</button>
     {% else %}
