@@ -19,7 +19,7 @@ import time.Duration;
  *
  * @author Jonathan Uhler
  */
-public class GetPeriod extends Command {
+public class GetCurrentPeriod extends Command {
 
 
     public class InputPayload {
@@ -45,13 +45,13 @@ public class GetPeriod extends Command {
     @Override
     public String process(String request, SchoolAPI schoolAPI, UserAPI userAPI) {
         Gson gson = new Gson();
-        GetPeriod command = gson.fromJson(request, GetPeriod.class);
+        GetCurrentPeriod command = gson.fromJson(request, GetCurrentPeriod.class);
 
         UTCTime now = UTCTime.now();
         SchoolPeriod currentSchoolPeriod = schoolAPI.getCurrentPeriod(now);
         SchoolPeriod nextSchoolPeriod = schoolAPI.getNextCountedPeriod(now);
 
-        GetPeriod response = new GetPeriod();
+        GetCurrentPeriod response = new GetCurrentPeriod();
         response.opcode = command.opcode;
         response.userId = command.userId;
         response.returnCode = ReturnCode.SUCCESS;

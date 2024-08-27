@@ -49,7 +49,7 @@ public class Command {
         /** Requests information about the time remaining in the current period. */
         GET_TIME_REMAINING,
         /** Requests information about the current and next period. */
-        GET_PERIOD
+        GET_CURRENT_PERIOD
     }
 
 

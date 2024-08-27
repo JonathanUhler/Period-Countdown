@@ -98,8 +98,8 @@ public class TransportServer extends JSSLServer {
             switch (opcode) {
             case GET_TIME_REMAINING:
                 return new GetTimeRemaining().process(commandStr, schoolAPI, userAPI);
-            case GET_PERIOD:
-                return new GetPeriod().process(commandStr, schoolAPI, userAPI);
+            case GET_CURRENT_PERIOD:
+                return new GetCurrentPeriod().process(commandStr, schoolAPI, userAPI);
             default:
                 return Command.error(Command.ReturnCode.ERR_RESPONSE, "unknown opcode: " + opcode);
             }

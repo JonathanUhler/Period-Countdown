@@ -46,27 +46,27 @@ def index() -> str:
         return flask.render_template("index.html", authenticated = False)
 
     time_remaining_resp: dict = commands.send(transport_client, Opcode.GET_TIME_REMAINING, sub)
-    period_resp: dict = commands.send(transport_client, Opcode.GET_PERIOD, sub)
+    current_period_resp: dict = commands.send(transport_client, Opcode.GET_CURRENT_PERIOD, sub)
     if (time_remaining_resp is None):
         logger.error("malformed GET_TIME_REMAINING from transport")
         return error_500("An internal error occurred while gathering your timing data.")
     if (time_remaining_resp["ReturnCode"] != ReturnCode.SUCCESS.name):
         logger.error(f"unsuccessful GET_TIME_REMAINING from transport: {time_remaining_resp}")
         return error_500("An internal error occurred while processing your timing data.")
-    if (period_resp is None):
-        logger.error("malformed GET_PERIOD from transport")
+    if (current_period_resp is None):
+        logger.error("malformed GET_CURRENT_PERIOD from transport")
         return error_500("An internal error occurred while gathering your class data.")
-    if (period_resp["ReturnCode"] != ReturnCode.SUCCESS.name):
-        logger.error(f"unsuccessful GET_PERIOD from transport: {period_resp}")
+    if (current_period_resp["ReturnCode"] != ReturnCode.SUCCESS.name):
+        logger.error(f"unsuccessful GET_CURRENT_PERIOD from transport: {current_period_resp}")
         return error_500("An internal error occurred while processing your class data.")
 
     time_remaining: str = time_remaining_resp["OutputPayload"]["TimeRemaining"]
     end_time: str = time_remaining_resp["OutputPayload"]["EndTime"]
     expire_time: str = time_remaining_resp["OutputPayload"]["ExpireTime"]
-    current_name: str = period_resp["OutputPayload"]["CurrentName"]
-    current_status: str = period_resp["OutputPayload"]["CurrentStatus"]
-    next_name: str = period_resp["OutputPayload"]["NextName"]
-    next_duration: str = period_resp["OutputPayload"]["NextDuration"]
+    current_name: str = current_period_resp["OutputPayload"]["CurrentName"]
+    current_status: str = current_period_resp["OutputPayload"]["CurrentStatus"]
+    next_name: str = current_period_resp["OutputPayload"]["NextName"]
+    next_duration: str = current_period_resp["OutputPayload"]["NextDuration"]
 
     return flask.render_template("index.html",
                                  authenticated = True,
