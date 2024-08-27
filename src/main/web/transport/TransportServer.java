@@ -82,7 +82,7 @@ public class TransportServer extends JSSLServer {
             userAPI = new UserAPI(userJson);
         }
         catch (RuntimeException e) {
-            return Command.error(userId, Command.ReturnCode.ERR_RESPONSE, "UserAPI: " + e);
+            return Command.error(opcode, userId, Command.ReturnCode.ERR_RESPONSE, "User: " + e);
         }
 
         try {
@@ -90,22 +90,36 @@ public class TransportServer extends JSSLServer {
             schoolAPI = new SchoolAPI(schoolJson);
         }
         catch (IOException | RuntimeException e) {
-            return Command.error(userId, Command.ReturnCode.ERR_RESPONSE, "SchoolAPI: " + e);
+            return Command.error(opcode, userId, Command.ReturnCode.ERR_RESPONSE, "School: " + e);
         }
 
         // Process the command based on the provided opcode and return response information
         try {
+            Command response;
             switch (opcode) {
             case GET_TIME_REMAINING:
-                return new GetTimeRemaining().process(commandStr, schoolAPI, userAPI);
+                response = new GetTimeRemaining().process(commandStr, schoolAPI, userAPI);
+                break;
             case GET_CURRENT_PERIOD:
-                return new GetCurrentPeriod().process(commandStr, schoolAPI, userAPI);
+                response = new GetCurrentPeriod().process(commandStr, schoolAPI, userAPI);
+                break;
+            case GET_USER_PERIODS:
+                response = new GetUserPeriods().process(commandStr, schoolAPI, userAPI);
+                break;
+            case GET_USER_SETTINGS:
+                response =  new GetUserSettings().process(commandStr, schoolAPI, userAPI);
+                ((GetUserSettings) response).outputPayload.availableSchools =
+                    this.database.getAvailableSchools(userId);
+                break;
             default:
                 return Command.error(Command.ReturnCode.ERR_RESPONSE, "unknown opcode: " + opcode);
             }
+
+            System.out.println(gson.toJson(response));
+            return gson.toJson(response);
         }
         catch (RuntimeException e) {
-            return Command.error(userId, Command.ReturnCode.ERR_RESPONSE, "process error: " + e);
+            return Command.error(opcode, userId, Command.ReturnCode.ERR_RESPONSE, "process: " + e);
         }
     }
 

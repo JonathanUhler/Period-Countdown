@@ -6,6 +6,8 @@ import java.io.FileInputStream;
 import java.io.File;
 import java.nio.file.Path;
 import java.util.Properties;
+import java.util.List;
+import java.util.ArrayList;
 import java.util.Map;
 import java.util.HashMap;
 import java.util.concurrent.CountDownLatch;
@@ -135,6 +137,49 @@ public class TransportDatabase {
 
 
     /**
+     * Returns a list of all children of a specified database resource for a specific user.
+     *
+     * This method is synchronous.
+     *
+     * @param userId     the unique identifier of the database user.
+     * @param parentKey  the parent to get all the child keys of.
+     *
+     * @return the list of child resource keys. If the parent cannot be retrieved or no children
+     *         exist, an empty list will be returned.
+     */
+    private List<String> getAvailableResources(String userId, String parentKey) {
+        String refPath = "users/" + userId + "/" + parentKey;
+        DatabaseReference ref = this.database.getReference(refPath);
+
+        CountDownLatch latch = new CountDownLatch(1);
+        List<String> data = new ArrayList<>();
+        ref.addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot snapshot) {
+                    for (DataSnapshot child : snapshot.getChildren()) {
+                        data.add(child.getKey());
+                    }
+                    latch.countDown();
+                }
+
+                @Override
+                public void onCancelled(DatabaseError error) {
+                    PCTransport.LOGGER.warning("database get '" + refPath + "' failed: " + error);
+                    latch.countDown();
+                }
+            });
+
+        try {
+            latch.await(10, TimeUnit.SECONDS);
+        }
+        catch (InterruptedException e) {
+            return null;
+        }
+        return data;
+    }
+
+
+    /**
      * Sets a specified database resource for a specific user.
      *
      * This method is synchronous.
@@ -214,6 +259,19 @@ public class TransportDatabase {
 
 
     /**
+     * Returns a list of school file names that, when converted with {@code Paths.get}, can be
+     * passed to {@code getSchoolJson}.
+     *
+     * @param userId  the unique identifier of the database user.
+     *
+     * @return a list of school file names.
+     */
+    public List<String> getAvailableSchools(String userId) {
+        return this.getAvailableResources(userId, "schools");
+    }
+
+
+    /**
      * Updates or creates the {@code UserJson} object for the specified database user.
      *
      * @param userId  the unique identifier of the database user.
@@ -239,7 +297,7 @@ public class TransportDatabase {
      *
      * @param userId      the unique identifier of the database user.
      * @param json        the updated record to set for the specified school file.
-     * @Param schoolFile  the file name of the school record to update or create.
+     * @param schoolFile  the file name of the school record to update or create.
      */
     public void setSchoolJson(String userId, SchoolJson json, Path schoolFile) {
         Gson gson = new Gson();

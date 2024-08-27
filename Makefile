@@ -113,7 +113,7 @@ test_deploy: build_web
 javadoc: javadoc_dir
 	javadoc $(shell find $(SRC_DIR)/main -name "*.java" -not -path "web/*")   \
 		-d $(JAVADOC_DIR)                                                 \
-		-cp .:src/lib/picocli.jar:src/lib/jnet.jar:src/lib/gson-2.2.2.jar
+		-cp .:$(shell echo src/lib/*.jar | tr ' ' ':')
 
 javadoc_dir:
 	mkdir -p $(JAVADOC_DIR)

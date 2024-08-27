@@ -43,7 +43,7 @@ public class GetCurrentPeriod extends Command {
 
 
     @Override
-    public String process(String request, SchoolAPI schoolAPI, UserAPI userAPI) {
+    public Command process(String request, SchoolAPI schoolAPI, UserAPI userAPI) {
         Gson gson = new Gson();
         GetCurrentPeriod command = gson.fromJson(request, GetCurrentPeriod.class);
 
@@ -75,7 +75,7 @@ public class GetCurrentPeriod extends Command {
             response.outputPayload.nextDuration = nextDuration.toString();
         }
         
-        return gson.toJson(response);
+        return response;
     }
 
 }

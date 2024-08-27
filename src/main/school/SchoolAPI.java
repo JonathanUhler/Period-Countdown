@@ -47,7 +47,7 @@ public class SchoolAPI {
     /**
      * Constructs a new {@code SchoolAPI} object from a {@code SchoolJson} object.
      *
-     * @param path  the {@code SchoolJson} object containg school data.
+     * @param json  the {@code SchoolJson} object containg school data.
      *
      * @throws IllegalArgumentException  if any json parse error occurs.
      *

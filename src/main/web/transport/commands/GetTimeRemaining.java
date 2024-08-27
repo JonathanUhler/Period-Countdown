@@ -40,7 +40,7 @@ public class GetTimeRemaining extends Command {
 
 
     @Override
-    public String process(String request, SchoolAPI schoolAPI, UserAPI userAPI) {
+    public Command process(String request, SchoolAPI schoolAPI, UserAPI userAPI) {
         Gson gson = new Gson();
         GetTimeRemaining command = gson.fromJson(request, GetTimeRemaining.class);
 
@@ -57,7 +57,7 @@ public class GetTimeRemaining extends Command {
         response.outputPayload.endTime = timeRemaining.getEnd().toString();
         response.outputPayload.expireTime = currentPeriod.getEnd().toString();
 
-        return gson.toJson(response);
+        return response;
     }
 
 }

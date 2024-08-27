@@ -6,6 +6,8 @@ from pnet.secure.psslclientsocket import PSSLClientSocket
 class Opcode(Enum):
     GET_TIME_REMAINING = auto()
     GET_CURRENT_PERIOD = auto()
+    GET_USER_PERIODS = auto()
+    GET_USER_SETTINGS = auto()
 
 
 

@@ -215,7 +215,7 @@ public class UTCTime implements Comparable<UTCTime> {
      * Returns whether this {@code UTCTime} represents the same chronological instant as the 
      * argument.
      *
-     * @param other  a {@code UTCTime} to compare to.
+     * @param o  a {@code UTCTime} to compare to.
      *
      * @return whether this {@code UTCTime} represents the same chronological instant as the 
      *         argument.
@@ -249,7 +249,7 @@ public class UTCTime implements Comparable<UTCTime> {
      * @throws NullPointerException  if {@code other} is null.
      *
      * @see isBefore
-     * @see isEqual
+     * @see equals
      */
     @Override
     public int compareTo(UTCTime other) {
