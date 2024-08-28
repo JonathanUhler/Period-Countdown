@@ -1,3 +1,10 @@
+"""
+Period countdown web server implementation in Python.
+
+Author: Jonathan Uhler
+"""
+
+
 import os
 import sys
 import json
@@ -8,7 +15,7 @@ from argparse import ArgumentParser, Namespace
 from typing import Final
 import requests
 import flask
-from flask import Flask
+from flask import Flask, request
 import flask_login
 from flask_login import LoginManager
 from oauthlib.oauth2 import WebApplicationClient
@@ -31,22 +38,56 @@ transport_client: Final = None
 
 @login_manager.user_loader
 def load_user(sub: str) -> User:
+    """
+    Loads a database user from a given identifier.
+
+    Arguments:
+     sub (str): the unique identifier of the database user.
+
+    Returns:
+     User: the database user for the given identifier.
+    """
+
     return User(sub)
 
 
 @server.errorhandler(500)
 def error_500(message: str = "An internal server error occurred.") -> str:
+    """
+    Routing method for 500 errors.
+
+    Arguments:
+     message (str): an optional message that describes the error. By default, this is a generic
+                    string about "an internal server error".
+
+    Returns:
+     str: a rendered template for the 500 error.
+    """
+
     return flask.render_template("500.html", message = message), 500
 
 
 @server.route("/", methods = ["GET"])
 def index() -> str:
+    """
+    Routing method for the index page.
+
+    The index page only supports GET requests. The content servered will change depending on
+    whether the current database user is logged in and authenticated with OAuth 2. For
+    users who are not logged in, a generic home page is displayed. Otherwise, timing and class
+    information is requested from the transport and formatted in the rendered template.
+
+    Return:
+     str: a rendered template of the index page.
+    """
+
     sub: str = flask_login.current_user.get_id()
     if (sub is None):
         return flask.render_template("index.html", authenticated = False)
 
     time_remaining_resp: dict = commands.send(transport_client, Opcode.GET_TIME_REMAINING, sub)
     current_period_resp: dict = commands.send(transport_client, Opcode.GET_CURRENT_PERIOD, sub)
+    user_settings_resp: dict = commands.send(transport_client, Opcode.GET_USER_SETTINGS, sub)
     if (time_remaining_resp is None):
         logger.error("malformed GET_TIME_REMAINING from transport")
         return error_500("An internal error occurred while gathering your timing data.")
@@ -59,6 +100,12 @@ def index() -> str:
     if (current_period_resp["ReturnCode"] != ReturnCode.SUCCESS.name):
         logger.error(f"unsuccessful GET_CURRENT_PERIOD from transport: {current_period_resp}")
         return error_500("An internal error occurred while processing your class data.")
+    if (user_settings_resp is None):
+        logger.error("malformed GET_USER_SETTINGS from transport")
+        return error_500("An internal error occurred while gathering your data.")
+    if (user_settings_resp["ReturnCode"] != ReturnCode.SUCCESS.name):
+        logger.error(f"unsuccessful GET_USER_SETTINGS from transport: {user_settings_resp}")
+        return error_500("An internal error occurred while processing your data.")
 
     time_remaining: str = time_remaining_resp["OutputPayload"]["TimeRemaining"]
     end_time: str = time_remaining_resp["OutputPayload"]["EndTime"]
@@ -67,6 +114,10 @@ def index() -> str:
     current_status: str = current_period_resp["OutputPayload"]["CurrentStatus"]
     next_name: str = current_period_resp["OutputPayload"]["NextName"]
     next_duration: str = current_period_resp["OutputPayload"]["NextDuration"]
+    theme: str = user_settings_resp["OutputPayload"]["Theme"]
+    font: str = user_settings_resp["OutputPayload"]["Font"]
+
+    theme = hex(int(theme))[2:].zfill(6)
 
     return flask.render_template("index.html",
                                  authenticated = True,
@@ -75,10 +126,79 @@ def index() -> str:
                                  expire_time = expire_time,
                                  current_period = f"{current_name} | {current_status}",
                                  next_period = next_name,
-                                 next_period_duration = next_duration)
+                                 next_period_duration = next_duration,
+                                 theme = f"#{theme}",
+                                 font = font)
 
 
-def _get_openid_configuration(key: str) -> dict:
+def settings_post(sub: str) -> str:
+    pass
+
+
+def settings_get(sub: str) -> str:
+    user_periods_resp: dict = commands.send(transport_client, Opcode.GET_USER_PERIODS, sub)
+    user_settings_resp: dict = commands.send(transport_client, Opcode.GET_USER_SETTINGS, sub)
+    if (user_periods_resp is None):
+        logger.error("malformed GET_USER_PERIODS from transport")
+        return error_500("An internal error occurred while gathering your course settings.")
+    if (user_periods_resp["ReturnCode"] != ReturnCode.SUCCESS.name):
+        logger.error(f"unsuccessful GET_USER_PERIODS from transport: {user_periods_resp}")
+        return error_500("An internal error occurred while processing your course settings.")
+    if (user_settings_resp is None):
+        logger.error("malformed GET_USER_SETTINGS from transport")
+        return error_500("An internal error occurred while gathering your course settings.")
+    if (user_settings_resp["ReturnCode"] != ReturnCode.SUCCESS.name):
+        logger.error(f"unsuccessful GET_USER_SETTINGS from transport: {user_settings_resp}")
+        return error_500("An internal error occurred while processing your course settings.")
+
+    user_periods: dict = user_periods_resp["OutputPayload"]["UserPeriods"]
+    theme: str = user_settings_resp["OutputPayload"]["Theme"]
+    font: str = user_settings_resp["OutputPayload"]["Font"]
+    school_json: str = user_settings_resp["OutputPayload"]["SchoolJson"]
+    available_schools: list = user_settings_resp["OutputPayload"]["AvailableSchools"]
+
+    return flask.render_template("settings.html",
+                                 user_periods = user_periods,
+                                 theme = theme,
+                                 font = font,
+                                 school_json = school_json,
+                                 available_schools = available_schools)
+
+
+@server.route("/settings", methods = ["GET", "POST"])
+def settings() -> str:
+    """
+    Routing method for the settings page.
+
+    The settings page supports GET requests to gather existing settings information and POST
+    requests with a JSON payload to update settings. This method will only serve users that
+    are logged in.
+
+    Return:
+     str: a rendered template of the settings page.
+    """
+
+    sub: str = flask_login.current_user.get_id()
+    if (sub is None):
+        return flask.redirect(flask.url_for("index"))
+
+    if (flask.request.method == "POST"):
+        return settings_post(sub)
+    return settings_get(sub)
+
+
+def _get_openid_configuration(key: str) -> str:
+    """
+    Returns a value from Google's Open ID data for the provided key.
+
+    Arguments:
+     key (str): the key in the Open ID data to get.
+
+    Returns:
+     str: the value of the specified key. If the key does not exist or the Open ID request failed
+          then `None` will be returned.
+    """
+
     try:
         openid_configuration: dict = requests.get(OPENID_URL, timeout = 30).json()
         return openid_configuration.get(key)
@@ -89,6 +209,13 @@ def _get_openid_configuration(key: str) -> dict:
 
 @server.route("/login", methods = ["GET"])
 def login() -> str:
+    """
+    Routing method for the login request page.
+
+    Returns:
+     str: a redirect to the OAuth login page, if the OAuth login request URI can be found.
+    """
+
     authorization_endpoint: str = _get_openid_configuration("authorization_endpoint")
     if (authorization_endpoint is None):
         logger.error("'authorization_endpoint' is missing from openid_configuration")
@@ -106,6 +233,13 @@ def login() -> str:
 
 @server.route("/login/callback", methods = ["GET"])
 def login_callback() -> str:
+    """
+    Routing method for the callback after an user has logged in with OAuth 2.
+
+    Returns:
+     str: a redirect to the index page if the user was successfully authenticated.
+    """
+
     authorization_code: str = flask.request.args.get("code")
     token_endpoint: str = _get_openid_configuration("token_endpoint")
     if (authorization_code is None):
@@ -162,12 +296,29 @@ def login_callback() -> str:
 
 
 @server.route("/logout")
-def logout():
+def logout() -> str:
+    """
+    Routing method for the logout page.
+
+    Returns:
+     str: a redirect to the index page after the user has been logged out.
+    """
+
     flask_login.logout_user()
     return flask.redirect(flask.url_for("index"))
 
 
 def _load_properties(properties_file: str) -> dict:
+    """
+    Loads the properties file used by the server as a dictionary.
+
+    Arguments:
+     properties_file (str): the path to the `.properties` file.
+
+    Returns:
+     dict: the parsed properties.
+    """
+
     global properties
     properties = {}
     with open(properties_file, "r", encoding = "utf-8") as f:
@@ -180,6 +331,13 @@ def _load_properties(properties_file: str) -> dict:
 
 
 def _write_pid_file() -> None:
+    """
+    Writes the process ID of the server to the file specified in the global properties.
+
+    If no PID file path is specified in the properties, a logger warning is printed but the process
+    is allowed to continue.
+    """
+
     pid_path: str = properties.get("server.pidFile")
     pid: int = os.getpid()
     if (pid_path is None):
@@ -201,6 +359,14 @@ def _write_pid_file() -> None:
 
 
 def _set_log_file() -> None:
+    """
+    Sets a file handler on the logger used by the server from the log file specified in the
+    global properties.
+
+    If no log file is specified in the properties, a logger warning is printed to the standard
+    output and the logger continues to use the default console handler.
+    """
+
     log_file: str = properties.get("server.logFile")
     if (log_file is None):
         logger.warning("server.logFile is not defined")
@@ -215,6 +381,13 @@ def _set_log_file() -> None:
 
 
 def _connect_oauth_client() -> None:
+    """
+    Initializes the OAuth 2 client used to authenticate client connections during login.
+
+    If any error ocurrs during initialization, or no OAuth token is specified in the global
+    properties, a fatal error is raised and the process exits.
+    """
+
     oauth_token: str = properties.get("server.oauthToken")
     if (oauth_token is None):
         logger.critical("invalid server.oauthToken: found None")
@@ -225,6 +398,13 @@ def _connect_oauth_client() -> None:
 
 
 def _connect_transport_client() -> None:
+    """
+    Initializes the client socket used to communicate with the Java transport.
+
+    If any error occurs during the socket setup, or transport socket information is missing,
+    a fatal error is raised and the process exits.
+    """
+
     transport_ip: str = properties.get("transport.ip")
     transport_port: int = properties.get("transport.port")
     transport_cafile: str = properties.get("transport.caFile")
@@ -250,6 +430,13 @@ def _connect_transport_client() -> None:
 
 
 def _get_host() -> tuple:
+    """
+    Returns the host information for the server.
+
+    Returns:
+     tuple: the web server IP address and port as a tuple in that order.
+    """
+
     ip: str = properties.get("server.ip")
     port: int = properties.get("server.port")
     if (ip is None):
@@ -264,6 +451,14 @@ def _get_host() -> tuple:
 
 
 def _get_ssl_context() -> tuple:
+    """
+    Returns the SSL context for the server.
+
+    Returns:
+     tuple: the certificate authority file, private key file, and Flask secret as a tuple in
+            that order.
+    """
+
     cafile: str = properties.get("server.caFile")
     keyfile: str = properties.get("server.privKey")
     secret: str = properties.get("server.secret")
@@ -280,6 +475,16 @@ def _get_ssl_context() -> tuple:
 
 
 def run(properties_file: str) -> Flask:
+    """
+    Starts the web server and associated services.
+
+    Arguments:
+     properties_file (str): the path to the server `.properties` file.
+
+    Returns:
+     Flask: the web server.
+    """
+
     _load_properties(properties_file)
     _set_log_file()
     _write_pid_file()

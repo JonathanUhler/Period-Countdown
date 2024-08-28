@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <title>Period Countdown</title>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='styles/index.css') }}">
+    <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
+  </head>
+  <body>
+    <div>Theme: {{ theme }}</div>
+    <div>Font: {{ font }}</div>
+    <div>Current JSON: {{ school_json }}</div>
+
+    <select name="schools">
+      {% for available_school in available_schools %}
+      <option value="{{ available_school }}">{{ available_school }}</option>
+      {% endfor %}
+    </select>
+
+    {% for period_key, period_info in user_periods.items() %}
+    <div>{{ period_key }}: {{ period_info }}</div>
+    {% endfor %}
+  </body>
+</html>
