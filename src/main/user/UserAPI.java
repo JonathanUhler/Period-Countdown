@@ -37,15 +37,12 @@ import school.SchoolAPI;
  * @author Jonathan Uhler
  */
 public class UserAPI {
-    
-    /** The full path to the user json file on the disk. */
+
     private Path path;
-    /** An object which holds all information in the user json file. */
     private UserJson json;
-    /** An object for the information in an entry to the {@code "Schools"} field. */
     private UserJsonSchoolDef schoolDef;
-    
-    
+
+
     /**
      * Constructs a new {@code UserAPI} object from the default jar artifact.
      *
@@ -94,6 +91,7 @@ public class UserAPI {
             throw new NullPointerException("json cannot be null");
         }
 
+        this.path = null;
         this.json = json;
         this.validate();
     }
@@ -430,9 +428,6 @@ public class UserAPI {
         if (path == null) {
             throw new NullPointerException("path cannot be null");
         }
-        if (!OSPath.isJsonFile(path)) {
-            throw new IllegalArgumentException("path is not a json file");
-        }
 
         this.json.settings.put(UserJson.SCHOOL_JSON, path.toString());
         this.updateJsonFile();
@@ -502,6 +497,16 @@ public class UserAPI {
         this.json.settings.put(UserJson.FONT, font);
         this.updateJsonFile();
     }
+
+
+    /**
+     * Returns the {@code UserJson} view of this user's information.
+     *
+     * @return the {@code UserJson} view of this user's information.
+     */
+    public UserJson getJson() {
+        return this.json;
+    }
     
     
     /**
@@ -510,6 +515,10 @@ public class UserAPI {
      * a default {@code UserJson} object.
      */
     private void updateJsonFile() {
+        if (this.path == null) {
+            return;
+        }
+
         FileWriter writer;
         try {
             writer = new FileWriter(this.path.toString());

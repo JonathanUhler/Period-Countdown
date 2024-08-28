@@ -2,6 +2,7 @@ package web.transport;
 
 
 import java.io.IOException;
+import java.nio.file.Paths;
 import java.util.Properties;
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
@@ -43,6 +44,62 @@ public class TransportServer extends JSSLServer {
     public TransportServer(Properties properties, String ip, int port) throws IOException {
         super(ip, port);
         this.database = new TransportDatabase(properties);
+    }
+
+
+    /**
+     * Generate a stringified response for the provided command parameters.
+     *
+     * @param opcode     the operation code of the request.
+     * @param userId     the unique identifier of the database user.
+     * @param request    the request string, which has already been validated as a `Command`.
+     * @param schoolAPI  the school API to use to gather information for the response.
+     * @param userAPI    the user API to use to gather information for the response.
+     */
+    private String getResponse(Command.Opcode opcode,
+                               String userId,
+                               String request,
+                               SchoolAPI schoolAPI,
+                               UserAPI userAPI)
+    {
+        Gson gson = new Gson();
+        Command response;
+
+        switch (opcode) {
+        case GET_TIME_REMAINING:
+            response = new GetTimeRemaining().process(request, schoolAPI, userAPI);
+            break;
+        case GET_CURRENT_PERIOD:
+            response = new GetCurrentPeriod().process(request, schoolAPI, userAPI);
+            break;
+        case GET_USER_PERIODS:
+            response = new GetUserPeriods().process(request, schoolAPI, userAPI);
+            break;
+        case GET_USER_SETTINGS:
+            response = new GetUserSettings().process(request, schoolAPI, userAPI);
+            ((GetUserSettings) response).outputPayload.availableSchools =
+                this.database.getAvailableSchools(userId);
+            break;
+        case SET_SCHOOL_JSON:
+            response = new SetSchoolJson().process(request, schoolAPI, userAPI);
+            SchoolJson newSchoolJson =
+                gson.fromJson(((SetSchoolJson) response).inputPayload.content, SchoolJson.class);
+            String newSchoolName = ((SetSchoolJson) response).inputPayload.schoolJson;
+            this.database.setSchoolJson(userId, newSchoolJson, Paths.get(newSchoolName));
+            break;
+        case SET_USER_PERIODS:
+            response = new SetUserPeriods().process(request, schoolAPI, userAPI);
+            this.database.setUserJson(userId, userAPI.getJson());
+            break;
+        case SET_USER_SETTINGS:
+            response = new SetUserSettings().process(request, schoolAPI, userAPI);
+            this.database.setUserJson(userId, userAPI.getJson());
+            break;
+        default:
+            return Command.error(Command.ReturnCode.ERR_RESPONSE, "unknown opcode: " + opcode);
+        }
+
+        return gson.toJson(response);
     }
 
 
@@ -95,28 +152,7 @@ public class TransportServer extends JSSLServer {
 
         // Process the command based on the provided opcode and return response information
         try {
-            Command response;
-            switch (opcode) {
-            case GET_TIME_REMAINING:
-                response = new GetTimeRemaining().process(commandStr, schoolAPI, userAPI);
-                break;
-            case GET_CURRENT_PERIOD:
-                response = new GetCurrentPeriod().process(commandStr, schoolAPI, userAPI);
-                break;
-            case GET_USER_PERIODS:
-                response = new GetUserPeriods().process(commandStr, schoolAPI, userAPI);
-                break;
-            case GET_USER_SETTINGS:
-                response =  new GetUserSettings().process(commandStr, schoolAPI, userAPI);
-                ((GetUserSettings) response).outputPayload.availableSchools =
-                    this.database.getAvailableSchools(userId);
-                break;
-            default:
-                return Command.error(Command.ReturnCode.ERR_RESPONSE, "unknown opcode: " + opcode);
-            }
-
-            System.out.println(gson.toJson(response));
-            return gson.toJson(response);
+            return this.getResponse(opcode, userId, commandStr, schoolAPI, userAPI);
         }
         catch (RuntimeException e) {
             return Command.error(opcode, userId, Command.ReturnCode.ERR_RESPONSE, "process: " + e);

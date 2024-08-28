@@ -53,7 +53,13 @@ public class Command {
         /** Requests the user-defined properties for each period of the current school file. */
         GET_USER_PERIODS,
         /** Requests the style and functional settings of the user. */
-        GET_USER_SETTINGS
+        GET_USER_SETTINGS,
+        /** Updates the contents of a school file. */
+        SET_SCHOOL_JSON,
+        /** Updates one or more user-defined periods for the current school file. */
+        SET_USER_PERIODS,
+        /** Udates one or more fields related to the user's settings */
+        SET_USER_SETTINGS
     }
 
 

@@ -193,12 +193,7 @@ public class Screen extends JPanel {
         }
         
         this.userAPI.setSchoolFile(Paths.get(file));
-        // School file was changed, so use the same routine as the constructor to reload the
-        // information
         try {
-            if (this.userAPI == null) {
-                throw new IllegalArgumentException("userAPI is null, cannot get school file name");
-            }
             this.schoolAPI = new SchoolAPI(this.userAPI.getSchoolFile());
         }
         catch (FileNotFoundException | IllegalArgumentException e) {

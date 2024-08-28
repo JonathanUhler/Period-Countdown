@@ -1,8 +1,7 @@
 package web.transport.commands;
 
 
-import java.util.List;
-import java.util.ArrayList;
+import java.util.Map;
 import com.google.gson.Gson;
 import com.google.gson.annotations.SerializedName;
 import school.SchoolAPI;
@@ -10,27 +9,21 @@ import user.UserAPI;
 
 
 /**
- * Requests the style and functional settings of the user.
+ * Updates one or more user-defined periods for the currently selected school JSON file.
  *
  * See the Period Countdown Web Specification for more information on this command.
  *
  * @author Jonathan Uhler
  */
-public class GetUserSettings extends Command {
+public class SetUserPeriods extends Command {
 
 
     public class InputPayload {
+        @SerializedName("UserPeriods")
+        public Map<String, Map<String, String>> userPeriods;
     }
 	
     public class OutputPayload {
-        @SerializedName("Theme")
-        public String theme;
-        @SerializedName("Font")
-        public String font;
-        @SerializedName("SchoolJson")
-        public String schoolJson;
-        @SerializedName("AvailableSchools")
-        public List<String> availableSchools;
     }
 
     @SerializedName("InputPayload")
@@ -42,17 +35,21 @@ public class GetUserSettings extends Command {
     @Override
     public Command process(String request, SchoolAPI schoolAPI, UserAPI userAPI) {
         Gson gson = new Gson();
-        GetUserSettings command = gson.fromJson(request, GetUserSettings.class);
+        SetUserPeriods command = gson.fromJson(request, SetUserPeriods.class);
+        if (command.inputPayload == null) {
+            throw new NullPointerException("SetUserPeriod missing input payload");
+        }
 
-        GetUserSettings response = new GetUserSettings();
+        for (String periodKey : command.inputPayload.userPeriods.keySet()) {
+            Map<String, String> periodInfo = command.inputPayload.userPeriods.get(periodKey);
+            userAPI.setPeriod(periodKey, periodInfo);
+        }
+
+        SetUserPeriods response = new SetUserPeriods();
         response.opcode = command.opcode;
         response.userId = command.userId;
         response.returnCode = ReturnCode.SUCCESS;
         response.outputPayload = response.new OutputPayload();
-        response.outputPayload.theme = Integer.toString(userAPI.getTheme());
-        response.outputPayload.font = userAPI.getFont();
-        response.outputPayload.schoolJson = userAPI.getSchoolFile().toString();
-        response.outputPayload.availableSchools = new ArrayList<>();  // Left for DB to fill
         
         return response;
     }

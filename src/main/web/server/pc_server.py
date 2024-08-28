@@ -68,9 +68,6 @@ def index() -> str:
     next_name: str = current_period_resp["OutputPayload"]["NextName"]
     next_duration: str = current_period_resp["OutputPayload"]["NextDuration"]
 
-    print(commands.send(transport_client, Opcode.GET_USER_PERIODS, sub))
-    print(commands.send(transport_client, Opcode.GET_USER_SETTINGS, sub))
-
     return flask.render_template("index.html",
                                  authenticated = True,
                                  time_remaining = time_remaining,

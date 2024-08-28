@@ -8,6 +8,9 @@ class Opcode(Enum):
     GET_CURRENT_PERIOD = auto()
     GET_USER_PERIODS = auto()
     GET_USER_SETTINGS = auto()
+    SET_SCHOOL_JSON = auto()
+    SET_USER_PERIODS = auto()
+    SET_USER_SETTINGS = auto()
 
 
 
