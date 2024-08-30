@@ -1,12 +1,11 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <meta charset="UTF-8">
     <title>Period Countdown</title>
-    <link rel="stylesheet"
-          type="text/css"
-          href="{{ url_for('static', filename='styles/index.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='styles/index.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='styles/common.css') }}">
     <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
+    <meta charset="UTF-8">
     {% if (authenticated == true) %}
     <meta name="end_time" content="{{ end_time }}">
     <meta name="expire_time" content="{{ expire_time }}">
@@ -14,18 +13,59 @@
   </head>
   <body>
     {% if (authenticated == true) %}
-    <div> {{ current_period }} </div>
-    <div id="time_remaining" style="background: -webkit-linear-gradient({{ theme }}, {{ theme }});
-                                    -webkit-background-clip: text;
-                                    -webkit-text-fill-color: transparent;">
-      {{ time_remaining }}
+    <style>
+      #time_remaining {
+	  background: -webkit-linear-gradient({{ theme_gradient }});
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+      }
+      #progress_bar {
+	  border-image: -webkit-linear-gradient({{ theme_gradient }});
+          border-image-slice: 1;
+      }
+      progress::-webkit-progress-value {
+	  background-color: -webkit-linear-gradient({{ theme_gradient }});
+      }
+      progress::-moz-progress-bar {
+	  background: -webkit-linear-gradient({{ theme_gradient }});
+      }
+    </style>
+
+    <!-- Control buttons -->
+    <div id="controls">
+      <button onclick="location.href = 'settings';">Settings</button>
+      <button onclick="location.href = 'logout';">Sign Out</button>
     </div>
-    <div> {{ next_period }} </div>
-    <div> ({{ next_period_duration }}) </div>
-    <button onclick="location.href = 'logout';">Sign out</button>
-    <button onclick="location.href = 'settings';">Settings</button>
+
+    <!-- Main class and time display -->
+    <div id="primary_display">
+      <div id="current_period">{{ current_period }}</div>
+      <div id="current_duration">{{ current_duration}}</div>
+      <div id="time_remaining">{{ time_remaining }}</div>
+      <!-- Current class progress bar -->
+      <progress id="progress_bar" value="37" max="100"></progress>
+    </div>
+
+    <div id="secondary_display">
+      <!-- Next class -->
+      <div id="next_period_display">
+        <div id="next_period">{{ next_period }}</div>
+        <div id="next_duration">{{ next_period_duration }}</div>
+      </div>
+      <!-- Current day/date -->
+      <div id="day_display">
+        <div id="day">Thursday</div>
+        <div id="date">08/29/24</div>
+      </div>
+    </div>
+
     {% else %}
-    <button onclick="location.href = 'login';">Sign in with Google</button>
+
+    <div id="primary_display">
+      <div id="new_user_title">Class Countdown</div>
+      <button onclick="location.href = 'login';">Sign In</button>
+    </div>
+
     {% endif %}
 
     <script src="{{ url_for('static', filename='javascript/index.js') }}"

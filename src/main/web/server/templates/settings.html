@@ -3,22 +3,57 @@
   <head>
     <meta charset="UTF-8">
     <title>Period Countdown</title>
-    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='styles/index.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='styles/settings.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='styles/common.css') }}">
     <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
   </head>
   <body>
-    <div>Theme: {{ theme }}</div>
-    <div>Font: {{ font }}</div>
-    <div>Current JSON: {{ school_json }}</div>
+    <form action="/settings" method="POST" enctype="multipart/form-data">
+      <div id="controls">
+        <button type="button" onclick="location.href = '/';">Back</button>
+        <button type="submit">Save</button>
+      </div>
 
-    <select name="schools">
-      {% for available_school in available_schools %}
-      <option value="{{ available_school }}">{{ available_school }}</option>
-      {% endfor %}
-    </select>
+      <div id="user_settings">
+        <div id="user_settings_title">Settings</div>
 
-    {% for period_key, period_info in user_periods.items() %}
-    <div>{{ period_key }}: {{ period_info }}</div>
-    {% endfor %}
+        <label id="settings_header">Theme</label>
+        <input type="text" name="Theme" value="{{ theme }}">
+
+        <label id="settings_header">Font</label>
+        <select name="Font">
+          {% for available_font in available_fonts %}
+          {% if font == available_font %}
+          <option value="{{ available_font }}" selected>{{ available_font }}</option>
+          {% else %}
+          <option value="{{ available_font }}">{{ available_font }}</option>
+          {% endif %}
+          {% endfor %}
+        </select>
+
+        <label id="settings_header">School</label>
+        <select name="SchoolJson">
+          {% for available_school in available_schools %}
+          {% if school_json == available_school %}
+          <option value="{{ available_school }}" selected>{{ available_school }}</option>
+          {% else %}
+          <option value="{{ available_school }}">{{ available_school }}</option>
+          {% endif %}
+          {% endfor %}
+        </select>
+      </div>
+
+      <div id="user_periods">
+        <div id="user_periods_title">Classes</div>
+        {% for period_key, period_info in user_periods.items() %}
+        <label id="settings_header">Class {{ period_key }}</label>
+        <div id="user_period">
+          <input type="text" name="{{ period_key }}" value="{{ period_info['Name'] }}" placeholder="Class Name">
+          <input type="text" name="{{ period_key }}" value="{{ period_info['Teacher'] }}" placeholder="Instructor">
+          <input type="text" name="{{ period_key }}" value="{{ period_info['Room'] }}" placeholder="Location">
+        </div>
+        {% endfor %}
+      </div>
+    </form>
   </body>
 </html>

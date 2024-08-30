@@ -1,0 +1,37 @@
+input {
+    background: rgb(230, 230, 230);
+    color: black;
+    border-radius: 6px;
+    border-style: solid;
+    border-width: 1px;
+    border-color: rgb(230, 230, 230);
+    padding: 0.5vw 0.5vh;
+}
+
+
+select {
+    background: rgb(230, 230, 230);
+    color: black;
+    border-radius: 6px;
+    border-style: solid;
+    border-width: 1px;
+    border-color: rgb(230, 230, 230);
+    padding: 0.5vw 0.5vh;
+}
+
+
+button {
+    background: rgb(245, 245, 245);
+    color: black;
+    transition-duration: 0.1s;
+    cursor: pointer;
+    font-size: 2vw;
+    border-radius: 6px;
+    border-style: solid;
+    border-width: 3px;
+    border-color: rgb(200, 200, 200);
+    padding: 1vw 1vh;
+}
+button:hover {
+    background: rgb(200, 200, 200);
+}

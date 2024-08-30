@@ -112,12 +112,15 @@ def index() -> str:
     expire_time: str = time_remaining_resp["OutputPayload"]["ExpireTime"]
     current_name: str = current_period_resp["OutputPayload"]["CurrentName"]
     current_status: str = current_period_resp["OutputPayload"]["CurrentStatus"]
+    current_duration: str = "00:00:00"#current_period_resp["OutputPayload"]["CurrentDuration"] # MARK: add this field to the GET_CURRENT_PERIOD command
     next_name: str = current_period_resp["OutputPayload"]["NextName"]
     next_duration: str = current_period_resp["OutputPayload"]["NextDuration"]
     theme: str = user_settings_resp["OutputPayload"]["Theme"]
     font: str = user_settings_resp["OutputPayload"]["Font"]
 
     theme = hex(int(theme))[2:].zfill(6)
+    theme_lighter: str = "ffffff" # MARK: get lighter version of color
+    theme_gradient: str = f"#{theme}, #{theme_lighter}"
 
     return flask.render_template("index.html",
                                  authenticated = True,
@@ -125,9 +128,10 @@ def index() -> str:
                                  end_time = end_time,
                                  expire_time = expire_time,
                                  current_period = f"{current_name} | {current_status}",
+                                 current_duration = current_duration,
                                  next_period = next_name,
                                  next_period_duration = next_duration,
-                                 theme = f"#{theme}",
+                                 theme_gradient = theme_gradient,
                                  font = font)
 
 
@@ -157,10 +161,13 @@ def settings_get(sub: str) -> str:
     school_json: str = user_settings_resp["OutputPayload"]["SchoolJson"]
     available_schools: list = user_settings_resp["OutputPayload"]["AvailableSchools"]
 
+    available_fonts: list = [] # MARK: get available fonts
+
     return flask.render_template("settings.html",
                                  user_periods = user_periods,
                                  theme = theme,
                                  font = font,
+                                 available_fonts = available_fonts,
                                  school_json = school_json,
                                  available_schools = available_schools)
 
