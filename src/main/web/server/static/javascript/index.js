@@ -193,6 +193,7 @@ function setTimeRemaining(timeInfo) {
  * Updates the time remaining information and polls the server for new information as needed.
  */
 function updateTimeRemaining() {
+    // Update time remaining
     let timeRemainingDiv = document.getElementById(TIME_REMAINING);
     let progressBar = document.getElementById(PROGRESS_BAR);
     if (timeRemainingDiv == null) {
@@ -222,6 +223,15 @@ function updateTimeRemaining() {
 
     timeRemainingDiv.innerHTML = timeRemaining.toString();
     progressBar.value = currentDuration.portionComplete(timeRemaining);
+
+    // Update date/day display
+    let now = new Date();
+    let month = String(now.getMonth() + 1).padStart(2, "0");
+    let date = String(now.getDate()).padStart(2, "0");
+    let year = String(now.getFullYear()).slice(-2);
+    let day = now.toLocaleDateString("en-US", {weekday: "long"});
+    document.getElementById("day").innerHTML = month + "/" + date + "/" + year;
+    document.getElementById("date").innerHTML = day;
 }
 
 

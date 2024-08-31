@@ -142,6 +142,7 @@ def settings_post(sub: str) -> str:
     theme: str = flask.request.form["Theme"].replace("#", "")
     font: str = flask.request.form["Font"]
     school_json: str = flask.request.form["SchoolJson"]
+    school_content: str = flask.request.files["Content"]
     period_names: list = flask.request.form.getlist("Name")
     period_teachers: list = flask.request.form.getlist("Teacher")
     period_rooms: list = flask.request.form.getlist("Room")
@@ -176,6 +177,23 @@ def settings_post(sub: str) -> str:
     if (user_settings_resp["ReturnCode"] != ReturnCode.SUCCESS.name):
         logger.error(f"unsuccessful SET_USER_SETTINGS from transport: {user_settings_resp}")
         return error_500("An internal error occurred while saving your course settings.")
+
+    if (school_content.filename != ""):
+        content_name: str = os.path.splitext(school_content.filename)[0]
+        for invalid_char in ['.', '#', '$', '[', ']']:
+            content_name = content_name.replace(invalid_char, "_")
+        content_str: str = school_content.read().decode("utf-8")
+        school_json_payload: dict = {"SchoolJson": content_name, "Content": content_str}
+        school_json_resp: dict = commands.send(transport_client,
+                                               Opcode.SET_SCHOOL_JSON,
+                                               sub,
+                                               school_json_payload)
+        if (school_json_resp is None):
+            logger.error("malformed SET_SCHOOL_JSON from transport")
+            return error_500("An internal error occurred while reading your school file.")
+        if (school_json_resp["ReturnCode"] != ReturnCode.SUCCESS.name):
+            logger.error(f"unsuccessful SET_SCHOOL_JSON from transport: {school_json_resp}")
+            return error_500("An internal error occurred while saving your school file.")
 
     return flask.redirect(flask.url_for("settings"))
 

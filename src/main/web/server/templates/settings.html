@@ -37,7 +37,7 @@
           {% endfor %}
         </select>
 
-        <label id="settings_header">School</label>
+        <label id="settings_header">Choose School</label>
         <select name="SchoolJson">
           {% for available_school in available_schools %}
           {% if school_json == available_school %}
@@ -47,6 +47,9 @@
           {% endif %}
           {% endfor %}
         </select>
+
+        <label id="settings_header">Add School</label>
+        <input type="file" name="Content" accept=".json">
       </div>
 
       <div id="user_periods">
