@@ -230,22 +230,73 @@ public class UserAPI {
     
     
     /**
-     * Adds user information for a school to the user's json file. If the school json file cannot
-     * be loaded and validated by {@code SchoolAPI}, no change is made.
+     * Adds user information for a school to the user's json file.
+     *
+     * If the school json file cannot be loaded and validated by {@code SchoolAPI}, no change is
+     * made.
      *
      * @param schoolPath  the path to the school JSON file.
      *
      * @see SchoolAPI
      */
-    private void addSchool(Path schoolPath) {
+    public void addSchool(Path schoolPath) {
+        if (schoolPath == null) {
+            throw new NullPointerException("schoolPath cannot be null");
+        }
+
         SchoolAPI schoolAPI;
         try {
             schoolAPI = new SchoolAPI(schoolPath);
         }
         catch(FileNotFoundException e) {
-            return;
+            throw new IllegalArgumentException("invalid school path: " + e);
         }
 
+        this.addSchoolFromAPI(schoolPath.getFileName().toString(), schoolAPI);
+    }
+
+
+    /**
+     * Adds user information for a school to the user's json file.
+     *
+     * A {@code SchoolJson} object is provided directly. If any error occurs with this object,
+     * not change is made.
+     *
+     * @param schoolName  the name of the new school.
+     * @param schoolJson  the json of the new school file.
+     *
+     * @see SchoolAPI.
+     */
+    public void addSchool(String schoolName, SchoolJson schoolJson) {
+        if (schoolName == null) {
+            throw new NullPointerException("schoolName cannot be null");
+        }
+        if (schoolJson == null) {
+            throw new NullPointerException("schoolJson cannot be null");
+        }
+
+        SchoolAPI schoolAPI;
+        try {
+            schoolAPI = new SchoolAPI(schoolJson);
+        }
+        catch(FileNotFoundException e) {
+            throw new IllegalArgumentException("invalid school json: " + e);
+        }
+
+        this.addSchoolFromAPI(schoolName, schoolAPI);
+    }
+
+
+    /**
+     * Performs the internal process of adding a new school.
+     *
+     * Given a name and {@code SchoolAPI} to pull information from, this method adds a blank
+     * placeholder structure for all the periods in the new school.
+     *
+     * @param schoolName  the name of the new school.
+     * @param schoolAPI   the API for the new school to gather information form.
+     */
+    private void addSchoolFromAPI(String schoolName, SchoolAPI schoolAPI) {
         int firstPeriod = schoolAPI.getFirstPeriod();
         int lastPeriod = schoolAPI.getLastPeriod();
 
@@ -260,7 +311,7 @@ public class UserAPI {
 
         UserJsonSchoolDef schoolInfo = new UserJsonSchoolDef();
         schoolInfo.periods = schoolPeriods;
-        this.json.schools.put(schoolPath.getFileName().toString(), schoolInfo);
+        this.json.schools.put(schoolName, schoolInfo);
         this.updateJsonFile();
     }
     

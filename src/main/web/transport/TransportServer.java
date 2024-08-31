@@ -85,6 +85,8 @@ public class TransportServer extends JSSLServer {
             SchoolJson newSchoolJson =
                 gson.fromJson(((SetSchoolJson) response).inputPayload.content, SchoolJson.class);
             String newSchoolName = ((SetSchoolJson) response).inputPayload.schoolJson;
+            userAPI.addSchool(newSchoolName, newSchoolJson);
+            this.database.setUserJson(userId, userAPI.getJson());
             this.database.setSchoolJson(userId, newSchoolJson, Paths.get(newSchoolName));
             break;
         case SET_USER_PERIODS:
