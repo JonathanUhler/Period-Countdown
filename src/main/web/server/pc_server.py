@@ -108,14 +108,14 @@ def index() -> str:
         logger.error(f"unsuccessful GET_USER_SETTINGS from transport: {user_settings_resp}")
         return error_500("An internal error occurred while processing your data.")
 
-    time_remaining: str = time_remaining_resp["OutputPayload"]["TimeRemaining"]
-    end_time: str = time_remaining_resp["OutputPayload"]["EndTime"]
-    expire_time: str = time_remaining_resp["OutputPayload"]["ExpireTime"]
-    current_name: str = current_period_resp["OutputPayload"]["CurrentName"]
-    current_status: str = current_period_resp["OutputPayload"]["CurrentStatus"]
-    current_duration: str = current_period_resp["OutputPayload"]["CurrentDuration"]
-    next_name: str = current_period_resp["OutputPayload"]["NextName"]
-    next_duration: str = current_period_resp["OutputPayload"]["NextDuration"]
+    time_remaining: str = time_remaining_resp["OutputPayload"].get("TimeRemaining")
+    end_time: str = time_remaining_resp["OutputPayload"].get("EndTime")
+    expire_time: str = time_remaining_resp["OutputPayload"].get("ExpireTime")
+    current_name: str = current_period_resp["OutputPayload"].get("CurrentName")
+    current_status: str = current_period_resp["OutputPayload"].get("CurrentStatus")
+    current_duration: str = current_period_resp["OutputPayload"].get("CurrentDuration")
+    next_name: str = current_period_resp["OutputPayload"].get("NextName")
+    next_duration: str = current_period_resp["OutputPayload"].get("NextDuration")
     theme: str = user_settings_resp["OutputPayload"]["Theme"]
     font: str = user_settings_resp["OutputPayload"]["Font"]
 

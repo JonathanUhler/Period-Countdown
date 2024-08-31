@@ -52,9 +52,13 @@ public class GetTimeRemaining extends Command {
         response.userId = command.userId;
         response.returnCode = ReturnCode.SUCCESS;
         response.outputPayload = response.new OutputPayload();
-        response.outputPayload.timeRemaining = timeRemaining.toString();
-        response.outputPayload.endTime = timeRemaining.getEnd().toString();
-        response.outputPayload.expireTime = currentPeriod.getEnd().toString();
+        if (timeRemaining != null) {
+            response.outputPayload.timeRemaining = timeRemaining.toString();
+            response.outputPayload.endTime = timeRemaining.getEnd().toString();
+        }
+        if (currentPeriod != null) {
+            response.outputPayload.expireTime = currentPeriod.getEnd().toString();
+        }
 
         return response;
     }
