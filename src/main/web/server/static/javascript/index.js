@@ -8,15 +8,30 @@ const END_TIME = "end_time";
 const EXPIRE_TIME = "expire_time";
 
 
+/**
+ * Represents a duration of time.
+ *
+ * @author Jonathan Uhler
+ */
 class Duration {
 
+    /** The number of minutes in one hour. */
     static MINUTES_PER_HOUR = 60;
+    /** The number of seconds in one minute. */
     static SECONDS_PER_MINUTE = 60;
+    /** The number of milliseconds in one second. */
     static MS_PER_SECOND = 1000;
+    /** The number of milliseconds in one minute. */
     static MS_PER_MINUTE = Duration.MS_PER_SECOND * Duration.SECONDS_PER_MINUTE;
+    /** The number of milliseconds in one hour. */
     static MS_PER_HOUR = Duration.MS_PER_MINUTE * Duration.MINUTES_PER_HOUR;
 
 
+    /**
+     * A private constructor to create a new {@code Duration} from a count of milliseconds.
+     *
+     * @param epoch  the number of milliseconds in this duration.
+     */
     constructor(epoch) {
         if (epoch <= 0) {
             this.hours = 0;
@@ -36,6 +51,14 @@ class Duration {
     }
 
 
+    /**
+     * Creates a new {@code Duration} between the current time and the provided end time.
+     *
+     * @param endTimeString  the ending time of the duration as an ISO timestamp in the format
+     *                       yyyy-MM-dd'T'HH:mm:ss Z.
+     *
+     * @return a new {@code Duration} between the current time and the provided end time.
+     */
     static fromEndTime(endTimeString) {
         endTimeString = endTimeString.trim().replaceAll(" ", "");
 
@@ -47,6 +70,14 @@ class Duration {
     }
 
 
+    /**
+     * Creates a new {@code Duration} from a string.
+     *
+     * @param durationString  a string specifying a number of hours, minutes, and seconds
+     *                        separated by colons.
+     *
+     * @return a new {@code Duration} from the specified string.
+     */
     static fromDuration(durationString) {
         let components = durationString.split(":");
         if (components.length != 3) {
@@ -65,11 +96,27 @@ class Duration {
     }
 
 
+    /**
+     * Returns whether this duration is over.
+     *
+     * A duration is over when all time units (hours, minutes, etc) are less than or equal to zero.
+     *
+     * @return whether this duration is over.
+     */
     isOver() {
         return this.hours <= 0 && this.minutes <= 0 && this.seconds <= 0 && this.millis <= 0;
     }
 
 
+    /**
+     * Returns the portion of this duration that has been completed by the provided sub-duration.
+     *
+     * @param remaining  another {@code Duration} object which represents the portion of time
+     *                   not yet completed.
+     *
+     * @return the portion of this duration completed as a decimal between 0 and 1, where the
+     *         portion not completed is equal to {@code remaining}.
+     */
     portionComplete(remaining) {
         let totalMillis =
             this.hours * Duration.MS_PER_HOUR +
@@ -86,6 +133,11 @@ class Duration {
     }
 
 
+    /**
+     * Returns a string representation of this duration.
+     *
+     * @return a string representation of this duration.
+     */
     toString() {
         return String(this.hours).padStart(2, "0") + ":" +
             String(this.minutes).padStart(2, "0") + ":" +
@@ -95,6 +147,14 @@ class Duration {
 }
 
 
+
+/**
+ * Reads the returns information about the time remaining from the DOM.
+ *
+ * @param doc  the DOM to read from. By default, this is {@code document}.
+ *
+ * @return the time remaining, current duration, end time, and expire time.
+ */
 function getTimeRemaining(doc = document) {
     let timeRemaining = doc.getElementById(TIME_REMAINING).innerHTML;
     let currentDuration = doc.getElementById(CURRENT_DURATION).innerHTML;
@@ -110,6 +170,12 @@ function getTimeRemaining(doc = document) {
 }
 
 
+/**
+ * Updates the time remaining information for the current DOM.
+ *
+ * @param timeInfo  a structure containing the same information as the value returned from
+ *                  {@code getTimeRemaining}.
+ */
 function setTimeRemaining(timeInfo) {
     let timeRemaining = timeInfo[TIME_REMAINING];
     let currentDuration = timeInfo[CURRENT_DURATION];
@@ -123,6 +189,9 @@ function setTimeRemaining(timeInfo) {
 }
 
 
+/**
+ * Updates the time remaining information and polls the server for new information as needed.
+ */
 function updateTimeRemaining() {
     let timeRemainingDiv = document.getElementById(TIME_REMAINING);
     let progressBar = document.getElementById(PROGRESS_BAR);
