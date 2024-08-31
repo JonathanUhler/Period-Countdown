@@ -208,7 +208,7 @@ public class Duration {
         String paddedHours = String.format("%02d", this.hours);
         String paddedMinutes = String.format("%02d", this.minutes);
         String paddedSeconds = String.format("%02d", this.seconds);
-        return this.hours + ":" + paddedMinutes + ":" + paddedSeconds;
+        return paddedHours + ":" + paddedMinutes + ":" + paddedSeconds;
     }
     
 }

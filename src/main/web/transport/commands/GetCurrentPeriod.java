@@ -29,6 +29,8 @@ public class GetCurrentPeriod extends Command {
         public String currentName;
         @SerializedName("CurrentStatus")
         public String currentStatus;
+        @SerializedName("CurrentDuration")
+        public String currentDuration;
         @SerializedName("NextName")
         public String nextName;
         @SerializedName("NextDuration")
@@ -67,9 +69,12 @@ public class GetCurrentPeriod extends Command {
         }
         if (nextSchoolPeriod != null) {
             UserPeriod nextUserPeriod = userAPI.getPeriod(nextSchoolPeriod);
+            UTCTime currentStart = currentSchoolPeriod.getStart();
             UTCTime nextStart = nextSchoolPeriod.getStart();
             UTCTime nextEnd = nextSchoolPeriod.getEnd().plus(1, UTCTime.SECONDS);
+            Duration currentDuration = new Duration(currentStart, nextStart);
             Duration nextDuration = new Duration(nextStart, nextEnd);
+            response.outputPayload.currentDuration = currentDuration.toString();
             response.outputPayload.nextName = nextUserPeriod.getName();
             response.outputPayload.nextDuration = nextDuration.toString();
         }

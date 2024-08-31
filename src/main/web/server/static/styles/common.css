@@ -1,6 +1,7 @@
 input {
     background: rgb(230, 230, 230);
     color: black;
+    width: 25vh;
     border-radius: 6px;
     border-style: solid;
     border-width: 1px;
@@ -12,6 +13,7 @@ input {
 select {
     background: rgb(230, 230, 230);
     color: black;
+    width: 25vh;
     border-radius: 6px;
     border-style: solid;
     border-width: 1px;

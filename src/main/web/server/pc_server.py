@@ -13,9 +13,10 @@ from logging import FileHandler, Formatter
 from tempfile import NamedTemporaryFile
 from argparse import ArgumentParser, Namespace
 from typing import Final
+import matplotlib.font_manager
 import requests
 import flask
-from flask import Flask, request
+from flask import Flask
 import flask_login
 from flask_login import LoginManager
 from oauthlib.oauth2 import WebApplicationClient
@@ -112,15 +113,19 @@ def index() -> str:
     expire_time: str = time_remaining_resp["OutputPayload"]["ExpireTime"]
     current_name: str = current_period_resp["OutputPayload"]["CurrentName"]
     current_status: str = current_period_resp["OutputPayload"]["CurrentStatus"]
-    current_duration: str = "00:00:00"#current_period_resp["OutputPayload"]["CurrentDuration"] # MARK: add this field to the GET_CURRENT_PERIOD command
+    current_duration: str = current_period_resp["OutputPayload"]["CurrentDuration"]
     next_name: str = current_period_resp["OutputPayload"]["NextName"]
     next_duration: str = current_period_resp["OutputPayload"]["NextDuration"]
     theme: str = user_settings_resp["OutputPayload"]["Theme"]
     font: str = user_settings_resp["OutputPayload"]["Font"]
 
-    theme = hex(int(theme))[2:].zfill(6)
-    theme_lighter: str = "ffffff" # MARK: get lighter version of color
-    theme_gradient: str = f"#{theme}, #{theme_lighter}"
+    theme_int: str = int(theme)
+    theme_hues: list = [(theme_int >> 16) & 255, (theme_int >> 8) & 255, theme_int & 255]
+    theme_lighter_hues: list = [min(255, int(hue / 0.7)) for hue in theme_hues]
+
+    theme_hex: str = "".join(f"{hue:02X}" for hue in theme_hues)
+    theme_lighter_hex: str = "".join(f"{hue:02X}" for hue in theme_lighter_hues)
+    theme_gradient: str = f"#{theme_hex}, #{theme_lighter_hex}"
 
     return flask.render_template("index.html",
                                  authenticated = True,
@@ -140,6 +145,16 @@ def settings_post(sub: str) -> str:
 
 
 def settings_get(sub: str) -> str:
+    """
+    Routing helpter method for a GET request on the settings page.
+
+    Arguments:
+     sub (str): the unique identifier of the database user currently logged in.
+
+    Return:
+     str: a rendered template of the settings page.
+    """
+
     user_periods_resp: dict = commands.send(transport_client, Opcode.GET_USER_PERIODS, sub)
     user_settings_resp: dict = commands.send(transport_client, Opcode.GET_USER_SETTINGS, sub)
     if (user_periods_resp is None):
@@ -161,7 +176,7 @@ def settings_get(sub: str) -> str:
     school_json: str = user_settings_resp["OutputPayload"]["SchoolJson"]
     available_schools: list = user_settings_resp["OutputPayload"]["AvailableSchools"]
 
-    available_fonts: list = [] # MARK: get available fonts
+    available_fonts: list = sorted([f.name for f in matplotlib.font_manager.fontManager.ttflist])
 
     return flask.render_template("settings.html",
                                  user_periods = user_periods,
