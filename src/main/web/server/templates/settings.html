@@ -8,6 +8,12 @@
     <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
   </head>
   <body>
+    <style>
+      * {
+          font-family: {{ font }};
+      }
+    </style>
+
     <form action="/settings" method="POST" enctype="multipart/form-data">
       <div id="controls">
         <button type="button" onclick="location.href = '/';">Back</button>
@@ -48,9 +54,9 @@
         {% for period_key, period_info in user_periods.items() %}
         <label id="settings_header">Class {{ period_key }}</label>
         <div id="user_period">
-          <input type="text" name="{{ period_key }}" value="{{ period_info['Name'] }}" placeholder="Class Name">
-          <input type="text" name="{{ period_key }}" value="{{ period_info['Teacher'] }}" placeholder="Instructor">
-          <input type="text" name="{{ period_key }}" value="{{ period_info['Room'] }}" placeholder="Location">
+          <input type="text" name="Name" value="{{ period_info['Name'] }}" placeholder="Class Name">
+          <input type="text" name="Teacher" value="{{ period_info['Teacher'] }}" placeholder="Instructor">
+          <input type="text" name="Room" value="{{ period_info['Room'] }}" placeholder="Location">
         </div>
         {% endfor %}
       </div>

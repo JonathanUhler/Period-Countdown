@@ -14,6 +14,9 @@
   <body>
     {% if (authenticated == true) %}
     <style>
+      * {
+          font-family: {{ font }};
+      }
       #time_remaining {
 	  background: -webkit-linear-gradient({{ theme_gradient }});
           -webkit-background-clip: text;
@@ -60,6 +63,11 @@
     </div>
 
     {% else %}
+    <style>
+      * {
+          font-family: Lexend Deca;
+      }
+    </style>
 
     <div id="primary_display">
       <div id="new_user_title">Class Countdown</div>

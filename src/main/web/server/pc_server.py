@@ -141,7 +141,45 @@ def index() -> str:
 
 
 def settings_post(sub: str) -> str:
-    pass
+    theme: str = flask.request.form["Theme"]
+    font: str = flask.request.form["Font"]
+    school_json: str = flask.request.form["SchoolJson"]
+    period_names: list = flask.request.form.getlist("Name")
+    period_teachers: list = flask.request.form.getlist("Teacher")
+    period_rooms: list = flask.request.form.getlist("Room")
+    num_periods: int = len(period_names)
+    user_periods: dict = {
+        str(period_key + 1): {"Name": period_names[period_key],
+                              "Teacher": period_teachers[period_key],
+                              "Room": period_rooms[period_key]}
+        for period_key in range(num_periods)
+    }
+
+    user_periods_payload: dict = {"UserPeriods": user_periods}
+    user_settings_payload: dict = {"Theme": theme, "Font": font, "SchoolJson": school_json}
+
+    user_periods_resp: dict = commands.send(transport_client,
+                                            Opcode.SET_USER_PERIODS,
+                                            sub,
+                                            user_periods_payload)
+    user_settings_resp: dict = commands.send(transport_client,
+                                             Opcode.SET_USER_SETTINGS,
+                                             sub,
+                                             user_settings_payload)
+    if (user_periods_resp is None):
+        logger.error("malformed SET_USER_PERIODS from transport")
+        return error_500("An internal error occurred while updating your course settings.")
+    if (user_periods_resp["ReturnCode"] != ReturnCode.SUCCESS.name):
+        logger.error(f"unsuccessful SET_USER_PERIODS from transport: {user_periods_resp}")
+        return error_500("An internal error occurred while saving your course settings.")
+    if (user_settings_resp is None):
+        logger.error("malformed SET_USER_SETTINGS from transport")
+        return error_500("An internal error occurred while updating your course settings.")
+    if (user_settings_resp["ReturnCode"] != ReturnCode.SUCCESS.name):
+        logger.error(f"unsuccessful SET_USER_SETTINGS from transport: {user_settings_resp}")
+        return error_500("An internal error occurred while saving your course settings.")
+
+    return flask.redirect(flask.url_for("settings"))
 
 
 def settings_get(sub: str) -> str:
