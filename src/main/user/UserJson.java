@@ -58,7 +58,7 @@ public class UserJson {
     public UserJson() {
         this.schools = new HashMap<>();
         this.settings = new HashMap<>();
-        this.settings.put(UserJson.THEME, "0");
+        this.settings.put(UserJson.THEME, "000000");
         this.settings.put(UserJson.FONT, "Arial");
         this.settings.put(UserJson.SCHOOL_JSON, "");
     }

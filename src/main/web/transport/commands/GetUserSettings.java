@@ -49,7 +49,7 @@ public class GetUserSettings extends Command {
         response.userId = command.userId;
         response.returnCode = ReturnCode.SUCCESS;
         response.outputPayload = response.new OutputPayload();
-        response.outputPayload.theme = Integer.toString(userAPI.getTheme());
+        response.outputPayload.theme = String.format("%06x", userAPI.getTheme());
         response.outputPayload.font = userAPI.getFont();
         response.outputPayload.schoolJson = userAPI.getSchoolFile().toString();
         response.outputPayload.availableSchools = new ArrayList<>();  // Left for DB to fill

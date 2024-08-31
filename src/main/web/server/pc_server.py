@@ -119,13 +119,11 @@ def index() -> str:
     theme: str = user_settings_resp["OutputPayload"]["Theme"]
     font: str = user_settings_resp["OutputPayload"]["Font"]
 
-    theme_int: str = int(theme)
+    theme_int: str = int(theme, 16)
     theme_hues: list = [(theme_int >> 16) & 255, (theme_int >> 8) & 255, theme_int & 255]
     theme_lighter_hues: list = [min(255, int(hue / 0.7)) for hue in theme_hues]
-
-    theme_hex: str = "".join(f"{hue:02X}" for hue in theme_hues)
-    theme_lighter_hex: str = "".join(f"{hue:02X}" for hue in theme_lighter_hues)
-    theme_gradient: str = f"#{theme_hex}, #{theme_lighter_hex}"
+    theme_lighter: str = "".join(f"{hue:02X}" for hue in theme_lighter_hues)
+    theme_gradient: str = f"#{theme}, #{theme_lighter}"
 
     return flask.render_template("index.html",
                                  authenticated = True,
@@ -141,7 +139,7 @@ def index() -> str:
 
 
 def settings_post(sub: str) -> str:
-    theme: str = flask.request.form["Theme"]
+    theme: str = flask.request.form["Theme"].replace("#", "")
     font: str = flask.request.form["Font"]
     school_json: str = flask.request.form["SchoolJson"]
     period_names: list = flask.request.form.getlist("Name")

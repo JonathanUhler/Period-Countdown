@@ -398,7 +398,7 @@ public class UserAPI {
     public int getTheme() {
         String rgbStr = this.json.settings.get(UserJson.THEME);
         try {
-            return Integer.parseInt(rgbStr);
+            return Integer.parseInt(rgbStr, 16);
         }
         catch (NumberFormatException e) {
             throw new NumberFormatException("cannot parse theme color: " + rgbStr + ", " + e);
@@ -483,7 +483,7 @@ public class UserAPI {
         }
 
         int rgb = (((r << 8) | g) << 8) | b;
-        this.json.settings.put(UserJson.THEME, Integer.toString(rgb));
+        this.json.settings.put(UserJson.THEME, String.format("%06x", rgb));
         this.updateJsonFile();
     }
     

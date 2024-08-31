@@ -47,9 +47,9 @@ public class SetUserSettings extends Command {
 
         String theme = command.inputPayload.theme;
         if (theme != null) {
-            int rgb = Integer.parseInt(theme);
-            int r = (rgb >> 8) & 0xFF;
-            int g = (rgb >> 4) & 0xFF;
+            int rgb = Integer.parseInt(theme, 16);
+            int r = (rgb >> 16) & 0xFF;
+            int g = (rgb >> 8) & 0xFF;
             int b = rgb & 0xFF;
             userAPI.setTheme(r, g, b);
         }

@@ -141,7 +141,7 @@ public class Screen extends JPanel {
      */
     protected int getUserTheme() {
         if (this.userAPI == null) {
-            return 0xffffff;
+            return 0x000000;
         }
         return this.userAPI.getTheme();
     }
