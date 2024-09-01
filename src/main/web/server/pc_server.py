@@ -34,7 +34,6 @@ logger: Final = logging.getLogger(__name__)
 server: Final = Flask(__name__)
 login_manager: Final = LoginManager()
 oauth_client: Final = None
-transport_client: Final = None
 
 
 @login_manager.user_loader
@@ -68,6 +67,42 @@ def error_500(message: str = "An internal server error occurred.") -> str:
     return flask.render_template("500.html", message = message), 500
 
 
+def _get_transport_client() -> PSSLClientSocket:
+    """
+    Initializes a client socket to communicate with the Java transport.
+
+    If any error occurs during the socket setup, or transport socket information is missing,
+    a fatal error is raised and the process exits.
+
+    Returns:
+     PSSLClientSocket: a socket that can be used to communicate with the transport. The caller
+                       is responsible for closing this socket.
+    """
+
+    transport_ip: str = properties.get("transport.ip")
+    transport_port: int = properties.get("transport.port")
+    transport_cafile: str = properties.get("transport.caFile")
+    if (transport_ip is None):
+        logger.critical("invalid transport.ip: found None")
+        sys.exit(1)
+    try:
+        transport_port = int(transport_port)
+    except ValueError as e:
+        logger.critical(f"invalid transport.port: {e}")
+        sys.exit(1)
+    if (transport_cafile is None):
+        logger.critical("invalid transport.caFile: found None")
+        sys.exit(1)
+
+    try:
+        transport_client = PSSLClientSocket(transport_cafile)
+        transport_client.connect(transport_ip, transport_port)
+        return transport_client
+    except OSError as e:
+        logger.critical(f"network error while attempting to connect to transport: {e}")
+        return None
+
+
 @server.route("/", methods = ["GET"])
 def index() -> str:
     """
@@ -86,9 +121,12 @@ def index() -> str:
     if (sub is None):
         return flask.render_template("index.html", authenticated = False)
 
+    transport_client: PSSLClientSocket = _get_transport_client()
     time_remaining_resp: dict = commands.send(transport_client, Opcode.GET_TIME_REMAINING, sub)
     current_period_resp: dict = commands.send(transport_client, Opcode.GET_CURRENT_PERIOD, sub)
     user_settings_resp: dict = commands.send(transport_client, Opcode.GET_USER_SETTINGS, sub)
+    transport_client.close()
+
     if (time_remaining_resp is None):
         logger.error("malformed GET_TIME_REMAINING from transport")
         return error_500("An internal error occurred while gathering your timing data.")
@@ -157,6 +195,7 @@ def settings_post(sub: str) -> str:
     user_periods_payload: dict = {"UserPeriods": user_periods}
     user_settings_payload: dict = {"Theme": theme, "Font": font, "SchoolJson": school_json}
 
+    transport_client: PSSLClientSocket = _get_transport_client()
     user_periods_resp: dict = commands.send(transport_client,
                                             Opcode.SET_USER_PERIODS,
                                             sub,
@@ -195,6 +234,7 @@ def settings_post(sub: str) -> str:
             logger.error(f"unsuccessful SET_SCHOOL_JSON from transport: {school_json_resp}")
             return error_500("An internal error occurred while saving your school file.")
 
+    transport_client.close()
     return flask.redirect(flask.url_for("settings"))
 
 
@@ -209,8 +249,11 @@ def settings_get(sub: str) -> str:
      str: a rendered template of the settings page.
     """
 
+    transport_client: PSSLClientSocket = _get_transport_client()
     user_periods_resp: dict = commands.send(transport_client, Opcode.GET_USER_PERIODS, sub)
     user_settings_resp: dict = commands.send(transport_client, Opcode.GET_USER_SETTINGS, sub)
+    transport_client.close()
+
     if (user_periods_resp is None):
         logger.error("malformed GET_USER_PERIODS from transport")
         return error_500("An internal error occurred while gathering your course settings.")
@@ -473,38 +516,6 @@ def _connect_oauth_client() -> None:
     oauth_client = WebApplicationClient(oauth_token)
 
 
-def _connect_transport_client() -> None:
-    """
-    Initializes the client socket used to communicate with the Java transport.
-
-    If any error occurs during the socket setup, or transport socket information is missing,
-    a fatal error is raised and the process exits.
-    """
-
-    transport_ip: str = properties.get("transport.ip")
-    transport_port: int = properties.get("transport.port")
-    transport_cafile: str = properties.get("transport.caFile")
-    if (transport_ip is None):
-        logger.critical("invalid transport.ip: found None")
-        sys.exit(1)
-    try:
-        transport_port = int(transport_port)
-    except ValueError as e:
-        logger.critical(f"invalid transport.port: {e}")
-        sys.exit(1)
-    if (transport_cafile is None):
-        logger.critical("invalid transport.caFile: found None")
-        sys.exit(1)
-
-    global transport_client
-    try:
-        transport_client = PSSLClientSocket(transport_cafile)
-        transport_client.connect(transport_ip, transport_port)
-    except OSError as e:
-        logger.critical(f"network error while attempting to connect to transport: {e}")
-        sys.exit(1)
-
-
 def _get_host() -> tuple:
     """
     Returns the host information for the server.
@@ -565,7 +576,6 @@ def run(properties_file: str) -> Flask:
     _set_log_file()
     _write_pid_file()
     _connect_oauth_client()
-    _connect_transport_client()
 
     login_manager.init_app(server)
 

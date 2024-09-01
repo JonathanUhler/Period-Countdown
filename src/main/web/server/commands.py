@@ -36,7 +36,10 @@ def send(transport_client: PSSLClientSocket,
         message["InputPayload"] = input_payload
 
     message_str: str = json.dumps(message)
-    transport_client.send(message_str)
+    try:
+        transport_client.send(message_str)
+    except OSError as e:
+        return None
 
     response_str: str = transport_client.srecv()
     try:
