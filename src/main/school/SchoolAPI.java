@@ -217,7 +217,7 @@ public class SchoolAPI {
             SchoolPeriod nextPeriod = this.getNextPeriod(walk);
             
             if (currentPeriod != null && currentPeriod.isCounted() && !nextPeriod.isCounted()) {
-                return nextPeriod;
+                return currentPeriod;
             }
             
             // If the current period is not counted, then go through all other periods in
