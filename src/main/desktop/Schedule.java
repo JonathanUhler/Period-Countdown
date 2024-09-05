@@ -5,11 +5,13 @@ import javax.swing.JPanel;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.BasicStroke;
+import java.awt.GradientPaint;
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.Dimension;
 import java.io.IOException;
 import java.io.FileNotFoundException;
+import java.time.DayOfWeek;
 import time.UTCTime;
 import time.Duration;
 import os.OSPath;
@@ -48,6 +50,20 @@ public class Schedule extends JPanel {
         catch (FileNotFoundException | IllegalArgumentException e) {
             PCDesktopApp.displayMessage("Error", "Screen: Exception when creating SchoolAPI\n" + e);
         }
+    }
+
+
+    private Color getPeriodColor(Color themeColor, int periodNumber) {
+        int red = themeColor.getRed();
+        int green = themeColor.getGreen();
+        int blue = themeColor.getBlue();
+        int redOffset = 93 * (periodNumber - 1);
+        int greenOffset = 79 * (periodNumber - 1);
+        int blueOffset = 37 * (periodNumber - 1);
+        int newRed = (red + redOffset) % 256;
+        int newGreen = (green + greenOffset) % 256;
+        int newBlue = (blue + blueOffset) % 256;
+        return new Color(newRed, newGreen, newBlue);
     }
 
 
@@ -120,7 +136,15 @@ public class Schedule extends JPanel {
             int day = schoolPeriodStart.get(UTCTime.DAY_OF_WEEK) % Duration.DAYS_PER_WEEK;
             int dayMargin = (int) (baseMargin + day * dayWidth);
 
-            g2.setColor(secondaryColor);
+            int periodNumber = Integer.parseInt(schoolPeriod.getType());
+            Color periodColor = this.getPeriodColor(themeColor, periodNumber);
+            GradientPaint themePaint = new GradientPaint(dayMargin,
+                                                         periodMargin,
+                                                         periodColor,
+                                                         dayMargin,
+                                                         periodMargin + periodHeight,
+                                                         periodColor.brighter());
+            g2.setPaint(themePaint);
             g2.fillRoundRect(dayMargin, periodMargin, (int) (dayWidth * 0.95), periodHeight, 3, 3);
 
             time = schoolPeriodEnd.plus(1, UTCTime.MILLISECONDS);
