@@ -152,7 +152,7 @@ def index() -> str:
     current_name: str = current_period_resp["OutputPayload"].get("CurrentName")
     current_status: str = current_period_resp["OutputPayload"].get("CurrentStatus")
     current_duration: str = current_period_resp["OutputPayload"].get("CurrentDuration")
-    next_name: str = current_period_resp["OutputPayload"].get("NextName")
+    next_status: str = current_period_resp["OutputPayload"].get("NextStatus")
     next_duration: str = current_period_resp["OutputPayload"].get("NextDuration")
     theme: str = user_settings_resp["OutputPayload"]["Theme"]
     font: str = user_settings_resp["OutputPayload"]["Font"]
@@ -163,14 +163,18 @@ def index() -> str:
     theme_lighter: str = "".join(f"{hue:02X}" for hue in theme_lighter_hues)
     theme_gradient: str = f"#{theme}, #{theme_lighter}"
 
+    current_period: str = current_status
+    if (current_name is not None and len(current_name) > 0):
+        current_period += f" | {current_name}"
+
     return flask.render_template("index.html",
                                  authenticated = True,
                                  time_remaining = time_remaining,
                                  end_time = end_time,
                                  expire_time = expire_time,
-                                 current_period = f"{current_name} | {current_status}",
+                                 current_period = current_period,
                                  current_duration = current_duration,
-                                 next_period = next_name,
+                                 next_period = next_status,
                                  next_period_duration = next_duration,
                                  theme_gradient = theme_gradient,
                                  font = font)

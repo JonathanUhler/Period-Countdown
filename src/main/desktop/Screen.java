@@ -301,7 +301,10 @@ public class Screen extends JPanel {
         this.setBackground(new Color(245, 245, 245));
 
         // Draw the name and status of the current period
-        String userString = periodName + " | " + periodStatus;
+        String userString = periodStatus;
+        if (periodName.length() > 0) {
+            userString += " | " + periodName;
+        }
         Font userFont = new Font(userFontName, Font.PLAIN, smallMargin);
         int userWidth = this.getTextWidth(userString, userFont);
         int userMargin = (width - userWidth) / 2;
