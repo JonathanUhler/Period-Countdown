@@ -68,17 +68,12 @@ public class PCDesktopApp {
     public static void main(String[] args) {
         try {
             JFrame frame = new JFrame("Period Countdown");
-            Screen screen = new Screen();
-            Menu menu = new Menu(screen);
-            frame.add(screen);
-            frame.setJMenuBar(menu);
+            Schedule schedule = new Schedule();
+            frame.add(schedule);
             
             frame.setDefaultCloseOperation(frame.EXIT_ON_CLOSE);
             frame.pack();
             frame.setVisible(true);
-            
-            // This starts a while(true) loop, so nothing should be after it in this method
-            screen.start();
         }
         catch (Exception e) {
             // Catch any exceptions that aren't handled in the rest of the code
