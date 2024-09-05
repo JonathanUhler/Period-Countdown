@@ -121,10 +121,24 @@ public class Schedule extends JPanel {
             int dayMargin = (int) (baseMargin + day * dayWidth);
 
             g2.setColor(secondaryColor);
-            g2.fillRect(dayMargin, periodMargin, (int) dayWidth, periodHeight);
+            g2.fillRoundRect(dayMargin, periodMargin, (int) (dayWidth * 0.95), periodHeight, 3, 3);
 
             time = schoolPeriodEnd.plus(1, UTCTime.MILLISECONDS);
         }
+
+        UTCTime now = UTCTime.now().to(timezone);
+        double nowHours =
+            (double) now.get(UTCTime.HOUR) +
+            (double) now.get(UTCTime.MINUTE) / (double) Duration.MINUTES_PER_HOUR;
+        int currentDay = now.get(UTCTime.DAY_OF_WEEK) % Duration.DAYS_PER_WEEK;
+        int currentHorizontalMargin = (int) (baseMargin + currentDay * dayWidth);
+        int currentVerticalMargin = (int) (baseMargin + nowHours * hourHeight);
+        g2.setColor(Color.RED);
+        g2.setStroke(new BasicStroke(3));
+        g2.drawLine(currentHorizontalMargin,
+                    currentVerticalMargin,
+                    (int) (currentHorizontalMargin + dayWidth),
+                    currentVerticalMargin);
     }
 
 
