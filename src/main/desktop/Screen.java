@@ -300,6 +300,7 @@ public class Screen extends JPanel {
 
         this.setBackground(new Color(245, 245, 245));
 
+        // Draw the name and status of the current period
         String userString = periodName + " | " + periodStatus;
         Font userFont = new Font(userFontName, Font.PLAIN, smallMargin);
         int userWidth = this.getTextWidth(userString, userFont);
@@ -308,6 +309,7 @@ public class Screen extends JPanel {
         g2.setFont(userFont);
         g2.drawString(userString, userMargin, fifthMargin);
 
+        // Draw the current day of the week and date
         String dayString = localNow.format(DateTimeFormatter.ofPattern("EEEE"));
         int dayWidth = this.getTextWidth(dayString, secondaryFont);
         g2.setFont(secondaryFont);
@@ -319,6 +321,7 @@ public class Screen extends JPanel {
         g2.setColor(tertiaryColor);
         g2.drawString(dateString, width - dateWidth - baseMargin, fullMargin);
 
+        // If there is a next period, draw the next period's name and length
         if (nextSchoolPeriod != null) {
             Duration nextUpTime = new Duration(nextSchoolPeriod.getStart(),
                                                nextSchoolPeriod.getEnd().plus(1, UTCTime.SECONDS));
@@ -326,12 +329,13 @@ public class Screen extends JPanel {
             g2.setFont(tertiaryFont);
             g2.drawString(nextUpTimeStr, baseMargin, fullMargin);
 
-            String nextUpString = userAPI.getPeriod(nextSchoolPeriod).getName();
+            String nextUpString = userAPI.getPeriod(nextSchoolPeriod).getStatus();
             g2.setColor(secondaryColor);
             g2.setFont(secondaryFont);
             g2.drawString(nextUpString, baseMargin, nineTenthsMargin);
         }
 
+        // Draw the time remaining
         String timeString = timeRemaining.toString();
         Font timeFont = new Font(userFontName, Font.BOLD, sixthMargin);
         int timeWidth = this.getTextWidth(timeString, timeFont);
@@ -346,7 +350,9 @@ public class Screen extends JPanel {
         g2.setFont(timeFont);
         g2.drawString(timeString, timeMargin, halfMargin);
 
-        if (nextSchoolPeriod != null) {
+        // If a duration between the current start and next start can be calculated, draw
+        // the progress bar of time remaining as well as the total time for the bar
+        if (schoolPeriod != null && nextSchoolPeriod != null) {
             Duration totalTime = new Duration(schoolPeriod.getStart(), nextSchoolPeriod.getStart());
 
             String durationString = totalTime.toString();
