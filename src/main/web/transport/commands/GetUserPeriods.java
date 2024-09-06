@@ -51,11 +51,12 @@ public class GetUserPeriods extends Command {
 
         UTCTime now = UTCTime.now();
         for (String periodKey : userAPI.getPeriodKeys()) {
-            SchoolPeriod schoolPeriod = new SchoolPeriod(periodKey, "", now, now, false);
+            SchoolPeriod schoolPeriod = schoolAPI.getPeriodByType(periodKey);
             UserPeriod userPeriod = userAPI.getPeriod(schoolPeriod);
 
             Map<String, String> periodInfo = new HashMap<>();
             periodInfo.put(UserJson.NAME, userPeriod.getName());
+            periodInfo.put("Status", schoolPeriod.getName());
             periodInfo.put(UserJson.TEACHER, userPeriod.getTeacher());
             periodInfo.put(UserJson.ROOM, userPeriod.getRoom());
             response.outputPayload.userPeriods.put(periodKey, periodInfo);

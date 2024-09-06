@@ -107,7 +107,8 @@ public class Menu extends JMenuBar {
             if (periodInfo == null) {
                 continue;
             }
-            
+
+            String status = periodInfo.getStatus();
             String name = periodInfo.getName();
             String teacher = periodInfo.getTeacher();
             String room = periodInfo.getRoom();
@@ -133,7 +134,7 @@ public class Menu extends JMenuBar {
             
             // Constructing entry for periodInputPanels
             JPanel periodInputPanel = new JPanel();
-            periodInputPanel.add(new JLabel(periodNumber + ": "));
+            periodInputPanel.add(new JLabel(status + ": "));
             periodInputPanel.add(new JLabel(UserJson.NAME));
             periodInputPanel.add(nameTextField);
             periodInputPanel.add(new JLabel(UserJson.TEACHER));

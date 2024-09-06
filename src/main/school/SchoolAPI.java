@@ -93,6 +93,22 @@ public class SchoolAPI {
     public int getLastPeriod() {
         return this.year.getLastPeriod();
     }
+
+
+    /**
+     * Returns the {@code SchoolPeriod} object with the specified {@code Type} string.
+     *
+     * If no such period exists, {@code null} is returned. The time-based information of the
+     * returned period (e.g. the start and end times, whether it's the last period in the day)
+     * are not guaranteed. Only the type and status (name) fields will be consistent.
+     *
+     * @param type  the type string of the period to find.
+     *
+     * @return a {@code SchoolPeriod} object with the specified {@code Type} string.
+     */
+    public SchoolPeriod getPeriodByType(String type) {
+        return this.year.getPeriodByType(type);
+    }
     
     
     /**
@@ -206,6 +222,19 @@ public class SchoolAPI {
     }
 
 
+    /**
+     * Gets the period chronologically after the period returned by {@code getCurrentPeriod} such
+     * that {@code getNextCountedPeriod(...).isCounted()} is true.
+     *
+     * @param time  the time to get the next counted period for.
+     *
+     * @return the next period object, if one exists. If the current period is {@code null} or no
+     *         next counted period exists, then {@code null} is returned.
+     *
+     * @throws NullPointerException  if {@code time} is null.
+     *
+     * @see getCurrentPeriod
+     */
     public SchoolPeriod getNextCountedPeriod(UTCTime time) {
         if (time == null) {
             throw new NullPointerException("time cannot be null");
