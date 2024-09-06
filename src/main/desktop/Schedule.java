@@ -7,6 +7,7 @@ import java.awt.Graphics2D;
 import java.awt.BasicStroke;
 import java.awt.GradientPaint;
 import java.awt.Color;
+import java.awt.color.ColorSpace;
 import java.awt.Font;
 import java.awt.Dimension;
 import java.io.IOException;
@@ -53,17 +54,13 @@ public class Schedule extends JPanel {
     }
 
 
-    private Color getPeriodColor(Color themeColor, int periodNumber) {
-        int red = themeColor.getRed();
-        int green = themeColor.getGreen();
-        int blue = themeColor.getBlue();
-        int redOffset = 93 * (periodNumber - 1);
-        int greenOffset = 79 * (periodNumber - 1);
-        int blueOffset = 37 * (periodNumber - 1);
-        int newRed = (red + redOffset) % 256;
-        int newGreen = (green + greenOffset) % 256;
-        int newBlue = (blue + blueOffset) % 256;
-        return new Color(newRed, newGreen, newBlue);
+    private Color getPeriodColor(Color themeColor, float periodOffset) {
+        float[] hsb = Color.RGBtoHSB(themeColor.getRed(),
+                                     themeColor.getGreen(),
+                                     themeColor.getBlue(),
+                                     null);
+        hsb[0] = (hsb[0] + periodOffset) % 1.0f;
+        return Color.getHSBColor(hsb[0], hsb[1], hsb[2]);
     }
 
 
@@ -136,8 +133,8 @@ public class Schedule extends JPanel {
             int day = schoolPeriodStart.get(UTCTime.DAY_OF_WEEK) % Duration.DAYS_PER_WEEK;
             int dayMargin = (int) (baseMargin + day * dayWidth);
 
-            int periodNumber = Integer.parseInt(schoolPeriod.getType());
-            Color periodColor = this.getPeriodColor(themeColor, periodNumber);
+            float periodOffset = (float) (schoolPeriod.getName().hashCode() % 128) / 128.0f;
+            Color periodColor = this.getPeriodColor(themeColor, periodOffset);
             GradientPaint themePaint = new GradientPaint(dayMargin,
                                                          periodMargin,
                                                          periodColor,
@@ -146,6 +143,11 @@ public class Schedule extends JPanel {
                                                          periodColor.brighter());
             g2.setPaint(themePaint);
             g2.fillRoundRect(dayMargin, periodMargin, (int) (dayWidth * 0.95), periodHeight, 3, 3);
+
+            String periodName = schoolPeriod.getName();
+            g2.setColor(Color.WHITE);
+            g2.setFont(tertiaryFont);
+            g2.drawString(periodName, dayMargin, periodMargin + (int) (hourHeight * 0.5));
 
             time = schoolPeriodEnd.plus(1, UTCTime.MILLISECONDS);
         }
