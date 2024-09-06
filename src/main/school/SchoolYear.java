@@ -252,7 +252,7 @@ public class SchoolYear {
                     try {
                         int academicType = Integer.parseInt(type);
                         if (academicType < this.firstPeriod || academicType > this.lastPeriod) {
-                            throw new IllegalArgumentException("type " + type " is out of range");
+                            throw new IllegalArgumentException("type " + type + " is out of range");
                         }
                     }
                     catch (NumberFormatException e) { }
