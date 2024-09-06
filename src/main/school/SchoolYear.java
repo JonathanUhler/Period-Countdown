@@ -27,20 +27,13 @@ import user.UserJson;
  */
 public class SchoolYear {
 
-    /** The json information. */
     private SchoolJson schoolJson;
-    /** All periods in the year. */
     private List<SchoolPeriod> year;
-    
-    /** First period number possible. */
+    private Map<String, SchoolPeriod> periodTypes;
     private int firstPeriod;
-    /** Last period number possible. */
     private int lastPeriod;
-    /** First date of the school year. */
     private String firstDayTag;
-    /** Last date of the school year. */
     private String lastDayTag;
-    /** The unix TZ identifier for the school's location. */
     private String timezone;
     
     
@@ -58,6 +51,7 @@ public class SchoolYear {
      */
     public SchoolYear(Path path) throws FileNotFoundException {
         this.year = new ArrayList<>();
+        this.periodTypes = new HashMap<>();
 
         // Load school json file
         InputStreamReader schoolReader;
@@ -288,6 +282,7 @@ public class SchoolYear {
                                                              startTime, endTime,
                                                              endStr.equals(UserJson.LAST_TIME));
                     this.year.add(addition);
+                    this.periodTypes.put(type, addition);
                 }
                 
                 // Go to the next day
@@ -383,6 +378,22 @@ public class SchoolYear {
      */
     public int getLastPeriod() {
         return this.lastPeriod;
+    }
+
+
+    /**
+     * Returns the {@code SchoolPeriod} object with the specified {@code Type} string.
+     *
+     * If no such period exists, {@code null} is returned. The time-based information of the
+     * returned period (e.g. the start and end times, whether it's the last period in the day)
+     * are not guaranteed. Only the type and status (name) fields will be consistent.
+     *
+     * @param type  the type string of the period to find.
+     *
+     * @return a {@code SchoolPeriod} object with the specified {@code Type} string.
+     */
+    public SchoolPeriod getPeriodByType(String type) {
+        return this.periodTypes.get(type);
     }
     
     

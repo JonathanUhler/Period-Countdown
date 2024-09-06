@@ -103,7 +103,7 @@ public class Screen extends JPanel {
         if (this.userAPI == null) {
             return null;
         }
-        SchoolPeriod keyPeriod = new SchoolPeriod(key, "", UTCTime.now(), UTCTime.now(), false);
+        SchoolPeriod keyPeriod = this.schoolAPI.getPeriodByType(key);
         return this.userAPI.getPeriod(keyPeriod);
     }
     
