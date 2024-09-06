@@ -54,8 +54,8 @@
 
       <div id="user_periods">
         <div id="user_periods_title">Classes</div>
-        {% for period_key, period_info in user_periods.items() %}
-        <label id="settings_header">Class {{ period_key }}</label>
+        {% for period_info in user_periods.values() %}
+        <label id="settings_header">{{ period_info['Status'] }}</label>
         <div id="user_period">
           <input type="text" name="Name" value="{{ period_info['Name'] }}" placeholder="Class Name">
           <input type="text" name="Teacher" value="{{ period_info['Teacher'] }}" placeholder="Instructor">

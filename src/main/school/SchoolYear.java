@@ -98,6 +98,7 @@ public class SchoolYear {
      */
     public SchoolYear(SchoolJson json) {
         this.year = new ArrayList<>();
+        this.periodTypes = new HashMap<>();
         this.schoolJson = json;
         this.initInfo();
         this.initYear();
@@ -247,6 +248,14 @@ public class SchoolYear {
                     String name = periodDef.get(SchoolJson.NAME);
                     String startStr = periodDef.get(SchoolJson.START);
                     String endStr = periodDef.get(SchoolJson.END);
+
+                    try {
+                        int academicType = Integer.parseInt(type);
+                        if (academicType < this.firstPeriod || academicType > this.lastPeriod) {
+                            throw new IllegalArgumentException("type " + type " is out of range");
+                        }
+                    }
+                    catch (NumberFormatException e) { }
                     
                     // Convert the `current` time to the timezone specified by the json. Use the
                     // day tag of that local object to create the local strings for the start/end.
