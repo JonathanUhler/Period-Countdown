@@ -9,18 +9,7 @@ obj
 bin
 venv
 *.log
-
-# Old deprecated web build format
-release/PeriodCountdown-*-web/
-release/PeriodCountdown-*-web/**
-
-# Test keys and other deprecated/test files
-# Auto-generated documentation
-docs/AWS-Setup.txt
 docs/javadoc
+
 # Deprecated files
-deprecated/*
-# Files for dev testing
-*.pem
-*.jks
-install_web.sh
+deprecated
