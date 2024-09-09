@@ -147,7 +147,9 @@ public class Schedule extends JPanel {
             String periodName = schoolPeriod.getName();
             g2.setColor(Color.WHITE);
             g2.setFont(tertiaryFont);
-            g2.drawString(periodName, dayMargin, periodMargin + (int) (hourHeight * 0.5));
+            g2.drawString(periodName,
+                          dayMargin + (int) (dayWidth * 0.05),
+                          periodMargin + (int) (hourHeight * 0.6));
 
             time = schoolPeriodEnd.plus(1, UTCTime.MILLISECONDS);
         }
