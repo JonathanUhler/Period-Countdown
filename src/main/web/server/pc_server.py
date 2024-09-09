@@ -546,28 +546,41 @@ def _get_ssl_context() -> tuple:
     Returns the SSL context for the server.
 
     Returns:
-     tuple: the certificate authority file, private key file, and Flask secret as a tuple in
-            that order.
+     tuple: the certificate authority file and private key file
     """
 
     cafile: str = properties.get("server.caFile")
     keyfile: str = properties.get("server.privKey")
-    secret: str = properties.get("server.secret")
     if (cafile is None):
         logger.critical("invalid server.caFile: found None")
         sys.exit(1)
     if (keyfile is None):
         logger.critical("invalid server.privKey: found None")
         sys.exit(1)
+    return (cafile, keyfile)
+
+
+def _get_flask_secret() -> str:
+    """
+    Returns the secret byte-array to use within Flask
+
+    Returns:
+     str: the Flask secret.
+    """
+
+    secret: str = properties.get("server.secret")
     if (secret is None):
         logger.critical("invalid server.secret: found None")
         sys.exit(1)
-    return (cafile, keyfile, secret)
+    return secret
 
 
 def run(properties_file: str) -> Flask:
     """
-    Starts the web server and associated services.
+    Prepares the web server and starts associated services.
+
+    The caller is responsible for starting the web server (securely or insecurely) by calling
+    `Flask.run` on the returned object.
 
     Arguments:
      properties_file (str): the path to the server `.properties` file.
@@ -583,15 +596,8 @@ def run(properties_file: str) -> Flask:
 
     login_manager.init_app(server)
 
-    server_ip, server_port = _get_host()
-    cafile, keyfile, secret= _get_ssl_context()
+    secret = _get_flask_secret()
     server.secret_key = secret
-    try:
-        server.run(host = server_ip,
-                   port = server_port,
-                   ssl_context = (cafile, keyfile))
-    except RuntimeError as e:
-        logger.error(f"uncaught exception thrown by run: {e}")
 
     return server
 
@@ -601,4 +607,13 @@ if (__name__ == "__main__"):
     parser.add_argument("properties_file")
     args: Namespace = parser.parse_args()
 
-    run(args.properties_file)
+    server: Flask = run(args.properties_file)
+
+    server_ip, server_port = _get_host()
+    cafile, keyfile = _get_ssl_context()
+    try:
+        server.run(host = server_ip,
+                   port = server_port,
+                   ssl_context = (cafile, keyfile))
+    except RuntimeError as e:
+        logger.error(f"uncaught exception thrown by run: {e}")
