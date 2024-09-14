@@ -129,7 +129,7 @@ public class TransportServer extends JSSLServer {
             return Command.error(Command.ReturnCode.ERR_PAYLOAD, "missing Opcode");
         }
         if (userId == null) {
-            return Command.error(Command.ReturnCode.ERR_PAYLOAD, "missing UserID");
+            return Command.error(Command.ReturnCode.SIGNED_OUT, "missing UserID");
         }
 
         // From the user ID, construct time APIs that can be used to get data about this user

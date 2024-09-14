@@ -67,6 +67,37 @@ def error_500(message: str = "An internal server error occurred.") -> str:
     return flask.render_template("500.html", message = message), 500
 
 
+def error_transport(user_facing_message: str, resp: dict) -> str:
+    """
+    Helper function to format a response for recoverable transport errors.
+
+    The response page primarily assumes issues with timing data and will display a mostly empty
+    screen with a button to access the user settings page (in case the error can be fixed from
+    there, e.g. by changing the school file selected).
+
+    Status information is also listed if the error persists and the user decides to make a report.
+    This function also logs an error.
+
+    Arguments:
+     user_facing_message (str): a user-friendly description of what went wrong.
+     resp (dict):               the error response from the transport, used to gather report data.
+    """
+
+    opcode: str = resp["Opcode"]
+    user_id: str = resp["UserID"]
+    return_code: str = resp["ReturnCode"]
+    message: str = resp["OutputPayload"]["Message"]
+
+    logger.error(f"unsuccessful {opcode} from transport: {resp}")
+
+    return flask.render_template("user_error.html",
+                                 user_facing_message = user_facing_message,
+                                 opcode = opcode,
+                                 user_id = user_id,
+                                 return_code = return_code,
+                                 message = message)
+
+
 def _get_transport_client() -> PSSLClientSocket:
     """
     Initializes a client socket to communicate with the Java transport.
@@ -121,31 +152,33 @@ def index() -> str:
     if (sub is None):
         return flask.render_template("index.html", authenticated = False)
 
+    # Request transport data
     transport_client: PSSLClientSocket = _get_transport_client()
     time_remaining_resp: dict = commands.send(transport_client, Opcode.GET_TIME_REMAINING, sub)
     current_period_resp: dict = commands.send(transport_client, Opcode.GET_CURRENT_PERIOD, sub)
     user_settings_resp: dict = commands.send(transport_client, Opcode.GET_USER_SETTINGS, sub)
     transport_client.close()
 
+    # Check for a readable response from transport
     if (time_remaining_resp is None):
-        logger.error("malformed GET_TIME_REMAINING from transport")
+        logger.error(f"malformed GET_TIME_REMAINING from transport on sub={sub}")
         return error_500("An internal error occurred while gathering your timing data.")
-    if (time_remaining_resp["ReturnCode"] != ReturnCode.SUCCESS.name):
-        logger.error(f"unsuccessful GET_TIME_REMAINING from transport: {time_remaining_resp}")
-        return error_500("An internal error occurred while processing your timing data.")
     if (current_period_resp is None):
-        logger.error("malformed GET_CURRENT_PERIOD from transport")
+        logger.error(f"malformed GET_CURRENT_PERIOD from transport on sub={sub}")
         return error_500("An internal error occurred while gathering your class data.")
-    if (current_period_resp["ReturnCode"] != ReturnCode.SUCCESS.name):
-        logger.error(f"unsuccessful GET_CURRENT_PERIOD from transport: {current_period_resp}")
-        return error_500("An internal error occurred while processing your class data.")
     if (user_settings_resp is None):
-        logger.error("malformed GET_USER_SETTINGS from transport")
+        logger.error(f"malformed GET_USER_SETTINGS from transport on sub={sub}")
         return error_500("An internal error occurred while gathering your data.")
-    if (user_settings_resp["ReturnCode"] != ReturnCode.SUCCESS.name):
-        logger.error(f"unsuccessful GET_USER_SETTINGS from transport: {user_settings_resp}")
-        return error_500("An internal error occurred while processing your data.")
 
+    # Check transport return code
+    if (time_remaining_resp["ReturnCode"] != ReturnCode.SUCCESS.name):
+        return error_transport("Your timing data is not available.", time_remaining_resp)
+    if (current_period_resp["ReturnCode"] != ReturnCode.SUCCESS.name):
+        return error_transport("Your class data is not available.", current_period_resp)
+    if (user_settings_resp["ReturnCode"] != ReturnCode.SUCCESS.name):
+        return error_transport("Your settings are not available.", user_settings_resp)
+
+    # Extract data from the responses
     time_remaining: str = time_remaining_resp["OutputPayload"].get("TimeRemaining")
     end_time: str = time_remaining_resp["OutputPayload"].get("EndTime")
     expire_time: str = time_remaining_resp["OutputPayload"].get("ExpireTime")
@@ -157,6 +190,7 @@ def index() -> str:
     theme: str = user_settings_resp["OutputPayload"]["Theme"]
     font: str = user_settings_resp["OutputPayload"]["Font"]
 
+    # Format response data
     theme_int: str = int(theme, 16)
     theme_hues: list = [(theme_int >> 16) & 255, (theme_int >> 8) & 255, theme_int & 255]
     theme_lighter_hues: list = [min(255, int(hue / 0.7)) for hue in theme_hues]
@@ -167,6 +201,7 @@ def index() -> str:
     if (current_name is not None and len(current_name) > 0):
         current_period += f" | {current_name}"
 
+    # Return template
     return flask.render_template("index.html",
                                  authenticated = True,
                                  time_remaining = time_remaining,
@@ -181,6 +216,7 @@ def index() -> str:
 
 
 def settings_post(sub: str) -> str:
+    # Format transport data
     theme: str = flask.request.form["Theme"].replace("#", "")
     font: str = flask.request.form["Font"]
     school_json: str = flask.request.form["SchoolJson"]
@@ -199,6 +235,7 @@ def settings_post(sub: str) -> str:
     user_periods_payload: dict = {"UserPeriods": user_periods}
     user_settings_payload: dict = {"Theme": theme, "Font": font, "SchoolJson": school_json}
 
+    # Send post requests to transport
     transport_client: PSSLClientSocket = _get_transport_client()
     user_periods_resp: dict = commands.send(transport_client,
                                             Opcode.SET_USER_PERIODS,
@@ -208,35 +245,44 @@ def settings_post(sub: str) -> str:
                                              Opcode.SET_USER_SETTINGS,
                                              sub,
                                              user_settings_payload)
+
+    # Check for a readable response from transport
     if (user_periods_resp is None):
         logger.error("malformed SET_USER_PERIODS from transport")
         return error_500("An internal error occurred while updating your course settings.")
-    if (user_periods_resp["ReturnCode"] != ReturnCode.SUCCESS.name):
-        logger.error(f"unsuccessful SET_USER_PERIODS from transport: {user_periods_resp}")
-        return error_500("An internal error occurred while saving your course settings.")
     if (user_settings_resp is None):
         logger.error("malformed SET_USER_SETTINGS from transport")
-        return error_500("An internal error occurred while updating your course settings.")
-    if (user_settings_resp["ReturnCode"] != ReturnCode.SUCCESS.name):
-        logger.error(f"unsuccessful SET_USER_SETTINGS from transport: {user_settings_resp}")
-        return error_500("An internal error occurred while saving your course settings.")
+        return error_500("An internal error occurred while updating your settings.")
 
+    # Check transport return code
+    if (user_periods_resp["ReturnCode"] != ReturnCode.SUCCESS.name):
+        return error_transport("Your course settings could not be saved.", user_periods_resp)
+    if (user_settings_resp["ReturnCode"] != ReturnCode.SUCCESS.name):
+        return error_transport("Your settings could not be saved.", user_settings_resp)
+
+    # Handle uploading new school files
     if (school_content.filename != ""):
         content_name: str = os.path.splitext(school_content.filename)[0]
         for invalid_char in ['.', '#', '$', '[', ']']:
             content_name = content_name.replace(invalid_char, "_")
-        content_str: str = school_content.read().decode("utf-8")
+
+        try:
+            content_str: str = school_content.read().decode("utf-8")
+        except UnicodeDecodeError as e:
+            content_str: str = None
+
         school_json_payload: dict = {"SchoolJson": content_name, "Content": content_str}
         school_json_resp: dict = commands.send(transport_client,
                                                Opcode.SET_SCHOOL_JSON,
                                                sub,
                                                school_json_payload)
+
         if (school_json_resp is None):
             logger.error("malformed SET_SCHOOL_JSON from transport")
             return error_500("An internal error occurred while reading your school file.")
+
         if (school_json_resp["ReturnCode"] != ReturnCode.SUCCESS.name):
-            logger.error(f"unsuccessful SET_SCHOOL_JSON from transport: {school_json_resp}")
-            return error_500("An internal error occurred while saving your school file.")
+            return error_transport("Your school file could not be uploaded.", school_json_resp)
 
     transport_client.close()
     return flask.redirect(flask.url_for("settings"))
@@ -253,32 +299,37 @@ def settings_get(sub: str) -> str:
      str: a rendered template of the settings page.
     """
 
+    # Request transport data
     transport_client: PSSLClientSocket = _get_transport_client()
     user_periods_resp: dict = commands.send(transport_client, Opcode.GET_USER_PERIODS, sub)
     user_settings_resp: dict = commands.send(transport_client, Opcode.GET_USER_SETTINGS, sub)
     transport_client.close()
 
+    # Check for a readable response from transport
     if (user_periods_resp is None):
         logger.error("malformed GET_USER_PERIODS from transport")
         return error_500("An internal error occurred while gathering your course settings.")
-    if (user_periods_resp["ReturnCode"] != ReturnCode.SUCCESS.name):
-        logger.error(f"unsuccessful GET_USER_PERIODS from transport: {user_periods_resp}")
-        return error_500("An internal error occurred while processing your course settings.")
     if (user_settings_resp is None):
         logger.error("malformed GET_USER_SETTINGS from transport")
         return error_500("An internal error occurred while gathering your course settings.")
-    if (user_settings_resp["ReturnCode"] != ReturnCode.SUCCESS.name):
-        logger.error(f"unsuccessful GET_USER_SETTINGS from transport: {user_settings_resp}")
-        return error_500("An internal error occurred while processing your course settings.")
 
+    # Check transport return code
+    if (user_periods_resp["ReturnCode"] != ReturnCode.SUCCESS.name):
+        return error_transport("Your course settings are not available.", user_periods_resp)
+    if (user_settings_resp["ReturnCode"] != ReturnCode.SUCCESS.name):
+        return error_transport("Your settings are not available.", user_settings_resp)
+
+    # Extract data from the responses
     user_periods: dict = user_periods_resp["OutputPayload"]["UserPeriods"]
     theme: str = user_settings_resp["OutputPayload"]["Theme"]
     font: str = user_settings_resp["OutputPayload"]["Font"]
     school_json: str = user_settings_resp["OutputPayload"]["SchoolJson"]
     available_schools: list = user_settings_resp["OutputPayload"]["AvailableSchools"]
 
+    # Format response data
     available_fonts: list = sorted([f.name for f in matplotlib.font_manager.fontManager.ttflist])
 
+    # Return template
     return flask.render_template("settings.html",
                                  user_periods = user_periods,
                                  theme = theme,

@@ -26,13 +26,13 @@ public class Command {
     public enum ReturnCode {
         /** The command was processed successfully and returned a valid response. */
         SUCCESS,
-        /** No user ID was provided; no further processing can be completed. */
+        /** Recoverable. No user ID was provided; no further processing can be completed. */
         SIGNED_OUT,
         /** A formatting error exists in the request JSON string. */
         ERR_PARSE,
         /** The content of the parsed JSON string is invalid (e.g. a key is missing). */
         ERR_PAYLOAD,
-        /** An internal error occurred that revents a valid response from being sent. */
+        /** An error occurred that prevents all response data from being generated. */
         ERR_RESPONSE,
         /** An error occurred. */
         ERR_GENERIC
