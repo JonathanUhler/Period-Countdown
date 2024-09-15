@@ -201,6 +201,10 @@ def index() -> str:
     if (current_name is not None and len(current_name) > 0):
         current_period += f" | {current_name}"
 
+    # Handle null data outside of the school year (during summer)
+    if (expire_time is None):
+        expire_time = end_time
+
     # Return template
     return flask.render_template("index.html",
                                  authenticated = True,

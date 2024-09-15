@@ -46,7 +46,9 @@
       <div id="current_duration">{{ current_duration}}</div>
       <div id="time_remaining">{{ time_remaining }}</div>
       <!-- Current class progress bar -->
+      {% if current_duration is not none %}
       <progress id="progress_bar" value="0" max="1"></progress>
+      {% endif %}
     </div>
 
     <div id="secondary_display">

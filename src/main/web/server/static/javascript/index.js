@@ -162,10 +162,10 @@ function getTimeRemaining(doc = document) {
     let expireTime = doc.querySelector('meta[name="' + EXPIRE_TIME + '"]').getAttribute("content");
 
     return {
-	[TIME_REMAINING]: timeRemaining,
+        [TIME_REMAINING]: timeRemaining,
         [CURRENT_DURATION]: currentDuration,
-	[END_TIME]: endTime,
-	[EXPIRE_TIME]: expireTime
+        [END_TIME]: endTime,
+        [EXPIRE_TIME]: expireTime
     };
 }
 
@@ -195,17 +195,14 @@ function setTimeRemaining(timeInfo) {
 function updateTimeRemaining() {
     // Update time remaining
     let timeRemainingDiv = document.getElementById(TIME_REMAINING);
-    let progressBar = document.getElementById(PROGRESS_BAR);
     if (timeRemainingDiv == null) {
         return;
     }
     let timeInfo = getTimeRemaining(document);
 
-    let totalTime = timeInfo[CURRENT_DURATION];
     let endTime = timeInfo[END_TIME];
     let expireTime = timeInfo[EXPIRE_TIME];
     let timeRemaining = Duration.fromEndTime(endTime);
-    let currentDuration = Duration.fromDuration(totalTime);
     let timeValid = Duration.fromEndTime(expireTime);
 
     if (timeValid.isOver() || timeRemaining.isOver()) {
@@ -222,7 +219,14 @@ function updateTimeRemaining() {
     }
 
     timeRemainingDiv.innerHTML = timeRemaining.toString();
-    progressBar.value = currentDuration.portionComplete(timeRemaining);
+
+    // Update progress bar
+    let progressBar = document.getElementById(PROGRESS_BAR);
+    if (progressBar != null) {
+        let totalTime = timeInfo[CURRENT_DURATION];
+        let currentDuration = Duration.fromDuration(totalTime);
+        progressBar.value = currentDuration.portionComplete(timeRemaining);
+    }
 
     // Update date/day display
     let now = new Date();

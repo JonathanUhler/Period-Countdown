@@ -67,7 +67,7 @@ public class GetCurrentPeriod extends Command {
             response.outputPayload.currentName = currentUserPeriod.getName();
             response.outputPayload.currentStatus = currentUserPeriod.getStatus();
         }
-        if (nextSchoolPeriod != null) {
+        if (currentSchoolPeriod != null && nextSchoolPeriod != null) {
             UserPeriod nextUserPeriod = userAPI.getPeriod(nextSchoolPeriod);
             UTCTime currentStart = currentSchoolPeriod.getStart();
             UTCTime nextStart = nextSchoolPeriod.getStart();
