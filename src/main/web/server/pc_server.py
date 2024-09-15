@@ -317,7 +317,7 @@ def settings_get(sub: str) -> str:
     # chosen a valid school file. This is recoverable, so we continue to allow the use to choose
     # or upload a new school file and fix the error state
     if (user_periods_resp["ReturnCode"] == ReturnCode.ERR_RESPONSE.name):
-        user_periods: dict = None
+        user_periods: dict = {}
     elif (user_periods_resp["ReturnCode"] != ReturnCode.SUCCESS.name):
         return error_transport("Your course settings are not available.", user_periods_resp)
     else:
@@ -326,7 +326,7 @@ def settings_get(sub: str) -> str:
     if (user_settings_resp["ReturnCode"] == ReturnCode.ERR_RESPONSE.name):
         theme: str = "000000"
         font: str = "Arial"
-        school_json: str = None
+        school_json: str = ""
         available_schools: list = []
     elif (user_settings_resp["ReturnCode"] != ReturnCode.SUCCESS.name):
         return error_transport("Your settings are not available.", user_settings_resp)
