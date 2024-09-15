@@ -35,7 +35,7 @@
         ],
         "Day2": [
             {"Type": "Nothing", "Start": "00:00", "End": "11:00", "Name": "BeforeClass"},
-            {"Type": "3", "Start": "11:00", "End": "13:00", "Name": "Class3"},
+            {"Type": "1", "Start": "11:00", "End": "13:00", "Name": "Class3"},
             {"Type": "Nothing", "Start": "13:00", "End": "23:59", "Name": "AfterClass"}
         ]
     },
