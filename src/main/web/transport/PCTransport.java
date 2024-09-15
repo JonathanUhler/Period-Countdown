@@ -1,107 +1,216 @@
-// +=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
-// PCTransport.java
-// Period-Countdown
-//
-// Created by Jonathan Uhler
-// +=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
-
-
 package web.transport;
 
 
-import util.Log;
-import javacli.annotations.Option;
-import javacli.annotations.Version;
-import javacli.OptionParser;
-import java.io.BufferedWriter;
 import java.io.IOException;
-import java.nio.file.StandardOpenOption;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Paths;
-import java.nio.file.Files;
+import java.io.FileReader;
+import java.io.PrintWriter;
+import java.io.File;
+import java.util.Properties;
+import java.util.logging.Logger;
+import java.util.logging.FileHandler;
+import picocli.CommandLine;
+import picocli.CommandLine.Parameters;
 
 
-// +=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
-// public class PCTransport
-//
-// Main class for the web version of Period Countdown. Acts as a transport between the APIs to access
-// json data on the Java side and the Python web server
-//
-public class PCTransport {	
+/**
+ * Command line interface and entry point for running the Period Countdown transport.
+ *
+ * This interface takes a single command line argument specifying the path to a Java properties
+ * file that contains configuration information for the transport.
+ *
+ * @author Jonathan Uhler
+ */
+public class PCTransport implements Runnable {
 
-	@Option(name = "transport-ip",
-			abbreviation = 'i',
-			nargs = 1,
-			type = String.class,
-			defaultValue = "127.0.0.1",
-			showDefault = true,
-			help = "set transport IP addr")
-	public static String transport_ip;
-	
-	@Option(name = "transport-port",
-			nargs = 1,
-			abbreviation = 'P',
-			type = Integer.class,
-			defaultValue = "9000",
-			showDefault = true,
-			help = "set transport port")
-	public static Integer transport_port;
-	
+    /** A logger used by the transport to report runtime information. */
+    public static final Logger LOGGER = Logger.getLogger(PCTransport.class.getName());
 
-	// ====================================================================================================
-	// public static void main
-	//
-	public static void main(String[] args) {
-		// Parse command line options
-		try {
-			OptionParser optionParser = new OptionParser(PCTransport.class);
-			optionParser.parse(args);
-		}
-		catch (Exception e) {
-			Log.stdout(Log.FATAL, "PCTransport", "cannot parse command line arguments");
-		}
 
-		// Set log file as a JVM property, to allow for the log class to also be used by the desktop app
-		if (Conf.TRANSPORT_LOG_FILE != null &&
-			!Conf.TRANSPORT_LOG_FILE.equals(""))
-			System.setProperty(Log.LOG_FILE_SYS_PROPERTY, Conf.TRANSPORT_LOG_FILE);
-		
-		// Check for the keystore file and keystore password. If these aren't specified (e.g. they're
-		// null) then the transport cannot start securely
-		if (Conf.TRANSPORT_KEYSTORE_FILE == null ||
-		    Conf.TRANSPORT_KEYSTORE_PASSWORD == null ||
-			Conf.TRANSPORT_KEYSTORE_FILE.equals("") ||
-		    Conf.TRANSPORT_KEYSTORE_PASSWORD.equals("")) {
-			Log.stdlog(Log.ERROR, "PCTransport", "keystore file or password not specified");
-			Log.stdlog(Log.ERROR, "PCTransport", "\tkeyStore=" + Conf.TRANSPORT_KEYSTORE_FILE);
-			Log.stdlog(Log.ERROR, "PCTransport", "\tkeyStorePassword=" + Conf.TRANSPORT_KEYSTORE_PASSWORD);
-			System.exit(Log.ERROR);
-		}
-		// Set the JVM properties so java can access them
-		System.setProperty("javax.net.ssl.keyStore", Conf.TRANSPORT_KEYSTORE_FILE);
-		System.setProperty("javax.net.ssl.keyStorePassword", Conf.TRANSPORT_KEYSTORE_PASSWORD);
+    @Parameters(paramLabel = "PROPERTIES",
+                description = "Specify the location of the server properties file.")
+    private String propertiesFile;
 
-		// Write the pid file
-		if (Conf.TRANSPORT_PID_FILE != null) {
-			BufferedWriter writer;
-			try {
-				writer = Files.newBufferedWriter(Paths.get(Conf.TRANSPORT_PID_FILE),
-												 StandardCharsets.UTF_8,
-												 StandardOpenOption.WRITE,
-												 StandardOpenOption.CREATE);
-				writer.write(ProcessHandle.current().pid() + "");
-				writer.close();
-			}
-			catch (IOException e) {
-				Log.stdlog(Log.FATAL, "PCTransport",
-						   "Could not write pid, will not start transport. Leave out --pid-file to start anyway");
-				System.exit(Log.FATAL);
-			}
-		}
-		
-		SSLServer transportServer = new SSLServer(PCTransport.transport_ip, PCTransport.transport_port);
-	}
-	// end: public static void main
+
+    /**
+     * Command line entry point
+     *
+     * @param args  command line arguments.
+     */
+    public static void main(String[] args) {
+        new CommandLine(new PCTransport()).execute(args);
+    }
+
+
+    /**
+     * Loads the properties file.
+     *
+     * This method does not perform any validation on the existence or value of entries in the
+     * properties file. Values must be validated before being used.
+     *
+     * If reading the properties file fails, a fatal error is raised and the process exits.
+     *
+     * @return the properties file specified from the command line as a {@code Properties} object.
+     */
+    private Properties loadProperties() {
+        Properties properties = new Properties();
+        try {
+            properties.load(new FileReader(this.propertiesFile));
+        }
+        catch (IOException e) {
+            PCTransport.LOGGER.severe("cannot load properties '" + this.propertiesFile + "': " + e);
+            System.exit(1);
+        }
+        return properties;
+    }
+
+
+    /**
+     * Loads the keystore and keystore password for SSL connections.
+     *
+     * If any error occurs setting up the keystore, a fatal error is raised and the process exits.
+     *
+     * @param properties  the transport properties, which must contain the keystore and password.
+     */
+    private void setKeyStore(Properties properties) {
+        String keyStore = properties.getProperty("transport.keyStore");
+        String keyStorePassword = properties.getProperty("transport.keyStorePassword");
+        if (keyStore == null) {
+            PCTransport.LOGGER.severe("invalid transport.keyStore: found null");
+            System.exit(1);
+        }
+        if (keyStorePassword == null) {
+            PCTransport.LOGGER.severe("invalid transport.keyStorePassword: found null");
+            System.exit(1);
+        }
+        System.setProperty("javax.net.ssl.keyStore", keyStore);
+        System.setProperty("javax.net.ssl.keyStorePassword", keyStorePassword);
+    }
+
+
+    /**
+     * Writes a file with the transport process ID.
+     *
+     * If no PID file is specified in the transport properties, a warning message is logged, but
+     * the process will continue without writing the PID file. If the PID file is specified but
+     * cannot be written, a fatal error is raised and the process exits.
+     *
+     * @param properties  the transport properties, which is recommended to contain a PID file path.
+     */
+    private void writePidFile(Properties properties) {
+        String pidPath = properties.getProperty("transport.pidFile");
+        long pid = ProcessHandle.current().pid();
+        if (pidPath == null) {
+            PCTransport.LOGGER.warning("tranport.pidFile is not defined, pid is " + pid);
+            return;
+        }
+
+        File pidFile = new File(pidPath);
+        pidFile.deleteOnExit();
+
+        try (PrintWriter pidWriter = new PrintWriter(pidFile)) {
+            pidWriter.println(pid);
+        }
+        catch (IOException e) {
+            PCTransport.LOGGER.severe("cannot write transport.pidFile: " + e);
+            System.exit(1);
+        }
+    }
+
+
+    /**
+     * Adds a file handler to {@code PCTransport.LOGGER}.
+     *
+     * If no log file is specified in the transport properties, a warning message is printed to
+     * the standard output, and future log messages are directed to the default console handler.
+     * If a log file is specified but cannot be added as a file handler, a fatal error is raised
+     * and the process exits.
+     *
+     * @param properties  the transport properties, which is recommended to contain a log file path.
+     */
+    private void setLogFile(Properties properties) {
+        String logFile = properties.getProperty("transport.logFile");
+        if (logFile == null) {
+            PCTransport.LOGGER.warning("transport.logFile is not defined");
+            return;
+        }
+
+        PCTransport.LOGGER.setUseParentHandlers(false);
+        try {
+            FileHandler fh = new FileHandler(logFile);
+            PCTransport.LOGGER.addHandler(fh);
+        }
+        catch (IOException e) {
+            PCTransport.LOGGER.severe("cannot write transport.logFile: " + e);
+            System.exit(1);
+        }
+    }
+
+
+    /**
+     * Returns the IP address of the transport.
+     *
+     * If the IP address is not specified in the properties file, a fatal error is raised and the
+     * process exits.
+     *
+     * @param properties  the transport properties which contains the IP address.
+     */
+    private String getIP(Properties properties) {
+        String ip = properties.getProperty("transport.ip");
+        if (ip == null) {
+            PCTransport.LOGGER.severe("invalid transport.ip: found null");
+            System.exit(1);
+        }
+        return ip;
+    }
+
+
+    /**
+     * Returns the port of the transport.
+     *
+     * If the port is not a valid integer, a fatal error is raised and the process exits.
+     *
+     * @param properties  the transport properties which contains the port.
+     */
+    private int getPort(Properties properties) {
+        int port = -1;
+        try {
+            port = Integer.parseInt(properties.getProperty("transport.port"));
+        }
+        catch (NumberFormatException e) {
+            PCTransport.LOGGER.severe("invalid transport.port: " + e);
+            System.exit(1);
+        }
+        return port;
+    }
+
+
+    /**
+     * Sets up and runs the transport.
+     *
+     * Before starting, the transport will perform the following actions in order, exiting on
+     * any fatal error:
+     * - Load the transport properties file
+     * - Add a file handler to the transport logger
+     * - Sets the Java keystore and keystore password
+     * - Writes the transport process ID file
+     * - Loads the transport host address and port
+     */
+    @Override
+    public void run() {
+        Properties properties = this.loadProperties();
+        this.setLogFile(properties);
+        this.setKeyStore(properties);
+        this.writePidFile(properties);
+
+        String ip = this.getIP(properties);
+        int port = this.getPort(properties);
+        try {
+            new TransportServer(properties, ip, port);
+        }
+        catch (IOException | RuntimeException e) {
+            PCTransport.LOGGER.severe("fatal exception in transport: " + e);
+            return;
+        }
+    }
 
 }
-// end: public class PCTransport

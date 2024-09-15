@@ -1,434 +1,687 @@
-# +=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
-# pc_server.py
-# Period-Countdown
-#
-# Created by Jonathan Uhler
-# +=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
+"""
+Period countdown web server implementation in Python.
+
+Author: Jonathan Uhler
+"""
 
 
-import conf
-import log
-import commands
-from user import User
 import os
 import sys
-import click
-import ssl
-import socket
-import requests
 import json
+import logging
+from logging import FileHandler, Formatter
+from tempfile import NamedTemporaryFile
+from argparse import ArgumentParser, Namespace
 from typing import Final
-from flask import Flask, request, render_template, redirect, url_for
-from flask_login import LoginManager, current_user, login_required, login_user, logout_user, login_required
+import matplotlib.font_manager
+import requests
+import flask
+from flask import Flask
+import flask_login
+from flask_login import LoginManager
 from oauthlib.oauth2 import WebApplicationClient
-from flask import Flask, request, render_template
+from pnet.secure.psslclientsocket import PSSLClientSocket
+from user import User
+import commands
+from commands import Opcode, ReturnCode
 
 
-GOOGLE_AUTHORIZATION_ENDPOINT: Final = "authorization_endpoint"
-GOOGLE_TOKEN_ENDPOINT: Final = "token_endpoint"
-GOOGLE_USERINFO_ENDPOINT: Final = "userinfo_endpoint"
-GOOGLE_AUTHORIZATION_CODE: Final = "code"
-GOOGLE_SUB: Final = "sub"
-GOOGLE_DISCOVERY_URL: Final = "https://accounts.google.com/.well-known/openid-configuration"
+OPENID_URL: Final = "https://accounts.google.com/.well-known/openid-configuration"
 
 
-# Setup whitelist
-whitelist: Final = []
-with open(conf.SERVER_WHITELIST, "r") as whitelist_file:
-    try:
-        whitelist = json.load(whitelist_file)
-        if (not isinstance(whitelist, list)):
-            raise TypeError(f"whitelist file is not list, found: {type(whitelist)}")
-    except Exception as e:
-        log.stdlog(log.FATAL, "pc_server", f"cannot load whitelist file: {e}");
-# Make sure whitelist ids are consistently strings
-for uid_index in range(len(whitelist)):
-    whitelist[uid_index] = str(whitelist[uid_index])
-
-# Setup communcation links
-web_server: Final = Flask(__name__)
+properties: Final = None
+logger: Final = logging.getLogger(__name__)
+server: Final = Flask(__name__)
 login_manager: Final = LoginManager()
-oauth_client: Final = WebApplicationClient(conf.OAUTH_TOKEN)
-send_socket: Final = ssl.wrap_socket(socket.socket(socket.AF_INET, socket.SOCK_STREAM));
+oauth_client: Final = None
 
 
-# ====================================================================================================
-# def load_user
-#
-# Attempts to load the current user based on their id
-#
-# Arguments--
-#
-#  user_id: the id of the user as a string. This comes from the "sub" field of the user's google token
-#
-# Returns--
-#
-#  An User object if the user could be loaded, otherwise None
-#
 @login_manager.user_loader
-def load_user(user_id: str) -> User:
-    # An user object can be immediately returned. If this user does not exist in the backend/database,
-    # the creation of an entry for this user will created based on their id (sub value) upon the
-    # first request to the transport
-    return User(user_id)
-# end: def load_user
+def load_user(sub: str) -> User:
+    """
+    Loads a database user from a given identifier.
+
+    Arguments:
+     sub (str): the unique identifier of the database user.
+
+    Returns:
+     User: the database user for the given identifier.
+    """
+
+    return User(sub)
 
 
-# ====================================================================================================
-# def get_google_value
-#
-# Fetch the authorization endpoint URL from google to verify an user's login attempt
-#
-# Returns--
-#
-#  The authorization endpoint URL, if successful. Otherwise, returns None
-#
-def get_google_value(key: str) -> str:
+@server.errorhandler(500)
+def error_500(message: str = "An internal server error occurred.") -> str:
+    """
+    Routing method for 500 errors.
+
+    Arguments:
+     message (str): an optional message that describes the error. By default, this is a generic
+                    string about "an internal server error".
+
+    Returns:
+     str: a rendered template for the 500 error.
+    """
+
+    return flask.render_template("500.html", message = message), 500
+
+
+def error_transport(user_facing_message: str, resp: dict) -> str:
+    """
+    Helper function to format a response for recoverable transport errors.
+
+    The response page primarily assumes issues with timing data and will display a mostly empty
+    screen with a button to access the user settings page (in case the error can be fixed from
+    there, e.g. by changing the school file selected).
+
+    Status information is also listed if the error persists and the user decides to make a report.
+    This function also logs an error.
+
+    Arguments:
+     user_facing_message (str): a user-friendly description of what went wrong.
+     resp (dict):               the error response from the transport, used to gather report data.
+    """
+
+    opcode: str = resp["Opcode"]
+    user_id: str = resp["UserID"]
+    return_code: str = resp["ReturnCode"]
+    message: str = resp["OutputPayload"]["Message"]
+
+    logger.error(f"unsuccessful {opcode} from transport: {resp}")
+
+    return flask.render_template("user_error.html",
+                                 user_facing_message = user_facing_message,
+                                 opcode = opcode,
+                                 user_id = user_id,
+                                 return_code = return_code,
+                                 message = message)
+
+
+def _get_transport_client() -> PSSLClientSocket:
+    """
+    Initializes a client socket to communicate with the Java transport.
+
+    If any error occurs during the socket setup, or transport socket information is missing,
+    a fatal error is raised and the process exits.
+
+    Returns:
+     PSSLClientSocket: a socket that can be used to communicate with the transport. The caller
+                       is responsible for closing this socket.
+    """
+
+    transport_ip: str = properties.get("transport.ip")
+    transport_port: int = properties.get("transport.port")
+    transport_cafile: str = properties.get("transport.caFile")
+    if (transport_ip is None):
+        logger.critical("invalid transport.ip: found None")
+        sys.exit(1)
     try:
-        response = requests.get(GOOGLE_DISCOVERY_URL)
-    except Exception as e:
-        log.stdlog(log.ERROR, "pc_server", f"Error thrown during google discovery: {e}")
+        transport_port = int(transport_port)
+    except ValueError as e:
+        logger.critical(f"invalid transport.port: {e}")
+        sys.exit(1)
+    if (transport_cafile is None):
+        logger.critical("invalid transport.caFile: found None")
+        sys.exit(1)
+
+    try:
+        transport_client = PSSLClientSocket(transport_cafile)
+        transport_client.connect(transport_ip, transport_port)
+        return transport_client
+    except OSError as e:
+        logger.critical(f"network error while attempting to connect to transport: {e}")
         return None
 
-    json: dict = response.json()
-    if (not key in json):
-        log.stdlog(log.ERROR, "pc_server", f"{key} not in google discovery payload")
-        return None
 
-    value: str = json[key]
-    if (value == None or value == ""):
-        log.stdlog(log.ERROR, "pc_server", f"{key} is None or empty: value={value}")
-        return None
-    return value
-# end: def get_google_value
-
-
-# ====================================================================================================
-# ERROR HANDLING
-@web_server.errorhandler(403)
-def err403(error) -> str:
-    return render_template("403.html"), 403
-
-@web_server.errorhandler(404)
-def err405(error) -> str:
-    return render_template("404.html"), 404
-
-@web_server.errorhandler(405)
-def err405(error) -> str:
-    return render_template("405.html"), 405
-
-@web_server.errorhandler(500)
-def err500(error) -> str:
-    return render_template("500.html", error=str(error)), 500
-# end: ERROR HANDLING
-
-
-# ====================================================================================================
-# def index
-#
-# Routing method for "/". Displays everything displayed on main screen of the desktop app.
-#
-# Returns--
-#
-#  A rendered HTML page, coming from template/index.html
-#
-@web_server.route("/", methods = ["GET"])
+@server.route("/", methods = ["GET"])
 def index() -> str:
-    if (request.method == "GET"):
-        # Get the id from the current user
-        user_id: str = current_user.get_id()
-        if (user_id == None):
-            user_id = "" # Convert null id to empty string format
-        
-        # Get the current user period, time remaining in the period, and list of next classes
-        user_period: dict = commands.send(send_socket, commands.GET_USER_PERIOD, user_id, {})
-        time_remaining: dict = commands.send(send_socket, commands.GET_TIME_REMAINING, user_id, {})
-        next_up_list: dict = commands.send(send_socket, commands.GET_NEXT_UP_LIST, user_id, {})
+    """
+    Routing method for the index page.
 
-        # Check return codes of the commands sent
-        if (user_period["ReturnCode"] != commands.SUCCESS or
-            time_remaining["ReturnCode"] != commands.SUCCESS or
-            next_up_list["ReturnCode"] != commands.SUCCESS):
-            return err500("(index)  command response had non-SUCCESS return code")
+    The index page only supports GET requests. The content servered will change depending on
+    whether the current database user is logged in and authenticated with OAuth 2. For
+    users who are not logged in, a generic home page is displayed. Otherwise, timing and class
+    information is requested from the transport and formatted in the rendered template.
 
-        # If all the return codes were successful, the output payloads are guaranteed to contain the keys used
-        period_name: str = user_period["OutputPayload"]["Name"]
-        period_status: str = user_period["OutputPayload"]["Status"]
-        time: str = time_remaining["OutputPayload"]["TimeRemaining"]
-        end_time: str = time_remaining["OutputPayload"]["EndTime"]
-        expire_time: str = time_remaining["OutputPayload"]["ExpireTime"]
-        next_up_level: str = next_up_list["OutputPayload"]["NextUp"]
-        next_up: list = next_up_list["OutputPayload"]["NextUpList"]
+    Return:
+     str: a rendered template of the index page.
+    """
 
-        # Return the rendered template
-        return render_template("index.html",
-                               authenticated=current_user.is_authenticated,
-                               end_time=f"{end_time}",
-                               expire_time=f"{expire_time}",
-                               status=f"{period_name} | {period_status}",
-                               time_remaining=f"{time}",
-                               next_up_list=next_up if next_up_level != "Disabled" else None)
-# end: def index
+    sub: str = flask_login.current_user.get_id()
+    if (sub is None):
+        return flask.render_template("index.html", authenticated = False)
 
+    # Request transport data
+    transport_client: PSSLClientSocket = _get_transport_client()
+    time_remaining_resp: dict = commands.send(transport_client, Opcode.GET_TIME_REMAINING, sub)
+    current_period_resp: dict = commands.send(transport_client, Opcode.GET_CURRENT_PERIOD, sub)
+    user_settings_resp: dict = commands.send(transport_client, Opcode.GET_USER_SETTINGS, sub)
+    transport_client.close()
 
-# ====================================================================================================
-# def settings
-#
-# Routing method for "/settings". Displays a of text fields, combo boxes, and other controls to
-# change user settings
-#
-# Returns--
-#
-#  A rendered HTML page, coming from template/settings.html
-#
-@web_server.route("/settings", methods = ["GET", "POST"])
-def settings():
-    if (not current_user.is_authenticated):
-        return redirect(url_for("login"))
+    # Check for a readable response from transport
+    if (time_remaining_resp is None):
+        logger.error(f"malformed GET_TIME_REMAINING from transport on sub={sub}")
+        return error_500("An internal error occurred while gathering your timing data.")
+    if (current_period_resp is None):
+        logger.error(f"malformed GET_CURRENT_PERIOD from transport on sub={sub}")
+        return error_500("An internal error occurred while gathering your class data.")
+    if (user_settings_resp is None):
+        logger.error(f"malformed GET_USER_SETTINGS from transport on sub={sub}")
+        return error_500("An internal error occurred while gathering your data.")
 
-    # Get the id from the current user
-    user_id: str = current_user.get_id()
-    if (user_id == None):
-        user_id = "" # Convert null id to empty string format
-    
-    if (request.method == "GET"): # Display user's settings
-        # Get user settings information
-        period_numbers: dict = commands.send(send_socket, commands.GET_PERIOD_NUMBERS, user_id, {})
-        available_schools: dict = commands.send(send_socket, commands.GET_AVAILABLE_SCHOOLS, user_id, {})
-        next_up_list: dict = commands.send(send_socket, commands.GET_NEXT_UP_LIST, user_id, {})
+    # Check transport return code
+    if (time_remaining_resp["ReturnCode"] != ReturnCode.SUCCESS.name):
+        return error_transport("Your timing data is not available.", time_remaining_resp)
+    if (current_period_resp["ReturnCode"] != ReturnCode.SUCCESS.name):
+        return error_transport("Your class data is not available.", current_period_resp)
+    if (user_settings_resp["ReturnCode"] != ReturnCode.SUCCESS.name):
+        return error_transport("Your settings are not available.", user_settings_resp)
 
-        # Check return codes of the commands sent
-        if (available_schools["ReturnCode"] != commands.SUCCESS or
-            next_up_list["ReturnCode"] != commands.SUCCESS or
-            period_numbers["ReturnCode"] != commands.SUCCESS):
-            return err500("(settings)  command response had non-SUCCESS return code")
+    # Extract data from the responses
+    time_remaining: str = time_remaining_resp["OutputPayload"].get("TimeRemaining")
+    end_time: str = time_remaining_resp["OutputPayload"].get("EndTime")
+    expire_time: str = time_remaining_resp["OutputPayload"].get("ExpireTime")
+    current_name: str = current_period_resp["OutputPayload"].get("CurrentName")
+    current_status: str = current_period_resp["OutputPayload"].get("CurrentStatus")
+    current_duration: str = current_period_resp["OutputPayload"].get("CurrentDuration")
+    next_status: str = current_period_resp["OutputPayload"].get("NextStatus")
+    next_duration: str = current_period_resp["OutputPayload"].get("NextDuration")
+    theme: str = user_settings_resp["OutputPayload"]["Theme"]
+    font: str = user_settings_resp["OutputPayload"]["Font"]
 
-        period_numbers_list: list = period_numbers["OutputPayload"]["PeriodNumbers"]
-        periods: dict = {}
-        current_school: str = available_schools["OutputPayload"]["CurrentSchool"]
-        schools_list: list = available_schools["OutputPayload"]["AvailableSchools"]
-        current_next_up: str = next_up_list["OutputPayload"]["NextUp"]
-        next_up: list = ["Disabled", "Next Class", "All Classes"]
+    # Format response data
+    theme_int: str = int(theme, 16)
+    theme_hues: list = [(theme_int >> 16) & 255, (theme_int >> 8) & 255, theme_int & 255]
+    theme_lighter_hues: list = [min(255, int(hue / 0.7)) for hue in theme_hues]
+    theme_lighter: str = "".join(f"{hue:02X}" for hue in theme_lighter_hues)
+    theme_gradient: str = f"#{theme}, #{theme_lighter}"
 
-        # Get user period information
-        for period_number in period_numbers_list:
-            user_period: dict = commands.send(send_socket, commands.GET_USER_PERIOD, user_id, {"Type": period_number})
-            if (user_period["ReturnCode"] != commands.SUCCESS):
-                return err500("(settings)  get period information command response had non-SUCCESS return code")
+    current_period: str = current_status
+    if (current_name is not None and len(current_name) > 0):
+        current_period += f" | {current_name}"
 
-            # Create the structure for the user's period. This will be unpacked by Jinja when rendering the template
-            periods[period_number] = {
-                "Name": user_period["OutputPayload"]["Name"],
-                "Teacher": user_period["OutputPayload"]["Teacher"],
-                "Room": user_period["OutputPayload"]["Room"]
-            }
+    # Handle null data outside of the school year (during summer)
+    if (expire_time is None):
+        expire_time = end_time
 
-        # Return a rendered template containing the user's options
-        return render_template("settings.html",
-                               periods=periods,
-                               current_school=current_school,
-                               schools_list=schools_list,
-                               current_next_up=current_next_up,
-                               next_up=next_up)
-    elif (request.method == "POST"): # Update user's settings
-        # Get the list of period numbers to index the form data
-        period_numbers: dict = commands.send(send_socket, commands.GET_PERIOD_NUMBERS, user_id, {})
-        if (period_numbers["ReturnCode"] != commands.SUCCESS):
-            return err500("(settings)  command response had non-SUCCESS return code")
-        period_numbers_list: list = period_numbers["OutputPayload"]["PeriodNumbers"]
-
-        # Set class information
-        for period_number in period_numbers_list:
-            period_name: str = request.form[commands.SET_USER_PERIOD + period_number + "Name"]
-            period_teacher: str = request.form[commands.SET_USER_PERIOD + period_number + "Teacher"]
-            period_room: str = request.form[commands.SET_USER_PERIOD + period_number + "Room"]
-
-            commands.send(send_socket, commands.SET_USER_PERIOD, user_id, {
-                "Type": period_number,
-                "Name": period_name,
-                "Teacher": period_teacher,
-                "Room": period_room
-            })
-
-        # Set school information
-        current_school: str = request.form[commands.SET_CURRENT_SCHOOL]
-        commands.send(send_socket, commands.SET_CURRENT_SCHOOL, user_id, {"CurrentSchool": current_school})
-
-        # Set next up information
-        next_up: str = request.form[commands.SET_NEXT_UP]
-        commands.send(send_socket, commands.SET_NEXT_UP, user_id, {"NextUp": next_up})
-        
-        # Reload settings page
-        return redirect(url_for("settings"))
-# end: def settings
+    # Return template
+    return flask.render_template("index.html",
+                                 authenticated = True,
+                                 time_remaining = time_remaining,
+                                 end_time = end_time,
+                                 expire_time = expire_time,
+                                 current_period = current_period,
+                                 current_duration = current_duration,
+                                 next_period = next_status,
+                                 next_period_duration = next_duration,
+                                 theme_gradient = theme_gradient,
+                                 font = font)
 
 
-# ====================================================================================================
-# def login
-#
-# Routing method for "/login". Displays nothing, but handles an user login attempt, redirecting to
-# "/login/callback"
-#
-# Returns--
-#
-#  A redirect request to "/login/callback"
-#
-@web_server.route("/login")
-def login():
-    authorization_endpoint: str = get_google_value(GOOGLE_AUTHORIZATION_ENDPOINT)
-    
+def settings_post_user_periods(sub: str, transport_client: PSSLClientSocket) -> dict:
+    period_names: list = flask.request.form.getlist("Name")
+    period_teachers: list = flask.request.form.getlist("Teacher")
+    period_rooms: list = flask.request.form.getlist("Room")
+    num_periods: int = len(period_names)
+    user_periods: dict = {
+        str(period_key + 1): {"Name": period_names[period_key],
+                              "Teacher": period_teachers[period_key],
+                              "Room": period_rooms[period_key]}
+        for period_key in range(num_periods)
+    }
+
+    if (num_periods == 0):
+        return {}
+
+    user_periods_payload: dict = {"UserPeriods": user_periods}
+    return commands.send(transport_client, Opcode.SET_USER_PERIODS, sub, user_periods_payload)
+
+
+def settings_post_user_settings(sub: str, transport_client: PSSLClientSocket) -> dict:
+    theme: str = flask.request.form.get("Theme")
+    font: str = flask.request.form.get("Font")
+    school_json: str = flask.request.form.get("SchoolJson")
+
+    if (theme is None or font is None or school_json is None):
+        return {}
+
+    theme = theme.replace("#", "")
+
+    user_settings_payload: dict = {"Theme": theme, "Font": font, "SchoolJson": school_json}
+    return commands.send(transport_client, Opcode.SET_USER_SETTINGS, sub, user_settings_payload)
+
+
+def settings_post_school_json(sub: str, transport_client: PSSLClientSocket) -> None:
+    school_content: str = flask.request.files.get("Content")
+
+    if (school_content is None or school_content.filename == ""):
+        return {}
+
+    content_name: str = os.path.splitext(school_content.filename)[0]
+    for invalid_char in ['.', '#', '$', '[', ']']:
+        content_name = content_name.replace(invalid_char, "_")
+
+    try:
+        content_str: str = school_content.read().decode("utf-8")
+    except UnicodeDecodeError as e:
+        content_str: str = None
+
+    school_json_payload: dict = {"SchoolJson": content_name, "Content": content_str}
+    return commands.send(transport_client, Opcode.SET_SCHOOL_JSON, sub, school_json_payload)
+
+
+def settings_post(sub: str) -> str:
+    transport_client: PSSLClientSocket = _get_transport_client()
+
+    school_json_resp: dict = settings_post_school_json(sub, transport_client)
+    user_periods_resp: dict = settings_post_user_periods(sub, transport_client)
+    user_settings_resp: dict = settings_post_user_settings(sub, transport_client)
+
+    if (len(school_json_resp) != 0):
+        if (school_json_resp is None):
+            logger.error("malformed SET_SCHOOL_JSON from transport")
+            return error_500("An internal error occurred while reading your school file.")
+        if (school_json_resp["ReturnCode"] != ReturnCode.SUCCESS.name):
+            return error_transport("Your school file could not be uploaded.", school_json_resp)
+    if (len(user_periods_resp) != 0):
+        if (user_periods_resp is None):
+            logger.error("malformed SET_USER_PERIODS from transport")
+            return error_500("An internal error occurred while updating your course settings.")
+        if (user_periods_resp["ReturnCode"] != ReturnCode.SUCCESS.name):
+            return error_transport("Your course settings could not be saved.", user_periods_resp)
+    if (len(user_settings_resp) != 0):
+        if (user_settings_resp is None):
+            logger.error("malformed SET_USER_SETTINGS from transport")
+            return error_500("An internal error occurred while updating your settings.")
+        if (user_settings_resp["ReturnCode"] != ReturnCode.SUCCESS.name):
+            return error_transport("Your settings could not be saved.", user_settings_resp)
+
+    transport_client.close()
+    return flask.redirect(flask.url_for("settings"))
+
+
+def settings_get(sub: str) -> str:
+    """
+    Routing helpter method for a GET request on the settings page.
+
+    Arguments:
+     sub (str): the unique identifier of the database user currently logged in.
+
+    Return:
+     str: a rendered template of the settings page.
+    """
+
+    # Request transport data
+    transport_client: PSSLClientSocket = _get_transport_client()
+    user_periods_resp: dict = commands.send(transport_client, Opcode.GET_USER_PERIODS, sub)
+    user_settings_resp: dict = commands.send(transport_client, Opcode.GET_USER_SETTINGS, sub)
+    transport_client.close()
+
+    # Check for a readable response from transport
+    if (user_periods_resp is None):
+        logger.error("malformed GET_USER_PERIODS from transport")
+        return error_500("An internal error occurred while gathering your course settings.")
+    if (user_settings_resp is None):
+        logger.error("malformed GET_USER_SETTINGS from transport")
+        return error_500("An internal error occurred while gathering your course settings.")
+
+    # Check transport return code. ERR_RESPONSE in settings likely indicates the user has not
+    # chosen a valid school file. This is recoverable, so we continue to allow the use to choose
+    # or upload a new school file and fix the error state
+    user_periods: dict = None
+    theme: str = None
+    font: str = None
+    school_json: str = None
+    available_schools: list = None
+    if (user_periods_resp["ReturnCode"] == ReturnCode.SUCCESS.name):
+        user_periods: dict = user_periods_resp["OutputPayload"]["UserPeriods"]
+    if (user_settings_resp["ReturnCode"] == ReturnCode.SUCCESS.name):
+        theme: str = user_settings_resp["OutputPayload"]["Theme"]
+        font: str = user_settings_resp["OutputPayload"]["Font"]
+        school_json: str = user_settings_resp["OutputPayload"]["SchoolJson"]
+        available_schools: list = user_settings_resp["OutputPayload"]["AvailableSchools"]
+
+    # Format response data
+    font_names: set = set([f.name for f in matplotlib.font_manager.fontManager.ttflist])
+    available_fonts: list = sorted(list(font_names))
+
+    # Return template
+    return flask.render_template("settings.html",
+                                 user_periods = user_periods,
+                                 theme = theme,
+                                 font = font,
+                                 available_fonts = available_fonts,
+                                 school_json = school_json,
+                                 available_schools = available_schools)
+
+
+@server.route("/settings", methods = ["GET", "POST"])
+def settings() -> str:
+    """
+    Routing method for the settings page.
+
+    The settings page supports GET requests to gather existing settings information and POST
+    requests with a JSON payload to update settings. This method will only serve users that
+    are logged in.
+
+    Return:
+     str: a rendered template of the settings page.
+    """
+
+    sub: str = flask_login.current_user.get_id()
+    if (sub is None):
+        return flask.redirect(flask.url_for("index"))
+
+    if (flask.request.method == "POST"):
+        return settings_post(sub)
+    return settings_get(sub)
+
+
+def _get_openid_configuration(key: str) -> str:
+    """
+    Returns a value from Google's Open ID data for the provided key.
+
+    Arguments:
+     key (str): the key in the Open ID data to get.
+
+    Returns:
+     str: the value of the specified key. If the key does not exist or the Open ID request failed
+          then `None` will be returned.
+    """
+
+    try:
+        openid_configuration: dict = requests.get(OPENID_URL, timeout = 30).json()
+        return openid_configuration.get(key)
+    except requests.exceptions.RequestException as e:
+        logger.error(f"error in openid_configuration GET: {e}")
+        return None
+
+
+@server.route("/login", methods = ["GET"])
+def login() -> str:
+    """
+    Routing method for the login request page.
+
+    Returns:
+     str: a redirect to the OAuth login page, if the OAuth login request URI can be found.
+    """
+
+    authorization_endpoint: str = _get_openid_configuration("authorization_endpoint")
+    if (authorization_endpoint is None):
+        logger.error("'authorization_endpoint' is missing from openid_configuration")
+        return error_500()
+
     request_uri = oauth_client.prepare_request_uri(
         authorization_endpoint,
-        redirect_uri=request.base_url + "/callback", # Redirect to ".../login" (current) + "/callback"
-        scope=["openid", "email"], # Request only the user's UID
-        prompt="consent"
+        redirect_uri = flask.request.base_url + "/callback",
+        scope = ["openid", "email"],
+        prompt = "consent"
     )
 
-    return redirect(request_uri)
-# end: def login
+    return flask.redirect(request_uri)
 
 
-# ====================================================================================================
-# def login_callback
-#
-# Routing method for "/login/callback". Handles an user login
-#
-# Returns--
-#
-#  A redirect request to "/"
-#
-@web_server.route("/login/callback")
-def login_callback():
-    authorization_code: str = request.args.get(GOOGLE_AUTHORIZATION_CODE)
-    token_endpoint: str = get_google_value(GOOGLE_TOKEN_ENDPOINT)
+@server.route("/login/callback", methods = ["GET"])
+def login_callback() -> str:
+    """
+    Routing method for the callback after an user has logged in with OAuth 2.
+
+    Returns:
+     str: a redirect to the index page if the user was successfully authenticated.
+    """
+
+    authorization_code: str = flask.request.args.get("code")
+    token_endpoint: str = _get_openid_configuration("token_endpoint")
+    if (authorization_code is None):
+        logging.error("'authorization_code' is missing")
+        return error_500()
+    if (token_endpoint is None):
+        logging.error("'token_endpoing' is miggin from openid_configuration")
+        return error_500()
 
     token_url, headers, body = oauth_client.prepare_token_request(
         token_endpoint,
-        authorization_response=request.url,
-        redirect_url=request.base_url,
-        code=authorization_code
+        authorization_response = flask.request.url,
+        redirect_url = flask.request.base_url,
+        code = authorization_code
     )
-    token_response = requests.post(
-        token_url,
-        headers=headers,
-        data=body,
-        auth=(conf.OAUTH_TOKEN, conf.OAUTH_SECRET)
-    )
+
+    oauth_token: str = properties.get("server.oauthToken")
+    oauth_secret: str = properties.get("server.oauthSecret")
+    if (oauth_token is None):
+        logger.error("invalid server.oauthToken: found None")
+        return error_500()
+    if (oauth_secret is None):
+        logger.error("invalid server.oauthSecret: found None")
+        return error_500()
+    try:
+        token_response = requests.post(
+            token_url,
+            timeout = 30,
+            headers = headers,
+            data = body,
+            auth = (oauth_token, oauth_secret)
+        )
+    except requests.exceptions.RequestException as e:
+        logging.error(f"attempt to POST token_response failed: {e}")
+        return error_500()
 
     oauth_client.parse_request_body_response(json.dumps(token_response.json()))
-
-    userinfo_endpoint = get_google_value(GOOGLE_USERINFO_ENDPOINT)
+    userinfo_endpoint: str = _get_openid_configuration("userinfo_endpoint")
     uri, headers, body = oauth_client.add_token(userinfo_endpoint)
-    userinfo_response = requests.get(uri, headers=headers, data=body)
-    userinfo_json = userinfo_response.json()
-
-    if (not GOOGLE_SUB in userinfo_json):
-        return err500("(login_callback)  Malformed response from OAuth2: Google unique ID (sub field) does not exist")
-    else:
-        unique_id = userinfo_json[GOOGLE_SUB]
-
-        # Check whitelist
-        if (not str(unique_id) in whitelist):
-            logout_user()
-            return render_template("whitelist.html", sub=unique_id)
-
-        # Login user
-        user: User = User(sub=unique_id)
-        login_user(user)
-        return redirect(url_for("index"))
-# end: def login_callback
-
-
-@web_server.route("/logout")
-def logout():
-    logout_user()
-    return redirect(url_for("index"))
-
-
-# ====================================================================================================
-# def run_development
-#
-# Runs the web server for development testing. This method takes in options for the server address,
-# transport address, and SSL key information. This method should only be used for development
-# purposes and can be run with "python3 pc_server.py [OPTIONS]" (see the __name__ == "__main__"
-# block below).
-#
-# For running this web server in production, use the run(str, str) method as an entry point
-#
-# Arguments--
-#
-#  See command line arguments (--help for more information)
-#
-@click.command()
-@click.option("--server-ip", nargs=1, default="127.0.0.1", show_default=True, help="set web server IP addr")
-@click.option("--server-port", nargs=1, default=443, show_default=True, type=int, help="set web server port")
-@click.option("--transport-ip", nargs=1, default="127.0.0.1", show_default=True, help="set transport IP addr")
-@click.option("--transport-port", nargs=1, default=9000, show_default=True, type=int, help="set transport port")
-def run_development(server_ip: str, server_port: int,
-                    transport_ip: str, transport_port: int) -> None:
-    log.stdout(log.WARN, "pc_server", "Starting in development mode! If this was intended, ignore this message")
-
-    # Use the run method below, which connects the send_socket and just returns the web server object.
-    # In a production setting, the returned Flask object from run(str, str) is configured further by
-    # the framework
-    run(transport_ip, transport_port)
-
-    # In the development environment, configure the web server manually
     try:
-        web_server.run(host = server_ip, port = server_port,
-                       ssl_context = (conf.APACHE_CERT_FILE, conf.APACHE_PRIVKEY_FILE))
-    except PermissionError:
-        log.stdlog(log.ERROR, "pc_server", "PermissionError thrown, run with sudo or change --server-port from 443")
-    except Exception as e:
-        log.stdlog(log.ERROR, "pc_server", f"Uncaught exception thrown by run(): {e}")
-    # end: def run_development
+        userinfo_response: str = requests.get(uri, timeout = 30, headers = headers, data = body)
+    except requests.exceptions.RequestException as e:
+        logging.error(f"attempt to GET userinfo_response failed: {e}")
+        return error_500()
+
+    userinfo_json: dict = userinfo_response.json()
+    if ("sub" not in userinfo_json):
+        logging.error("'sub' missing from userinfo response")
+        return error_500()
+    sub: str = userinfo_json["sub"]
+    user: User = User(sub)
+    flask_login.login_user(user)
+    return flask.redirect(flask.url_for("index"))
 
 
-# ====================================================================================================
-# def run
-#
-# Runs the web server in a production setting. Starts the secure socket connection with the Java
-# transport then returns the Flask object. This object can be configured by the production
-# framework (or by the run_development method above).
-#
-# Arguments--
-#
-#  transport_ip:   the IP address of the java transport
-#
-#  transport_port: the port of the java transport
-#
-# Returns--
-#
-#  The Flask object web_server, for further configuration by the caller of this method
-#
-def run(transport_ip: str, transport_port: int) -> Flask:
+@server.route("/logout")
+def logout() -> str:
+    """
+    Routing method for the logout page.
+
+    Returns:
+     str: a redirect to the index page after the user has been logged out.
+    """
+
+    flask_login.logout_user()
+    return flask.redirect(flask.url_for("index"))
+
+
+def _load_properties(properties_file: str) -> dict:
+    """
+    Loads the properties file used by the server as a dictionary.
+
+    Arguments:
+     properties_file (str): the path to the `.properties` file.
+
+    Returns:
+     dict: the parsed properties.
+    """
+
+    global properties
+    properties = {}
+    with open(properties_file, "r", encoding = "utf-8") as f:
+        for line in f:
+            line = line.strip()
+            if (not line or line.startswith("#") or line.startswith("//")):
+                continue
+            key, value = line.split("=", 1)
+            properties[key.strip()] = value.strip()
+
+
+def _write_pid_file() -> None:
+    """
+    Writes the process ID of the server to the file specified in the global properties.
+
+    If no PID file path is specified in the properties, a logger warning is printed but the process
+    is allowed to continue.
+    """
+
+    pid_path: str = properties.get("server.pidFile")
+    pid: int = os.getpid()
+    if (pid_path is None):
+        logger.warning(f"server.pidFile is not defined, pid is {pid}")
+        return
+
+    pid_dir: str = os.path.dirname(pid_path)
+    pid_filename, pid_ext = os.path.splitext(os.path.basename(pid_path))
     try:
-        send_socket.settimeout(30) # 30 second timeout
-        send_socket.connect((transport_ip, transport_port))
-    except TimeoutError as te:
-        log.stdlog(log.ERROR, "pc_server", f"send_socket timed out")
-    except InterruptedError as ie:
-        log.stdlog(log.ERROR, "pc_server", f"InterruptedError thrown by send_socket.connect()")
-        log.stdlog(log.ERROR, "pc_server", f"\t{ie}")
-    except ConnectionRefusedError as cre:
-        log.stdlog(log.ERROR, "pc_server", f"ConnectionRefusedError thrown by send_socket.connect()")
-        log.stdlog(log.ERROR, "pc_server", f"\t{cre}")
-
-    web_server.secret_key = os.urandom(24)
-    login_manager.init_app(web_server)
-    return web_server # Let a production framework or run_development set up the rest
-# end: def run
+        with NamedTemporaryFile(delete = True,
+                                mode = "w+",
+                                prefix = pid_filename,
+                                suffix = pid_ext,
+                                dir = pid_dir) as pid_file:
+            pid_file.write(str(pid))
+    except OSError as e:
+        logger.critical(f"cannot write server.pidFile: {e}")
+        sys.exit(1)
 
 
-# ====================================================================================================
-# Main entry
-#
+def _set_log_file() -> None:
+    """
+    Sets a file handler on the logger used by the server from the log file specified in the
+    global properties.
+
+    If no log file is specified in the properties, a logger warning is printed to the standard
+    output and the logger continues to use the default console handler.
+    """
+
+    log_file: str = properties.get("server.logFile")
+    if (log_file is None):
+        logger.warning("server.logFile is not defined")
+        return
+
+    logger.handlers.clear()
+    fh: FileHandler = FileHandler(log_file)
+    format_str: str = "%(asctime)s %(levelname)s %(filename)s %(funcName)s %(message)s"
+    fh.setFormatter(Formatter(format_str))
+    logger.addHandler(fh)
+    logger.setLevel(logging.DEBUG)
+
+
+def _connect_oauth_client() -> None:
+    """
+    Initializes the OAuth 2 client used to authenticate client connections during login.
+
+    If any error ocurrs during initialization, or no OAuth token is specified in the global
+    properties, a fatal error is raised and the process exits.
+    """
+
+    oauth_token: str = properties.get("server.oauthToken")
+    if (oauth_token is None):
+        logger.critical("invalid server.oauthToken: found None")
+        sys.exit(1)
+
+    global oauth_client
+    oauth_client = WebApplicationClient(oauth_token)
+
+
+def _get_host() -> tuple:
+    """
+    Returns the host information for the server.
+
+    Returns:
+     tuple: the web server IP address and port as a tuple in that order.
+    """
+
+    ip: str = properties.get("server.ip")
+    port: int = properties.get("server.port")
+    if (ip is None):
+        logger.critical("invalid server.ip: found None")
+        sys.exit(1)
+    try:
+        port = int(port)
+    except ValueError as e:
+        logger.critical(f"invalid server.port: {e}")
+        sys.exit(1)
+    return (ip, port)
+
+
+def _get_ssl_context() -> tuple:
+    """
+    Returns the SSL context for the server.
+
+    Returns:
+     tuple: the certificate authority file and private key file
+    """
+
+    cafile: str = properties.get("server.caFile")
+    keyfile: str = properties.get("server.privKey")
+    if (cafile is None):
+        logger.critical("invalid server.caFile: found None")
+        sys.exit(1)
+    if (keyfile is None):
+        logger.critical("invalid server.privKey: found None")
+        sys.exit(1)
+    return (cafile, keyfile)
+
+
+def _get_flask_secret() -> str:
+    """
+    Returns the secret byte-array to use within Flask
+
+    Returns:
+     str: the Flask secret.
+    """
+
+    secret: str = properties.get("server.secret")
+    if (secret is None):
+        logger.critical("invalid server.secret: found None")
+        sys.exit(1)
+    return secret
+
+
+def run(properties_file: str) -> Flask:
+    """
+    Prepares the web server and starts associated services.
+
+    The caller is responsible for starting the web server (securely or insecurely) by calling
+    `Flask.run` on the returned object.
+
+    Arguments:
+     properties_file (str): the path to the server `.properties` file.
+
+    Returns:
+     Flask: the web server.
+    """
+
+    _load_properties(properties_file)
+    _set_log_file()
+    _write_pid_file()
+    _connect_oauth_client()
+
+    login_manager.init_app(server)
+
+    secret = _get_flask_secret()
+    server.secret_key = secret
+
+    return server
+
+
 if (__name__ == "__main__"):
+    parser: ArgumentParser = ArgumentParser()
+    parser.add_argument("properties_file")
+    args: Namespace = parser.parse_args()
+
+    server: Flask = run(args.properties_file)
+
+    server_ip, server_port = _get_host()
+    cafile, keyfile = _get_ssl_context()
     try:
-        run_development()
-    except Exception as e:
-        log.stdlog(log.ERROR, "pc_server", f"unchecked exception thrown from run_development");
-        log.stdlog(log.ERROR, "pc_server", f"\t{type(e)}: {e}");
-    finally:
-        send_socket.close()
-# end: Main entry
+        server.run(host = server_ip,
+                   port = server_port,
+                   ssl_context = (cafile, keyfile))
+    except RuntimeError as e:
+        logger.error(f"uncaught exception thrown by run: {e}")

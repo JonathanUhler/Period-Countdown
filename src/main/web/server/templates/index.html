@@ -1,58 +1,85 @@
-<!doctype html>
-<html>
+<!DOCTYPE html>
+<html lang="en">
   <head>
-	<title>Period Countdown</title>
-	<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='styles/index.css') }}">
-	<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='styles/button.css') }}">
-	<link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
-
-	<meta name="end_time" content="{{ end_time }}">
-	<meta name="expire_time" content="{{ expire_time }}">
+    <title>Period Countdown</title>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='styles/index.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='styles/common.css') }}">
+    <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
+    <meta charset="UTF-8">
+    {% if (authenticated == true) %}
+    <meta name="end_time" content="{{ end_time }}">
+    <meta name="expire_time" content="{{ expire_time }}">
+    {% endif %}
   </head>
-
-  
   <body>
-	<div id="status">
-	  <p>{{ status }}</p>
-	</div>
-	
-	<div id="time_remaining">
-	  <p>{{ time_remaining }}</p>
-	</div>
+    {% if (authenticated == true) %}
+    <style>
+      * {
+          font-family: {{ font }};
+      }
+      #time_remaining {
+	  background: -webkit-linear-gradient({{ theme_gradient }});
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+      }
+      #progress_bar {
+	  border-image: -webkit-linear-gradient({{ theme_gradient }});
+          border-image-slice: 1;
+      }
+      progress::-webkit-progress-value {
+	  background-color: -webkit-linear-gradient({{ theme_gradient }});
+      }
+      progress::-moz-progress-bar {
+	  background: -webkit-linear-gradient({{ theme_gradient }});
+      }
+    </style>
 
-	<div id="next_up">
-	  {% if (next_up_list != none) %}
-	  <table>
-		<td>
-		  <b>Upcoming Periods</b>
-		</td>
-		
-		<tbody>
-		  {% if (next_up_list|length == 0) %}
-		  <tr>
-			<td>No more classes today</td>
-		  </tr>
-		  {% endif %}
-		  
-		  {% for next_class in next_up_list %}
-		  <tr>
-			<td>{{ next_class }}</td>
-		  </tr>
-		  {% endfor %}
-		</tbody>
-	  </table>
-	  {% endif %}
-	</div>
+    <!-- Control buttons -->
+    <div id="controls">
+      <button onclick="location.href = 'settings';">Settings</button>
+      <button onclick="location.href = 'logout';">Sign Out</button>
+    </div>
 
-	<div id="operations">
-	  {% if (authenticated != true) %}
-	  <button onclick="location.href = 'login';">Sign in with Google</button>
-	  {% else %}
-	  <button onclick="location.href = 'logout';">Sign out</button>
-	  <button onclick="location.href = 'settings';">Settings</button>
-	  {% endif %}
-	</div>
+    <!-- Main class and time display -->
+    <div id="primary_display">
+      <div id="current_period">{{ current_period }}</div>
+      <div id="current_duration">{{ current_duration}}</div>
+      <div id="time_remaining">{{ time_remaining }}</div>
+      <!-- Current class progress bar -->
+      {% if current_duration is not none %}
+      <progress id="progress_bar" value="0" max="1"></progress>
+      {% endif %}
+    </div>
 
-	<script src="{{url_for('static', filename='javascript/index.js')}}" type="text/javascript"></script>
+    <div id="secondary_display">
+      <!-- Next class -->
+      <div id="next_period_display">
+        <div id="next_period">{{ next_period }}</div>
+        <div id="next_duration">{{ next_period_duration }}</div>
+      </div>
+      <!-- Current day/date -->
+      <div id="day_display">
+        <div id="day"></div>
+        <div id="date"></div>
+      </div>
+    </div>
+
+    {% else %}
+    <style>
+      * {
+          font-family: Lexend Deca;
+      }
+    </style>
+
+    <div id="primary_display">
+      <div id="new_user_title">Class Countdown</div>
+      <button onclick="location.href = 'login';">Sign In</button>
+    </div>
+
+    {% endif %}
+
+    <script src="{{ url_for('static', filename='javascript/index.js') }}"
+            type="text/javascript">
+    </script>
   </body>
 </html>

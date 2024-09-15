@@ -1,65 +1,49 @@
-* {
-	font-family: Arial;
-	margin-top: 0;
-	margin-bottom: 0;
-	top: 0;
-	left: 0;
+body {
+    background: rgb(245, 245, 245);
 }
 
-#title {
-	padding-top: 3vw;
-	padding-left: 3vw;
-	font-size: 6vw;
-	margin-bottom: 3vw;
+
+#settings_header {
+    text-decoration: underline;
+    font-size: 4vh;
+    margin-top: 1vh;
 }
 
-#classinformation {
-	padding-left: 3vw;
-	font-size: 4vw;
+
+#controls {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 10vh;
+    margin-left: 10vw;
+    margin-right: 10vw;
 }
 
-#schoolinformation {
-	padding-left: 3vw;
-	font-size: 4vw;
+
+#user_settings {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    margin-top: 5vh;
+}
+#user_settings_title {
+    font-size: 6vh;
+    margin-bottom: 1vh;
 }
 
-#nextup {
-	padding-left: 3vw;
-	font-size: 4vw;
-}
 
-#operations {
-	padding-top: 3vw;
-	padding-left: 3vw;
+#user_periods {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    margin-top: 5vh;
 }
-
-#classinformation-entries {
-	margin-bottom: 2vw;
-	font-size: 2vw;
+#user_periods_title {
+    font-size: 6vh;
+    margin-bottom: 1vh;
 }
-
-form {
-	background: #eeeeee;
-	border-radius: 2vw;
-	padding: 4vw 1vw;
-}
-
-select {
-	margin-bottom: 2vw;
-	background: #ffffff;
-	color: #1a73f6;
-	cursor: pointer;
-	font-size: 2vw;
-	border-radius: 1vw;
-	border: 2px solid #1a73f6;
-	padding: 1vw 2vw;
-}
-
-input {
-	background: #ffffff;
-	color: #1a73f6;
-	font-size: 2vw;
-	border-radius: 0.5vw;
-	border: 1px solid #1a73f6;
-	padding: 0.5vw 0.5vw;
+#user_period {
+    margin-bottom: 1vh;
 }

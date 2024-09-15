@@ -1,68 +1,79 @@
-<!doctype html>
-<html>
+<!DOCTYPE html>
+<html lang="en">
   <head>
-	<title>Period Countdown - Settings</title>
-
-	<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='styles/settings.css') }}">
-	<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='styles/button.css') }}">
-	<link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
+    <meta charset="UTF-8">
+    <title>Period Countdown</title>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='styles/settings.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='styles/common.css') }}">
+    <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
   </head>
   <body>
-	<div id="title">
-	  <p>User Settings</p>
-	</div>
+    {% if font is not none %}
+    <style>
+      * {
+          font-family: {{ font }};
+      }
+    </style>
+    {% endif %}
 
-	<form action="/settings" method="POST" enctype="multipart/form-data">
-	  <div id="classinformation">
-		<p>Class Information</p>
-		<div id="classinformation-entries">
-		  {% for period_index in range(periods|length) %}
-		  <div>
-			<label>{{ period_index + 1 }}: </label>
-			<label>Name</label>
-			<input type="text" name="{{ 'SetUserPeriod' + (period_index + 1)|string + 'Name' }}" value="{{ periods[(period_index + 1)|string]['Name'] }}">
-			<label>Teacher</label>
-			<input type="text" name="{{ 'SetUserPeriod' + (period_index + 1)|string + 'Teacher' }}" value="{{ periods[(period_index + 1)|string]['Teacher'] }}">
-			<label>Room</label>
-			<input type="text" name="{{ 'SetUserPeriod' + (period_index + 1)|string + 'Room' }}" value="{{ periods[(period_index + 1)|string]['Room'] }}">
-		  </div>
-		  {% endfor %}
-		</div>
-	  </div>
-	  
-	  <div id="schoolinformation">
-		<p>School Information</p>
-		<select name="SetCurrentSchool">
-		  {% for school in schools_list %}
-		  {% if current_school == school %}
-		  <option value="{{ school }}" selected>{{ school }}</option>
-		  {% else %}
-		  <option value="{{ school }}">{{ school }}</option>
-		  {% endif %}
-		  {% endfor %}
-		</select>
-	  </div>
-	  
-	  <div id="nextup">
-		<p>Next Up</p>
-		<select name="SetNextUp">
-		  {% for next_up_verbosity in next_up %}
-		  {% if current_next_up == next_up_verbosity %}
-		  <option value="{{ next_up_verbosity }}" selected>{{ next_up_verbosity }}</option>
-		  {% else %}
-		  <option value="{{ next_up_verbosity }}">{{ next_up_verbosity }}</option>
-		  {% endif %}
-		  {% endfor %}
-		</select>
-	  </div>
+    <form action="/settings" method="POST" enctype="multipart/form-data">
+      <div id="controls">
+        <button type="button" onclick="location.href = '/';">Back</button>
+        <button type="submit">Save</button>
+      </div>
 
-	  <div id="operations">
-		<button type="submit">Save Settings</button>
-	  </div>
-	</form>
+      <div id="user_settings">
+        <div id="user_settings_title">Settings</div>
 
-	<div id="operations">
-	  <button onclick="location.href = '/'">Back to Countdown</button>
-	</div>
+        {% if theme is not none %}
+        <label id="settings_header">Theme</label>
+        <input type="color" name="Theme" value="#{{ theme }}">
+        {% endif %}
+
+        {% if font is not none %}
+        <label id="settings_header">Font</label>
+        <select name="Font">
+          {% for available_font in available_fonts %}
+          {% if font == available_font %}
+          <option value="{{ available_font }}" selected>{{ available_font }}</option>
+          {% else %}
+          <option value="{{ available_font }}">{{ available_font }}</option>
+          {% endif %}
+          {% endfor %}
+        </select>
+        {% endif %}
+
+        {% if available_schools is not none %}
+        <label id="settings_header">Choose School</label>
+        <select name="SchoolJson">
+          {% for available_school in available_schools %}
+          {% if school_json == available_school %}
+          <option value="{{ available_school }}" selected>{{ available_school }}</option>
+          {% else %}
+          <option value="{{ available_school }}">{{ available_school }}</option>
+          {% endif %}
+          {% endfor %}
+        </select>
+        {% endif %}
+
+        <label id="settings_header">Add School</label>
+        <input type="file" name="Content" accept=".json">
+      </div>
+
+
+      {% if user_periods is not none %}
+      <div id="user_periods">
+        <div id="user_periods_title">Classes</div>
+        {% for period_info in user_periods.values() %}
+        <label id="settings_header">{{ period_info['Status'] }}</label>
+        <div id="user_period">
+          <input type="text" name="Name" value="{{ period_info['Name'] }}" placeholder="Class Name">
+          <input type="text" name="Teacher" value="{{ period_info['Teacher'] }}" placeholder="Instructor">
+          <input type="text" name="Room" value="{{ period_info['Room'] }}" placeholder="Location">
+        </div>
+        {% endfor %}
+      </div>
+      {% endif %}
+    </form>
   </body>
 </html>

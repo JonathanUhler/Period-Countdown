@@ -1,17 +1,15 @@
-# Compiled/artifact files
+# IDE files
 .DS_Store
+.vscode
+.idea
 *~
-obj/
-bin/*
-*.log
-# Old deprecated web build format
-release/PeriodCountdown-*-web/
-release/PeriodCountdown-*-web/**
 
-# Additional files to ignore
-deprecated/*
-documentation/AWS-Setup.txt
-*.pem
-*.jks
-install_web.sh
-sensitive/*
+# Compiled/artifact files
+obj
+bin
+venv
+*.log
+docs/javadoc
+
+# Deprecated files
+deprecated

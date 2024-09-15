@@ -1,152 +1,241 @@
 "use strict";
 
 
+const PROGRESS_BAR = "progress_bar";
+const TIME_REMAINING = "time_remaining";
+const CURRENT_DURATION = "current_duration";
 const END_TIME = "end_time";
 const EXPIRE_TIME = "expire_time";
-const TIME_REMAINING = "time_remaining";
-const STATUS = "status";
-const NEXT_UP = "next_up";
 
 
-
+/**
+ * Represents a duration of time.
+ *
+ * @author Jonathan Uhler
+ */
 class Duration {
 
-	static DAYS_PER_YEAR = 365;
-	static DAYS_PER_WEEK = 7;
-	static HOURS_PER_DAY = 24;
-	static MINUTES_PER_HOUR = 60;
-	static SECONDS_PER_MINUTE = 60;
-	static MS_PER_SECOND = 1000;
-	static MS_PER_MINUTE = Duration.MS_PER_SECOND * Duration.SECONDS_PER_MINUTE;
-	static MS_PER_HOUR = Duration.MS_PER_MINUTE * Duration.MINUTES_PER_HOUR;
-	
-
-	constructor(endTimeStr) {
-		if (typeof endTimeStr !== "string")
-			throw new TypeError("unexpected type: should be (string), found (" + (typeof endTimeStr) + ")");
-
-		// Remove any spaces (such as between the timestamp and zone ID) as these aren't allowed in Date.parse
-		endTimeStr = endTimeStr.replaceAll(" ", "");
-
-		var start = new Date().getTime();
-		var end = Date.parse(endTimeStr);
-
-		var deltaEpoch = end - start;
-
-		this.hours = 0;
-		this.minutes = 0;
-		this.seconds = 0;
-		this.millis = 0;
-		
-		if (deltaEpoch > 0) {
-			this.hours = Math.floor(deltaEpoch / Duration.MS_PER_HOUR);
-			deltaEpoch -= this.hours * Duration.MS_PER_HOUR;
-
-			this.minutes = Math.floor(deltaEpoch / Duration.MS_PER_MINUTE);
-			deltaEpoch -= this.minutes * Duration.MS_PER_MINUTE;
-
-			this.seconds = Math.floor(deltaEpoch / Duration.MS_PER_SECOND);
-			deltaEpoch -= this.seconds * Duration.MS_PER_SECOND;
-
-			this.millis = Math.floor(deltaEpoch);
-		}
-	}
+    /** The number of minutes in one hour. */
+    static MINUTES_PER_HOUR = 60;
+    /** The number of seconds in one minute. */
+    static SECONDS_PER_MINUTE = 60;
+    /** The number of milliseconds in one second. */
+    static MS_PER_SECOND = 1000;
+    /** The number of milliseconds in one minute. */
+    static MS_PER_MINUTE = Duration.MS_PER_SECOND * Duration.SECONDS_PER_MINUTE;
+    /** The number of milliseconds in one hour. */
+    static MS_PER_HOUR = Duration.MS_PER_MINUTE * Duration.MINUTES_PER_HOUR;
 
 
-	isOver() {
-		return (this.hours <= 0 &&
-			    this.minutes <= 0 &&
-			    this.seconds <= 0);
-	}
+    /**
+     * A private constructor to create a new {@code Duration} from a count of milliseconds.
+     *
+     * @param epoch  the number of milliseconds in this duration.
+     */
+    constructor(epoch) {
+        if (epoch <= 0) {
+            this.hours = 0;
+            this.minutes = 0;
+            this.seconds = 0;
+            this.millis = 0;
+        }
+        else {
+	    this.hours = Math.floor(epoch / Duration.MS_PER_HOUR);
+	    epoch -= this.hours * Duration.MS_PER_HOUR;
+	    this.minutes = Math.floor(epoch / Duration.MS_PER_MINUTE);
+	    epoch -= this.minutes * Duration.MS_PER_MINUTE;
+	    this.seconds = Math.floor(epoch / Duration.MS_PER_SECOND);
+	    epoch -= this.seconds * Duration.MS_PER_SECOND;
+	    this.millis = Math.floor(epoch);
+        }
+    }
 
 
-	toString() {
-		if (this.hours == 0)
-			return String(this.minutes).padStart(2, "0") + ":" +
-			       String(this.seconds).padStart(2, "0");
-		else
-			return this.hours + ":" +
-			       String(this.minutes).padStart(2, "0") + ":" +
-			       String(this.seconds).padStart(2, "0");
-	}
-	
+    /**
+     * Creates a new {@code Duration} between the current time and the provided end time.
+     *
+     * @param endTimeString  the ending time of the duration as an ISO timestamp in the format
+     *                       yyyy-MM-dd'T'HH:mm:ss Z.
+     *
+     * @return a new {@code Duration} between the current time and the provided end time.
+     */
+    static fromEndTime(endTimeString) {
+        endTimeString = endTimeString.trim().replaceAll(" ", "");
+
+        let start = new Date().getTime();
+        let end = Date.parse(endTimeString);
+        let deltaEpoch = end - start;
+
+        return new Duration(deltaEpoch);
+    }
+
+
+    /**
+     * Creates a new {@code Duration} from a string.
+     *
+     * @param durationString  a string specifying a number of hours, minutes, and seconds
+     *                        separated by colons.
+     *
+     * @return a new {@code Duration} from the specified string.
+     */
+    static fromDuration(durationString) {
+        let components = durationString.split(":");
+        if (components.length != 3) {
+            throw new Error("invalid duration string: " + durationString);
+        }
+
+        let hours = parseInt(components[0]);
+        let minutes = parseInt(components[1]);
+        let seconds = parseInt(components[2]);
+        let epoch =
+            hours * Duration.MS_PER_HOUR +
+            minutes * Duration.MS_PER_MINUTE +
+            seconds * Duration.MS_PER_SECOND;
+
+        return new Duration(epoch);
+    }
+
+
+    /**
+     * Returns whether this duration is over.
+     *
+     * A duration is over when all time units (hours, minutes, etc) are less than or equal to zero.
+     *
+     * @return whether this duration is over.
+     */
+    isOver() {
+        return this.hours <= 0 && this.minutes <= 0 && this.seconds <= 0 && this.millis <= 0;
+    }
+
+
+    /**
+     * Returns the portion of this duration that has been completed by the provided sub-duration.
+     *
+     * @param remaining  another {@code Duration} object which represents the portion of time
+     *                   not yet completed.
+     *
+     * @return the portion of this duration completed as a decimal between 0 and 1, where the
+     *         portion not completed is equal to {@code remaining}.
+     */
+    portionComplete(remaining) {
+        let totalMillis =
+            this.hours * Duration.MS_PER_HOUR +
+            this.minutes * Duration.MS_PER_MINUTE +
+            this.seconds * Duration.MS_PER_SECOND +
+            this.millis;
+        let remainingMillis =
+            remaining.hours * Duration.MS_PER_HOUR +
+            remaining.minutes * Duration.MS_PER_MINUTE +
+            remaining.seconds * Duration.MS_PER_SECOND +
+            remaining.millis;
+
+        return 1.0 - remainingMillis / totalMillis;
+    }
+
+
+    /**
+     * Returns a string representation of this duration.
+     *
+     * @return a string representation of this duration.
+     */
+    toString() {
+        return String(this.hours).padStart(2, "0") + ":" +
+            String(this.minutes).padStart(2, "0") + ":" +
+            String(this.seconds).padStart(2, "0");
+    }
+
 }
 
 
 
-function getComponents() {
-	var endTime = document.querySelector('meta[name="' + END_TIME + '"]').getAttribute("content");
-	var expireTime = document.querySelector('meta[name="' + EXPIRE_TIME + '"]').getAttribute("content");
-	var status = document.getElementById(STATUS).innerHTML;
-	var timeRemaining = document.getElementById(TIME_REMAINING).innerHTML;
-	var nextUp = document.getElementById(NEXT_UP).innerHTML;
+/**
+ * Reads the returns information about the time remaining from the DOM.
+ *
+ * @param doc  the DOM to read from. By default, this is {@code document}.
+ *
+ * @return the time remaining, current duration, end time, and expire time.
+ */
+function getTimeRemaining(doc = document) {
+    let timeRemaining = doc.getElementById(TIME_REMAINING).innerHTML;
+    let currentDuration = doc.getElementById(CURRENT_DURATION).innerHTML;
+    let endTime = doc.querySelector('meta[name="' + END_TIME + '"]').getAttribute("content");
+    let expireTime = doc.querySelector('meta[name="' + EXPIRE_TIME + '"]').getAttribute("content");
 
-	return {
-		[END_TIME]: endTime,
-		[EXPIRE_TIME]: expireTime,
-		[STATUS]: status,
-		[TIME_REMAINING]: timeRemaining,
-		[NEXT_UP]: nextUp
-	};
+    return {
+        [TIME_REMAINING]: timeRemaining,
+        [CURRENT_DURATION]: currentDuration,
+        [END_TIME]: endTime,
+        [EXPIRE_TIME]: expireTime
+    };
 }
 
 
-function setComponents(endTime, expireTime, status, timeRemaining, nextUp) {
-	if (typeof endTime !== "string" ||
-		typeof expireTime !== "string" ||
-		typeof status !== "string" ||
-		typeof timeRemaining !== "string" ||
-		typeof nextUp !== "string")
-		throw new TypeError("unexpected type: should be (string, string, string, string, string), found (" +
-							(typeof endTime) + ", " +
-							(typeof expireTime) + ", " +
-							(typeof status) + ", " +
-							(typeof timeRemaining) + ", " +
-							(typeof nextUp) + ")");
+/**
+ * Updates the time remaining information for the current DOM.
+ *
+ * @param timeInfo  a structure containing the same information as the value returned from
+ *                  {@code getTimeRemaining}.
+ */
+function setTimeRemaining(timeInfo) {
+    let timeRemaining = timeInfo[TIME_REMAINING];
+    let currentDuration = timeInfo[CURRENT_DURATION];
+    let endTime = timeInfo[END_TIME];
+    let expireTime = timeInfo[EXPIRE_TIME];
 
-	document.querySelector('meta[name="' + END_TIME + '"]').setAttribute("content", endTime);
-	document.querySelector('meta[name="' + EXPIRE_TIME + '"]').setAttribute("content", expireTime);
-	document.getElementById(STATUS).innerHTML = status;
-	document.getElementById(TIME_REMAINING).innerHTML = timeRemaining;
-	document.getElementById(NEXT_UP).innerHTML = nextUp;
+    document.getElementById(TIME_REMAINING).innerHTML = timeRemaining;
+    document.getElementById(CURRENT_DURATION).innerHTML = currentDuration;
+    document.querySelector('meta[name="' + END_TIME + '"]').setAttribute("content", endTime);
+    document.querySelector('meta[name="' + EXPIRE_TIME + '"]').setAttribute("content", expireTime);
 }
 
 
+/**
+ * Updates the time remaining information and polls the server for new information as needed.
+ */
 function updateTimeRemaining() {
-	var timeRemainingDiv = document.getElementById(TIME_REMAINING);
-	var components = getComponents();
-	
-	var endTime = components[END_TIME];
-	var timeRemaining = new Duration(endTime);
+    // Update time remaining
+    let timeRemainingDiv = document.getElementById(TIME_REMAINING);
+    if (timeRemainingDiv == null) {
+        return;
+    }
+    let timeInfo = getTimeRemaining(document);
 
-	var expireTime = components[EXPIRE_TIME];
-	var timeValid = new Duration(expireTime);
+    let endTime = timeInfo[END_TIME];
+    let expireTime = timeInfo[EXPIRE_TIME];
+    let timeRemaining = Duration.fromEndTime(endTime);
+    let timeValid = Duration.fromEndTime(expireTime);
 
-	if (timeValid.isOver()) {
-		window.location.reload(true);
-		return;
-	}
+    if (timeValid.isOver() || timeRemaining.isOver()) {
+        fetch("/").then(function (response) {
+            return response.text();
+        }).then(function (newHtml) {
+            let parser = new DOMParser();
+            let newDocument = parser.parseFromString(newHtml, "text/html");
+            let newTimeInfo = getTimeRemaining(newDocument);
+            setTimeRemaining(newTimeInfo);
+        }).catch(function (error) {
+            throw new Error("error fetching updated information from server: " + error);
+        });
+    }
 
-	if (timeRemaining.isOver()) {
-		fetch("/").then(function (response) {
-			return response.text(); // Return HTML from the server
-		}).then(function (html) {
-			// Load the new html
-			var parser = new DOMParser();
-			var newDoc = parser.parseFromString(html, "text/html");
+    timeRemainingDiv.innerHTML = timeRemaining.toString();
 
-			setComponents(newDoc.querySelector('meta[name="' + END_TIME + '"]').getAttribute("content"),
-						  newDoc.querySelector('meta[name="' + EXPIRE_TIME + '"]').getAttribute("content"),
-						  newDoc.getElementById(STATUS).innerHTML,
-						  newDoc.getElementById(TIME_REMAINING).innerHTML,
-						  newDoc.getElementById(NEXT_UP).innerHTML);
-		}).catch(function (error) {
-			throw new Error("error fetching updated information from server: " + error);
-		})
-		return;
-	}
+    // Update progress bar
+    let progressBar = document.getElementById(PROGRESS_BAR);
+    if (progressBar != null) {
+        let totalTime = timeInfo[CURRENT_DURATION];
+        let currentDuration = Duration.fromDuration(totalTime);
+        progressBar.value = currentDuration.portionComplete(timeRemaining);
+    }
 
-	timeRemainingDiv.getElementsByTagName("p")[0].innerHTML = timeRemaining.toString();
+    // Update date/day display
+    let now = new Date();
+    let month = String(now.getMonth() + 1).padStart(2, "0");
+    let date = String(now.getDate()).padStart(2, "0");
+    let year = String(now.getFullYear()).slice(-2);
+    let day = now.toLocaleDateString("en-US", {weekday: "long"});
+    document.getElementById("day").innerHTML = month + "/" + date + "/" + year;
+    document.getElementById("date").innerHTML = day;
 }
 
 

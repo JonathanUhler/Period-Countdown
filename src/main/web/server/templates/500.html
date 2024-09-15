@@ -1,18 +1,12 @@
-<!doctype html>
+<!DOCTYPE html>
 <html>
   <head>
-	<title>Period Countdown - Error 500</title>
-	<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='styles/error.css') }}">
-	<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='styles/button.css') }}">
+    <title>Period Countdown</title>
   </head>
 
-  
   <body>
-	<h1>500 - Internal Error</h1>
-	<p>An unspecified internal error occured with the server.</p>
-	<p>Please try again later or submit a <a href="https://github.com/JonathanUhler/Period-Countdown/issues/new?assignees=&labels=bug&template=bug-report.md&title=%5BBug%5D+">Github issue if the problem persists.</a></p>
-	<p>Error Description: {{ error }}</p>
-	<br>
-	<button onclick="location.href = '/';">Back to Countdown</button>
+    <h1>500 - Internal Error</h1>
+    <p>{{ message }}</p>
+    <p>Please try again later or submit an issue if the problem persists.</p>
   </body>
 </html>
