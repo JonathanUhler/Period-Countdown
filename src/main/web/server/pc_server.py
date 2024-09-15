@@ -313,18 +313,28 @@ def settings_get(sub: str) -> str:
         logger.error("malformed GET_USER_SETTINGS from transport")
         return error_500("An internal error occurred while gathering your course settings.")
 
-    # Check transport return code
-    if (user_periods_resp["ReturnCode"] != ReturnCode.SUCCESS.name):
+    # Check transport return code. ERR_RESPONSE in settings likely indicates the user has not
+    # chosen a valid school file. This is recoverable, so we continue to allow the use to choose
+    # or upload a new school file and fix the error state
+    if (user_periods_resp["ReturnCode"] == ReturnCode.ERR_RESPONSE.name):
+        user_periods: dict = None
+    elif (user_periods_resp["ReturnCode"] != ReturnCode.SUCCESS.name):
         return error_transport("Your course settings are not available.", user_periods_resp)
-    if (user_settings_resp["ReturnCode"] != ReturnCode.SUCCESS.name):
-        return error_transport("Your settings are not available.", user_settings_resp)
+    else:
+        user_periods: dict = user_periods_resp["OutputPayload"]["UserPeriods"]
 
-    # Extract data from the responses
-    user_periods: dict = user_periods_resp["OutputPayload"]["UserPeriods"]
-    theme: str = user_settings_resp["OutputPayload"]["Theme"]
-    font: str = user_settings_resp["OutputPayload"]["Font"]
-    school_json: str = user_settings_resp["OutputPayload"]["SchoolJson"]
-    available_schools: list = user_settings_resp["OutputPayload"]["AvailableSchools"]
+    if (user_settings_resp["ReturnCode"] == ReturnCode.ERR_RESPONSE.name):
+        theme: str = "000000"
+        font: str = "Arial"
+        school_json: str = None
+        available_schools: list = []
+    elif (user_settings_resp["ReturnCode"] != ReturnCode.SUCCESS.name):
+        return error_transport("Your settings are not available.", user_settings_resp)
+    else:
+        theme: str = user_settings_resp["OutputPayload"]["Theme"]
+        font: str = user_settings_resp["OutputPayload"]["Font"]
+        school_json: str = user_settings_resp["OutputPayload"]["SchoolJson"]
+        available_schools: list = user_settings_resp["OutputPayload"]["AvailableSchools"]
 
     # Format response data
     available_fonts: list = sorted([f.name for f in matplotlib.font_manager.fontManager.ttflist])
