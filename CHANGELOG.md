@@ -13,6 +13,10 @@ string generally refer to the following scopes of changes:
 * `patch`: A non-breaking change without any major significance (e.g. fixing typos, updating
   comments or documentation, algorithm optimization). That is, version 1.0.1 must support all the
   features of version 1.0.0, and version 1.0.0 must support all the features of version 1.0.1.
+  
+## [8.0.0] - 2024-09-15
+### Changed
+* Refactor of website code
 
 ## [7.0.1] - 2023-09-24
 ### Changed
