@@ -344,7 +344,7 @@ def settings_get(sub: str) -> str:
 
     # Format response data
     font_names: set = set([f.name for f in matplotlib.font_manager.fontManager.ttflist])
-    available_fonts: list = sorted(list(font_name))
+    available_fonts: list = sorted(list(font_names))
 
     # Return template
     return flask.render_template("settings.html",
