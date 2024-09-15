@@ -8,11 +8,13 @@
     <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
   </head>
   <body>
+    {% if font is not none %}
     <style>
       * {
           font-family: {{ font }};
       }
     </style>
+    {% endif %}
 
     <form action="/settings" method="POST" enctype="multipart/form-data">
       <div id="controls">
@@ -23,9 +25,12 @@
       <div id="user_settings">
         <div id="user_settings_title">Settings</div>
 
+        {% if theme is not none %}
         <label id="settings_header">Theme</label>
         <input type="color" name="Theme" value="#{{ theme }}">
+        {% endif %}
 
+        {% if font is not none %}
         <label id="settings_header">Font</label>
         <select name="Font">
           {% for available_font in available_fonts %}
@@ -36,7 +41,9 @@
           {% endif %}
           {% endfor %}
         </select>
+        {% endif %}
 
+        {% if available_schools is not none %}
         <label id="settings_header">Choose School</label>
         <select name="SchoolJson">
           {% for available_school in available_schools %}
@@ -47,11 +54,14 @@
           {% endif %}
           {% endfor %}
         </select>
+        {% endif %}
 
         <label id="settings_header">Add School</label>
         <input type="file" name="Content" accept=".json">
       </div>
 
+
+      {% if user_periods is not none %}
       <div id="user_periods">
         <div id="user_periods_title">Classes</div>
         {% for period_info in user_periods.values() %}
@@ -63,6 +73,7 @@
         </div>
         {% endfor %}
       </div>
+      {% endif %}
     </form>
   </body>
 </html>

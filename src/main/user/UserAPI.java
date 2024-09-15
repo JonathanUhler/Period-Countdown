@@ -222,8 +222,10 @@ public class UserAPI {
         // Set the schoolDef instance variable, creating that definition in the json file if
         // it does not exist
         Path schoolPath = Paths.get(this.json.settings.get(UserJson.SCHOOL_JSON));
-        if (!this.json.schools.keySet().contains(schoolPath.getFileName().toString())) {
-            this.addSchool(schoolPath);
+        if (this.path != null) {
+            if (!this.json.schools.keySet().contains(schoolPath.getFileName().toString())) {
+                this.addSchool(schoolPath);
+            }
         }
         this.schoolDef = this.json.schools.get(schoolPath.getFileName().toString());
     }

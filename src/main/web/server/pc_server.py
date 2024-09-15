@@ -215,12 +215,7 @@ def index() -> str:
                                  font = font)
 
 
-def settings_post(sub: str) -> str:
-    # Format transport data
-    theme: str = flask.request.form["Theme"].replace("#", "")
-    font: str = flask.request.form["Font"]
-    school_json: str = flask.request.form["SchoolJson"]
-    school_content: str = flask.request.files["Content"]
+def settings_post_user_periods(sub: str, transport_client: PSSLClientSocket) -> dict:
     period_names: list = flask.request.form.getlist("Name")
     period_teachers: list = flask.request.form.getlist("Teacher")
     period_rooms: list = flask.request.form.getlist("Room")
@@ -232,57 +227,71 @@ def settings_post(sub: str) -> str:
         for period_key in range(num_periods)
     }
 
+    if (num_periods == 0):
+        return {}
+
     user_periods_payload: dict = {"UserPeriods": user_periods}
+    return commands.send(transport_client, Opcode.SET_USER_PERIODS, sub, user_periods_payload)
+
+
+def settings_post_user_settings(sub: str, transport_client: PSSLClientSocket) -> dict:
+    theme: str = flask.request.form.get("Theme")
+    font: str = flask.request.form.get("Font")
+    school_json: str = flask.request.form.get("SchoolJson")
+
+    if (theme is None or font is None or school_json is None):
+        return {}
+
+    theme = theme.replace("#", "")
+
     user_settings_payload: dict = {"Theme": theme, "Font": font, "SchoolJson": school_json}
+    return commands.send(transport_client, Opcode.SET_USER_SETTINGS, sub, user_settings_payload)
 
-    # Send post requests to transport
+
+def settings_post_school_json(sub: str, transport_client: PSSLClientSocket) -> None:
+    school_content: str = flask.request.files.get("Content")
+
+    if (school_content is None or school_content.filename == ""):
+        return {}
+
+    content_name: str = os.path.splitext(school_content.filename)[0]
+    for invalid_char in ['.', '#', '$', '[', ']']:
+        content_name = content_name.replace(invalid_char, "_")
+
+    try:
+        content_str: str = school_content.read().decode("utf-8")
+    except UnicodeDecodeError as e:
+        content_str: str = None
+
+    school_json_payload: dict = {"SchoolJson": content_name, "Content": content_str}
+    return commands.send(transport_client, Opcode.SET_SCHOOL_JSON, sub, school_json_payload)
+
+
+def settings_post(sub: str) -> str:
     transport_client: PSSLClientSocket = _get_transport_client()
-    user_periods_resp: dict = commands.send(transport_client,
-                                            Opcode.SET_USER_PERIODS,
-                                            sub,
-                                            user_periods_payload)
-    user_settings_resp: dict = commands.send(transport_client,
-                                             Opcode.SET_USER_SETTINGS,
-                                             sub,
-                                             user_settings_payload)
 
-    # Check for a readable response from transport
-    if (user_periods_resp is None):
-        logger.error("malformed SET_USER_PERIODS from transport")
-        return error_500("An internal error occurred while updating your course settings.")
-    if (user_settings_resp is None):
-        logger.error("malformed SET_USER_SETTINGS from transport")
-        return error_500("An internal error occurred while updating your settings.")
+    school_json_resp: dict = settings_post_school_json(sub, transport_client)
+    user_periods_resp: dict = settings_post_user_periods(sub, transport_client)
+    user_settings_resp: dict = settings_post_user_settings(sub, transport_client)
 
-    # Check transport return code
-    if (user_periods_resp["ReturnCode"] != ReturnCode.SUCCESS.name):
-        return error_transport("Your course settings could not be saved.", user_periods_resp)
-    if (user_settings_resp["ReturnCode"] != ReturnCode.SUCCESS.name):
-        return error_transport("Your settings could not be saved.", user_settings_resp)
-
-    # Handle uploading new school files
-    if (school_content.filename != ""):
-        content_name: str = os.path.splitext(school_content.filename)[0]
-        for invalid_char in ['.', '#', '$', '[', ']']:
-            content_name = content_name.replace(invalid_char, "_")
-
-        try:
-            content_str: str = school_content.read().decode("utf-8")
-        except UnicodeDecodeError as e:
-            content_str: str = None
-
-        school_json_payload: dict = {"SchoolJson": content_name, "Content": content_str}
-        school_json_resp: dict = commands.send(transport_client,
-                                               Opcode.SET_SCHOOL_JSON,
-                                               sub,
-                                               school_json_payload)
-
+    if (len(school_json_resp) != 0):
         if (school_json_resp is None):
             logger.error("malformed SET_SCHOOL_JSON from transport")
             return error_500("An internal error occurred while reading your school file.")
-
         if (school_json_resp["ReturnCode"] != ReturnCode.SUCCESS.name):
             return error_transport("Your school file could not be uploaded.", school_json_resp)
+    if (len(user_periods_resp) != 0):
+        if (user_periods_resp is None):
+            logger.error("malformed SET_USER_PERIODS from transport")
+            return error_500("An internal error occurred while updating your course settings.")
+        if (user_periods_resp["ReturnCode"] != ReturnCode.SUCCESS.name):
+            return error_transport("Your course settings could not be saved.", user_periods_resp)
+    if (len(user_settings_resp) != 0):
+        if (user_settings_resp is None):
+            logger.error("malformed SET_USER_SETTINGS from transport")
+            return error_500("An internal error occurred while updating your settings.")
+        if (user_settings_resp["ReturnCode"] != ReturnCode.SUCCESS.name):
+            return error_transport("Your settings could not be saved.", user_settings_resp)
 
     transport_client.close()
     return flask.redirect(flask.url_for("settings"))
@@ -316,21 +325,14 @@ def settings_get(sub: str) -> str:
     # Check transport return code. ERR_RESPONSE in settings likely indicates the user has not
     # chosen a valid school file. This is recoverable, so we continue to allow the use to choose
     # or upload a new school file and fix the error state
-    if (user_periods_resp["ReturnCode"] == ReturnCode.ERR_RESPONSE.name):
-        user_periods: dict = {}
-    elif (user_periods_resp["ReturnCode"] != ReturnCode.SUCCESS.name):
-        return error_transport("Your course settings are not available.", user_periods_resp)
-    else:
+    user_periods: dict = None
+    theme: str = None
+    font: str = None
+    school_json: str = None
+    available_schools: list = None
+    if (user_periods_resp["ReturnCode"] == ReturnCode.SUCCESS.name):
         user_periods: dict = user_periods_resp["OutputPayload"]["UserPeriods"]
-
-    if (user_settings_resp["ReturnCode"] == ReturnCode.ERR_RESPONSE.name):
-        theme: str = "000000"
-        font: str = "Arial"
-        school_json: str = ""
-        available_schools: list = []
-    elif (user_settings_resp["ReturnCode"] != ReturnCode.SUCCESS.name):
-        return error_transport("Your settings are not available.", user_settings_resp)
-    else:
+    if (user_settings_resp["ReturnCode"] == ReturnCode.SUCCESS.name):
         theme: str = user_settings_resp["OutputPayload"]["Theme"]
         font: str = user_settings_resp["OutputPayload"]["Font"]
         school_json: str = user_settings_resp["OutputPayload"]["SchoolJson"]

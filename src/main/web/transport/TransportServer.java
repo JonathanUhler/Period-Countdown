@@ -133,23 +133,31 @@ public class TransportServer extends JSSLServer {
         }
 
         // From the user ID, construct time APIs that can be used to get data about this user
-        UserAPI userAPI;
-        SchoolAPI schoolAPI;
+        UserAPI userAPI = null;
+        SchoolAPI schoolAPI = null;
+        String apiStatus = "";
 
         try {
             UserJson userJson = this.database.getUserJson(userId);
             userAPI = new UserAPI(userJson);
         }
         catch (RuntimeException e) {
-            return Command.error(opcode, userId, Command.ReturnCode.ERR_RESPONSE, "User: " + e);
+            // Error condition, but may be recoverable by the user if this is a change to settings
+            // that caused the original error condition
+            apiStatus = "User: " + e;
         }
 
         try {
-            SchoolJson schoolJson = this.database.getSchoolJson(userId, userAPI.getSchoolFile());
-            schoolAPI = new SchoolAPI(schoolJson);
+            if (userAPI != null) {
+                SchoolJson schoolJson = this.database.getSchoolJson(userId,
+                                                                    userAPI.getSchoolFile());
+                schoolAPI = new SchoolAPI(schoolJson);
+            }
         }
         catch (IOException | RuntimeException e) {
-            return Command.error(opcode, userId, Command.ReturnCode.ERR_RESPONSE, "School: " + e);
+            // Error condition, but may be recoverable by the user if this is a change to settings
+            // that caused the original error condition
+            apiStatus = "School: " + e;
         }
 
         // Process the command based on the provided opcode and return response information
@@ -157,7 +165,10 @@ public class TransportServer extends JSSLServer {
             return this.getResponse(opcode, userId, commandStr, schoolAPI, userAPI);
         }
         catch (RuntimeException e) {
-            return Command.error(opcode, userId, Command.ReturnCode.ERR_RESPONSE, "process: " + e);
+            return Command.error(opcode,
+                                 userId,
+                                 Command.ReturnCode.ERR_RESPONSE,
+                                 "getResponse: " + e + ", apiStatus: " + apiStatus);
         }
     }
 
