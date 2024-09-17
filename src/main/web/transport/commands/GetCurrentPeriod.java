@@ -62,21 +62,21 @@ public class GetCurrentPeriod extends Command {
         response.outputPayload.nextStatus = null;
         response.outputPayload.nextDuration = null;
 
-        if (currentSchoolPeriod != null) {
-            UserPeriod currentUserPeriod = userAPI.getPeriod(currentSchoolPeriod);
-            response.outputPayload.currentName = currentUserPeriod.getName();
-            response.outputPayload.currentStatus = currentUserPeriod.getStatus();
+        UserPeriod currentUserPeriod = userAPI.getPeriod(currentSchoolPeriod);
+        response.outputPayload.currentName = currentUserPeriod.getName();
+        response.outputPayload.currentStatus = currentUserPeriod.getStatus();
+
+        if (nextSchoolPeriod != null) {
+            UserPeriod nextUserPeriod = userAPI.getPeriod(nextSchoolPeriod);
+            Duration nextUpTime = new Duration(nextSchoolPeriod.getStart(),
+                                               nextSchoolPeriod.getEnd().plus(1, UTCTime.SECONDS));
+            response.outputPayload.nextDuration = nextUpTime.toString();
+            response.outputPayload.nextStatus = nextUserPeriod.getStatus();
         }
         if (currentSchoolPeriod != null && nextSchoolPeriod != null) {
-            UserPeriod nextUserPeriod = userAPI.getPeriod(nextSchoolPeriod);
-            UTCTime currentStart = currentSchoolPeriod.getStart();
-            UTCTime nextStart = nextSchoolPeriod.getStart();
-            UTCTime nextEnd = nextSchoolPeriod.getEnd().plus(1, UTCTime.SECONDS);
-            Duration currentDuration = new Duration(currentStart, nextStart);
-            Duration nextDuration = new Duration(nextStart, nextEnd);
+            Duration currentDuration = new Duration(currentSchoolPeriod.getEnd(),
+                                                    nextSchoolPeriod.getStart());
             response.outputPayload.currentDuration = currentDuration.toString();
-            response.outputPayload.nextStatus = nextUserPeriod.getStatus();
-            response.outputPayload.nextDuration = nextDuration.toString();
         }
         
         return response;
