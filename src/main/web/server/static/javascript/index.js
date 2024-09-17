@@ -234,8 +234,8 @@ function updateTimeRemaining() {
     let date = String(now.getDate()).padStart(2, "0");
     let year = String(now.getFullYear()).slice(-2);
     let day = now.toLocaleDateString("en-US", {weekday: "long"});
-    document.getElementById("day").innerHTML = month + "/" + date + "/" + year;
-    document.getElementById("date").innerHTML = day;
+    document.getElementById("day").innerHTML = day;
+    document.getElementById("date").innerHTML = month + "/" + date + "/" + year;
 }
 
 
