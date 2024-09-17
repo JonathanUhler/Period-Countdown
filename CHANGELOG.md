@@ -14,6 +14,10 @@ string generally refer to the following scopes of changes:
   comments or documentation, algorithm optimization). That is, version 1.0.1 must support all the
   features of version 1.0.0, and version 1.0.0 must support all the features of version 1.0.1.
   
+## [8.0.1] - 2024-09-16
+### Changed
+* Fill in next school period and current user period data in GetCurrentPeriod command during summer
+  
 ## [8.0.0] - 2024-09-15
 ### Changed
 * Refactor of website code
