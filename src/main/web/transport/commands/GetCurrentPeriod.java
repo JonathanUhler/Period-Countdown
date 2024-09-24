@@ -66,17 +66,17 @@ public class GetCurrentPeriod extends Command {
         response.outputPayload.currentName = currentUserPeriod.getName();
         response.outputPayload.currentStatus = currentUserPeriod.getStatus();
 
+        Duration totalTime = schoolAPI.getTotalTime(now);
+        if (totalTime != null) {
+            response.outputPayload.currentDuration = totalTime.toString();
+        }
+
         if (nextSchoolPeriod != null) {
             UserPeriod nextUserPeriod = userAPI.getPeriod(nextSchoolPeriod);
             Duration nextUpTime = new Duration(nextSchoolPeriod.getStart(),
                                                nextSchoolPeriod.getEnd().plus(1, UTCTime.SECONDS));
             response.outputPayload.nextDuration = nextUpTime.toString();
             response.outputPayload.nextStatus = nextUserPeriod.getStatus();
-        }
-        if (currentSchoolPeriod != null && nextSchoolPeriod != null) {
-            Duration currentDuration = new Duration(currentSchoolPeriod.getEnd(),
-                                                    nextSchoolPeriod.getStart());
-            response.outputPayload.currentDuration = currentDuration.toString();
         }
         
         return response;
