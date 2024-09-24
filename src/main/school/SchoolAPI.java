@@ -137,10 +137,12 @@ public class SchoolAPI {
      * achieved by taking the end time of the current period and adding 1 millisecond, thus causing
      * the time to overflow to the start of the next period whose time is at least 1 millisecond.
      *
+     * If the current period is {@code null}, then the next calendar year is searched for the first
+     * period of the school year. If nothing is found after this search, {@code null} is returned.
+     *
      * @param time  the time to get the next period for.
      *
-     * @return the next period object, if one exists. If the current period is {@code null} or no
-     *         next period exists, then {@code null} is returned.
+     * @return the next period object, if one exists.
      *
      * @throws NullPointerException  if {@code time} is null.
      *
@@ -165,31 +167,62 @@ public class SchoolAPI {
         // If the current period is null, then "walk" the time pointer for the next calendar year
         // from the time specified by `time` to search for a period.
         UTCTime walk = time;
-            
-        for (int i = 0; i < Duration.DAYS_PER_YEAR; i++) {
-            SchoolPeriod nextPeriod = this.getNextPeriodToday(walk);
-            // If no next period was found today, then continue to the next day
-            if (nextPeriod == null) {
-                walk = walk.plus(1, UTCTime.DAYS);
-                walk = walk.toMidnight(this.year.getTimezone());
-                continue;
-            }
-                
-            // If the period was found, return that
-            if (nextPeriod != null && nextPeriod.isCounted()) {
+        UTCTime end = walk.plus(1, UTCTime.YEARS);
+        while (walk.isBefore(end)) {
+            SchoolPeriod nextPeriod = this.getCurrentPeriod(walk);
+            if (nextPeriod != null) {
                 return nextPeriod;
             }
-            // If some period was found today, but wasn't "counted", then loop through the rest of
-            // the periods in the current day to check for another counter period
-            while (nextPeriod != null && !nextPeriod.isLast()) {
-                walk = nextPeriod.getEnd().plus(1, UTCTime.MILLISECONDS);
-                nextPeriod = this.getNextPeriodToday(walk);
-                if (nextPeriod != null && nextPeriod.isCounted()) {
-                    return nextPeriod;
-                }
-            }
+            walk = walk.plus(1, UTCTime.DAYS);
+            walk = walk.toMidnight(this.year.getTimezone());
         }
             
+        return null;
+    }
+
+
+    /**
+     * Gets the period immediately before the period returned by {@code getCurrentPeriod}. This is
+     * achieved by taking the start time of the current period and subtracting 1 millisecond, thus
+     * causing the time to underflow to the end of the previous period whose time is at least 1
+     * millisecond.
+     *
+     * If the current period is {@code null}, then the previous calendar year is searched for the
+     * last period of the school year. If nothing is found after this search, {@code null} is
+     * returned.
+     *
+     * @param time  the time to get the next period for.
+     *
+     * @return the previous period object, if one exists.
+     *
+     * @throws NullPointerException  if {@code time} is null.
+     *
+     * @see getCurrentPeriod
+     */
+    public SchoolPeriod getPreviousPeriod(UTCTime time) {
+        if (time == null) {
+            throw new NullPointerException("time cannot be null");
+        }
+
+        SchoolPeriod currentPeriod = this.getCurrentPeriod(time);
+        if (currentPeriod != null) {
+            UTCTime currentPeriodStart = currentPeriod.getStart();
+            UTCTime previousPeriodEnd = currentPeriodStart.plus(-1, UTCTime.MILLISECONDS);
+
+            return this.getCurrentPeriod(previousPeriodEnd);
+        }
+
+        UTCTime walk = time;
+        UTCTime end = walk.plus(-1, UTCTime.YEARS);
+        while (walk.isAfter(end)) {
+            SchoolPeriod previousPeriod = this.getCurrentPeriod(walk);
+            if (previousPeriod != null) {
+                return previousPeriod;
+            }
+            walk = walk.toMidnight(this.year.getTimezone());
+            walk = walk.plus(-1, UTCTime.MILLISECONDS);
+        }
+
         return null;
     }
     
@@ -223,13 +256,13 @@ public class SchoolAPI {
 
 
     /**
-     * Gets the period chronologically after the period returned by {@code getCurrentPeriod} such
-     * that {@code getNextCountedPeriod(...).isCounted()} is true.
+     * Gets the period chronologically at or after the period returned by {@code getCurrentPeriod}
+     * such that {@code getNextCountedPeriod(...).isCounted()} is true.
      *
      * @param time  the time to get the next counted period for.
      *
-     * @return the next period object, if one exists. If the current period is {@code null} or no
-     *         next counted period exists, then {@code null} is returned.
+     * @return the next counted period object, if one exists. If no such counted period exists,
+     *         then {@code null} is returned.
      *
      * @throws NullPointerException  if {@code time} is null.
      *
@@ -240,31 +273,65 @@ public class SchoolAPI {
             throw new NullPointerException("time cannot be null");
         }
 
+        SchoolPeriod currentPeriod = this.getCurrentPeriod(time);
+        if (currentPeriod != null && currentPeriod.isCounted()) {
+            return currentPeriod;
+        }
         UTCTime walk = time;
-        for (int i = 0; i < Duration.DAYS_PER_YEAR; i++) {
-            SchoolPeriod currentPeriod = this.getCurrentPeriod(walk);
+        UTCTime end = time.plus(1, UTCTime.YEARS);
+        while (walk.isBefore(end)) {
             SchoolPeriod nextPeriod = this.getNextPeriod(walk);
-            
-            if (currentPeriod != null && currentPeriod.isCounted() && !nextPeriod.isCounted()) {
-                return currentPeriod;
+            if (nextPeriod == null) {
+                return null;
             }
-            
-            // If the current period is not counted, then go through all other periods in
-            // this day to check for a counted period
-            while (nextPeriod != null && !nextPeriod.isLast()) {
-                if (nextPeriod.isCounted()) {
-                    return nextPeriod;
-                }
+            if (nextPeriod.isCounted()) {
+                return nextPeriod;
+            }
                 
-                walk = nextPeriod.getEnd().plus(1, UTCTime.MILLISECONDS);
-                nextPeriod = this.getCurrentPeriod(walk);
-            }
-            
-            // If no match found today, go to the next day and continue the search
-            walk = walk.plus(1, UTCTime.DAYS);
-            walk = walk.toMidnight(this.year.getTimezone());
+            walk = nextPeriod.getEnd();
         }
 	
+        return null;
+    }
+
+
+    /**
+     * Gets the period chronologically at or before the period returned by {@code getCurrentPeriod}
+     * such that {@code getPreviousCountedPeriod(...).isCounted()} is true.
+     *
+     * @param time  the time to get the previous counted period for.
+     *
+     * @return the previous counted period object, if one exists. If no such counted period exists,
+     *         then {@code null} is returned.
+     *
+     * @throws NullPointerException  if {@code time} is null.
+     *
+     * @see getCurrentPeriod
+     */
+    public SchoolPeriod getPreviousCountedPeriod(UTCTime time) {
+        if (time == null) {
+            throw new NullPointerException("time cannot be null");
+        }
+
+        SchoolPeriod currentPeriod = this.getCurrentPeriod(time);
+        if (currentPeriod != null && currentPeriod.isCounted()) {
+            return currentPeriod;
+        }
+
+        UTCTime walk = time;
+        UTCTime end = time.plus(-1, UTCTime.YEARS);
+        while (walk.isAfter(end)) {
+            SchoolPeriod previousPeriod = this.getPreviousPeriod(walk);
+            if (previousPeriod == null) {
+                return null;
+            }
+            if (previousPeriod.isCounted()) {
+                return previousPeriod;
+            }
+
+            walk = previousPeriod.getStart();
+        }
+
         return null;
     }
     
@@ -286,11 +353,49 @@ public class SchoolAPI {
             throw new NullPointerException("time cannot be null");
         }
 
+        SchoolPeriod currentPeriod = this.getCurrentPeriod(time);
         SchoolPeriod nextCountedPeriod = this.getNextCountedPeriod(time);
-        if (nextCountedPeriod == null) {
+        if (currentPeriod == null || nextCountedPeriod == null) {
             return null;
         }
+
+        if (currentPeriod.isCounted()) {
+            return new Duration(time, currentPeriod.getEnd());
+        }
         return new Duration(time, nextCountedPeriod.getStart());
+    }
+
+
+    /**
+     * Gets the total time for which {@code getTimeRemaining} is a subset. The total time spans
+     * from the end of the previous counted period to the start of the next counted period. If
+     * the current period is counted, its start and end time are used as the limits.
+     *
+     * The percentage of the current block of time complete can be determined by calling:
+     * {@code getTotalTime.portionComplete(getTimeRemaining())}.
+     *
+     * @param time  a time in the block to get the total duration of.
+     *
+     * @return the total amount of time in the current block.
+     *
+     * @throws NullPointerException  if {@code time} is null.
+     */
+    public Duration getTotalTime(UTCTime time) {
+        if (time == null) {
+            throw new NullPointerException("time cannot be null");
+        }
+
+        SchoolPeriod currentPeriod = this.getCurrentPeriod(time);
+        SchoolPeriod previousCountedPeriod = this.getPreviousCountedPeriod(time);
+        SchoolPeriod nextCountedPeriod = this.getNextCountedPeriod(time);
+        if (currentPeriod == null || previousCountedPeriod == null || nextCountedPeriod == null) {
+            return null;
+        }
+
+        if (currentPeriod.isCounted()) {
+            return new Duration(currentPeriod.getStart(), currentPeriod.getEnd());
+        }
+        return new Duration(previousCountedPeriod.getEnd(), nextCountedPeriod.getStart());
     }
     
 }
