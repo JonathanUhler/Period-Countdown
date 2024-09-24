@@ -268,6 +268,7 @@ public class Screen extends JPanel {
         SchoolPeriod schoolPeriod = schoolAPI.getCurrentPeriod(now);
         SchoolPeriod nextSchoolPeriod = schoolAPI.getNextCountedPeriod(now);
         Duration timeRemaining = schoolAPI.getTimeRemaining(now);
+        Duration totalTime = schoolAPI.getTotalTime(now);
         if (timeRemaining == null) {
             timeRemaining = new Duration(0, 0, 0, 0);
         }
@@ -355,9 +356,7 @@ public class Screen extends JPanel {
 
         // If a duration between the current start and next start can be calculated, draw
         // the progress bar of time remaining as well as the total time for the bar
-        if (schoolPeriod != null && nextSchoolPeriod != null) {
-            Duration totalTime = new Duration(schoolPeriod.getStart(), nextSchoolPeriod.getStart());
-
+        if (totalTime != null) {
             String durationString = totalTime.toString();
             int durationWidth = this.getTextWidth(durationString, secondaryFont);
             int durationMargin = (width - durationWidth) / 2;

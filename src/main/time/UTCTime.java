@@ -212,6 +212,24 @@ public class UTCTime implements Comparable<UTCTime> {
     
     
     /**
+     * Returns whether this {@code UTCTime} is chronologically after the argument.
+     *
+     * @param other  a {@code UTCTime} to compare to.
+     *
+     * @return whether this {@code UTCTime} is chronologically after the argument.
+     *
+     * @throws NullPointerException  if {@code other} is null.
+     */
+    public boolean isAfter(UTCTime other) {
+        if (other == null) {
+            throw new NullPointerException("other cannot be null");
+        }
+
+        return this.datetime.isAfter(other.asZonedDateTime());
+    }
+
+
+    /**
      * Returns whether this {@code UTCTime} represents the same chronological instant as the 
      * argument.
      *
