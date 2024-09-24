@@ -281,7 +281,10 @@ public class SchoolAPI {
         UTCTime end = time.plus(1, UTCTime.YEARS);
         while (walk.isBefore(end)) {
             SchoolPeriod nextPeriod = this.getNextPeriod(walk);
-            if (nextPeriod != null && nextPeriod.isCounted()) {
+            if (nextPeriod == null) {
+                return null;
+            }
+            if (nextPeriod.isCounted()) {
                 return nextPeriod;
             }
                 
@@ -319,7 +322,10 @@ public class SchoolAPI {
         UTCTime end = time.plus(-1, UTCTime.YEARS);
         while (walk.isAfter(end)) {
             SchoolPeriod previousPeriod = this.getPreviousPeriod(walk);
-            if (previousPeriod != null && previousPeriod.isCounted()) {
+            if (previousPeriod == null) {
+                return null;
+            }
+            if (previousPeriod.isCounted()) {
                 return previousPeriod;
             }
 
