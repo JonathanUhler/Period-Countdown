@@ -366,6 +366,20 @@ public class SchoolAPI {
     }
 
 
+    /**
+     * Gets the total time for which {@code getTimeRemaining} is a subset. The total time spans
+     * from the end of the previous counted period to the start of the next counted period. If
+     * the current period is counted, its start and end time are used as the limits.
+     *
+     * The percentage of the current block of time complete can be determined by calling:
+     * {@code getTotalTime.portionComplete(getTimeRemaining())}.
+     *
+     * @param time  a time in the block to get the total duration of.
+     *
+     * @return the total amount of time in the current block.
+     *
+     * @throws NullPointerException  if {@code time} is null.
+     */
     public Duration getTotalTime(UTCTime time) {
         if (time == null) {
             throw new NullPointerException("time cannot be null");
